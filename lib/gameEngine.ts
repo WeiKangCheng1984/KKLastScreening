@@ -170,7 +170,7 @@ export class GameEngine {
     };
   }
 
-  solvePuzzle(puzzleId: string, input: string | string[]): boolean {
+  solvePuzzle(puzzleId: string, input: string | string[] | number[] | Record<string, any>): boolean {
     const scene = this.getCurrentScene();
     if (!scene) return false;
 
@@ -197,22 +197,60 @@ export class GameEngine {
 
     if (puzzle.type === 'input' || puzzle.type === 'combination_lock') {
       solved = puzzle.solution === input;
+    } else if (puzzle.type === 'word_scramble') {
+      // 拼字遊戲：比較答案（不區分大小寫）
+      const solution = typeof puzzle.solution === 'string' ? puzzle.solution.toUpperCase() : '';
+      const userAnswer = typeof input === 'string' ? input.toUpperCase() : '';
+      solved = solution === userAnswer;
+    } else if (puzzle.type === 'wire_connection') {
+      // 顏色線對接：如果返回 'connected' 表示正確
+      solved = input === 'connected';
+    } else if (puzzle.type === 'jigsaw' || puzzle.type === 'sliding_puzzle') {
+      // 拼圖和滑塊拼圖：如果返回 'solved' 表示正確
+      solved = input === 'solved';
+    } else if (puzzle.type === 'rotating_dial') {
+      // 旋轉轉盤：比較陣列
+      if (Array.isArray(puzzle.solution) && Array.isArray(input)) {
+        solved = JSON.stringify(puzzle.solution) === JSON.stringify(input);
+      }
+    } else if (puzzle.type === 'sequence_memory') {
+      // 序列記憶：比較序列
+      if (Array.isArray(puzzle.solution) && Array.isArray(input)) {
+        solved = JSON.stringify(puzzle.solution) === JSON.stringify(input);
+      }
+    } else if (puzzle.type === 'symbol_matching') {
+      // 符號配對：如果返回 'matched' 表示正確
+      solved = input === 'matched';
+    } else if (puzzle.type === 'maze_path') {
+      // 迷宮路徑：如果返回 'path' 表示正確
+      solved = input === 'path';
+    } else if (puzzle.type === 'logic_switches') {
+      // 邏輯開關：比較物件
+      if (typeof puzzle.solution === 'object' && typeof input === 'object') {
+        solved = JSON.stringify(puzzle.solution) === JSON.stringify(input);
+      }
     } else if (puzzle.type === 'sequence' || puzzle.type === 'arrangement') {
       if (Array.isArray(puzzle.solution) && Array.isArray(input)) {
         solved = JSON.stringify(puzzle.solution) === JSON.stringify(input);
       }
     } else if (puzzle.type === 'combination') {
       if (Array.isArray(puzzle.solution) && Array.isArray(input)) {
-        solved = puzzle.solution.every(id => input.includes(id));
+        // combination 類型通常使用字符串陣列（組合 ID）
+        const solutionArray = puzzle.solution as string[];
+        const inputArray = input as string[];
+        solved = solutionArray.every(id => inputArray.includes(id));
       }
     } else if (puzzle.type === 'visual_selection') {
       // 視覺化選擇謎題：檢查選中的選項是否匹配答案
       if (Array.isArray(puzzle.solution)) {
         // 多選模式：檢查選中的選項是否完全匹配答案（順序不重要）
         if (Array.isArray(input)) {
-          solved = puzzle.solution.length === input.length && 
-                   puzzle.solution.every(id => input.includes(id)) &&
-                   input.every(id => puzzle.solution.includes(id));
+          // visual_selection 類型使用字符串陣列（選項 ID）
+          const solutionArray = puzzle.solution as string[];
+          const inputArray = input as string[];
+          solved = solutionArray.length === inputArray.length && 
+                   solutionArray.every(id => inputArray.includes(id)) &&
+                   inputArray.every(id => solutionArray.includes(id));
         } else {
           // 單選輸入但答案是多選，不匹配
           solved = false;
@@ -228,6 +266,7 @@ export class GameEngine {
         }
       }
     }
+    // 其他新謎題類型暫時返回 false，等待實作
 
     if (solved && puzzle.onSolve) {
       puzzle.onSolve.forEach(effect => this.applyEffect(effect));

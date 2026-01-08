@@ -73,8 +73,15 @@ export default function VisualSelectionPuzzle({
                    selected.every(id => solutionArray.includes(id));
     } else {
       // 單選模式
-      isCorrect = puzzle.solution === selected[0] || 
-                  (Array.isArray(puzzle.solution) && puzzle.solution.includes(selected[0]));
+      if (typeof puzzle.solution === 'string') {
+        isCorrect = puzzle.solution === selected[0];
+      } else if (Array.isArray(puzzle.solution)) {
+        // 檢查是否為 string[]（排除 number[]）
+        const solutionArray = puzzle.solution as string[];
+        isCorrect = solutionArray.includes(selected[0]);
+      } else {
+        isCorrect = false;
+      }
     }
     
     if (!isCorrect) {
@@ -196,7 +203,7 @@ export default function VisualSelectionPuzzle({
 
           {/* 錯誤提示 */}
           {error && (
-            <div className="mb-6 p-3 bg-red-950/30 border-2 border-red-700/70 rounded-lg text-sm text-red-300 flex items-center gap-2 animate-pulse">
+            <div className="mb-6 p-3 bg-orange-950/30 border-2 border-orange-700/70 rounded-lg text-sm text-orange-300 flex items-center gap-2 shake-on-error">
               <AlertCircle size={16} className="flex-shrink-0" />
               <span className="font-medium">{error}</span>
             </div>
@@ -210,7 +217,7 @@ export default function VisualSelectionPuzzle({
             disabled={selected.length === 0 || (isMultiSelect && selected.length !== requiredCount)}
             className={`flex-1 px-6 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg ${
               selected.length > 0 && (!isMultiSelect || selected.length === requiredCount)
-                ? 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white hover:shadow-xl'
+                ? 'bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white hover:shadow-xl'
                 : 'bg-dark-surface border-2 border-dark-border text-gray-500 cursor-not-allowed'
             }`}
           >

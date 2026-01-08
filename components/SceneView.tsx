@@ -237,33 +237,33 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
             onMouseLeave={() => setHoveredHotspot(null)}
             className={`
               transition-all duration-200
-              ${debug ? 'border-2 border-red-500 bg-red-500/20' : ''}
-              ${isHovered && !debug ? 'bg-white/5' : ''}
-              ${isClicked ? 'bg-white/10 scale-95' : ''}
+              ${debug ? 'border-2 border-orange-500 bg-orange-500/20' : ''}
+              ${isHovered && !debug ? 'bg-orange-500/10 border-orange-400/30' : ''}
+              ${isClicked ? 'bg-orange-500/20 scale-95' : ''}
             `}
             title={debug ? `${hotspot.id}: ${hotspot.description || ''}` : hotspot.hint}
           >
             {/* Debug 標籤 */}
             {debug && (
-              <div className="absolute top-0 left-0 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-br">
+              <div className="absolute top-0 left-0 bg-orange-600 text-white text-xs px-1.5 py-0.5 rounded-br">
                 {hotspot.id}
               </div>
             )}
 
-            {/* Hover 提示浮動標籤 */}
+            {/* Hover 提示浮動標籤 - 縮小50% */}
             {isHovered && !debug && hotspot.hint && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-dark-surface/95 backdrop-blur-md border border-dark-border rounded-lg text-xs text-gray-200 whitespace-nowrap shadow-lg z-50 pointer-events-none">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-1.5 py-0.75 bg-orange-950/95 backdrop-blur-md border border-orange-700/50 rounded text-[10px] leading-tight text-orange-100 whitespace-nowrap shadow-lg z-50 pointer-events-none animate-fade-float">
                 {hotspot.hint}
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                  <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-dark-border"></div>
+                  <div className="w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-orange-700/50"></div>
                 </div>
               </div>
             )}
 
-            {/* 點擊波紋效果 */}
+            {/* 點擊波紋效果 - 縮小50% */}
             {isClicked && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-20 h-20 rounded-full bg-white/20 animate-ping"></div>
+                <div className="w-10 h-10 rounded-full bg-white/20 animate-ping"></div>
               </div>
             )}
 

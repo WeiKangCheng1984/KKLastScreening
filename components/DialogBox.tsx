@@ -57,26 +57,26 @@ export default function DialogBox({
     switch (dialog.type) {
       case 'broadcast':
         return {
-          container: 'bg-gradient-to-br from-red-950/90 via-red-900/80 to-red-950/90 border-red-700/60 text-red-100',
-          icon: 'text-red-400',
+          container: 'bg-gradient-to-br from-red-950/90 via-orange-950/80 to-red-950/90 border-red-700/60 text-orange-100',
+          icon: 'text-orange-400',
           pulse: 'animate-pulse'
         };
       case 'item':
         return {
-          container: 'bg-gradient-to-br from-blue-950/90 via-blue-900/80 to-blue-950/90 border-blue-700/60 text-blue-100',
-          icon: 'text-blue-400',
+          container: 'bg-gradient-to-br from-orange-950/90 via-amber-950/80 to-orange-950/90 border-orange-700/60 text-orange-100',
+          icon: 'text-amber-400',
           pulse: ''
         };
       case 'system':
         return {
-          container: 'bg-gradient-to-br from-yellow-950/90 via-yellow-900/80 to-yellow-950/90 border-yellow-700/60 text-yellow-100',
-          icon: 'text-yellow-400',
+          container: 'bg-gradient-to-br from-amber-950/90 via-orange-950/80 to-amber-950/90 border-amber-700/60 text-amber-100',
+          icon: 'text-amber-400',
           pulse: ''
         };
       default:
         return {
-          container: 'bg-gradient-to-br from-gray-950/95 via-gray-900/90 to-gray-950/95 border-gray-700/50 text-gray-100',
-          icon: 'text-gray-400',
+          container: 'bg-gradient-to-br from-gray-950/95 via-gray-900/90 to-gray-950/95 border-orange-700/30 text-gray-100',
+          icon: 'text-orange-400/70',
           pulse: ''
         };
     }
@@ -89,7 +89,7 @@ export default function DialogBox({
       className="fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8"
     >
       <div
-        className={`max-w-3xl w-full p-6 md:p-8 rounded-2xl border-2 backdrop-blur-xl ${styles.container} pointer-events-auto shadow-2xl transform transition-all duration-300 ${
+        className={`max-w-3xl w-full p-6 md:p-8 rounded-2xl border-2 backdrop-blur-xl ${styles.container} pointer-events-auto shadow-2xl transform transition-all duration-300 animate-fade-float ${
           isComplete ? 'scale-100' : 'scale-95'
         }`}
       >

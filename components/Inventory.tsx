@@ -49,7 +49,7 @@ export default function Inventory({ itemIds, onItemClick }: InventoryProps) {
             >
               {/* 道具圖示區域 */}
               <div className="flex items-center justify-center w-12 h-12 mb-3 bg-dark-bg/50 rounded-lg border border-dark-border group-hover:border-gray-500 transition-colors">
-                <Sparkles size={20} className="transition-colors text-gray-500 group-hover:text-yellow-400" />
+                <Sparkles size={20} className="transition-colors text-gray-500 group-hover:text-orange-400" />
               </div>
 
               {/* 道具名稱 */}
@@ -58,7 +58,7 @@ export default function Inventory({ itemIds, onItemClick }: InventoryProps) {
                   {item.name}
                 </div>
                 {item.usable && (
-                  <div className="text-xs text-blue-400 mt-1">可使用</div>
+                  <div className="text-xs text-orange-400 mt-1">可使用</div>
                 )}
               </div>
             </button>

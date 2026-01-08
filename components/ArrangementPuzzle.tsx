@@ -149,7 +149,7 @@ export default function ArrangementPuzzle({ puzzle, onSolve, onClose, error: ext
 
         {/* 錯誤提示 */}
         {error && (
-          <div className="mb-4 p-3 bg-red-950/30 border-2 border-red-700/70 rounded-lg text-sm text-red-300 flex items-center gap-2 animate-pulse z-[60] relative">
+          <div className="mb-4 p-3 bg-orange-950/30 border-2 border-orange-700/70 rounded-lg text-sm text-orange-300 flex items-center gap-2 shake-on-error z-[60] relative">
             <X size={16} className="flex-shrink-0" />
             <span className="font-medium">{error}</span>
           </div>
@@ -166,7 +166,7 @@ export default function ArrangementPuzzle({ puzzle, onSolve, onClose, error: ext
           </button>
           <button
             onClick={handleSubmit}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl"
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
           >
             <Check size={18} />
             確認排列

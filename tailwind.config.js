@@ -14,6 +14,15 @@ module.exports = {
           card: '#252525',
           border: '#333333',
         },
+        industrial: {
+          orange: '#f97316',
+          'orange-dark': '#ea580c',
+          'orange-light': '#fb923c',
+          red: '#dc2626',
+          'red-dark': '#b91c1c',
+          amber: '#f59e0b',
+          'amber-dark': '#d97706',
+        },
       },
       backdropBlur: {
         xs: '2px',
@@ -26,6 +35,8 @@ module.exports = {
         'flicker-slow': 'flicker 0.3s ease-in-out',
         'dim': 'dim 0.5s ease-in-out',
         'electric-shimmer': 'electricShimmer 0.1s linear',
+        'fade-float': 'fadeFloat 0.5s ease-out',
+        'shake-alert': 'shakeAlert 0.3s ease-in-out',
       },
       keyframes: {
         fadeIn: {
@@ -47,6 +58,21 @@ module.exports = {
         electricShimmer: {
           '0%': { backgroundPosition: '0% 50%' },
           '100%': { backgroundPosition: '200% 50%' },
+        },
+        fadeFloat: {
+          '0%': { 
+            opacity: '0',
+            transform: 'translateY(20px)',
+          },
+          '100%': { 
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        shakeAlert: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' },
         },
       },
     },

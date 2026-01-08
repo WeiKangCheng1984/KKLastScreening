@@ -54,5 +54,20 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+
+  /* 工業橙紅主題按鈕 */
+  .btn-industrial {
+    @apply bg-gradient-to-r from-industrial-orange to-industrial-red;
+    @apply hover:from-industrial-orange-dark hover:to-industrial-red-dark;
+    @apply text-white font-semibold;
+    @apply transition-all duration-300;
+    @apply shadow-lg hover:shadow-xl;
+    @apply hover:scale-105 active:scale-95;
+  }
+
+  /* 警示震動效果 */
+  .shake-on-error {
+    animation: shakeAlert 0.3s ease-in-out;
+  }
 }
 

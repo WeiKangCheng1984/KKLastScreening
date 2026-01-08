@@ -8,11 +8,11 @@ TypeScript 5：用型別鎖住內容結構（Scene/Hotspot/Event/Requirement/Eff
 Tailwind CSS 3：快速做沉浸式 UI（暗色、霧面、卡片、對話框）
 Lucide React：線索牆、音量、返回、提示等輕量圖示
 部署：Vercel：靜態資產 + SSR/CSR 混用、快速迭代上線
-資料與內容規範（你最關鍵的「自救法則」）
+
 
 【1】場景背景圖（BG）
 固定比例
-固定尺寸：720×720
+固定尺寸：540×540
 格式：PNG
 單張大小上限：≤ 250KB（超過就重壓或降畫質）
 命名：bg_ch{章}_sc{場}_v{版}
@@ -26,7 +26,7 @@ Lucide React：線索牆、音量、返回、提示等輕量圖示
 
 【3】UI 圖
 圖示：一律用 Lucide（SVG），不做 PNG icon
-尺寸：720×720 或更小
+尺寸：540×540 或更小
 大小：≤ 80KB
 
 【4】Hotspot（透明點選區）

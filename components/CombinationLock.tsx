@@ -37,7 +37,7 @@ export default function CombinationLock({ puzzle, onSolve, onClose, error: exter
   const currentCode = digits.join('');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-gradient-to-br from-dark-card to-dark-surface border-2 border-dark-border rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl">
         {/* 標題欄 */}
         <div className="flex items-center justify-between mb-6">
@@ -129,7 +129,7 @@ export default function CombinationLock({ puzzle, onSolve, onClose, error: exter
           </div>
 
           {error && (
-            <div className="mt-3 p-3 bg-red-950/30 border-2 border-red-700/70 rounded-lg text-sm text-red-300 flex items-center gap-2 animate-pulse">
+            <div className="mt-3 p-3 bg-orange-950/30 border-2 border-orange-700/70 rounded-lg text-sm text-orange-300 flex items-center gap-2 shake-on-error">
               <X size={16} className="flex-shrink-0" />
               <span className="font-medium">{error}</span>
             </div>
@@ -140,7 +140,7 @@ export default function CombinationLock({ puzzle, onSolve, onClose, error: exter
         <div className="flex gap-3">
           <button
             onClick={handleSubmit}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl"
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
           >
             <Check size={18} />
             解鎖

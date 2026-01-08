@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '粉紅瑜珈墊 - 密室逃脫',
-  description: '你越強壯，越接近被收割。',
+  title: 'FME異物入侵 - 密室逃脫',
+  description: '你不是來扮演誰的。你只是走進了一個還沒有被做出最後決定的地方。',
 };
 
 export default function RootLayout({

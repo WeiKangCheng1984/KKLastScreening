@@ -57,12 +57,54 @@ export interface Dialog {
 
 export interface Puzzle {
   id: string;
-  type: 'input' | 'sequence' | 'arrangement' | 'combination' | 'visual_selection' | 'combination_lock';
-  solution: string | string[];
+  type: 
+    | 'input' 
+    | 'sequence' 
+    | 'arrangement' 
+    | 'combination' 
+    | 'visual_selection' 
+    | 'combination_lock'
+    | 'word_scramble'      // 拼字遊戲
+    | 'wire_connection'    // 顏色線對接
+    | 'jigsaw'             // 拼圖
+    | 'rotating_dial'      // 旋轉轉盤
+    | 'sequence_memory'    // 序列記憶
+    | 'sliding_puzzle'     // 滑塊拼圖
+    | 'symbol_matching'    // 符號配對
+    | 'maze_path'          // 迷宮路徑
+    | 'logic_switches';     // 邏輯開關
+  solution: string | string[] | number[] | Record<string, any>;
   hint?: string;
   requirements?: Requirement[];
   onSolve?: Effect[];
   options?: Array<{ id: string; label: string; description?: string; visual?: string }>; // 視覺化選擇謎題的選項
+  // 各謎題類型的專屬配置
+  config?: {
+    // 拼字遊戲
+    scrambledWord?: string;
+    originalWord?: string;
+    // 顏色線對接
+    wires?: Array<{ id: string; color: string; start: number; end: number }>;
+    // 拼圖
+    gridSize?: [number, number]; // [rows, cols]
+    imageUrl?: string;
+    // 旋轉轉盤
+    dials?: Array<{ id: string; segments: number; target: number }>;
+    // 序列記憶
+    sequenceLength?: number;
+    symbols?: string[];
+    // 滑塊拼圖
+    // gridSize 同上
+    // 符號配對
+    pairs?: Array<{ id: string; symbol: string }>;
+    // 迷宮
+    maze?: number[][]; // 0=牆, 1=路徑
+    start?: [number, number];
+    end?: [number, number];
+    // 邏輯開關
+    switches?: Array<{ id: string; initialState: boolean }>;
+    logicRules?: string; // 邏輯表達式
+  };
 }
 
 export interface Scene {

@@ -11,13 +11,43 @@ import PuzzleInput from '@/components/PuzzleInput';
 import ArrangementPuzzle from '@/components/ArrangementPuzzle';
 import VisualSelectionPuzzle from '@/components/VisualSelectionPuzzle';
 import CombinationLock from '@/components/CombinationLock';
+import WordScramble from '@/components/WordScramble';
+import WireConnection from '@/components/WireConnection';
+import JigsawPuzzle from '@/components/JigsawPuzzle';
+import RotatingDial from '@/components/RotatingDial';
+import SequenceMemory from '@/components/SequenceMemory';
+import SlidingPuzzle from '@/components/SlidingPuzzle';
+import SymbolMatching from '@/components/SymbolMatching';
+import MazePath from '@/components/MazePath';
+import LogicSwitches from '@/components/LogicSwitches';
 import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
-import { ArrowLeft, Package, X, MapPin, ChevronDown, Code } from 'lucide-react';
+import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code } from 'lucide-react';
 import Link from 'next/link';
 import { audioManager } from '@/lib/audioManager';
 import { scenes, chapters, items } from '@/data/gameData';
 import DeveloperPanel from '@/components/DeveloperPanel';
+
+// 獲取當前章節的所有場景
+const getCurrentChapterScenes = (chapterId: string): string[] => {
+  const chapter = chapters[chapterId];
+  return chapter ? chapter.scenes : [];
+};
+
+// 獲取當前場景的前一個和下一個場景
+const getAdjacentScenes = (chapterId: string, sceneId: string): { prev: string | null; next: string | null } => {
+  const chapterScenes = getCurrentChapterScenes(chapterId);
+  const currentIndex = chapterScenes.indexOf(sceneId);
+  
+  if (currentIndex === -1) {
+    return { prev: null, next: null };
+  }
+  
+  return {
+    prev: currentIndex > 0 ? chapterScenes[currentIndex - 1] : null,
+    next: currentIndex < chapterScenes.length - 1 ? chapterScenes[currentIndex + 1] : null,
+  };
+};
 
 export default function PlayPage() {
   const params = useParams();
@@ -305,15 +335,41 @@ export default function PlayPage() {
     });
   }, []);
 
-  // 開發者模式快捷鍵已移除（隱藏功能）
+  // 開發者模式快捷鍵支援（Ctrl+D / Cmd+D）
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+D (Windows/Linux) 或 Cmd+D (Mac)
+      // 注意：key 可能是 'd' 或 'D'，所以使用 toLowerCase
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        // 只有在 devMode 啟用時才切換
+        if (devMode) {
+          setShowDeveloperPanel(prev => {
+            const newValue = !prev;
+            console.log('開發者模式切換:', newValue ? '開啟' : '關閉');
+            return newValue;
+          });
+        } else {
+          console.warn('開發者模式未啟用！請在 URL 中添加 ?dev=1');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [devMode]);
 
   // 開發者模式按鈕默認隱藏，只能通過 URL 參數 ?dev=1 啟用
-  const [hideDevMode] = useState(true); // 默認隱藏
-
-  // 如果 URL 中有 dev=1 參數，自動顯示開發者面板
+  // 如果 URL 中有 dev=1 參數，在控制台顯示提示
   useEffect(() => {
     if (devMode) {
-      setShowDeveloperPanel(true);
+      console.log('✅ 開發者模式已啟用！');
+      console.log('💡 使用方式：');
+      console.log('   1. 按 Ctrl+D (Windows) 或 Cmd+D (Mac) 開啟/關閉開發者面板');
+      console.log('   2. 或點擊右上角的紫色按鈕（Code 圖示）');
+    } else {
+      console.log('⚠️ 開發者模式未啟用');
+      console.log('💡 要啟用開發者模式，請在 URL 中添加 ?dev=1');
     }
   }, [devMode]);
 
@@ -327,6 +383,17 @@ export default function PlayPage() {
     setCurrentDialog(null);
     setDialogQueue([]);
     
+    // 確保當前章節的所有場景都被標記為可訪問（添加到 visitedScenes）
+    // 這樣玩家就可以在該章節的三個空間間自由切換
+    const currentChapterScenes = getCurrentChapterScenes(chapterId);
+    let scenesAdded = false;
+    currentChapterScenes.forEach(sceneIdToAdd => {
+      if (!state.visitedScenes.includes(sceneIdToAdd)) {
+        state.visitedScenes.push(sceneIdToAdd);
+        scenesAdded = true;
+      }
+    });
+    
     // 確保當前場景被添加到 visitedScenes
     if (!state.visitedScenes.includes(sceneId)) {
       engine.applyEffect({
@@ -334,8 +401,8 @@ export default function PlayPage() {
         chapterId: chapterId,
         sceneId: sceneId,
       });
-    } else if (state.currentChapter !== chapterId || state.currentScene !== sceneId) {
-      // 如果場景已在 visitedScenes 中，但狀態不一致，只更新當前場景
+    } else if (state.currentChapter !== chapterId || state.currentScene !== sceneId || scenesAdded) {
+      // 如果場景已在 visitedScenes 中，但狀態不一致，或新增了場景，更新當前場景
       engine.applyEffect({
         type: 'changeScene',
         chapterId: chapterId,
@@ -1378,7 +1445,7 @@ export default function PlayPage() {
     setRefreshKey(prev => prev + 1);
   }, [scene]); // engine 來自 useRef，不需要在依賴中
 
-  const handlePuzzleSolve = useCallback((input: string | string[]) => {
+  const handlePuzzleSolve = useCallback((input: string | string[] | number[] | Record<string, any>) => {
     if (!currentPuzzle || !engineRef.current) return;
     const engine = engineRef.current;
     
@@ -1545,6 +1612,39 @@ export default function PlayPage() {
     );
   }
 
+  // 獲取相鄰場景
+  const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
+  const prevScene = adjacentScenes.prev ? scenes[adjacentScenes.prev] : null;
+  const nextScene = adjacentScenes.next ? scenes[adjacentScenes.next] : null;
+
+  // 切換到相鄰場景的處理函數
+  const handleSceneNavigation = useCallback((targetSceneId: string) => {
+    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    const targetScene = scenes[targetSceneId];
+    if (!targetScene) return;
+
+    // 切換場景，但保留所有狀態
+    engine.applyEffect({
+      type: 'changeScene',
+      chapterId: targetScene.chapterId,
+      sceneId: targetSceneId,
+    });
+    
+    // 保存狀態
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('gameState', JSON.stringify(engine.getState()));
+      } catch (e) {
+        console.warn('無法保存遊戲狀態:', e);
+      }
+    }
+    
+    // 導航到新場景
+    router.push(`/play/${targetScene.chapterId}/${targetSceneId}`);
+    setRefreshKey(prev => prev + 1);
+  }, [router]);
+
   return (
     <div className="relative min-h-screen bg-dark-bg overflow-hidden">
       {/* 場景視圖 - 全屏沉浸式 */}
@@ -1560,6 +1660,28 @@ export default function PlayPage() {
               debug={debug}
               interactionCount={interactionCount}
             />
+            
+            {/* 左側箭頭 - 切換到上一個場景 */}
+            {prevScene && (
+              <button
+                onClick={() => handleSceneNavigation(prevScene.id)}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-12 h-12 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
+                title={`前往：${prevScene.name}`}
+              >
+                <ChevronLeft size={24} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+              </button>
+            )}
+            
+            {/* 右側箭頭 - 切換到下一個場景 */}
+            {nextScene && (
+              <button
+                onClick={() => handleSceneNavigation(nextScene.id)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-12 h-12 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
+                title={`前往：${nextScene.name}`}
+              >
+                <ChevronRight size={24} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1582,9 +1704,9 @@ export default function PlayPage() {
             className="group flex items-center justify-center w-12 h-12 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg relative"
             title="背包"
           >
-            <Package size={22} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+            <Package size={22} className="text-gray-300 group-hover:text-orange-400 transition-colors" />
             {state.inventory.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white border-2 border-dark-bg shadow-lg animate-pulse">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-industrial-orange rounded-full flex items-center justify-center text-xs font-bold text-white border-2 border-dark-bg shadow-lg animate-pulse">
                 {state.inventory.length}
               </span>
             )}
@@ -1592,16 +1714,29 @@ export default function PlayPage() {
           {/* 開發者模式按鈕 - 僅在 URL 參數 ?dev=1 時顯示 */}
           {devMode && (
             <button
-              onClick={() => setShowDeveloperPanel(!showDeveloperPanel)}
+              onClick={() => {
+                setShowDeveloperPanel(prev => {
+                  const newValue = !prev;
+                  console.log('開發者模式按鈕點擊:', newValue ? '開啟' : '關閉');
+                  return newValue;
+                });
+              }}
               className={`group flex items-center justify-center w-12 h-12 backdrop-blur-md border rounded-lg transition-all duration-200 shadow-lg ${
                 showDeveloperPanel
-                  ? 'bg-purple-600/30 border-purple-500 text-purple-200'
-                  : 'bg-purple-600/10 border-purple-500/30 text-purple-400/50 hover:bg-purple-600/20 hover:border-purple-500/50 hover:text-purple-300'
+                  ? 'bg-industrial-orange/30 border-industrial-orange text-orange-200 ring-2 ring-industrial-orange'
+                  : 'bg-industrial-orange/10 border-industrial-orange/30 text-orange-400/50 hover:bg-industrial-orange/20 hover:border-industrial-orange/50 hover:text-orange-300'
               }`}
-              title="開發者模式 (僅在 ?dev=1 時可用)"
+              title="開發者模式 (Ctrl+D / Cmd+D) - 點擊開啟/關閉"
             >
               <Code size={22} className="transition-colors" />
             </button>
+          )}
+          {/* 開發者模式未啟用時的提示 */}
+          {!devMode && (
+            <div className="fixed top-4 right-4 z-40 p-2 bg-yellow-900/80 border border-yellow-700 rounded-lg text-yellow-200 text-xs max-w-xs">
+              <div className="font-semibold mb-1">💡 啟用開發者模式</div>
+              <div>在 URL 中添加 <code className="bg-yellow-950 px-1 rounded">?dev=1</code></div>
+            </div>
           )}
         </div>
       </div>
@@ -1611,87 +1746,97 @@ export default function PlayPage() {
         <div className="px-4 py-2 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg shadow-lg">
           <div className="text-sm font-medium text-gray-300">{scene.name}</div>
         </div>
-        {/* 場景切換按鈕 */}
-        {state.visitedScenes.length > 1 && (
-          <button
-            onClick={() => setShowSceneSelector(!showSceneSelector)}
-            className="group flex items-center gap-2 px-4 py-2 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg"
-            title="切換場景"
-          >
-            <MapPin size={18} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
-            <ChevronDown size={16} className={`transition-transform ${showSceneSelector ? 'rotate-180' : ''}`} />
-          </button>
-        )}
+        {/* 場景切換按鈕 - 顯示當前章節的所有場景 */}
+        {(() => {
+          const currentChapterScenes = getCurrentChapterScenes(chapterId);
+          return currentChapterScenes.length > 1 && (
+            <button
+              onClick={() => setShowSceneSelector(!showSceneSelector)}
+              className="group flex items-center gap-2 px-4 py-2 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg"
+              title="切換場景"
+            >
+              <MapPin size={18} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+              <ChevronDown size={16} className={`transition-transform ${showSceneSelector ? 'rotate-180' : ''}`} />
+            </button>
+          );
+        })()}
       </div>
 
-      {/* 場景選擇器 */}
-      {showSceneSelector && state.visitedScenes.length > 1 && (
-        <>
-          {/* 背景遮罩，點擊關閉 */}
-          <div
-            className="fixed inset-0 z-20"
-            onClick={() => setShowSceneSelector(false)}
-          />
-          <div className="absolute top-20 left-4 z-30 w-64 bg-dark-surface/95 backdrop-blur-xl border border-dark-border rounded-lg shadow-2xl p-4">
-          <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">已訪問的場景</div>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {state.visitedScenes.map((visitedSceneId) => {
-              const visitedScene = scenes[visitedSceneId];
-              if (!visitedScene) return null;
-              const isCurrentScene = visitedSceneId === sceneId;
-              
-              return (
-                <button
-                  key={visitedSceneId}
-                  onClick={() => {
-                    if (!engineRef.current) return;
-                    const engine = engineRef.current;
-                    // 切換場景，但保留所有狀態
-                    engine.applyEffect({
-                      type: 'changeScene',
-                      chapterId: visitedScene.chapterId,
-                      sceneId: visitedSceneId,
-                    });
-                    // 保存狀態
-                    if (typeof window !== 'undefined') {
-                      try {
-                        localStorage.setItem('gameState', JSON.stringify(engine.getState()));
-                      } catch (e) {
-                        console.warn('無法保存遊戲狀態:', e);
-                      }
-                    }
-                    // 導航到新場景
-                    router.push(`/play/${visitedScene.chapterId}/${visitedSceneId}`);
-                    setShowSceneSelector(false);
-                    setRefreshKey(prev => prev + 1);
-                  }}
-                  disabled={isCurrentScene}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
-                    isCurrentScene
-                      ? 'bg-blue-600/20 border border-blue-500/50 text-blue-300 cursor-not-allowed'
-                      : 'bg-dark-surface/50 border border-dark-border/50 text-gray-300 hover:bg-dark-surface hover:border-dark-border hover:text-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-medium">{visitedScene.name}</div>
-                      {visitedScene.description && (
-                        <div className="text-xs text-gray-400 mt-1 line-clamp-1">
-                          {visitedScene.description}
+      {/* 場景選擇器 - 顯示當前章節的所有場景 */}
+      {showSceneSelector && (() => {
+        const currentChapterScenes = getCurrentChapterScenes(chapterId);
+        if (currentChapterScenes.length <= 1) return null;
+        
+        return (
+          <>
+            {/* 背景遮罩，點擊關閉 */}
+            <div
+              className="fixed inset-0 z-20"
+              onClick={() => setShowSceneSelector(false)}
+            />
+            <div className="absolute top-20 left-4 z-30 w-64 bg-dark-surface/95 backdrop-blur-xl border border-dark-border rounded-lg shadow-2xl p-4">
+              <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">
+                {chapters[chapterId]?.name || '當前章節的場景'}
+              </div>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {currentChapterScenes.map((sceneIdToShow) => {
+                  const sceneToShow = scenes[sceneIdToShow];
+                  if (!sceneToShow) return null;
+                  const isCurrentScene = sceneIdToShow === sceneId;
+                  
+                  return (
+                    <button
+                      key={sceneIdToShow}
+                      onClick={() => {
+                        if (!engineRef.current) return;
+                        const engine = engineRef.current;
+                        // 切換場景，但保留所有狀態
+                        engine.applyEffect({
+                          type: 'changeScene',
+                          chapterId: sceneToShow.chapterId,
+                          sceneId: sceneIdToShow,
+                        });
+                        // 保存狀態
+                        if (typeof window !== 'undefined') {
+                          try {
+                            localStorage.setItem('gameState', JSON.stringify(engine.getState()));
+                          } catch (e) {
+                            console.warn('無法保存遊戲狀態:', e);
+                          }
+                        }
+                        // 導航到新場景
+                        router.push(`/play/${sceneToShow.chapterId}/${sceneIdToShow}`);
+                        setShowSceneSelector(false);
+                        setRefreshKey(prev => prev + 1);
+                      }}
+                      disabled={isCurrentScene}
+                      className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+                        isCurrentScene
+                          ? 'bg-blue-600/20 border border-blue-500/50 text-blue-300 cursor-not-allowed'
+                          : 'bg-dark-surface/50 border border-dark-border/50 text-gray-300 hover:bg-dark-surface hover:border-dark-border hover:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-medium">{sceneToShow.name}</div>
+                          {sceneToShow.description && (
+                            <div className="text-xs text-gray-400 mt-1 line-clamp-1">
+                              {sceneToShow.description}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    {isCurrentScene && (
-                      <div className="text-xs text-blue-400 font-medium">當前</div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        </>
-      )}
+                        {isCurrentScene && (
+                          <div className="text-xs text-blue-400 font-medium">當前</div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* 側邊道具欄 - 從右側滑入 */}
       <div className={`fixed top-0 right-0 h-full w-80 bg-dark-surface/95 backdrop-blur-xl border-l border-dark-border z-40 transform transition-transform duration-300 ease-out ${
@@ -1754,6 +1899,105 @@ export default function PlayPage() {
           />
         ) : currentPuzzle.type === 'combination_lock' ? (
           <CombinationLock
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'word_scramble' ? (
+          <WordScramble
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'wire_connection' ? (
+          <WireConnection
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'jigsaw' ? (
+          <JigsawPuzzle
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'rotating_dial' ? (
+          <RotatingDial
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'sequence_memory' ? (
+          <SequenceMemory
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'sliding_puzzle' ? (
+          <SlidingPuzzle
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'symbol_matching' ? (
+          <SymbolMatching
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'maze_path' ? (
+          <MazePath
+            puzzle={currentPuzzle}
+            onSolve={handlePuzzleSolve}
+            onClose={() => {
+              setCurrentPuzzle(null);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        ) : currentPuzzle.type === 'logic_switches' ? (
+          <LogicSwitches
             puzzle={currentPuzzle}
             onSolve={handlePuzzleSolve}
             onClose={() => {
@@ -1827,9 +2071,12 @@ export default function PlayPage() {
       )}
 
       {/* 開發者面板 */}
-      {showDeveloperPanel && (
+      {showDeveloperPanel && devMode && (
         <DeveloperPanel
-          onClose={() => setShowDeveloperPanel(false)}
+          onClose={() => {
+            console.log('開發者面板關閉');
+            setShowDeveloperPanel(false);
+          }}
           currentChapterId={chapterId}
           currentSceneId={sceneId}
         />
