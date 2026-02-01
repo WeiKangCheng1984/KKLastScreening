@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>­ B“hW9	</title>
+  <defs>
+    <linearGradient id="schedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8e0d8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c8b8a8;stop-opacity:0.95" />
+    </linearGradient>
+  </defs>
+  <!-- h<,Ô -->
+  <rect x="24" y="24" width="336" height="336" rx="4" fill="url(#schedGrad)" stroke="#8b7d6b" stroke-width="2"/>
+  <!-- h- -->
+  <rect x="40" y="48" width="304" height="40" fill="#c4b4a4" opacity="0.6"/>
+  <line x1="40" y1="88" x2="344" y2="88" stroke="#8b7d6b" stroke-width="1"/>
+  <!-- kÚ -->
+  <line x1="40" y1="136" x2="344" y2="136" stroke="#9a8a7a" stroke-width="1" opacity="0.8"/>
+  <line x1="40" y1="184" x2="344" y2="184" stroke="#9a8a7a" stroke-width="1" opacity="0.8"/>
+  <line x1="40" y1="232" x2="344" y2="232" stroke="#9a8a7a" stroke-width="1" opacity="0.8"/>
+  <!-- W9Fƒ‰°B“ -->
+  <line x1="180" y1="195" x2="260" y2="215" stroke="#b03030" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+  <text x="270" y="220" font-size="14" fill="#b03030" font-family="sans-serif" font-weight="bold">öŒ 3 </text>
+  <!-- M” -->
+  <line x1="160" y1="48" x2="160" y2="360" stroke="#9a8a7a" stroke-width="1" opacity="0.6"/>
+  <line x1="280" y1="48" x2="280" y2="360" stroke="#9a8a7a" stroke-width="1" opacity="0.6"/>
+</svg>

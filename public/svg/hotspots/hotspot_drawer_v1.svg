@@ -1,0 +1,12 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .drawer { fill: none; stroke: currentColor; stroke-width: 2; }
+      .handle { fill: currentColor; }
+    </style>
+  </defs>
+  <!-- ½\F -->
+  <rect class="drawer" x="8" y="12" width="32" height="24" rx="1"/>
+  <!-- ½\ŠK -->
+  <rect class="handle" x="18" y="22" width="12" height="4" rx="1"/>
+</svg>

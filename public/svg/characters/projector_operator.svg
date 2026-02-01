@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 400" width="250" height="400">
+  <title>5> á	</title>
+  <defs>
+    <linearGradient id="projBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e2028;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#12151a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="250" height="400" fill="url(#projBg)" />
+  <g fill="none" stroke="#5a5565" stroke-width="2" opacity="0.85">
+    <!-- -è -->
+    <ellipse cx="125" cy="92" rx="38" ry="46" />
+    <!-- <áF—: -->
+    <ellipse cx="110" cy="92" rx="12" ry="10" opacity="0.5" />
+    <ellipse cx="140" cy="92" rx="12" ry="10" opacity="0.5" />
+    <!-- 
+«PÿÍ\ðM -->
+    <path d="M 90 155 L 125 148 L 160 155 L 165 320 L 85 320 Z" stroke-linejoin="round" />
+    <!-- KÂ§6 -->
+    <path d="M 125 200 L 125 280 M 100 240 L 150 240" stroke-width="1.5" opacity="0.7" />
+  </g>
+</svg>

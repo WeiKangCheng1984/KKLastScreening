@@ -1,0 +1,14 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .banner { fill: none; stroke: currentColor; stroke-width: 2; }
+      .red { fill: currentColor; opacity: 0.25; }
+    </style>
+  </defs>
+  <!--  -->
+  <rect class="banner" x="8" y="12" width="32" height="24" rx="1"/>
+  <rect class="red" x="10" y="14" width="28" height="20" rx="0.5"/>
+  <!-- ø›Þ -->
+  <line class="banner" x1="12" y1="12" x2="12" y2="8" stroke-width="2"/>
+  <line class="banner" x1="36" y1="12" x2="36" y2="8" stroke-width="2"/>
+</svg>

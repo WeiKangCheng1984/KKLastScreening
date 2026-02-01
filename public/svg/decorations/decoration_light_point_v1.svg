@@ -1,0 +1,11 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .light { fill: currentColor; opacity: 0.6; }
+      .glow { fill: currentColor; opacity: 0.2; }
+    </style>
+  </defs>
+  <!-- IÞ -->
+  <circle class="glow" cx="12" cy="12" r="6"/>
+  <circle class="light" cx="12" cy="12" r="3"/>
+</svg>

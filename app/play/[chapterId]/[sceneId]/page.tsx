@@ -6,7 +6,11 @@ import { GameEngine } from '@/lib/gameEngine';
 import { Dialog } from '@/types/game';
 import SceneView, { SceneViewRef } from '@/components/SceneView';
 import DialogBox from '@/components/DialogBox';
+import CharacterConversation from '@/components/CharacterConversation';
+import { characterConversations } from '@/data/characterConversations';
 import Inventory from '@/components/Inventory';
+import SceneNameDisplay from '@/components/SceneNameDisplay';
+import ItemObtainedNotification from '@/components/ItemObtainedNotification';
 import PuzzleInput from '@/components/PuzzleInput';
 import ArrangementPuzzle from '@/components/ArrangementPuzzle';
 import VisualSelectionPuzzle from '@/components/VisualSelectionPuzzle';
@@ -22,11 +26,19 @@ import MazePath from '@/components/MazePath';
 import LogicSwitches from '@/components/LogicSwitches';
 import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
-import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code } from 'lucide-react';
+import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { audioManager } from '@/lib/audioManager';
 import { scenes, chapters, items } from '@/data/gameData';
 import DeveloperPanel from '@/components/DeveloperPanel';
+import TutorialGuide from '@/components/TutorialGuide';
+import AudioControl from '@/components/AudioControl';
+import DialogHistory from '@/components/DialogHistory';
+import { preloadSVGBatch } from '@/lib/svgLoader';
+import { DialogChoice } from '@/types/game';
+import ChapterPuzzle from '@/components/ChapterPuzzle';
+import ScoreDisplay from '@/components/ScoreDisplay';
+import NpcBar from '@/components/NpcBar';
 
 // 獲取當前章節的所有場景
 const getCurrentChapterScenes = (chapterId: string): string[] => {
@@ -94,10 +106,33 @@ export default function PlayPage() {
   const [showDoor701Confirm, setShowDoor701Confirm] = useState(false);
   const [showWindow702Confirm, setShowWindow702Confirm] = useState(false);
   const [showDescendConfirm, setShowDescendConfirm] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const gameEndShownRef = useRef(false);
   const [showDeveloperPanel, setShowDeveloperPanel] = useState(false);
+  // 新的角色對話系統
+  const [currentConversation, setCurrentConversation] = useState<any>(null);
   const sceneViewRef = useRef<SceneViewRef>(null);
   const isDescendPuzzleCompleteRef = useRef(false);
+  // 使用 useState 的函數形式確保服務器和客戶端初始狀態一致
+  const [isSceneTransitioning, setIsSceneTransitioning] = useState(() => false);
+  const [sceneLoading, setSceneLoading] = useState(() => false);
+  const preloadedImagesRef = useRef<Set<string>>(new Set());
+  const [dialogHistory, setDialogHistory] = useState<Dialog[]>([]);
+  const [showDialogHistory, setShowDialogHistory] = useState(false);
+  const [chapterProgress, setChapterProgress] = useState(0);
+  const [showChapterPuzzle, setShowChapterPuzzle] = useState(false);
+  // 場景切換相關狀態
+  // 使用 useState 的函數形式確保服務器和客戶端初始狀態一致
+  const [showSceneName, setShowSceneName] = useState(() => false);
+  const [currentSceneName, setCurrentSceneName] = useState(() => '');
+  // 追蹤上次顯示的場景，確保每次切換都顯示
+  const lastDisplayedSceneRef = useRef<string>('');
+  // 追蹤場景名稱顯示計時器，避免重複設置
+  const sceneNameTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const sceneTransitionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // 道具獲得提示狀態
+  const [showItemNotification, setShowItemNotification] = useState(false);
+  const [obtainedItem, setObtainedItem] = useState<{ id: string; name: string; image?: string; svgImage?: string } | null>(null);
 
   // 添加對話到隊列（需要在 handleItemCollection 之前定義）
   const addDialogsToQueue = useCallback((dialogs: Dialog[]) => {
@@ -167,14 +202,14 @@ export default function PlayPage() {
     }
     
     // 步驟3：檢查事件是否會添加道具（通過檢查 effects 中是否有 addItem）
-    const addItemEffects = event.effects.filter((e: any) => e.type === 'addItem');
-    if (addItemEffects.length === 0) {
+    const eventAddItemEffects = event.effects.filter((e: any) => e.type === 'addItem');
+    if (eventAddItemEffects.length === 0) {
       // 這個事件不會添加道具，可能不是道具獲取事件，返回 false
       return false;
     }
     
     // 步驟4：檢查是否已收集所有相關道具（快速檢查，避免不必要的處理）
-    const collectedItems = addItemEffects
+    const collectedItems = eventAddItemEffects
       .map((e: any) => e.itemId)
       .filter((itemId: string) => state.inventory.includes(itemId));
     
@@ -235,35 +270,154 @@ export default function PlayPage() {
       audioManager.playSFX('/audio/sfx/sfx_rust_remover.mp3', 0.6);
     }
     
-    // 步驟8：觸發事件
+    // 步驟8：觸發事件並處理道具獲得提示
+    // 先觸發事件以獲取道具
     const result = engine.triggerEvent(eventId);
-    if (result) {
-      // 步驟9：統一處理對話顯示
-      // 注意：事件中已經定義了所有對話（包括道具描述），直接使用即可
-      const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
-      
-      // 構建對話隊列：直接使用事件中定義的對話（保持原有順序）
-      const dialogs: Dialog[] = [];
-      
-      // 添加所有事件對話（包括道具描述、旁白、系統、廣播等）
-      dialogEffects.forEach((effect: any) => {
-        if (effect.dialog) {
-          dialogs.push(effect.dialog);
+    
+    if (!result) {
+      // 事件沒有觸發，返回
+      return false;
+    }
+    
+    // 檢查是否有道具被添加
+    const addItemEffects = result.effects.filter((e: any) => e.type === 'addItem');
+    
+    if (addItemEffects.length > 0) {
+      // 如果有道具被添加，先顯示道具獲得提示
+        const firstItemEffect = addItemEffects[0];
+        const itemId = firstItemEffect?.itemId;
+        const item = itemId != null ? items[itemId] : undefined;
+        if (item) {
+          // 播放收集音效
+          audioManager.playInteractionSFX('collect');
+          
+          // 顯示道具獲得提示
+          setObtainedItem({
+            id: item.id,
+            name: item.name,
+            image: item.image,
+            svgImage: item.svgImage,
+          });
+          setShowItemNotification(true);
+          
+          // 1.5秒後關閉提示，然後顯示對話框（縮短等待時間）
+          setTimeout(() => {
+            setShowItemNotification(false);
+            setObtainedItem(null);
+            
+            // 檢查是否為角色對話事件
+            const isCharacterDialog = /^(character_\d_|person_)(first|second|third|fourth|fifth)_talk$/.test(eventId) || 
+                                      /^talk_to_(character_|person)/.test(eventId);
+            
+            if (isCharacterDialog) {
+              // 映射事件 ID 到對話鏈 ID
+              let conversationId: string | null = null;
+              if (eventId === 'talk_to_character_1' || eventId.startsWith('character_1_')) {
+                conversationId = 'character_1_conversation';
+              } else if (eventId === 'talk_to_character_2' || eventId.startsWith('character_2_')) {
+                conversationId = 'character_2_conversation';
+              } else if (eventId === 'talk_to_person' || eventId.startsWith('person_')) {
+                conversationId = 'person_conversation';
+              }
+              
+              // 如果找到對應的對話鏈，使用新系統
+              if (conversationId && characterConversations[conversationId]) {
+                const conversation = characterConversations[conversationId];
+                
+                // 檢查是否已經完成過
+                if (conversation.onComplete?.setFlag) {
+                  const flag = conversation.onComplete.setFlag;
+                  if (engine.hasFlag(flag)) {
+                    return true;
+                  }
+                }
+                
+                // 顯示角色對話
+                setCurrentConversation(conversation);
+                setRefreshKey(prev => prev + 1);
+                return true;
+              }
+            }
+            
+            // 處理對話顯示
+            const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
+            const dialogs: Dialog[] = [];
+            
+            dialogEffects.forEach((effect: any) => {
+              if (effect.dialog) {
+                dialogs.push(effect.dialog);
+              }
+            });
+            
+            if (dialogs.length > 0) {
+              addDialogsToQueue(dialogs);
+            }
+            
+            setRefreshKey(prev => prev + 1);
+          }, 1500); // 縮短為 1.5 秒
+          
+          return true; // 已處理
         }
-      });
-      
-      // 使用對話隊列顯示
-      if (dialogs.length > 0) {
-        addDialogsToQueue(dialogs);
       }
       
-      // 觸發重新渲染，確保背包更新
-      setRefreshKey(prev => prev + 1);
-      return true; // 已處理，不需要繼續
-    } else {
-      // 事件觸發失敗，可能是條件不滿足或已觸發過
-      console.warn(`事件 ${eventId} 觸發失敗`);
-    }
+      // 沒有道具，正常處理對話
+      // 檢查是否為角色對話事件
+      const isCharacterDialog = /^(character_\d_|person_)(first|second|third|fourth|fifth)_talk$/.test(eventId) || 
+                                /^talk_to_(character_|person)/.test(eventId);
+      
+      if (isCharacterDialog) {
+        // 映射事件 ID 到對話鏈 ID
+        let conversationId: string | null = null;
+        if (eventId === 'talk_to_character_1' || eventId.startsWith('character_1_')) {
+          conversationId = 'character_1_conversation';
+        } else if (eventId === 'talk_to_character_2' || eventId.startsWith('character_2_')) {
+          conversationId = 'character_2_conversation';
+        } else if (eventId === 'talk_to_person' || eventId.startsWith('person_')) {
+          conversationId = 'person_conversation';
+        }
+        
+        // 如果找到對應的對話鏈，使用新系統
+        if (conversationId && characterConversations[conversationId]) {
+          const conversation = characterConversations[conversationId];
+          
+          // 檢查是否已經完成過
+          if (conversation.onComplete?.setFlag) {
+            const flag = conversation.onComplete.setFlag;
+            if (engine.hasFlag(flag)) {
+              return true;
+            }
+          }
+          
+          // 顯示角色對話
+          setCurrentConversation(conversation);
+          setRefreshKey(prev => prev + 1);
+          return true;
+        }
+      }
+      
+      // 處理對話顯示
+      if (result) {
+        const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
+        const dialogs: Dialog[] = [];
+        
+        dialogEffects.forEach((effect: any) => {
+          if (effect.dialog) {
+            dialogs.push(effect.dialog);
+          }
+        });
+        
+        if (dialogs.length > 0) {
+          addDialogsToQueue(dialogs);
+        }
+        
+        setRefreshKey(prev => prev + 1);
+        return true; // 已處理
+      } else {
+        // 事件觸發失敗，可能是條件不滿足或已觸發過
+        if (devMode) {
+          console.warn(`事件 ${eventId} 觸發失敗`);
+        }
+      }
     
     // 事件觸發失敗，顯示 hotspot 提示
     const hotspot = scene.hotspots.find(h => h.id === hotspotId);
@@ -277,8 +431,96 @@ export default function PlayPage() {
     return true; // 已處理，不需要繼續
   }, [engineRef, setCurrentDialog, setRefreshKey, addDialogsToQueue, items]);
 
-  // 處理對話關閉：如果有隊列，顯示下一個對話
+  // 將 NpcDialogNode 轉成 Dialog 供 DialogBox 顯示；node.text 依 \n\n 分段，玩家按繼續逐段進行
+  const buildDialogFromNpcNode = useCallback((node: { text: string; choices: Array<{ id: string; label: string; effects?: any[]; insightEffects?: any[] }> }, npc: { id: string; name: string; portrait?: string }) => {
+    const segments = node.text.split(/\n\n+/).map((s: string) => s.trim()).filter(Boolean);
+    const textSegments = segments.length > 0 ? segments : [node.text];
+    return {
+      text: textSegments[0],
+      textSegments,
+      type: 'character' as const,
+      characterId: npc.id,
+      characterName: npc.name,
+      characterPortrait: npc.portrait,
+      choices: node.choices.map((c: { id: string; label: string; effects?: any[]; insightEffects?: any[] }) => ({
+        id: c.id,
+        text: c.label,
+        effects: c.effects,
+        insightEffects: c.insightEffects,
+      })),
+    };
+  }, []);
+
+  // 處理對話選擇
+  const handleDialogChoice = useCallback((choice: DialogChoice) => {
+    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    const scene = engine.getCurrentScene();
+    const currentState = engine.getState();
+
+    // NPC 關鍵對話模式：使用 handleNpcDialogChoice，並顯示下一節點或結束
+    if (currentState.activeNpcDialogId) {
+      engine.handleNpcDialogChoice(choice.id);
+      const nextNode = engine.getCurrentNpcDialogNode();
+      if (nextNode && scene?.npcs) {
+        const npc = scene.npcs.find((n: { id: string }) => n.id === currentState.activeNpcDialogId);
+        if (npc) {
+          setCurrentDialog(buildDialogFromNpcNode(nextNode, npc));
+        } else {
+          engine.endNpcDialog();
+          setCurrentDialog(null);
+        }
+      } else {
+        engine.endNpcDialog();
+        setCurrentDialog(null);
+      }
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+
+    // 一般對話選擇
+    engine.handleDialogChoice(choice);
+
+    // 第一章態度宣言選完後：顯示推理句（依本章最高洞察維度），再導向 ch2
+    const st = engine.getState();
+    if (st.flags?.ch1_attitude_declared && (choice.id === 'ch1_attitude_procedure' || choice.id === 'ch1_attitude_evidence' || choice.id === 'ch1_attitude_human' || choice.id === 'ch1_attitude_both')) {
+      const insights = st.insights || { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
+      const p = insights.procedure_insight ?? 0;
+      const h = insights.human_insight ?? 0;
+      const e = insights.evidence_insight ?? 0;
+      const maxVal = Math.max(p, h, e);
+      const inferenceText =
+        maxVal === p
+          ? '兇手不是在黑暗裡殺人，他是在規定的黑暗裡殺人。'
+          : maxVal === e
+            ? '官腔很滑，但官腔擋不住痕跡。找一個他沒想到的小東西，他就會破。'
+            : '他怕的不是兇手，是上面那張看不見的臉。恐懼會替兇手擦地板。';
+      setCurrentDialog({
+        text: inferenceText,
+        type: 'narrator',
+        choices: [
+          {
+            id: 'to_ch2',
+            text: '進入第二章',
+            effects: [{ type: 'setFlag', flag: 'navigate_to_ch2_intro', value: true }],
+          },
+        ],
+      });
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+
+    if (choice.nextDialog) {
+      setCurrentDialog(choice.nextDialog);
+    }
+    setRefreshKey((prev) => prev + 1);
+  }, [buildDialogFromNpcNode]);
+
+  // 處理對話關閉：若有進行中的 NPC 關鍵對話則結束，使下次點擊該 NPC 可恢復隨機談話
   const handleDialogClose = useCallback(() => {
+    if (engineRef.current?.getState().activeNpcDialogId) {
+      engineRef.current.endNpcDialog();
+    }
     setCurrentDialog(null);
     // 檢查是否有待顯示的對話
     setDialogQueue(prev => {
@@ -309,10 +551,36 @@ export default function PlayPage() {
         return prev.slice(1);
       } else {
         // 對話隊列為空，檢查是否需要顯示確認對話框或遊戲結束畫面
-        // 檢查遊戲是否完成（且尚未顯示過結束畫面）
-        if (engineRef.current && !gameEndShownRef.current) {
+        // 檢查是否需要導航到下一個章節的導讀頁
+        if (engineRef.current) {
           const state = engineRef.current.getState();
-          if (state.flags.game_completed) {
+          
+          // 檢查導航標記
+          const nextChapterMap: Record<string, string> = {
+            'navigate_to_ch2_intro': 'ch2',
+            'navigate_to_ch3_intro': 'ch3',
+            'navigate_to_ch4_intro': 'ch4',
+            'navigate_to_ch5_intro': 'ch5',
+          };
+          
+          for (const [flag, nextChapterId] of Object.entries(nextChapterMap)) {
+            if (state.flags[flag]) {
+              // 清除標記
+              engineRef.current.applyEffect({
+                type: 'setFlag',
+                flag: flag,
+                value: false,
+              });
+              // 導航到下一個章節的導讀頁
+              setTimeout(() => {
+                router.push(`/play/${nextChapterId}/intro`);
+              }, 500);
+              return prev;
+            }
+          }
+          
+          // 檢查遊戲是否完成（且尚未顯示過結束畫面）
+          if (!gameEndShownRef.current && state.flags.game_completed) {
             // 標記已顯示，防止重複觸發
             gameEndShownRef.current = true;
             // 使用一個短暫延遲確保對話完全關閉
@@ -335,49 +603,124 @@ export default function PlayPage() {
     });
   }, []);
 
-  // 開發者模式快捷鍵支援（Ctrl+D / Cmd+D）
+  // 開發者模式按鈕（移除快捷鍵，只保留按鈕）
+
+  // 圖片預載入功能（優化版）
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+D (Windows/Linux) 或 Cmd+D (Mac)
-      // 注意：key 可能是 'd' 或 'D'，所以使用 toLowerCase
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
-        e.preventDefault();
-        // 只有在 devMode 啟用時才切換
-        if (devMode) {
-          setShowDeveloperPanel(prev => {
-            const newValue = !prev;
-            console.log('開發者模式切換:', newValue ? '開啟' : '關閉');
-            return newValue;
-          });
-        } else {
-          console.warn('開發者模式未啟用！請在 URL 中添加 ?dev=1');
+    if (!engineRef.current) return;
+    const currentScene = engineRef.current.getCurrentScene();
+    if (!currentScene) return;
+    
+    // 預載入當前場景圖片
+    const preloadImage = (src: string) => {
+      if (preloadedImagesRef.current.has(src)) return;
+      
+      // 使用 link preload 進行更高效的預載入
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      document.head.appendChild(link);
+      
+      // 同時使用 Image 對象確保載入
+      const img = new Image();
+      img.onload = () => {
+        preloadedImagesRef.current.add(src);
+        // 安全移除 link（如果還在 DOM 中）
+        if (link.parentNode) {
+          document.head.removeChild(link);
         }
-      }
+      };
+      img.onerror = () => {
+        // 安全移除 link（如果還在 DOM 中）
+        if (link.parentNode) {
+          document.head.removeChild(link);
+        }
+      };
+      img.src = src;
     };
+    
+    // 預載入當前場景
+    preloadImage(currentScene.background);
+    
+    // 預載入相鄰場景圖片（延遲載入，避免阻塞）
+    const timeoutId = setTimeout(() => {
+      const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
+      if (adjacentScenes.prev) {
+        const prevScene = scenes[adjacentScenes.prev];
+        if (prevScene) preloadImage(prevScene.background);
+      }
+      if (adjacentScenes.next) {
+        const nextScene = scenes[adjacentScenes.next];
+        if (nextScene) preloadImage(nextScene.background);
+      }
+    }, 500);
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [chapterId, sceneId]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [devMode]);
-
-  // 開發者模式按鈕默認隱藏，只能通過 URL 參數 ?dev=1 啟用
-  // 如果 URL 中有 dev=1 參數，在控制台顯示提示
-  useEffect(() => {
-    if (devMode) {
-      console.log('✅ 開發者模式已啟用！');
-      console.log('💡 使用方式：');
-      console.log('   1. 按 Ctrl+D (Windows) 或 Cmd+D (Mac) 開啟/關閉開發者面板');
-      console.log('   2. 或點擊右上角的紫色按鈕（Code 圖示）');
-    } else {
-      console.log('⚠️ 開發者模式未啟用');
-      console.log('💡 要啟用開發者模式，請在 URL 中添加 ?dev=1');
+  // 統一的場景名稱顯示函數（必須在 useEffect 之前定義）
+  const showSceneNameWithTimer = useCallback((sceneNameToShow: string, duration: number = 4000) => {
+    // 清除舊的計時器（如果存在）
+    if (sceneNameTimerRef.current) {
+      clearTimeout(sceneNameTimerRef.current);
+      sceneNameTimerRef.current = null;
     }
-  }, [devMode]);
+    if (sceneTransitionTimerRef.current) {
+      clearTimeout(sceneTransitionTimerRef.current);
+      sceneTransitionTimerRef.current = null;
+    }
+    
+    // 設置場景名稱
+    setCurrentSceneName(sceneNameToShow);
+    setShowSceneName(true);
+    setIsSceneTransitioning(true);
+    setSceneLoading(true);
+    
+    // 設置場景名稱關閉計時器（4秒後同時關閉場景名稱和載入畫面）
+    sceneNameTimerRef.current = setTimeout(() => {
+      setShowSceneName(false);
+      setIsSceneTransitioning(false);
+      setSceneLoading(false);
+      sceneNameTimerRef.current = null;
+    }, duration);
+    
+    // 保留 sceneTransitionTimerRef 以備將來使用，但現在不需要額外延遲
+    // 場景名稱和載入畫面同時在 4 秒後關閉
+  }, []);
 
   // 根據 URL 初始化狀態（如果狀態與 URL 不一致）
   useEffect(() => {
     if (!engineRef.current) return;
     const engine = engineRef.current;
     const state = engine.getState();
+    
+    // 獲取當前場景信息
+    const currentScene = scenes[sceneId];
+    if (!currentScene) return;
+    
+    // 檢查是否為新場景（使用 ref 追蹤，確保每次 URL 改變都觸發）
+    const isNewScene = lastDisplayedSceneRef.current !== sceneId;
+    
+    // 場景切換時啟動過渡動畫
+    // 檢查條件：1) URL 改變（新場景） 2) 狀態與 URL 不一致
+    const isSceneChange = isNewScene || 
+                          state.currentChapter !== chapterId || 
+                          state.currentScene !== sceneId;
+    
+    // 如果是新場景，顯示場景名稱（確保每次切換都有特效）
+    // 使用 setTimeout 確保在客戶端首次渲染後才更新狀態，避免 hydration 錯誤
+    if (isNewScene) {
+      // 更新追蹤的場景
+      lastDisplayedSceneRef.current = sceneId;
+      
+      // 延遲到下一幀執行，確保在首次渲染完成後才更新狀態
+      setTimeout(() => {
+        showSceneNameWithTimer(currentScene.name, 4000);
+      }, 0);
+    }
     
     // 場景切換時清空對話隊列
     setCurrentDialog(null);
@@ -408,6 +751,19 @@ export default function PlayPage() {
         chapterId: chapterId,
         sceneId: sceneId,
       });
+      
+      // 即使場景已在 visitedScenes 中，如果 URL 改變了，也要顯示場景名稱
+      // 使用 ref 檢查是否為新場景
+      if (lastDisplayedSceneRef.current !== sceneId) {
+        lastDisplayedSceneRef.current = sceneId;
+        const newScene = scenes[sceneId];
+        if (newScene) {
+          // 延遲到下一幀執行，確保在首次渲染完成後才更新狀態
+          setTimeout(() => {
+            showSceneNameWithTimer(newScene.name, 4000);
+          }, 0);
+        }
+      }
     }
     
     // 保存狀態到 localStorage
@@ -418,7 +774,21 @@ export default function PlayPage() {
         console.warn('無法保存遊戲狀態到 localStorage:', e);
       }
     }
-  }, [chapterId, sceneId]);
+    
+    // 清理函數：清除所有計時器
+    return () => {
+      // 清除場景名稱顯示計時器
+      if (sceneNameTimerRef.current) {
+        clearTimeout(sceneNameTimerRef.current);
+        sceneNameTimerRef.current = null;
+      }
+      // 清除場景過渡計時器
+      if (sceneTransitionTimerRef.current) {
+        clearTimeout(sceneTransitionTimerRef.current);
+        sceneTransitionTimerRef.current = null;
+      }
+    };
+  }, [chapterId, sceneId, showSceneNameWithTimer]);
 
   // 保存狀態到 localStorage（當狀態改變時）
   useEffect(() => {
@@ -430,6 +800,109 @@ export default function PlayPage() {
       }
     }
   }, [refreshKey]); // engine 來自 useRef，不需要在依賴中
+
+  // 進度追蹤和章節謎題解鎖檢查
+  useEffect(() => {
+    if (!engineRef.current || !sceneId) return;
+    const engine = engineRef.current;
+
+    // 計算當前場景進度
+    engine.calculateExplorationProgress(sceneId);
+    
+    // 計算章節總進度
+    const progress = engine.getChapterProgress(chapterId);
+    setChapterProgress(progress);
+
+    // 檢查章節謎題是否解鎖
+    const isUnlocked = engine.checkChapterPuzzleUnlock(chapterId);
+    if (isUnlocked) {
+      // 檢查是否已經顯示過謎題
+      const state = engine.getState();
+      if (!state.flags[`chapter_puzzle_${chapterId}_shown`] && !showChapterPuzzle) {
+        setShowChapterPuzzle(true);
+        engine.applyEffect({
+          type: 'setFlag',
+          flag: `chapter_puzzle_${chapterId}_shown`,
+          value: true,
+        });
+      }
+    }
+  }, [sceneId, chapterId, refreshKey]); // 移除 showChapterPuzzle 從依賴，避免循環
+
+  // SVG 預載入：場景切換時預載入相關 SVG
+  useEffect(() => {
+    if (!sceneId || !scenes[sceneId]) return;
+
+    const currentScene = scenes[sceneId];
+    const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
+    const svgPaths: string[] = [];
+
+    // 收集當前場景的 SVG
+    // 1. 道具的 SVG
+    currentScene.items.forEach((item) => {
+      if (item.svgImage) {
+        svgPaths.push(item.svgImage);
+      }
+    });
+
+    // 2. 場景事件的對話 SVG
+    currentScene.events.forEach((event) => {
+      event.effects.forEach((effect) => {
+        if (effect.type === 'showDialog' && effect.dialog?.svgImage) {
+          svgPaths.push(effect.dialog.svgImage);
+        }
+      });
+    });
+
+    // 3. 相鄰場景的 SVG（延遲預載入）
+    const adjacentSceneIds = [adjacentScenes.prev, adjacentScenes.next].filter(Boolean) as string[];
+    adjacentSceneIds.forEach((adjSceneId) => {
+      const adjScene = scenes[adjSceneId];
+      if (adjScene) {
+        adjScene.items.forEach((item) => {
+          if (item.svgImage) {
+            svgPaths.push(item.svgImage);
+          }
+        });
+      }
+    });
+
+    // 4. 當前背包中道具的 SVG
+    const state = engine.getState();
+    state.inventory.forEach((itemId) => {
+      const item = items[itemId];
+      if (item?.svgImage) {
+        svgPaths.push(item.svgImage);
+      }
+    });
+
+    // 去重並預載入
+    const uniquePaths = Array.from(new Set(svgPaths));
+    if (uniquePaths.length > 0) {
+      // 立即預載入當前場景的 SVG
+      const currentScenePaths = uniquePaths.filter((path) => {
+        const isCurrentScene = currentScene.items.some((item) => item.svgImage === path) ||
+          currentScene.events.some((event) =>
+            event.effects.some((effect) =>
+              effect.type === 'showDialog' && effect.dialog?.svgImage === path
+            )
+          );
+        return isCurrentScene;
+      });
+      
+      if (currentScenePaths.length > 0) {
+        preloadSVGBatch(currentScenePaths);
+      }
+
+      // 延遲預載入相鄰場景的 SVG（不阻塞當前場景）
+      const adjacentPaths = uniquePaths.filter((path) => !currentScenePaths.includes(path));
+      if (adjacentPaths.length > 0) {
+        setTimeout(() => {
+          preloadSVGBatch(adjacentPaths);
+        }, 1000);
+      }
+    }
+  }, [chapterId, sceneId, engine]);
 
 
   // 監聽場景變化並導航（只在 engine 主動改變場景時導航）
@@ -458,126 +931,64 @@ export default function PlayPage() {
     return () => clearTimeout(timer);
   }, [refreshKey, router, chapterId, sceneId]); // engine 來自 useRef，不需要在依賴中
 
+  // 獲取當前場景（必須在所有使用它的 Hooks 和函數定義之前定義）
   const scene = engineRef.current?.getCurrentScene() || null;
-  let state = engineRef.current?.getState() || {
-    currentChapter: chapterId,
-    currentScene: sceneId,
-    inventory: [],
-    flags: {},
-    interactions: [],
-    visitedScenes: [],
-  };
-  
-  // 確保當前場景在 visitedScenes 中（額外檢查，防止遺漏）
-  if (scene && engineRef.current && !state.visitedScenes.includes(scene.id)) {
-    engineRef.current.applyEffect({
-      type: 'changeScene',
-      chapterId: scene.chapterId,
-      sceneId: scene.id,
-    });
-    // 重新獲取狀態
-    state = engineRef.current.getState();
-  }
 
-  // 進入場景時播放環境音
-  useEffect(() => {
-    if (scene?.id === 'ch1_sc1') {
-      // 第一空間：播放醫院環境音（循環）
-      audioManager.playAmbient('/audio/ambient/ambient_hospital.mp3', 0.25);
-      
-      return () => {
-        // 離開場景時停止環境音
-        audioManager.stopAmbient();
-      };
-    } else if (scene?.id === 'ch1_sc2') {
-      // 第二空間：播放醫院環境音（循環）
-      audioManager.playAmbient('/audio/ambient/ambient_hospital.mp3', 0.25);
-      
-      return () => {
-        // 離開場景時停止環境音
-        audioManager.stopAmbient();
-      };
-    } else if (scene?.id === 'ch1_sc3') {
-      // 第三空間：播放702病房環境音（循環）
-      audioManager.playAmbient('/audio/ambient/ambient_room702.mp3', 0.2);
-      
-      return () => {
-        // 離開場景時停止環境音
-        audioManager.stopAmbient();
-      };
-    } else if (scene?.id === 'ch1_sc4') {
-      // 第四空間：播放陽台環境音（循環）
-      audioManager.playAmbient('/audio/ambient/ambient_balcony.mp3', 0.25);
-      
-      return () => {
-        // 離開場景時停止環境音
-        audioManager.stopAmbient();
-      };
-    } else if (scene?.id === 'ch1_sc5') {
-      // 第五空間：播放露台環境音（循環）
-      audioManager.playAmbient('/audio/ambient/ambient_terrace.mp3', 0.2);
-      
-      return () => {
-        // 離開場景時停止環境音
-        audioManager.stopAmbient();
-      };
-    }
-  }, [scene?.id]);
+  // 環境音：cleanup 延遲停止（給 Strict Mode 取消用）、目前播放路徑（同曲目不重播）
+  const ambientStopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastAmbientSceneIdRef = useRef<string | null>(null);
+  const currentAmbientPathRef = useRef<string | null>(null);
 
-  // 恐怖元素：隨機閃光和訊息
+  // 進入場景時播放環境音（帶漸變效果）- 以 URL 的 sceneId 為準
   useEffect(() => {
-    if (!scene) return;
+    if (!sceneId) return;
     
-    // 根據場景設置不同的恐怖元素觸發間隔
-    const horrorIntervals: Record<string, number> = {
-      'ch1_sc1': 12000, // 第一空間：12秒
-      'ch1_sc2': 15000, // 第二空間：15秒
-      'ch1_sc3': 10000, // 第三空間：10秒（更頻繁）
-      'ch1_sc4': 18000, // 第四空間：18秒
-      'ch1_sc5': 20000, // 第五空間：20秒
+    if (ambientStopTimeoutRef.current) {
+      clearTimeout(ambientStopTimeoutRef.current);
+      ambientStopTimeoutRef.current = null;
+    }
+    
+    const ch1AmbientPath = '/audio/ambient/ambient_ch1.mp3';
+    const ambientMap: Record<string, { path: string; volume: number }> = {
+      'scene_ch1_cinema_a_hall': { path: ch1AmbientPath, volume: 0.7 },
+      'scene_ch1_projection_room': { path: ch1AmbientPath, volume: 0.7 },
+      'scene_ch1_restroom': { path: ch1AmbientPath, volume: 0.7 },
     };
     
-    const interval = horrorIntervals[scene.id];
-    if (!interval) return;
+    const ambient = ambientMap[sceneId];
+    const isSameSceneReRun = lastAmbientSceneIdRef.current === sceneId;
+    lastAmbientSceneIdRef.current = sceneId;
     
-    // 隨機觸發恐怖元素
-    const horrorTimer = setInterval(() => {
-      // 30% 機率觸發
-      if (Math.random() < 0.3) {
-        // 觸發閃光
-        if (sceneViewRef.current) {
-          sceneViewRef.current.triggerFlicker('light');
-        }
-        
-        // 根據場景播放不同的恐怖音效
-        const horrorSounds: Record<string, string> = {
-          'ch1_sc1': '/audio/horror/horror_whisper.mp3',
-          'ch1_sc2': '/audio/horror/horror_heartbeat.mp3',
-          'ch1_sc3': '/audio/horror/horror_breathing.mp3',
-          'ch1_sc4': '/audio/horror/horror_wind.mp3',
-          'ch1_sc5': '/audio/horror/horror_ambient.mp3',
-        };
-        
-        const soundPath = horrorSounds[scene.id];
-        if (soundPath) {
-          audioManager.playSFX(soundPath, 0.3);
-        }
+    if (ambient) {
+      const isSameTrack = currentAmbientPathRef.current === ambient.path;
+      // 同一場景重跑（Strict Mode）：不重播
+      if (isSameSceneReRun) {
+        // 不做事，音樂繼續
+      } else if (isSameTrack) {
+        // 第一章三場景共用同一曲目：不 stop 不重播，只確保音量
+        audioManager.fadeAmbient(ambient.volume, 300);
+      } else {
+        // 新曲目：正常播放
+        currentAmbientPathRef.current = ambient.path;
+        audioManager.playAmbient(ambient.path, 0);
+        setTimeout(() => {
+          audioManager.fadeAmbient(ambient.volume, 1000);
+        }, 100);
       }
-    }, interval);
-    
-    return () => clearInterval(horrorTimer);
-  }, [scene?.id]);
-
-  // 初始化場景對話
-  useEffect(() => {
-    if (scene?.initialDialog) {
-      // 延遲顯示初始對話，給場景切換一點時間
-      const timer = setTimeout(() => {
-        setCurrentDialog(scene.initialDialog ?? null);
-      }, 500);
-      return () => clearTimeout(timer);
     }
-  }, [scene?.id]);
+    
+    return () => {
+      if (!ambient) return;
+      ambientStopTimeoutRef.current = setTimeout(() => {
+        audioManager.fadeAmbient(0, 500);
+        ambientStopTimeoutRef.current = setTimeout(() => {
+          audioManager.stopAmbient();
+          currentAmbientPathRef.current = null;
+          ambientStopTimeoutRef.current = null;
+        }, 500);
+      }, 100);
+    };
+  }, [sceneId]);
 
   // 觸發劇烈閃爍（廣播時使用）
   const triggerIntenseFlicker = useCallback(() => {
@@ -613,6 +1024,80 @@ export default function PlayPage() {
     // 步驟1：嘗試統一道具獲取處理
     if (handleItemCollection(hotspotId)) {
       return; // 已處理，不需要繼續
+    }
+
+    // 步驟2：檢查是否有可解的謎題（優先於事件處理）
+    // 先記錄互動，這樣謎題的 hasInteracted 需求才能通過
+    engine.addInteraction(hotspotId);
+    
+    if (scene.puzzles && scene.puzzles.length > 0) {
+      // 找出與當前 hotspot 相關且需求已滿足的謎題
+      const availablePuzzles = scene.puzzles.filter(puzzle => {
+        // 檢查謎題是否已經解決過
+        const solvedFlag = `puzzle_${puzzle.id}_solved`;
+        if (engine.hasFlag(solvedFlag)) return false;
+        
+        // 檢查謎題是否與當前 hotspot 相關
+        const puzzleRequiresHotspot = puzzle.requirements?.some(
+          req => req.type === 'hasInteracted' && req.hotspotId === hotspotId
+        );
+        
+        // 如果謎題明確要求這個 hotspot，檢查所有需求
+        if (puzzleRequiresHotspot) {
+          const canSolve = engine.checkPuzzleRequirements(puzzle);
+          if (canSolve && devMode) {
+            console.log(`[謎題檢查] ${puzzle.id} 可解（明確要求 ${hotspotId}）`);
+          }
+          return canSolve;
+        }
+        
+        // 如果謎題沒有明確要求這個 hotspot，但謎題ID暗示與 hotspot 相關
+        // 例如：tv_silent_puzzle 與 tv hotspot 相關，stove_stuck_puzzle 與 gas_stove 相關
+        const hotspotBaseName = hotspotId.replace('_spot', '').replace('_', '');
+        const puzzleIdLower = puzzle.id.toLowerCase();
+        const hotspotNameInPuzzleId = 
+          puzzleIdLower.includes(hotspotId.toLowerCase()) ||
+          puzzleIdLower.includes(hotspotBaseName.toLowerCase()) ||
+          (hotspotId === 'tv' && puzzleIdLower.includes('tv')) ||
+          (hotspotId === 'gas_stove' && puzzleIdLower.includes('stove'));
+        
+        if (hotspotNameInPuzzleId) {
+          // 檢查所有需求（包括 hasInteracted，因為我們已經記錄了互動）
+          const canSolve = engine.checkPuzzleRequirements(puzzle);
+          if (canSolve && devMode) {
+            console.log(`[謎題檢查] ${puzzle.id} 可解（名稱匹配 ${hotspotId}）`);
+          }
+          return canSolve;
+        }
+        
+        return false;
+      });
+      
+      // 如果有可解的謎題，優先觸發第一個
+      if (availablePuzzles.length > 0) {
+        if (devMode) {
+          console.log(`[謎題觸發] 觸發謎題: ${availablePuzzles[0].id} (hotspot: ${hotspotId})`);
+        }
+        setCurrentPuzzle(availablePuzzles[0]);
+        setRefreshKey(prev => prev + 1);
+        return; // 觸發謎題，不再處理事件
+      } else if (devMode) {
+        // 調試：顯示為什麼謎題沒有觸發
+        const allPuzzles = scene.puzzles.filter(p => {
+          const solvedFlag = `puzzle_${p.id}_solved`;
+          return !engine.hasFlag(solvedFlag);
+        });
+        if (allPuzzles.length > 0) {
+          console.log(`[謎題檢查] hotspot ${hotspotId} 沒有可解謎題`);
+          allPuzzles.forEach(p => {
+            const requirementsMet = engine.checkPuzzleRequirements(p);
+            const requiresHotspot = p.requirements?.some(
+              req => req.type === 'hasInteracted' && req.hotspotId === hotspotId
+            );
+            console.log(`  - ${p.id}: 需求滿足=${requirementsMet}, 要求hotspot=${requiresHotspot}`);
+          });
+        }
+      }
     }
 
     // 純提示型 hotspot 處理（只顯示旁白對話，不觸發事件或獲得道具）
@@ -1008,8 +1493,52 @@ export default function PlayPage() {
       // 記錄互動，然後觸發獲得手把事件
       engine.addInteraction('sofa_gap');
       const result = engine.triggerEvent('find_handle');
-      if (result?.dialog) {
-        setCurrentDialog(result.dialog);
+      if (result) {
+        // 檢查是否有道具被添加
+        const addItemEffects = result.effects.filter((e: any) => e.type === 'addItem');
+        const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
+        
+        // 如果有道具被添加，先顯示道具獲得提示
+        if (addItemEffects.length > 0) {
+          const firstItemEffect = addItemEffects[0];
+          const itemId = firstItemEffect?.itemId;
+          const item = itemId != null ? items[itemId] : undefined;
+          if (item) {
+            // 播放收集音效
+            audioManager.playInteractionSFX('collect');
+            
+            // 顯示道具獲得提示
+            setObtainedItem({
+              id: item.id,
+              name: item.name,
+              image: item.image,
+              svgImage: item.svgImage,
+            });
+            setShowItemNotification(true);
+            
+            // 1.5秒後關閉提示，然後顯示對話框（縮短等待時間）
+            setTimeout(() => {
+              setShowItemNotification(false);
+              setObtainedItem(null);
+              
+              if (result.dialog) {
+                setCurrentDialog(result.dialog);
+              } else if (dialogEffects[0]?.dialog) {
+                setCurrentDialog(dialogEffects[0].dialog);
+              }
+              setRefreshKey(prev => prev + 1);
+            }, 1500); // 縮短為 1.5 秒
+            
+            return;
+          }
+        }
+        
+        // 沒有道具，直接顯示對話
+        if (result.dialog) {
+          setCurrentDialog(result.dialog);
+        } else if (dialogEffects[0]?.dialog) {
+          setCurrentDialog(dialogEffects[0].dialog);
+        }
         setRefreshKey(prev => prev + 1);
         return;
       }
@@ -1174,8 +1703,44 @@ export default function PlayPage() {
       engine.addInteraction('heart_box');
       const result = engine.triggerEvent('find_id_card');
       if (result) {
-        // 找出所有對話效果
+        // 檢查是否有道具被添加
+        const addItemEffects = result.effects.filter((e: any) => e.type === 'addItem');
         const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
+        
+        // 如果有道具被添加，先顯示道具獲得提示
+        if (addItemEffects.length > 0) {
+          const firstItemEffect = addItemEffects[0];
+          const itemId = firstItemEffect?.itemId;
+          const item = itemId != null ? items[itemId] : undefined;
+          if (item) {
+            // 播放收集音效
+            audioManager.playInteractionSFX('collect');
+            
+            // 顯示道具獲得提示
+            setObtainedItem({
+              id: item.id,
+              name: item.name,
+              image: item.image,
+              svgImage: item.svgImage,
+            });
+            setShowItemNotification(true);
+            
+            // 1.5秒後關閉提示，然後顯示對話框（縮短等待時間）
+            setTimeout(() => {
+              setShowItemNotification(false);
+              setObtainedItem(null);
+              
+              if (dialogEffects[0]?.dialog) {
+                setCurrentDialog(dialogEffects[0].dialog);
+              }
+              setRefreshKey(prev => prev + 1);
+            }, 1500); // 縮短為 1.5 秒
+            
+            return;
+          }
+        }
+        
+        // 沒有道具，直接顯示對話
         if (dialogEffects[0]?.dialog) {
           setCurrentDialog(dialogEffects[0].dialog);
         }
@@ -1237,34 +1802,176 @@ export default function PlayPage() {
         const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
         const addItemEffects = result.effects.filter((e: any) => e.type === 'addItem');
         
-        // 構建對話隊列：先顯示道具描述，再顯示事件對話
-        const dialogs: Dialog[] = [];
-        
-        // 添加道具描述對話（藍色框）
-        addItemEffects.forEach((effect: any) => {
-          const item = items[effect.itemId];
+        // 如果有道具被添加，先顯示道具獲得提示
+        if (addItemEffects.length > 0) {
+          const firstItemEffect = addItemEffects[0];
+          const itemId = firstItemEffect?.itemId;
+          const item = itemId != null ? items[itemId] : undefined;
           if (item) {
-            dialogs.push({
-              text: `獲得：${item.name}\n\n${item.description}`,
-              type: 'item',
+            // 播放收集音效
+            audioManager.playInteractionSFX('collect');
+            
+            // 顯示道具獲得提示
+            setObtainedItem({
+              id: item.id,
+              name: item.name,
+              image: item.image,
+              svgImage: item.svgImage,
             });
+            setShowItemNotification(true);
+            
+            // 1.5秒後關閉提示，然後顯示對話框（縮短等待時間）
+            setTimeout(() => {
+              setShowItemNotification(false);
+              setObtainedItem(null);
+              
+              // 構建對話隊列：先顯示道具描述，再顯示事件對話
+              const dialogs: Dialog[] = [];
+              
+              // 添加道具描述對話（藍色框）
+              addItemEffects.forEach((effect: any) => {
+                const eid = effect?.itemId;
+                const item = eid != null ? items[eid] : undefined;
+                if (item) {
+                  dialogs.push({
+                    text: `獲得：${item.name}\n\n${item.description}`,
+                    type: 'item',
+                    svgImage: item.svgImage,
+                    svgPosition: 'left',
+                  });
+                }
+              });
+              
+              // 添加事件對話（旁白/系統）
+              dialogEffects.forEach((effect: any) => {
+                if (effect.dialog) {
+                  dialogs.push(effect.dialog);
+                }
+              });
+              
+              // 使用對話隊列顯示
+              if (dialogs.length > 0) {
+                addDialogsToQueue(dialogs);
+              }
+              
+              setRefreshKey(prev => prev + 1);
+            }, 1500); // 縮短為 1.5 秒
+            
+            return;
           }
-        });
+        }
         
-        // 添加事件對話（旁白/系統）
+        // 沒有道具，直接顯示對話
+        const dialogs: Dialog[] = [];
         dialogEffects.forEach((effect: any) => {
           if (effect.dialog) {
             dialogs.push(effect.dialog);
           }
         });
         
-        // 使用對話隊列顯示
         if (dialogs.length > 0) {
           addDialogsToQueue(dialogs);
         }
         
         setRefreshKey(prev => prev + 1);
         return;
+      }
+    }
+
+    // 步驟3：通用事件處理（處理不會添加道具的事件）
+    // 檢查是否有事件映射但沒有被 handleItemCollection 處理
+    // 首先檢查 hotspotEventMap 中映射的事件
+    const mappedEventId = scene.hotspotEventMap?.[hotspotId];
+    let eventToTrigger = mappedEventId ? scene.events.find(e => e.id === mappedEventId) : null;
+    
+    // 如果映射的事件不存在或不滿足條件，檢查所有與該 hotspot 相關的事件
+    if (!eventToTrigger || !engine.checkEventRequirements(eventToTrigger)) {
+      // 查找所有與該 hotspot 相關的事件（通過 requirements 中的 hasInteracted 檢查）
+      const relatedEvents = scene.events.filter(e => 
+        e.requirements.some((req: any) => req.type === 'hasInteracted' && req.hotspotId === hotspotId)
+      );
+      
+      // 找到第一個滿足條件的事件
+      for (const event of relatedEvents) {
+        if (engine.checkEventRequirements(event)) {
+          eventToTrigger = event;
+          break;
+        }
+      }
+    }
+    
+    if (eventToTrigger) {
+      const eventId = eventToTrigger.id;
+      // 檢查事件是否會添加道具（如果會，應該已經被 handleItemCollection 處理了）
+      const addItemEffects = eventToTrigger.effects.filter((e: any) => e.type === 'addItem');
+      if (addItemEffects.length === 0) {
+        // 這個事件不會添加道具，需要手動處理
+        // 檢查事件需求（已經檢查過了，但再次確認）
+        const requirementsMet = engine.checkEventRequirements(eventToTrigger);
+        if (requirementsMet) {
+          if (devMode) {
+            console.log(`[事件觸發] 觸發事件: ${eventId} (hotspot: ${hotspotId})`);
+          }
+          
+          // 檢查是否為角色對話事件，使用新的對話系統
+          const isCharacterDialog = /^(character_\d_|person_)(first|second|third|fourth|fifth)_talk$/.test(eventId) || 
+                                    /^talk_to_(character_|person)/.test(eventId);
+          
+          if (isCharacterDialog) {
+            // 映射事件 ID 到對話鏈 ID
+            let conversationId: string | null = null;
+            if (eventId === 'talk_to_character_1' || eventId.startsWith('character_1_')) {
+              conversationId = 'character_1_conversation';
+            } else if (eventId === 'talk_to_character_2' || eventId.startsWith('character_2_')) {
+              conversationId = 'character_2_conversation';
+            } else if (eventId === 'talk_to_person' || eventId.startsWith('person_')) {
+              conversationId = 'person_conversation';
+            }
+            
+            // 如果找到對應的對話鏈，使用新系統
+            if (conversationId && characterConversations[conversationId]) {
+              const conversation = characterConversations[conversationId];
+              
+              // 檢查是否已經完成過（如果需要的話）
+              if (conversation.onComplete?.setFlag) {
+                const flag = conversation.onComplete.setFlag;
+                if (engine.hasFlag(flag)) {
+                  // 已經完成過，不重複觸發
+                  return;
+                }
+              }
+              
+              // 顯示角色對話
+              setCurrentConversation(conversation);
+              setRefreshKey(prev => prev + 1);
+              return; // 已處理
+            }
+          } else {
+            // 非角色對話：正常觸發單個事件
+            const result = engine.triggerEvent(eventId);
+            if (result) {
+              // 處理對話效果
+              const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
+              if (dialogEffects.length > 0) {
+                const dialogs: Dialog[] = [];
+                dialogEffects.forEach((effect: any) => {
+                  if (effect.dialog) {
+                    dialogs.push(effect.dialog);
+                  }
+                });
+                if (dialogs.length > 0) {
+                  addDialogsToQueue(dialogs);
+                }
+              }
+              setRefreshKey(prev => prev + 1);
+              return; // 已處理
+            }
+          }
+        } else {
+          if (devMode) {
+            console.log(`[事件檢查] 事件 ${eventId} 需求未滿足`);
+          }
+        }
       }
     }
 
@@ -1277,7 +1984,7 @@ export default function PlayPage() {
       });
       setRefreshKey(prev => prev + 1);
     }
-  }, [scene, handleItemCollection]); // engine 來自 useRef，不需要在依賴中
+  }, [scene, handleItemCollection, addDialogsToQueue]); // engine 來自 useRef，不需要在依賴中
 
   const handleItemClick = useCallback((itemId: string) => {
     if (!engineRef.current) return;
@@ -1300,9 +2007,12 @@ export default function PlayPage() {
       if (state.flags.beds_labels_revealed) {
         // 已經使用過，顯示包含觀察結果的道具描述
         const item = scene?.items.find(i => i.id === itemId);
+        const itemData = items[itemId];
         setCurrentDialog({
           text: `${item?.name || '鏡片碎角'}\n\n${item?.description || ''}\n\n透過鏡片碎角的反射，你看到每張病床上都有模糊的標籤：「護理師」、「住院」、「主治」、「主任」。\n\n這些標籤有什麼意義嗎?`,
           type: 'item',
+          svgImage: itemData?.svgImage,
+          svgPosition: 'left',
         });
         setRefreshKey(prev => prev + 1);
         return;
@@ -1342,10 +2052,13 @@ export default function PlayPage() {
       } else {
         // 未閱讀日記，顯示普通描述
         const item = scene?.items.find(i => i.id === itemId);
+        const itemData = items[itemId];
         if (item) {
           setCurrentDialog({
             text: item.description,
             type: 'item',
+            svgImage: itemData?.svgImage,
+            svgPosition: 'left',
           });
           setRefreshKey(prev => prev + 1);
           return;
@@ -1390,6 +2103,8 @@ export default function PlayPage() {
         setCurrentDialog({
           text: `**座標**\n\n**${item.description}**\n\n這是從拼箱排序中獲得的座標。`,
           type: 'item',
+          svgImage: item.svgImage,
+          svgPosition: 'left',
         });
         setRefreshKey(prev => prev + 1);
         return;
@@ -1426,19 +2141,25 @@ export default function PlayPage() {
         setCurrentDialog(result.dialog);
       } else {
         const item = scene?.items.find(i => i.id === itemId);
+        const itemData = items[itemId];
         if (item) {
           setCurrentDialog({
             text: item.description,
             type: 'item',
+            svgImage: itemData?.svgImage,
+            svgPosition: 'left',
           });
         }
       }
     } else {
       const item = scene?.items.find(i => i.id === itemId);
+      const itemData = items[itemId];
       if (item) {
         setCurrentDialog({
           text: item.description,
           type: 'item',
+          svgImage: itemData?.svgImage,
+          svgPosition: 'left',
         });
       }
     }
@@ -1474,7 +2195,103 @@ export default function PlayPage() {
       const puzzle = scene?.puzzles.find(p => p.id === currentPuzzle.id);
       if (puzzle?.onSolve) {
         const dialogEffects = puzzle.onSolve.filter(e => e.type === 'showDialog');
-        const sceneChange = puzzle.onSolve.find(e => e.type === 'changeScene');
+        const triggerEventEffects = puzzle.onSolve.filter(e => e.type === 'triggerEvent');
+        
+        // 處理 triggerEvent 效果（謎題解決後可能觸發其他事件）
+        if (triggerEventEffects.length > 0) {
+          triggerEventEffects.forEach((effect: any) => {
+            if (effect.eventId) {
+              const eventResult = engine.triggerEvent(effect.eventId);
+              if (eventResult) {
+                // 處理事件產生的對話和道具
+                const eventDialogEffects = eventResult.effects.filter((e: any) => e.type === 'showDialog');
+                const eventAddItemEffects = eventResult.effects.filter((e: any) => e.type === 'addItem');
+                
+                // 如果有道具添加，先顯示道具獲得提示
+                if (eventAddItemEffects.length > 0) {
+                  const firstItemEffect = eventAddItemEffects[0];
+                  const itemId = firstItemEffect?.itemId;
+                  const item = itemId != null ? items[itemId] : undefined;
+                  if (item) {
+                    // 播放收集音效
+                    audioManager.playInteractionSFX('collect');
+                    
+                    // 顯示道具獲得提示
+                    setObtainedItem({
+                      id: item.id,
+                      name: item.name,
+                      image: item.image,
+                      svgImage: item.svgImage,
+                    });
+                    setShowItemNotification(true);
+                    
+                    // 1.5秒後關閉提示，然後添加對話（縮短等待時間）
+                    setTimeout(() => {
+                      setShowItemNotification(false);
+                      setObtainedItem(null);
+                      
+                      eventAddItemEffects.forEach((addItemEffect: any) => {
+                        const eid = addItemEffect?.itemId;
+                        const item = eid != null ? items[eid] : undefined;
+                        if (item) {
+                          dialogEffects.push({
+                            type: 'showDialog',
+                            dialog: {
+                              text: `獲得：${item.name}\n\n${item.description}`,
+                              type: 'item',
+                              svgImage: item.svgImage,
+                              svgPosition: 'left',
+                            },
+                          });
+                        }
+                      });
+                      
+                      // 處理對話隊列
+                      const dialogs: Dialog[] = [];
+                      dialogEffects.forEach((effect: any) => {
+                        if (effect.dialog) {
+                          dialogs.push(effect.dialog);
+                        }
+                      });
+                      
+                      if (dialogs.length > 0) {
+                        addDialogsToQueue(dialogs);
+                      }
+                      
+                      setRefreshKey(prev => prev + 1);
+                    }, 1500); // 縮短為 1.5 秒
+                    
+                    return;
+                  }
+                }
+                
+                // 沒有道具，正常處理對話
+                const dialogs: Dialog[] = [];
+                dialogEffects.forEach((effect: any) => {
+                  if (effect.dialog) {
+                    dialogs.push(effect.dialog);
+                  }
+                });
+                
+                if (dialogs.length > 0) {
+                  addDialogsToQueue(dialogs);
+                }
+                
+                setRefreshKey(prev => prev + 1);
+                
+                // 添加事件的對話效果
+                eventDialogEffects.forEach((e: any) => {
+                  if (e.dialog) {
+                    dialogEffects.push({
+                      type: 'showDialog',
+                      dialog: e.dialog,
+                    });
+                  }
+                });
+              }
+            }
+          });
+        }
         
         // 檢查場景是否已改變（使用更新後的 state）
         const sceneChanged = newState.currentChapter !== chapterId || newState.currentScene !== sceneId;
@@ -1597,33 +2414,45 @@ export default function PlayPage() {
       setPuzzleError('答案不正確，再試試看。');
     }
   }, [currentPuzzle, scene, chapterId, sceneId, router]); // engine 來自 useRef，不需要在依賴中
-
-
-  if (!scene) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-xl mb-4">場景不存在</div>
-          <Link href="/" className="text-blue-400 hover:text-blue-300">
-            返回首頁
-          </Link>
-        </div>
-      </div>
-    );
+  
+  // 獲取狀態並確保當前場景在 visitedScenes 中（額外檢查，防止遺漏）
+  let state = engineRef.current?.getState() || {
+    currentChapter: '',
+    currentScene: '',
+    inventory: [],
+    flags: {},
+    interactions: [],
+    visitedScenes: [],
+  };
+  
+  if (scene && engineRef.current && !state.visitedScenes.includes(scene.id)) {
+    engineRef.current.applyEffect({
+      type: 'changeScene',
+      chapterId: scene.chapterId,
+      sceneId: scene.id,
+    });
+    // 重新獲取狀態
+    state = engineRef.current.getState();
   }
 
-  // 獲取相鄰場景
+  // 獲取相鄰場景（必須在條件返回之前定義）
   const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
   const prevScene = adjacentScenes.prev ? scenes[adjacentScenes.prev] : null;
   const nextScene = adjacentScenes.next ? scenes[adjacentScenes.next] : null;
 
-  // 切換到相鄰場景的處理函數
+  // 切換到相鄰場景的處理函數（必須在條件返回之前定義）
   const handleSceneNavigation = useCallback((targetSceneId: string) => {
     if (!engineRef.current) return;
     const engine = engineRef.current;
     const targetScene = scenes[targetSceneId];
     if (!targetScene) return;
 
+    // 更新追蹤的場景
+    lastDisplayedSceneRef.current = targetSceneId;
+    
+    // 播放場景切換音效
+    audioManager.playSFX('/audio/sfx/sfx_scene_transition.mp3', 0.3);
+    
     // 切換場景，但保留所有狀態
     engine.applyEffect({
       type: 'changeScene',
@@ -1640,19 +2469,69 @@ export default function PlayPage() {
       }
     }
     
+    // 延遲到下一幀執行，確保在首次渲染完成後才更新狀態
+    setTimeout(() => {
+      showSceneNameWithTimer(targetScene.name, 4000);
+    }, 0);
+    
     // 導航到新場景
     router.push(`/play/${targetScene.chapterId}/${targetSceneId}`);
     setRefreshKey(prev => prev + 1);
-  }, [router]);
+  }, [router, showSceneNameWithTimer]);
+
+  // 新手引導完成處理（必須在條件返回之前定義）
+  const handleTutorialComplete = useCallback(() => {
+    // 引導完成後可以執行任何初始化操作
+  }, []);
+
+  if (!scene) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-xl mb-4">場景不存在</div>
+          <Link href="/" className="text-blue-400 hover:text-blue-300">
+            返回首頁
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-dark-bg overflow-hidden">
-      {/* 場景視圖 - 全屏沉浸式 */}
-      <div className={`absolute inset-0 transition-all duration-300 ${
-        showInventory ? 'md:translate-x-[-320px]' : ''
-      }`}>
-        <div className="h-full w-full flex items-center justify-center p-4 md:p-8">
-          <div className="relative w-full max-w-4xl aspect-square bg-dark-surface/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-dark-border/50 shadow-2xl">
+      {/* 新手引導 */}
+      <TutorialGuide onComplete={handleTutorialComplete} />
+      
+      {/* 場景視圖 - 全屏沉浸式（不再因背包移動） */}
+      <div className="absolute inset-0">
+        {/* 場景名稱顯示 */}
+        {showSceneName && currentSceneName && (
+          <SceneNameDisplay
+            sceneName={currentSceneName}
+            show={showSceneName}
+            duration={4000}
+            onComplete={() => {
+              setShowSceneName(false);
+            }}
+          />
+        )}
+
+        {/* 場景過渡遮罩（載入指示器） */}
+        {isSceneTransitioning && !showSceneName && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-fade-in flex items-center justify-center gpu-accelerated">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-orange-400/30 border-t-orange-400 rounded-full animate-spin mx-auto mb-4 gpu-accelerated"></div>
+              <div className="text-gray-300 text-sm">載入場景中...</div>
+            </div>
+          </div>
+        )}
+        
+        <div className={`h-full w-full flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 gpu-accelerated ${
+          isSceneTransitioning ? 'opacity-0' : 'opacity-100'
+        }`}>
+          <div className={`relative w-full max-w-4xl aspect-square bg-dark-surface/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-dark-border/50 shadow-2xl transform transition-all duration-500 gpu-accelerated ${
+            isSceneTransitioning ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+          }`}>
             <SceneView
               ref={sceneViewRef}
               scene={scene}
@@ -1686,59 +2565,159 @@ export default function PlayPage() {
         </div>
       </div>
 
-      {/* 浮動控制按鈕組 - 右上角 */}
-      <div className="absolute top-4 right-4 z-30 flex flex-col gap-2">
-        {/* 返回按鈕 */}
-        <button
-          onClick={() => setShowQuitConfirm(true)}
-          className="group flex items-center gap-2 px-4 py-2.5 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg"
-        >
-          <ArrowLeft size={18} className="group-hover:translate-x-[-2px] transition-transform" />
-          <span className="text-sm font-medium hidden sm:inline">放棄遊戲</span>
-        </button>
+      {/* NPC 互動欄 - 場景名稱顯示時隱藏 */}
+      {scene?.npcs && scene.npcs.length > 0 && !showSceneName && (
+        <NpcBar
+          npcs={scene.npcs}
+          activeNpcId={state?.activeNpcDialogId ?? undefined}
+          onNpcClick={(npcId) => {
+            if (!engineRef.current) return;
+            const engine = engineRef.current;
+            const st = engine.getState();
+            const flags = st.flags || {};
 
-        {/* 菜單按鈕組 */}
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={() => setShowInventory(!showInventory)}
-            className="group flex items-center justify-center w-12 h-12 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg relative"
-            title="背包"
-          >
-            <Package size={22} className="text-gray-300 group-hover:text-orange-400 transition-colors" />
-            {state.inventory.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-industrial-orange rounded-full flex items-center justify-center text-xs font-bold text-white border-2 border-dark-bg shadow-lg animate-pulse">
-                {state.inventory.length}
-              </span>
-            )}
-          </button>
-          {/* 開發者模式按鈕 - 僅在 URL 參數 ?dev=1 時顯示 */}
-          {devMode && (
-            <button
-              onClick={() => {
-                setShowDeveloperPanel(prev => {
-                  const newValue = !prev;
-                  console.log('開發者模式按鈕點擊:', newValue ? '開啟' : '關閉');
-                  return newValue;
-                });
-              }}
-              className={`group flex items-center justify-center w-12 h-12 backdrop-blur-md border rounded-lg transition-all duration-200 shadow-lg ${
-                showDeveloperPanel
-                  ? 'bg-industrial-orange/30 border-industrial-orange text-orange-200 ring-2 ring-industrial-orange'
-                  : 'bg-industrial-orange/10 border-industrial-orange/30 text-orange-400/50 hover:bg-industrial-orange/20 hover:border-industrial-orange/50 hover:text-orange-300'
-              }`}
-              title="開發者模式 (Ctrl+D / Cmd+D) - 點擊開啟/關閉"
-            >
-              <Code size={22} className="transition-colors" />
-            </button>
+            // 關鍵對話解鎖條件與完成 flag
+            const keyDialogUnlocked: Record<string, () => boolean> = {
+              npc_lin_ruitang: () => !!flags.observed_any_ch1 && !flags.npc_lin_key_done,
+              npc_ashun: () => !!flags.observed_any_ch1 && !flags.npc_ashun_key_done,
+              npc_xiaozhang: () => !!flags.projection_room_unlocked && !flags.npc_xiaozhang_key_done,
+              npc_zhou_jie: () => !flags.npc_zhou_jie_key_done,
+            };
+            const check = keyDialogUnlocked[npcId];
+            const useKeyDialog = check?.() ?? false;
+
+            if (useKeyDialog) {
+              engine.startNpcDialog(npcId);
+              const node = engine.getCurrentNpcDialogNode();
+              const npc = scene.npcs?.find((n: { id: string }) => n.id === npcId);
+              if (node && npc) {
+                const dialog = buildDialogFromNpcNode(node, npc);
+                setCurrentDialog(dialog);
+                setDialogHistory((prev) => [...prev, dialog]);
+              }
+              return;
+            }
+
+            // 隨機對話
+            const dialog = engine.triggerRandomNpcDialog(npcId);
+            if (dialog) {
+              setCurrentDialog(dialog);
+              setDialogHistory((prev) => [...prev, dialog]);
+            }
+          }}
+          checkAvailability={(npc) => {
+            if (!engineRef.current) return false;
+            const engine = engineRef.current;
+            
+            // 檢查 available 屬性
+            if (npc.available === false) return false;
+            
+            // 檢查 availabilityRequirement
+            if (npc.availabilityRequirement) {
+              return engine.checkRequirement(npc.availabilityRequirement);
+            }
+            
+            return true;
+          }}
+        />
+      )}
+
+      {/* 浮動控制按鈕組 - 右上角（統一收納選單） */}
+      <div className="absolute top-4 right-4 z-30">
+        {/* 選單按鈕 */}
+        <button
+          onClick={() => setShowMenu(!showMenu)}
+          className="group flex items-center justify-center w-12 h-12 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg relative"
+          title="選單"
+        >
+          <Menu size={22} className="text-gray-300 group-hover:text-orange-400 transition-colors" />
+          {state.inventory.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-industrial-orange rounded-full flex items-center justify-center text-xs font-bold text-white border-2 border-dark-bg shadow-lg animate-pulse">
+              {state.inventory.length}
+            </span>
           )}
-          {/* 開發者模式未啟用時的提示 */}
-          {!devMode && (
-            <div className="fixed top-4 right-4 z-40 p-2 bg-yellow-900/80 border border-yellow-700 rounded-lg text-yellow-200 text-xs max-w-xs">
-              <div className="font-semibold mb-1">💡 啟用開發者模式</div>
-              <div>在 URL 中添加 <code className="bg-yellow-950 px-1 rounded">?dev=1</code></div>
+        </button>
+        
+        {/* 展開的選單 */}
+        {showMenu && (
+          <>
+            {/* 背景遮罩 */}
+            <div
+              onClick={() => setShowMenu(false)}
+              className="fixed inset-0 bg-black/40 z-40"
+            />
+            {/* 選單面板 */}
+            <div className="absolute top-14 right-0 w-64 bg-dark-surface/98 backdrop-blur-xl border border-dark-border rounded-lg shadow-2xl z-50 overflow-hidden">
+              <div className="p-2 space-y-1">
+                {/* 背包 */}
+                <button
+                  onClick={() => {
+                    setShowInventory(!showInventory);
+                    setShowMenu(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
+                >
+                  <Package size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
+                  <span>背包</span>
+                  {state.inventory.length > 0 && (
+                    <span className="ml-auto w-6 h-6 bg-industrial-orange rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                      {state.inventory.length}
+                    </span>
+                  )}
+                </button>
+                
+                {/* 音量控制 */}
+                <div className="px-4 py-3 bg-dark-card/50 border border-dark-border/50 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-sm font-medium text-gray-300">音量控制</span>
+                  </div>
+                  <AudioControl />
+                </div>
+                
+                {/* 計分系統（KK 洞察三維度；dev=1 時顯示舊 preferences） */}
+                <div className="px-4 py-3 bg-dark-card/50 border border-dark-border/50 rounded-lg">
+                  <ScoreDisplay gameState={state} showLegacyWeights={devMode} />
+                </div>
+                
+                {/* 開發者模式 */}
+                <button
+                  onClick={() => {
+                    if (devMode) {
+                      setShowDeveloperPanel(prev => {
+                        const newValue = !prev;
+                        console.log('開發者模式:', newValue ? '開啟' : '關閉');
+                        return newValue;
+                      });
+                    } else {
+                      alert('開發者模式未啟用。請在 URL 中添加 ?dev=1');
+                    }
+                    setShowMenu(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 border rounded-lg transition-all duration-200 text-sm font-medium group ${
+                    showDeveloperPanel && devMode
+                      ? 'bg-industrial-orange/30 border-industrial-orange text-orange-200 hover:bg-industrial-orange/40'
+                      : 'bg-dark-card/50 border-dark-border/50 text-gray-500 hover:bg-dark-card hover:text-gray-400'
+                  }`}
+                >
+                  <Code size={18} className="group-hover:scale-110 transition-transform" />
+                  <span>開發者模式</span>
+                </button>
+                
+                {/* 放棄遊戲 */}
+                <button
+                  onClick={() => {
+                    setShowQuitConfirm(true);
+                    setShowMenu(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-red-900/30 border border-dark-border/50 hover:border-red-500/50 rounded-lg text-gray-300 hover:text-red-300 transition-all duration-200 text-sm font-medium group"
+                >
+                  <ArrowLeft size={18} className="group-hover:translate-x-[-2px] transition-transform" />
+                  <span>放棄遊戲</span>
+                </button>
+              </div>
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* 場景名稱和切換按鈕 - 左上角浮動 */}
@@ -1750,14 +2729,14 @@ export default function PlayPage() {
         {(() => {
           const currentChapterScenes = getCurrentChapterScenes(chapterId);
           return currentChapterScenes.length > 1 && (
-            <button
-              onClick={() => setShowSceneSelector(!showSceneSelector)}
-              className="group flex items-center gap-2 px-4 py-2 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg"
-              title="切換場景"
-            >
-              <MapPin size={18} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
-              <ChevronDown size={16} className={`transition-transform ${showSceneSelector ? 'rotate-180' : ''}`} />
-            </button>
+          <button
+            onClick={() => setShowSceneSelector(!showSceneSelector)}
+            className="group flex items-center gap-2 px-4 py-2 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg"
+            title="切換場景"
+          >
+            <MapPin size={18} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+            <ChevronDown size={16} className={`transition-transform ${showSceneSelector ? 'rotate-180' : ''}`} />
+          </button>
           );
         })()}
       </div>
@@ -1768,108 +2747,221 @@ export default function PlayPage() {
         if (currentChapterScenes.length <= 1) return null;
         
         return (
-          <>
-            {/* 背景遮罩，點擊關閉 */}
-            <div
-              className="fixed inset-0 z-20"
-              onClick={() => setShowSceneSelector(false)}
-            />
-            <div className="absolute top-20 left-4 z-30 w-64 bg-dark-surface/95 backdrop-blur-xl border border-dark-border rounded-lg shadow-2xl p-4">
+        <>
+          {/* 背景遮罩，點擊關閉 */}
+          <div
+            className="fixed inset-0 z-20"
+            onClick={() => setShowSceneSelector(false)}
+          />
+          <div className="absolute top-20 left-4 z-30 w-64 bg-dark-surface/95 backdrop-blur-xl border border-dark-border rounded-lg shadow-2xl p-4">
               <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">
                 {chapters[chapterId]?.name || '當前章節的場景'}
               </div>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2 max-h-96 overflow-y-auto">
                 {currentChapterScenes.map((sceneIdToShow) => {
                   const sceneToShow = scenes[sceneIdToShow];
                   if (!sceneToShow) return null;
                   const isCurrentScene = sceneIdToShow === sceneId;
-                  
-                  return (
-                    <button
+              
+              return (
+                <button
                       key={sceneIdToShow}
-                      onClick={() => {
-                        if (!engineRef.current) return;
-                        const engine = engineRef.current;
-                        // 切換場景，但保留所有狀態
-                        engine.applyEffect({
-                          type: 'changeScene',
+                  onClick={() => {
+                    if (!engineRef.current) return;
+                    const engine = engineRef.current;
+                    // 切換場景，但保留所有狀態
+                    engine.applyEffect({
+                      type: 'changeScene',
                           chapterId: sceneToShow.chapterId,
                           sceneId: sceneIdToShow,
-                        });
-                        // 保存狀態
-                        if (typeof window !== 'undefined') {
-                          try {
-                            localStorage.setItem('gameState', JSON.stringify(engine.getState()));
-                          } catch (e) {
-                            console.warn('無法保存遊戲狀態:', e);
-                          }
-                        }
-                        // 導航到新場景
+                    });
+                    // 保存狀態
+                    if (typeof window !== 'undefined') {
+                      try {
+                        localStorage.setItem('gameState', JSON.stringify(engine.getState()));
+                      } catch (e) {
+                        console.warn('無法保存遊戲狀態:', e);
+                      }
+                    }
+                    // 導航到新場景
                         router.push(`/play/${sceneToShow.chapterId}/${sceneIdToShow}`);
-                        setShowSceneSelector(false);
-                        setRefreshKey(prev => prev + 1);
-                      }}
-                      disabled={isCurrentScene}
-                      className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
-                        isCurrentScene
-                          ? 'bg-blue-600/20 border border-blue-500/50 text-blue-300 cursor-not-allowed'
-                          : 'bg-dark-surface/50 border border-dark-border/50 text-gray-300 hover:bg-dark-surface hover:border-dark-border hover:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
+                    setShowSceneSelector(false);
+                    setRefreshKey(prev => prev + 1);
+                  }}
+                  disabled={isCurrentScene}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+                    isCurrentScene
+                      ? 'bg-blue-600/20 border border-blue-500/50 text-blue-300 cursor-not-allowed'
+                      : 'bg-dark-surface/50 border border-dark-border/50 text-gray-300 hover:bg-dark-surface hover:border-dark-border hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
                           <div className="text-sm font-medium">{sceneToShow.name}</div>
                           {sceneToShow.description && (
-                            <div className="text-xs text-gray-400 mt-1 line-clamp-1">
+                        <div className="text-xs text-gray-400 mt-1 line-clamp-1">
                               {sceneToShow.description}
-                            </div>
-                          )}
                         </div>
-                        {isCurrentScene && (
-                          <div className="text-xs text-blue-400 font-medium">當前</div>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </>
+                      )}
+                    </div>
+                    {isCurrentScene && (
+                      <div className="text-xs text-blue-400 font-medium">當前</div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        </>
         );
       })()}
 
-      {/* 側邊道具欄 - 從右側滑入 */}
-      <div className={`fixed top-0 right-0 h-full w-80 bg-dark-surface/95 backdrop-blur-xl border-l border-dark-border z-40 transform transition-transform duration-300 ease-out ${
-        showInventory ? 'translate-x-0' : 'translate-x-full'
-      }`}>
-        <div className="h-full flex flex-col">
-          {/* 道具欄標題 */}
-          <div className="flex items-center justify-between p-4 border-b border-dark-border">
-            <h2 className="text-lg font-semibold text-gray-200">背包</h2>
-            <button
-              onClick={() => setShowInventory(false)}
-              className="p-1.5 text-gray-400 hover:text-white hover:bg-dark-card rounded transition-colors"
-            >
-              <X size={20} />
-            </button>
-          </div>
+      {/* 背包浮動覆蓋層 */}
+      {showInventory && (
+        <>
+          {/* 半透明背景遮罩 - 點擊可關閉 */}
+          <div
+            onClick={() => setShowInventory(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
+          />
           
-          {/* 道具列表 */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <Inventory
-              itemIds={state.inventory}
-              onItemClick={handleItemClick}
-            />
+          {/* 背包面板 - 從右側滑入 */}
+          <div className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-dark-surface/98 backdrop-blur-xl border-l border-dark-border z-50 transform transition-transform duration-300 ease-out shadow-2xl ${
+            showInventory ? 'translate-x-0' : 'translate-x-full'
+          }`}>
+            <div className="h-full flex flex-col">
+              {/* 道具欄標題 */}
+              <div className="flex items-center justify-between p-4 border-b border-dark-border">
+                <h2 className="text-lg font-semibold text-gray-200">背包</h2>
+                <button
+                  onClick={() => setShowInventory(false)}
+                  className="p-1.5 text-gray-400 hover:text-white hover:bg-dark-card rounded transition-colors"
+                  title="關閉"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              {/* 道具列表 */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <Inventory
+                  itemIds={state.inventory}
+                  onItemClick={handleItemClick}
+                  currentSceneId={sceneId}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* 對話框 - 底部浮動 */}
-      {currentDialog && (
+      {/* 道具獲得提示 - 優先顯示 */}
+      {showItemNotification && obtainedItem && (
+        <ItemObtainedNotification
+          itemId={obtainedItem.id}
+          itemName={obtainedItem.name}
+          itemImage={obtainedItem.image}
+          itemSvgImage={obtainedItem.svgImage}
+          show={showItemNotification}
+          duration={1500} // 縮短為 1.5 秒，讓動畫更明顯
+          onComplete={() => {
+            setShowItemNotification(false);
+            setObtainedItem(null);
+          }}
+        />
+      )}
+
+      {/* 對話框 - 底部浮動（道具提示和場景名稱未顯示時才顯示） */}
+      {currentDialog && !showItemNotification && !showSceneName && (
         <DialogBox
           dialog={currentDialog}
           onClose={handleDialogClose}
           autoClose={false}
+          onAddToHistory={(dialog) => {
+            setDialogHistory(prev => [...prev, dialog]);
+          }}
+          showHistory={showDialogHistory}
+          onShowHistory={() => setShowDialogHistory(true)}
+          onChoiceSelect={handleDialogChoice}
+        />
+      )}
+
+      {/* 角色對話系統（優先顯示） */}
+      {currentConversation && (
+        <CharacterConversation
+          conversation={currentConversation.turns}
+          finalChoices={currentConversation.finalChoices}
+          onComplete={() => {
+            // 對話完成後的處理
+            if (currentConversation.onComplete?.setFlag) {
+              engine.applyEffect({ 
+                type: 'setFlag', 
+                flag: currentConversation.onComplete.setFlag, 
+                value: true 
+              });
+            }
+            if (currentConversation.onComplete?.triggerEvent) {
+              engine.triggerEvent(currentConversation.onComplete.triggerEvent);
+            }
+            setCurrentConversation(null);
+            setRefreshKey(prev => prev + 1);
+          }}
+          onChoiceSelect={(choice) => {
+            // 處理選擇
+            handleDialogChoice(choice);
+            // 對話完成
+            if (currentConversation.onComplete?.setFlag) {
+              engine.applyEffect({ 
+                type: 'setFlag', 
+                flag: currentConversation.onComplete.setFlag, 
+                value: true 
+              });
+            }
+            setCurrentConversation(null);
+            setRefreshKey(prev => prev + 1);
+          }}
+        />
+      )}
+
+      {/* 進度條 - 已隱藏（不顯示給玩家） */}
+
+      {/* 章節謎題 */}
+      {showChapterPuzzle && engineRef.current && (() => {
+        const chapter = chapters[chapterId];
+        if (!chapter || !chapter.chapterPuzzle) return null;
+        
+        return (
+          <ChapterPuzzle
+            puzzle={chapter.chapterPuzzle}
+            onSolve={(input) => {
+              if (engineRef.current) {
+                const solved = engineRef.current.solvePuzzle(chapter.chapterPuzzle!.id, input);
+                if (solved) {
+                  setShowChapterPuzzle(false);
+                  setPuzzleError('');
+                  setRefreshKey(prev => prev + 1);
+                } else {
+                  setPuzzleError('答案不正確，再試試看。');
+                }
+              }
+            }}
+            onClose={() => {
+              setShowChapterPuzzle(false);
+              setPuzzleError('');
+            }}
+            chapterName={chapter.name}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+        );
+      })()}
+
+      {/* 對話歷史面板 */}
+      {showDialogHistory && (
+        <DialogHistory
+          dialogs={dialogHistory}
+          onClose={() => setShowDialogHistory(false)}
         />
       )}
 

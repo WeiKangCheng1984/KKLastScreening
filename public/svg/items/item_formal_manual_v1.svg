@@ -1,0 +1,22 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .manual { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .cover { fill: currentColor; opacity: 0.25; }
+      .binding { fill: currentColor; opacity: 0.5; }
+      .seal { fill: currentColor; opacity: 0.4; }
+      .text { fill: currentColor; opacity: 0.3; }
+    </style>
+  </defs>
+  <!-- cKŠ -->
+  <rect class="manual" x="12" y="16" width="40" height="32" rx="1"/>
+  <rect class="cover" x="14" y="18" width="36" height="28" rx="0.5"/>
+  <!-- Ý -->
+  <rect class="binding" x="30" y="18" width="4" height="28" rx="0.5"/>
+  <!-- pà -->
+  <circle class="seal" cx="32" cy="38" r="5"/>
+  <circle class="seal" cx="32" cy="38" r="3" fill="none" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+  <!-- ‡W -->
+  <line class="text" x1="18" y1="26" x2="26" y2="26" stroke-width="1"/>
+  <line class="text" x1="18" y1="30" x2="28" y2="30" stroke-width="1"/>
+</svg>

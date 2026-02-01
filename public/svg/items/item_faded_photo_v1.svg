@@ -1,0 +1,16 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .photo { fill: none; stroke: currentColor; stroke-width: 1.5; }
+      .photo-frame { fill: rgba(139, 139, 139, 0.2); stroke: currentColor; stroke-width: 1; }
+    </style>
+  </defs>
+  <!-- øF -->
+  <rect class="photo-frame" x="12" y="12" width="40" height="40" rx="2"/>
+  <!-- gGg¹!ÊHœ	 -->
+  <rect class="photo" x="16" y="16" width="32" height="32" rx="1" opacity="0.6"/>
+  <!-- !Ê„ºÉ*Ó -->
+  <ellipse class="photo" cx="32" cy="28" rx="8" ry="10" opacity="0.4"/>
+  <!-- !Ê„«Ô*Ó -->
+  <rect class="photo" x="24" y="36" width="16" height="10" rx="2" opacity="0.3"/>
+</svg>

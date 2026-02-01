@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>w«&</title>
+  <desc>³qw«&ïý	&’H</desc>
+  <defs>
+    <linearGradient id="charmGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4a020;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#b88010;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b6000;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="redGradient" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#d02020;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b0000;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  <g transform="translate(192, 192)">
+    <!-- w«&Fr	 -->
+    <rect x="-60" y="-80" width="120" height="160" rx="8" fill="url(#redGradient)" stroke="#600000" stroke-width="2"/>
+    <!-- ÑrgF -->
+    <rect x="-50" y="-70" width="100" height="140" rx="6" fill="url(#charmGradient)" stroke="#8b6000" stroke-width="1.5"/>
+    <!-- &’‡W!ºÚH	 -->
+    <g stroke="#8b0000" stroke-width="2" fill="none">
+      <!-- 
+¹&_ -->
+      <path d="M -30 -50 Q -20 -60 -10 -50 Q 0 -60 10 -50 Q 20 -60 30 -50"/>
+      <!-- -“&_ -->
+      <path d="M -20 -20 L -20 20 M 0 -20 L 0 20 M 20 -20 L 20 20"/>
+      <!-- ¹&_ -->
+      <path d="M -30 40 Q -20 50 -10 40 Q 0 50 10 40 Q 20 50 30 40"/>
+    </g>
+    <!-- ÝþÞ -->
+    <circle cx="-30" cy="-30" r="3" fill="#d02020"/>
+    <circle cx="30" cy="-30" r="3" fill="#d02020"/>
+    <circle cx="-30" cy="30" r="3" fill="#d02020"/>
+    <circle cx="30" cy="30" r="3" fill="#d02020"/>
+    <!-- ›i -->
+    <rect x="-8" y="-90" width="16" height="20" rx="8" fill="#4a3d2b"/>
+  </g>
+</svg>

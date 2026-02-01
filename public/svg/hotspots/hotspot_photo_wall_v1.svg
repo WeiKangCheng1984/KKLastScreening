@@ -1,0 +1,15 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .wall { fill: none; stroke: currentColor; stroke-width: 2; }
+      .frame { fill: currentColor; opacity: 0.2; }
+    </style>
+  </defs>
+  <!-- gGF -->
+  <rect class="wall" x="8" y="8" width="32" height="32" rx="1"/>
+  <!-- øF -->
+  <rect class="frame" x="12" y="12" width="12" height="12" rx="1"/>
+  <rect class="frame" x="26" y="12" width="12" height="12" rx="1"/>
+  <rect class="frame" x="12" y="26" width="12" height="12" rx="1"/>
+  <rect class="frame" x="26" y="26" width="12" height="12" rx="1"/>
+</svg>

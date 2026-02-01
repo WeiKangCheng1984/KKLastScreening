@@ -1,0 +1,16 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .key { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .teeth { fill: currentColor; }
+    </style>
+  </defs>
+  <!-- p- -->
+  <circle class="key" cx="20" cy="32" r="8"/>
+  <circle class="key" cx="20" cy="32" r="4" fill="currentColor" opacity="0.3"/>
+  <!-- pÄ -->
+  <rect class="key" x="28" y="28" width="20" height="8" rx="2"/>
+  <!-- pR -->
+  <rect class="teeth" x="44" y="30" width="4" height="4" rx="0.5"/>
+  <rect class="teeth" x="48" y="32" width="3" height="2" rx="0.5"/>
+</svg>

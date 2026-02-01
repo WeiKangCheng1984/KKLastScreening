@@ -1,0 +1,16 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .equipment { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .warning { fill: currentColor; opacity: 0.5; }
+      .crack { fill: none; stroke: currentColor; stroke-width: 1.5; opacity: 0.6; }
+    </style>
+  </defs>
+  <!-- -™ -->
+  <rect class="equipment" x="12" y="14" width="24" height="20" rx="1"/>
+  <!-- fJ -->
+  <path class="warning" d="M24 18 L28 24 L20 24 Z"/>
+  <circle class="warning" cx="24" cy="22" r="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.7"/>
+  <!-- ÂÕ -->
+  <path class="crack" d="M18 20 L22 24 L20 28"/>
+</svg>

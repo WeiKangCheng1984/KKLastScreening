@@ -69,5 +69,322 @@
   .shake-on-error {
     animation: shakeAlert 0.3s ease-in-out;
   }
+
+  /* 浮動動畫 */
+  @keyframes float {
+    0%, 100% { 
+      transform: translateY(0) translateX(0); 
+    }
+    33% { 
+      transform: translateY(-20px) translateX(10px); 
+    }
+    66% { 
+      transform: translateY(-10px) translateX(-10px); 
+    }
+  }
+
+  /* 緩慢脈衝動畫 */
+  @keyframes pulse-slow {
+    0%, 100% { 
+      opacity: 1; 
+    }
+    50% { 
+      opacity: 0.8; 
+    }
+  }
+
+  /* 閃爍動畫（用於打字機游標） */
+  @keyframes blink {
+    0%, 50% { 
+      opacity: 1; 
+    }
+    51%, 100% { 
+      opacity: 0; 
+    }
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+
+  .animate-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  /* 從下方滑入動畫 */
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 20px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.4s ease-out;
+  }
+
+  /* 道具獲取動畫 */
+  @keyframes item-fly-in {
+    0% {
+      transform: scale(0) translateY(100px);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.2) translateY(-20px);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-item-fly-in {
+    animation: item-fly-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* 解謎成功特效 */
+  @keyframes puzzle-success {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 20px rgba(34, 197, 94, 0);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+  }
+
+  .animate-puzzle-success {
+    animation: puzzle-success 0.6s ease-out;
+  }
+
+  /* 粒子擴散效果 */
+  @keyframes particle-burst {
+    0% {
+      transform: scale(0) translate(0, 0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) translate(var(--tx), var(--ty));
+      opacity: 0;
+    }
+  }
+
+  /* 閃光效果 */
+  @keyframes flash {
+    0%, 100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .animate-flash {
+    animation: flash 0.3s ease-in-out;
+  }
+
+  /* 震動效果增強 */
+  @keyframes shakeAlert {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+      transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+      transform: translateX(5px);
+    }
+  }
+
+  /* 懸停發光效果 */
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(251, 146, 60, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(251, 146, 60, 0.6);
+    }
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  /* 淡入淡出過渡 */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes slide-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  .animate-fade-out {
+    animation: fade-out 0.3s ease-out;
+  }
+
+  .animate-slide-fade-in {
+    animation: slide-fade-in 0.4s ease-out;
+  }
+
+  /* 電流特效動畫 */
+  @keyframes electric-shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .animate-electric-shimmer {
+    animation: electric-shimmer 0.5s linear;
+  }
+
+  /* 浮動提示動畫 */
+  @keyframes fade-float {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, 10px);
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -10px);
+    }
+  }
+
+  .animate-fade-float {
+    animation: fade-float 0.3s ease-out;
+  }
+
+  /* 閃電效果動畫 */
+  @keyframes lightning-flash {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    20% {
+      opacity: 0.3;
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* 道具使用動畫 */
+  @keyframes item-use {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.9) rotate(-5deg);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-item-use {
+    animation: item-use 0.3s ease-out;
+  }
+
+  /* 道具品質邊框 */
+  .item-quality-common {
+    border-color: rgba(156, 163, 175, 0.5);
+  }
+
+  .item-quality-rare {
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+
+  .item-quality-epic {
+    border-color: rgba(147, 51, 234, 0.5);
+  }
+
+  .item-quality-legendary {
+    border-color: rgba(251, 146, 60, 0.5);
+  }
+
+  /* GPU 加速優化 */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+
+  /* 動畫性能優化 */
+  .animate-optimized {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* 過渡效果樣式 */
+  .transition-effect {
+    will-change: transform, opacity, filter, clip-path;
+  }
+
+  /* 移動端性能降級 */
+  @media (max-width: 768px) {
+    .transition-effect {
+      will-change: auto;
+    }
+    
+    /* 減少複雜動畫 */
+    .animate-optimized {
+      transform: none;
+      backface-visibility: visible;
+      perspective: none;
+    }
+  }
 }
 

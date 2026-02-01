@@ -1,0 +1,18 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .watch { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .face { fill: currentColor; opacity: 0.1; }
+      .hand { stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+    </style>
+  </defs>
+  <!-- 6ä -->
+  <circle class="watch" cx="32" cy="32" r="18"/>
+  <circle class="face" cx="32" cy="32" r="16"/>
+  <!-- BÝ\(yšB“	 -->
+  <line class="hand" x1="32" y1="32" x2="32" y2="24"/>
+  <!-- Ý\b	 -->
+  <line class="hand" x1="32" y1="32" x2="36" y2="28" stroke-width="1.5"/>
+  <!-- -ÃÞ -->
+  <circle class="watch" cx="32" cy="32" r="2" fill="currentColor"/>
+</svg>

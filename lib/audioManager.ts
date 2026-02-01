@@ -5,11 +5,30 @@ export class AudioManager {
   private masterVolume: number = 0.7;
   private sfxVolume: number = 0.8;
   private ambientVolume: number = 0.3;
+  private isMuted: boolean = false;
+
+  constructor() {
+    // 從 localStorage 恢復音量設定
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('audioSettings');
+        if (saved) {
+          const settings = JSON.parse(saved);
+          this.masterVolume = settings.masterVolume ?? 0.7;
+          this.sfxVolume = settings.sfxVolume ?? 0.8;
+          this.ambientVolume = settings.ambientVolume ?? 0.3;
+          this.isMuted = settings.isMuted ?? false;
+        }
+      } catch (e) {
+        console.warn('無法從 localStorage 恢復音效設定:', e);
+      }
+    }
+  }
 
   // 播放環境音（循環）
   playAmbient(audioPath: string, volume?: number): void {
     this.stopAmbient();
-    if (!audioPath) return;
+    if (!audioPath || this.isMuted) return;
     
     try {
       const audio = new Audio(audioPath);
@@ -24,9 +43,41 @@ export class AudioManager {
     }
   }
 
+  // 環境音漸變
+  fadeAmbient(targetVolume: number, duration: number = 1000): void {
+    if (!this.ambientAudio) return;
+    
+    const startVolume = this.ambientAudio.volume;
+    const volumeDiff = targetVolume - startVolume;
+    const steps = 20;
+    const stepTime = duration / steps;
+    const stepVolume = volumeDiff / steps;
+    
+    let currentStep = 0;
+    const fadeInterval = setInterval(() => {
+      // 檢查 ambientAudio 是否仍然存在
+      if (!this.ambientAudio) {
+        clearInterval(fadeInterval);
+        return;
+      }
+      
+      currentStep++;
+      if (currentStep >= steps) {
+        if (this.ambientAudio) {
+          this.ambientAudio.volume = targetVolume;
+        }
+        clearInterval(fadeInterval);
+      } else {
+        if (this.ambientAudio) {
+          this.ambientAudio.volume = startVolume + (stepVolume * currentStep);
+        }
+      }
+    }, stepTime);
+  }
+
   // 播放音效（一次性）
   playSFX(audioPath: string, volume?: number): void {
-    if (!audioPath) return;
+    if (!audioPath || this.isMuted) return;
     
     try {
       // 使用快取避免重複載入
@@ -45,6 +96,22 @@ export class AudioManager {
     }
   }
 
+  // 播放互動音效（根據類型）
+  playInteractionSFX(type: 'click' | 'hover' | 'collect' | 'puzzle' | 'error'): void {
+    const sfxMap: Record<string, string> = {
+      click: '/audio/sfx/sfx_click.mp3',
+      hover: '/audio/sfx/sfx_hover.mp3',
+      collect: '/audio/sfx/sfx_item_collect.mp3',
+      puzzle: '/audio/sfx/sfx_puzzle_submit.mp3',
+      error: '/audio/sfx/sfx_error.mp3',
+    };
+    
+    const path = sfxMap[type];
+    if (path) {
+      this.playSFX(path, 0.3);
+    }
+  }
+
   // 停止環境音
   stopAmbient(): void {
     if (this.ambientAudio) {
@@ -57,8 +124,13 @@ export class AudioManager {
   // 設定音量
   setMasterVolume(volume: number): void {
     this.masterVolume = Math.max(0, Math.min(1, volume));
-    if (this.ambientAudio) {
-      this.ambientAudio.volume = this.ambientVolume * this.masterVolume;
+    if (this.ambientAudio && this.ambientAudio.readyState >= 2) {
+      // 確保音頻已載入
+      try {
+        this.ambientAudio.volume = this.ambientVolume * this.masterVolume;
+      } catch (e) {
+        console.warn('無法設置總音量:', e);
+      }
     }
   }
 
@@ -68,8 +140,54 @@ export class AudioManager {
 
   setAmbientVolume(volume: number): void {
     this.ambientVolume = Math.max(0, Math.min(1, volume));
-    if (this.ambientAudio) {
-      this.ambientAudio.volume = this.ambientVolume * this.masterVolume;
+    if (this.ambientAudio && this.ambientAudio.readyState >= 2) {
+      // 確保音頻已載入
+      try {
+        this.ambientAudio.volume = this.ambientVolume * this.masterVolume;
+      } catch (e) {
+        console.warn('無法設置環境音音量:', e);
+      }
+    }
+    this.saveSettings();
+  }
+
+  // 靜音/取消靜音
+  toggleMute(): void {
+    this.isMuted = !this.isMuted;
+    if (this.isMuted) {
+      this.stopAmbient();
+    }
+    // 取消靜音時，環境音需要由外部重新觸發播放
+    this.saveSettings();
+  }
+
+  getMuted(): boolean {
+    return this.isMuted;
+  }
+
+  // 獲取音量設定
+  getVolumeSettings() {
+    return {
+      masterVolume: this.masterVolume,
+      sfxVolume: this.sfxVolume,
+      ambientVolume: this.ambientVolume,
+      isMuted: this.isMuted,
+    };
+  }
+
+  // 保存設定到 localStorage
+  private saveSettings(): void {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('audioSettings', JSON.stringify({
+          masterVolume: this.masterVolume,
+          sfxVolume: this.sfxVolume,
+          ambientVolume: this.ambientVolume,
+          isMuted: this.isMuted,
+        }));
+      } catch (e) {
+        console.warn('無法保存音效設定:', e);
+      }
     }
   }
 

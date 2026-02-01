@@ -1,5 +1,5 @@
-import { GameState, Scene, Event, Requirement, Effect, Puzzle, Item } from '@/types/game';
-import { scenes, items } from '@/data/gameData';
+import { GameState, Scene, Event, Requirement, Effect, Puzzle, Item, DialogChoice, PlayerChoice, NpcDialogNode, PreferenceEffect, RandomDialog, Npc, Dialog, InsightsState, InsightEffect } from '@/types/game';
+import { scenes, items, chapters, npcDialogs } from '@/data/gameData';
 
 export class GameEngine {
   private state: GameState;
@@ -7,12 +7,68 @@ export class GameEngine {
   constructor(initialState?: GameState) {
     this.state = initialState || {
       currentChapter: 'ch1',
-      currentScene: 'ch1_sc1',
+      currentScene: 'scene_ch1_cinema_a_hall',
       inventory: [],
       flags: {},
       interactions: [],
       visitedScenes: [],
+      explorationProgress: {},
+      chapterPuzzleUnlocked: {},
+      score: 0,
+      weights: {},
+      choices: [],
+      preferences: {
+        preference_system_intervention: 0,
+        preference_observation_wait: 0,
+        overweight_motive: 0,
+        weight_behavior_evidence: 0,
+        weight_process_similarity: 0,
+        weight_escape_route: 0,
+        question_system: 0,
+        avoid_early_conviction: 0,
+      },
+      insights: {
+        procedure_insight: 0,
+        human_insight: 0,
+        evidence_insight: 0,
+      },
     };
+    
+    // 確保新字段存在（向後兼容）
+    if (!this.state.explorationProgress) {
+      this.state.explorationProgress = {};
+    }
+    if (!this.state.chapterPuzzleUnlocked) {
+      this.state.chapterPuzzleUnlocked = {};
+    }
+    if (this.state.score === undefined) {
+      this.state.score = 0;
+    }
+    if (!this.state.weights) {
+      this.state.weights = {};
+    }
+    if (!this.state.choices) {
+      this.state.choices = [];
+    }
+    if (!this.state.preferences) {
+      this.state.preferences = {
+        preference_system_intervention: 0,
+        preference_observation_wait: 0,
+        overweight_motive: 0,
+        weight_behavior_evidence: 0,
+        weight_process_similarity: 0,
+        weight_escape_route: 0,
+        question_system: 0,
+        avoid_early_conviction: 0,
+      };
+    }
+    if (!this.state.insights) {
+      this.state.insights = {
+        procedure_insight: 0,
+        human_insight: 0,
+        evidence_insight: 0,
+      };
+    }
   }
 
   getState(): GameState {
@@ -100,6 +156,21 @@ export class GameEngine {
       case 'triggerEvent':
         if (effect.eventId) {
           this.triggerEvent(effect.eventId);
+        }
+        break;
+      case 'startNpcDialog':
+        if (effect.dialogId) {
+          this.startNpcDialog(effect.dialogId);
+        }
+        break;
+      case 'addInsight':
+        if (effect.insightTarget != null && effect.insightDelta !== undefined) {
+          if (!this.state.insights) {
+            this.state.insights = { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
+          }
+          const insights = this.state.insights;
+          const current = insights[effect.insightTarget] ?? 0;
+          insights[effect.insightTarget] = Math.max(0, current + effect.insightDelta);
         }
         break;
     }
@@ -326,6 +397,383 @@ export class GameEngine {
     if (!this.state.interactions.includes(id)) {
       this.state.interactions.push(id);
     }
+  }
+
+  // 計算場景探索進度
+  calculateExplorationProgress(sceneId: string): number {
+    const scene = scenes[sceneId];
+    if (!scene) return 0;
+
+    const totalItems = scene.items.filter(item => item.collectible).length;
+    const totalHotspots = scene.hotspots.length;
+    const totalInteractables = totalItems + totalHotspots;
+
+    if (totalInteractables === 0) return 100;
+
+    // 計算已收集的道具
+    const collectedItems = scene.items
+      .filter(item => item.collectible && this.hasItem(item.id))
+      .length;
+
+    // 計算已互動的熱點
+    const interactedHotspots = scene.hotspots
+      .filter(hotspot => this.hasInteracted(hotspot.id))
+      .length;
+
+    const progress = ((collectedItems + interactedHotspots) / totalInteractables) * 100;
+    
+    // 更新進度記錄（確保 explorationProgress 已初始化）
+    if (!this.state.explorationProgress) {
+      this.state.explorationProgress = {};
+    }
+    this.state.explorationProgress[sceneId] = Math.min(100, Math.max(0, progress));
+    
+    return this.state.explorationProgress[sceneId];
+  }
+
+  // 檢查章節謎題是否解鎖
+  checkChapterPuzzleUnlock(chapterId: string): boolean {
+    const chapter = chapters[chapterId];
+    if (!chapter || !chapter.chapterPuzzle) return false;
+
+    if (!this.state.chapterPuzzleUnlocked) {
+      this.state.chapterPuzzleUnlocked = {};
+    }
+
+    // 如果已經解鎖，直接返回
+    if (this.state.chapterPuzzleUnlocked[chapterId]) {
+      return true;
+    }
+
+    // 計算章節總進度
+    let totalProgress = 0;
+    let sceneCount = 0;
+
+    chapter.scenes.forEach(sceneId => {
+      const progress = this.calculateExplorationProgress(sceneId);
+      totalProgress += progress;
+      sceneCount++;
+    });
+
+    const averageProgress = sceneCount > 0 ? totalProgress / sceneCount : 0;
+    const threshold = chapter.puzzleUnlockThreshold || 75;
+
+    // 達到閾值則解鎖
+    if (averageProgress >= threshold) {
+      this.state.chapterPuzzleUnlocked[chapterId] = true;
+      return true;
+    }
+
+    return false;
+  }
+
+  // 記錄玩家選擇
+  addChoice(choiceId: string, weight: number = 0): void {
+    if (!this.state.choices) {
+      this.state.choices = [];
+    }
+    const choice: PlayerChoice = {
+      id: `choice_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      choiceId,
+      timestamp: Date.now(),
+      weight,
+    };
+
+    this.state.choices.push(choice);
+    
+    // 更新總分數
+    this.state.score = (this.state.score || 0) + weight;
+
+    // 更新權重（根據選擇ID推斷維度）
+    // 例如：choice_rule_follower -> rule_follower 維度
+    const dimension = this.extractDimensionFromChoiceId(choiceId);
+    if (dimension) {
+      if (!this.state.weights) {
+        this.state.weights = {};
+      }
+      this.state.weights[dimension] = (this.state.weights[dimension] || 0) + weight;
+    }
+  }
+
+  // 從選擇ID提取維度名稱
+  private extractDimensionFromChoiceId(choiceId: string): string | null {
+    // 簡單的提取邏輯，可以根據實際需求調整
+    const patterns = [
+      /rule_follower/i,
+      /risk_taker/i,
+      /careful/i,
+      /bold/i,
+      /compassionate/i,
+      /pragmatic/i,
+    ];
+
+    for (const pattern of patterns) {
+      if (pattern.test(choiceId)) {
+        return pattern.source.replace(/[\/i]/g, '').toLowerCase();
+      }
+    }
+
+    return null;
+  }
+
+  // 獲取玩家檔案（各維度權重）
+  getPlayerProfile(): Record<string, number> {
+    return { ...(this.state.weights ?? {}) };
+  }
+
+  // 處理對話選擇
+  handleDialogChoice(choice: DialogChoice): void {
+    // 記錄選擇
+    if (choice.weight !== undefined) {
+      this.addChoice(choice.id, choice.weight);
+    }
+
+    // 應用選擇效果
+    if (choice.effects) {
+      choice.effects.forEach(effect => this.applyEffect(effect));
+    }
+
+    // 應用 KK 洞察三維度影響
+    if (choice.insightEffects?.length) {
+      if (!this.state.insights) {
+        this.state.insights = { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
+      }
+      const insights = this.state.insights;
+      choice.insightEffects.forEach(insightEffect => {
+        if (insightEffect.target in insights) {
+          const current = insights[insightEffect.target] ?? 0;
+          insights[insightEffect.target] = Math.max(0, current + insightEffect.delta);
+        }
+      });
+    }
+  }
+
+  // 獲取當前章節的探索進度
+  getChapterProgress(chapterId: string): number {
+    const chapter = chapters[chapterId];
+    if (!chapter) return 0;
+
+    let totalProgress = 0;
+    let sceneCount = 0;
+
+    chapter.scenes.forEach(sceneId => {
+      const progress = this.calculateExplorationProgress(sceneId);
+      totalProgress += progress;
+      sceneCount++;
+    });
+
+    return sceneCount > 0 ? totalProgress / sceneCount : 0;
+  }
+
+  // === NPC 對話系統方法 ===
+
+  // 開始 NPC 對話
+  startNpcDialog(dialogId: string): void {
+    // dialogId 格式：npc_{npcId}，例如 npc_lin_ruitang
+    // 找到第一個節點（通常是 node_01_surface 或類似的起始節點）
+    const dialogTree = npcDialogs[dialogId];
+    if (!dialogTree) {
+      console.warn(`NPC 對話樹不存在: ${dialogId}`);
+      return;
+    }
+
+    // 找到第一個節點（按 id 排序或使用約定）
+    const firstNodeId = Object.keys(dialogTree).find(id => id.includes('01') || id.includes('surface') || id.includes('intro')) || Object.keys(dialogTree)[0];
+    
+    if (firstNodeId) {
+      this.state.activeNpcDialogId = dialogId;
+      this.state.activeNpcDialogNodeId = firstNodeId;
+      console.log(`[NPC 對話] 開始對話: ${dialogId}, 節點: ${firstNodeId}`);
+    } else {
+      console.warn(`[NPC 對話] 無法找到第一個節點: ${dialogId}`);
+    }
+  }
+
+  // 獲取當前 NPC 對話節點
+  getCurrentNpcDialogNode(): NpcDialogNode | null {
+    if (!this.state.activeNpcDialogId || !this.state.activeNpcDialogNodeId) {
+      return null;
+    }
+
+    const dialogTree = npcDialogs[this.state.activeNpcDialogId];
+    if (!dialogTree) {
+      console.warn(`[NPC 對話] 對話樹不存在: ${this.state.activeNpcDialogId}`);
+      return null;
+    }
+
+    const node = dialogTree[this.state.activeNpcDialogNodeId];
+    if (!node) {
+      console.warn(`[NPC 對話] 節點不存在: ${this.state.activeNpcDialogNodeId} (對話樹: ${this.state.activeNpcDialogId})`);
+      return null;
+    }
+
+    return node;
+  }
+
+  // 處理 NPC 對話選擇
+  handleNpcDialogChoice(choiceId: string): void {
+    const currentNode = this.getCurrentNpcDialogNode();
+    if (!currentNode) {
+      return;
+    }
+
+    const choice = currentNode.choices.find(c => c.id === choiceId);
+    if (!choice) {
+      return;
+    }
+
+    // 應用選擇效果
+    if (choice.effects) {
+      choice.effects.forEach(effect => this.applyEffect(effect));
+    }
+
+    // 應用偏好變量影響
+    if (choice.preferenceEffects?.length) {
+      if (!this.state.preferences) {
+        this.state.preferences = {
+          preference_system_intervention: 0,
+          preference_observation_wait: 0,
+          overweight_motive: 0,
+          weight_behavior_evidence: 0,
+          weight_process_similarity: 0,
+          weight_escape_route: 0,
+          question_system: 0,
+          avoid_early_conviction: 0,
+        };
+      }
+      const prefs = this.state.preferences;
+      choice.preferenceEffects.forEach(prefEffect => {
+        if (prefEffect.target in prefs) {
+          const currentValue = prefs[prefEffect.target];
+          prefs[prefEffect.target] = Math.max(0, Math.min(3, currentValue + prefEffect.delta));
+        }
+      });
+    }
+
+    // 應用 KK 洞察三維度影響
+    if (choice.insightEffects?.length) {
+      if (!this.state.insights) {
+        this.state.insights = { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
+      }
+      const insights = this.state.insights;
+      choice.insightEffects.forEach(insightEffect => {
+        if (insightEffect.target in insights) {
+          const current = insights[insightEffect.target] ?? 0;
+          insights[insightEffect.target] = Math.max(0, current + insightEffect.delta);
+        }
+      });
+    }
+
+    // 設置選擇 flag（用於後續節點判斷）
+    this.state.flags[`npc_${this.state.activeNpcDialogId}_choice_${choiceId}`] = true;
+
+    // 決定下一個節點
+    if (currentNode.next) {
+      let nextNodeId: string | null = null;
+      
+      if (typeof currentNode.next === 'string') {
+        nextNodeId = currentNode.next;
+      } else if (typeof currentNode.next === 'function') {
+        nextNodeId = currentNode.next(this.state);
+      }
+
+      if (nextNodeId) {
+        this.state.activeNpcDialogNodeId = nextNodeId;
+      } else {
+        // 沒有下一個節點，結束對話
+        this.endNpcDialog();
+      }
+    } else {
+      // 沒有 next，結束對話
+      this.endNpcDialog();
+    }
+  }
+
+  // 結束 NPC 對話
+  endNpcDialog(): void {
+    if (this.state.activeNpcDialogId) {
+      // 設置對話完成 flag
+      this.state.flags[`npc_${this.state.activeNpcDialogId}_interviewed`] = true;
+      
+      // 特殊處理：周雅雯對話結束時設置 clue_light_delay_confirmed
+      if (this.state.activeNpcDialogId === 'npc_zhou_jie') {
+        this.state.flags['clue_light_delay_confirmed'] = true;
+      }
+    }
+    
+    this.state.activeNpcDialogId = undefined;
+    this.state.activeNpcDialogNodeId = undefined;
+  }
+
+  // 檢查 NPC 是否已訪談
+  hasNpcBeenInterviewed(npcId: string): boolean {
+    return this.hasFlag(`npc_${npcId}_interviewed`);
+  }
+
+  // === NPC 隨機對話系統 ===
+
+  // 根據權重隨機選擇 NPC 對話
+  getRandomNpcDialog(npcId: string): RandomDialog | null {
+    const scene = this.getCurrentScene();
+    if (!scene || !scene.npcs) return null;
+
+    const npc = scene.npcs.find(n => n.id === npcId);
+    if (!npc || !npc.randomDialogs || npc.randomDialogs.length === 0) return null;
+
+    // 檢查 NPC 是否可用
+    if (npc.available === false) return null;
+    if (npc.availabilityRequirement && !this.checkRequirement(npc.availabilityRequirement)) {
+      return null;
+    }
+
+    // 根據權重隨機選擇對話
+    const dialogs = npc.randomDialogs;
+    const totalWeight = dialogs.reduce((sum, dialog) => sum + (dialog.weight || 1), 0);
+    
+    if (totalWeight === 0) {
+      // 如果所有權重都是 0，隨機選擇一個
+      return dialogs[Math.floor(Math.random() * dialogs.length)] || null;
+    }
+
+    let random = Math.random() * totalWeight;
+    for (const dialog of dialogs) {
+      const weight = dialog.weight || 1;
+      if (random < weight) {
+        return dialog;
+      }
+      random -= weight;
+    }
+
+    // 如果沒有選中（理論上不應該發生），返回第一個
+    return dialogs[0] || null;
+  }
+
+  // 觸發隨機 NPC 對話並返回 Dialog 對象
+  triggerRandomNpcDialog(npcId: string): Dialog | null {
+    const dialog = this.getRandomNpcDialog(npcId);
+    if (!dialog) return null;
+
+    const scene = this.getCurrentScene();
+    if (!scene || !scene.npcs) return null;
+
+    const npc = scene.npcs.find(n => n.id === npcId);
+    if (!npc) return null;
+
+    // 應用對話效果（如果有）
+    if (dialog.effects) {
+      dialog.effects.forEach(effect => this.applyEffect(effect));
+    }
+
+    // 返回 Dialog 對象，用於顯示對話框
+    return {
+      text: dialog.text,
+      type: 'character',
+      characterId: npcId,
+      characterName: npc.name,
+      characterPortrait: npc.portrait,
+      characterPosition: 'left',
+      choices: dialog.choices, // 傳遞選項
+    };
   }
 }
 

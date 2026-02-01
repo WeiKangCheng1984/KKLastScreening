@@ -1,0 +1,15 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .panel { fill: none; stroke: currentColor; stroke-width: 2; }
+      .screen { fill: currentColor; opacity: 0.15; }
+      .button { fill: currentColor; opacity: 0.3; }
+    </style>
+  </defs>
+  <!-- §6b -->
+  <rect class="panel" x="8" y="12" width="32" height="24" rx="1"/>
+  <rect class="screen" x="10" y="14" width="20" height="20" rx="0.5"/>
+  <!-- 	 -->
+  <circle class="button" cx="34" cy="20" r="3"/>
+  <circle class="button" cx="34" cy="28" r="3"/>
+</svg>

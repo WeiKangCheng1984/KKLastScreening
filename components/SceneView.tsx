@@ -1,8 +1,13 @@
 'use client';
 
 import { Scene, Hotspot } from '@/types/game';
-import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
 import Image from 'next/image';
+import { audioManager } from '@/lib/audioManager';
+import { lightingManager, LightSource } from '@/lib/lightingManager';
+import { getAnimationQuality, isMobileDevice } from '@/lib/performanceUtils';
+import HoverGlow from './effects/HoverGlow';
+import RippleEffect from './effects/RippleEffect';
 
 interface SceneViewProps {
   scene: Scene;
@@ -13,6 +18,8 @@ interface SceneViewProps {
 
 export interface SceneViewRef {
   triggerFlicker: (intensity?: 'light' | 'strong' | 'intense' | 'red' | 'electric') => void;
+  triggerLightning: () => void;
+  setAmbientLight: (intensity: number) => void;
 }
 
 const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
@@ -20,12 +27,58 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
   const [imageError, setImageError] = useState(false);
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
   const [clickedHotspot, setClickedHotspot] = useState<string | null>(null);
+  // 波紋效果狀態
+  const [ripplePosition, setRipplePosition] = useState<{x: number, y: number, hotspotId: string} | null>(null);
+  const [showRipple, setShowRipple] = useState(false);
   const [lightFlicker, setLightFlicker] = useState(false);
   const [redFlicker, setRedFlicker] = useState(false);
   const [electricFlicker, setElectricFlicker] = useState(false);
   const [lightIntensity, setLightIntensity] = useState(1);
   const [flickerKey, setFlickerKey] = useState(0);
   const [flickerType, setFlickerType] = useState<'white' | 'red' | 'electric'>('white');
+  const [ambientLightIntensity, setAmbientLightIntensity] = useState(0.3);
+  const [lightningActive, setLightningActive] = useState(false);
+  const ambientLightIdRef = useRef('scene_ambient');
+  const lightningLightIdRef = useRef('scene_lightning');
+  const animationQualityRef = useRef(getAnimationQuality());
+
+  // 初始化環境光照
+  useEffect(() => {
+    // 環境光
+    const ambientLight: LightSource = {
+      id: ambientLightIdRef.current,
+      type: 'ambient',
+      position: { x: 0.5, y: 0.5 },
+      color: '#ffffff',
+      intensity: ambientLightIntensity,
+      enabled: true,
+    };
+    
+    // 閃電光源（初始禁用）
+    const lightningLight: LightSource = {
+      id: lightningLightIdRef.current,
+      type: 'directional',
+      position: { x: 0.5, y: 0 },
+      color: '#ffffff',
+      intensity: 0,
+      enabled: false,
+    };
+    
+    lightingManager.addLight(ambientLight);
+    lightingManager.addLight(lightningLight);
+    
+    return () => {
+      lightingManager.removeLight(ambientLightIdRef.current);
+      lightingManager.removeLight(lightningLightIdRef.current);
+    };
+  }, []);
+
+  // 更新環境光強度
+  useEffect(() => {
+    lightingManager.updateLight(ambientLightIdRef.current, {
+      intensity: ambientLightIntensity,
+    });
+  }, [ambientLightIntensity]);
 
   // 觸發閃爍的外部方法
   useImperativeHandle(ref, () => ({
@@ -68,92 +121,114 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
         setTimeout(() => setLightFlicker(false), durations[intensity]);
       }
     },
+    triggerLightning: () => {
+      setLightningActive(true);
+      // 啟用閃電光源
+      lightingManager.setLightEnabled(lightningLightIdRef.current, true);
+      lightingManager.updateLight(lightningLightIdRef.current, {
+        intensity: 1.5,
+      });
+      
+      // 播放閃電音效
+      audioManager.playSFX('/audio/sfx/sfx_lightning.mp3', 0.6);
+      
+      // 觸發強烈閃爍
+      setFlickerType('white');
+      setLightFlicker(true);
+      setFlickerKey(prev => prev + 1);
+      
+      // 快速衰減
+      setTimeout(() => {
+        lightingManager.updateLight(lightningLightIdRef.current, {
+          intensity: 0.8,
+        });
+      }, 50);
+      
+      setTimeout(() => {
+        lightingManager.updateLight(lightningLightIdRef.current, {
+          intensity: 0.3,
+        });
+      }, 150);
+      
+      setTimeout(() => {
+        lightingManager.setLightEnabled(lightningLightIdRef.current, false);
+        setLightningActive(false);
+        setLightFlicker(false);
+      }, 300);
+    },
+    setAmbientLight: (intensity: number) => {
+      setAmbientLightIntensity(Math.max(0, Math.min(1, intensity)));
+    },
   }));
 
-  // 背景閃爍邏輯
+  // 背景閃爍邏輯 - 已取消閃爍效果
+  // 只保留環境光調整（不閃爍）
   useEffect(() => {
-    // 根據互動次數調整閃爍頻率（接近解謎時頻率增加）
-    // 互動次數越多，閃爍間隔越短
-    const baseInterval = 8000; // 8秒
-    const minInterval = 4000; // 最小4秒
-    const intervalReduction = Math.min(interactionCount * 500, 4000); // 最多減少4秒
-    const flickerInterval = Math.max(minInterval, baseInterval - intervalReduction);
-    
-    // 隨機輕微閃爍（白色）
-    const flickerTimer = setInterval(() => {
-      if (Math.random() < 0.3) { // 30% 機率閃爍
-        setFlickerType('white');
-        setLightFlicker(true);
-        setTimeout(() => setLightFlicker(false), 100 + Math.random() * 200);
-      }
-    }, flickerInterval + Math.random() * 7000); // 加上隨機變化
-
-    // 偶爾紅色閃光（10% 機率）
-    const redFlickerTimer = setInterval(() => {
-      if (Math.random() < 0.1) { // 10% 機率紅色閃光
-        setFlickerType('red');
-        setRedFlicker(true);
-        setTimeout(() => setRedFlicker(false), 150 + Math.random() * 100);
-      }
-    }, 15000 + Math.random() * 10000); // 15-25秒間隔
-
-    // 偶爾電流特效（5% 機率）
-    const electricTimer = setInterval(() => {
-      if (Math.random() < 0.05) { // 5% 機率電流特效
-        setFlickerType('electric');
-        // 電流特效：快速閃爍多次
-        let flashCount = 0;
-        const electricFlash = () => {
-          setElectricFlicker(prev => {
-            flashCount++;
-            if (flashCount >= 6) {
-              return false;
-            }
-            return !prev;
-          });
-          if (flashCount < 6) {
-            setTimeout(electricFlash, 50);
-          }
-        };
-        electricFlash();
-      }
-    }, 20000 + Math.random() * 15000); // 20-35秒間隔
-
-    // 偶爾亮度變化
-    const intensityTimer = setInterval(() => {
-      if (Math.random() < 0.2) {
-        setLightIntensity(0.85 + Math.random() * 0.15);
-        setTimeout(() => setLightIntensity(1), 500);
-      }
-    }, 12000 + Math.random() * 8000);
+    // 動態調整環境光（根據互動次數）- 性能優化：移動端降低更新頻率
+    const updateInterval = animationQualityRef.current.reduceAnimations ? 3000 : 2000;
+    const ambientAdjustTimer = setInterval(() => {
+      // 互動次數越多，環境光稍微變暗（營造緊張感）
+      const targetIntensity = Math.max(0.1, 0.3 - (interactionCount * 0.02));
+      setAmbientLightIntensity(prev => {
+        const diff = targetIntensity - prev;
+        return prev + diff * 0.1; // 平滑過渡
+      });
+    }, updateInterval);
 
     return () => {
-      clearInterval(flickerTimer);
-      clearInterval(redFlickerTimer);
-      clearInterval(electricTimer);
-      clearInterval(intensityTimer);
+      clearInterval(ambientAdjustTimer);
     };
   }, [interactionCount]);
 
   const handleHotspotClick = (hotspot: Hotspot, e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     
-    // 點擊波紋效果
+    // 計算點擊位置（相對於 hotspot 容器）
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // 設置波紋效果
+    setRipplePosition({ x, y, hotspotId: hotspot.id });
+    setShowRipple(true);
+    
+    // 保留原有的 clickedHotspot 狀態用於其他邏輯
     setClickedHotspot(hotspot.id);
     setTimeout(() => setClickedHotspot(null), 300);
+    
+    // 波紋動畫完成後重置
+    setTimeout(() => {
+      setShowRipple(false);
+      setRipplePosition(null);
+    }, 600);
     
     onHotspotClick(hotspot.id);
   };
 
+  // 播放點擊音效
+  useEffect(() => {
+    if (clickedHotspot) {
+      audioManager.playInteractionSFX('click');
+    }
+  }, [clickedHotspot]);
+
   const getHotspotStyle = (hotspot: Hotspot): React.CSSProperties => {
     if (hotspot.shape === 'rect' && hotspot.coords.length >= 4) {
       const [x, y, width, height] = hotspot.coords;
+      // 計算中心點位置
+      const centerX = (x + width) / 2;
+      const centerY = (y + height) / 2;
+      // 使用 clamp() 響應式大小：最小 40px，理想 4vw，最大 64px
+      // 手機端會自動縮小，桌面端保持 64px
+      const responsiveSize = 'clamp(40px, 4vw, 64px)';
+      
       return {
         position: 'absolute',
-        left: `${x * 100}%`,
-        top: `${y * 100}%`,
-        width: `${(width - x) * 100}%`,
-        height: `${(height - y) * 100}%`,
+        left: `${centerX * 100}%`,
+        top: `${centerY * 100}%`,
+        width: responsiveSize,
+        height: responsiveSize,
+        transform: 'translate(-50%, -50%)', // 以中心點定位
         cursor: 'pointer',
       };
     }
@@ -162,56 +237,30 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
 
   return (
     <div className="relative w-full h-full bg-dark-bg">
-      {/* 白色燈光閃爍層 */}
-      <div 
-        key={flickerKey}
-        className={`
-          absolute inset-0 pointer-events-none z-10
-          transition-all duration-75
-          ${lightFlicker && flickerType === 'white' ? 'bg-white/15' : 'bg-transparent'}
-        `}
-        style={{
-          filter: `brightness(${lightIntensity})`,
-        }}
-      />
+      {/* 閃爍效果已取消 */}
       
-      {/* 紅色閃光層 */}
+      {/* 環境光照層（整合光照管理器） */}
       <div 
-        key={`red-${flickerKey}`}
-        className={`
-          absolute inset-0 pointer-events-none z-11
-          transition-all duration-75
-          ${redFlicker && flickerType === 'red' ? 'bg-red-500/25' : 'bg-transparent'}
-        `}
+        className="absolute inset-0 pointer-events-none z-9"
         style={{
+          background: `radial-gradient(circle at 50% 50%, rgba(255, 255, 255, ${ambientLightIntensity * 0.1}) 0%, transparent 70%)`,
           mixBlendMode: 'screen',
+          transition: 'opacity 0.5s ease-out',
         }}
       />
-      
-      {/* 電流特效層 */}
-      {electricFlicker && flickerType === 'electric' && (
-        <div 
-          key={`electric-${flickerKey}`}
-          className="absolute inset-0 pointer-events-none z-12 animate-electric-shimmer"
-          style={{
-            mixBlendMode: 'screen',
-            filter: 'contrast(1.5)',
-            backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(34, 211, 238, 0.4) 25%, transparent 50%, rgba(34, 211, 238, 0.4) 75%, transparent 100%)',
-            backgroundSize: '200% 100%',
-          }}
-        />
-      )}
       
       {/* 背景圖 */}
-      <div className="relative w-full h-full">
+      <div className="relative w-full h-full gpu-accelerated">
         {!imageError ? (
           <Image
             src={scene.background}
             alt={scene.name}
             fill
-            className="object-contain"
+            className="object-contain gpu-accelerated"
             onError={() => setImageError(true)}
             priority
+            loading="eager"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-dark-surface text-gray-500">
@@ -236,10 +285,10 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
             onMouseEnter={() => setHoveredHotspot(hotspot.id)}
             onMouseLeave={() => setHoveredHotspot(null)}
             className={`
-              transition-all duration-200
-              ${debug ? 'border-2 border-orange-500 bg-orange-500/20' : ''}
-              ${isHovered && !debug ? 'bg-orange-500/10 border-orange-400/30' : ''}
-              ${isClicked ? 'bg-orange-500/20 scale-95' : ''}
+              transition-all duration-200 gpu-accelerated rounded-full
+              ${debug ? 'border-4 border-orange-500 bg-orange-500/40' : 'border border-white/30 bg-white/5'}
+              ${isHovered && !debug ? 'bg-white/10 border-white/50 shadow-lg shadow-white/20 scale-105' : ''}
+              ${isClicked ? 'bg-white/15 border-white/60 scale-95' : ''}
             `}
             title={debug ? `${hotspot.id}: ${hotspot.description || ''}` : hotspot.hint}
           >
@@ -260,16 +309,35 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
               </div>
             )}
 
-            {/* 點擊波紋效果 - 縮小50% */}
-            {isClicked && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-10 h-10 rounded-full bg-white/20 animate-ping"></div>
-              </div>
+            {/* 懸停發光效果 */}
+            {isHovered && !debug && (
+              <HoverGlow
+                isActive={true}
+                intensity="medium"
+                color="#fb923c"
+                size={80}
+              />
             )}
 
-            {/* 可互動脈衝效果 */}
+            {/* 點擊波紋效果 - 使用 RippleEffect 組件 */}
+            {showRipple && ripplePosition && ripplePosition.hotspotId === hotspot.id && (
+              <RippleEffect
+                show={true}
+                position={{ x: ripplePosition.x, y: ripplePosition.y }}
+                color="#fb923c"
+                duration={600}
+                size={120}
+              />
+            )}
+
+            {/* 可互動脈衝效果 - 簡化版（保留微弱的提醒效果） */}
             {!debug && (
-              <div className="absolute inset-0 border-2 border-white/20 rounded animate-pulse opacity-0 hover:opacity-100 transition-opacity"></div>
+              <>
+                {/* 外層脈衝動畫 - 非常微弱的向外擴散 */}
+                <div className="absolute inset-[-6px] border border-white/10 rounded-full animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
+                {/* 中心發光點 - 非常微弱（白色） */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/30 rounded-full opacity-40"></div>
+              </>
             )}
           </div>
         );

@@ -2,11 +2,15 @@
 
 import { useRouter } from 'next/navigation';
 import { Play } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Home() {
   const router = useRouter();
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const handleStartGame = () => {
+    setIsTransitioning(true);
+    
     // 清除所有遊戲記憶
     if (typeof window !== 'undefined') {
       try {
@@ -17,22 +21,52 @@ export default function Home() {
       }
     }
     
-    // 導航到遊戲頁面
-    router.push('/play/ch1/ch1_sc1');
+    // 等待過場動畫完成後導航到序章，再進入第一章導讀
+    setTimeout(() => {
+      router.push('/play/prologue');
+    }, 800);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg">
-      <div className="text-center max-w-2xl px-4 animate-fade-float">
-        <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent animate-fade-float" style={{ animationDelay: '0.1s' }}>
-          FME異物入侵
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg relative overflow-hidden">
+      {/* 背景粒子效果 */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-orange-400 rounded-full animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${3 + Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* 過場遮罩 */}
+      {isTransitioning && (
+        <div className="fixed inset-0 z-50 bg-black transition-opacity duration-800 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
+            <p className="text-orange-300 text-lg">載入中...</p>
+          </div>
+        </div>
+      )}
+
+      <div className={`text-center max-w-2xl px-4 transition-all duration-800 ${
+        isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+      }`}>
+        <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent animate-fade-float" style={{ animationDelay: '0.1s' }}>
+          KK流程偵探：最後一場放映
         </h1>
         <p className="text-lg text-orange-300/80 mb-8 animate-fade-float" style={{ animationDelay: '0.2s' }}>
-          你不是來扮演誰的。你只是走進了一個還沒有被做出最後決定的地方。
+          凌晨 00:19，一通沒有顯示來電的電話。城市影城，散場後五分鐘，有人死在 H 排 12 號。散場的燈，延後三分鐘亮起——你不是警察，你是 KK。
         </p>
         <button
           onClick={handleStartGame}
-          className="inline-flex items-center gap-2 px-10 py-5 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-xl transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 animate-fade-float"
+          className="inline-flex items-center gap-2 px-10 py-5 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-xl transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 animate-pulse-slow"
           style={{ animationDelay: '0.3s' }}
         >
           <Play size={24} />

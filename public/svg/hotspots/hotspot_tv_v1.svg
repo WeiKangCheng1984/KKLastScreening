@@ -1,0 +1,14 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .tv { fill: none; stroke: currentColor; stroke-width: 2; }
+      .screen { fill: currentColor; opacity: 0.15; }
+      .stand { fill: currentColor; }
+    </style>
+  </defs>
+  <!-- û– -->
+  <rect class="tv" x="10" y="12" width="28" height="20" rx="1"/>
+  <rect class="screen" x="12" y="14" width="24" height="16" rx="0.5"/>
+  <!-- •§ -->
+  <rect class="stand" x="20" y="32" width="8" height="3" rx="1"/>
+</svg>

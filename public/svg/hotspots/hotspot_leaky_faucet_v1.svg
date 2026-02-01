@@ -1,0 +1,13 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .faucet { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .drop { fill: currentColor; opacity: 0.4; }
+    </style>
+  </defs>
+  <!-- 4- -->
+  <path class="faucet" d="M24 8 L24 16 Q24 20 20 20 L20 24"/>
+  <rect class="faucet" x="18" y="20" width="4" height="8" rx="1"/>
+  <!-- 4ô -->
+  <path class="drop" d="M22 28 Q22 30 24 30 Q26 30 26 28 Q26 26 24 26 Q22 26 22 28"/>
+</svg>
