@@ -1,7 +1,7 @@
 'use client';
 
 import { Dialog, DialogChoice, NpcDialogChoice } from '@/types/game';
-import { X, ChevronRight, History, SkipForward } from 'lucide-react';
+import { X, ChevronRight, SkipForward } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import SVGImage from './SVGImage';
 import DialogChoiceComponent from './DialogChoice';
@@ -11,10 +11,7 @@ interface DialogBoxProps {
   onClose: () => void;
   autoClose?: boolean;
   typewriterSpeed?: number;
-  onAddToHistory?: (dialog: Dialog) => void;
-  showHistory?: boolean;
-  onShowHistory?: () => void;
-  onChoiceSelect?: (choice: DialogChoice) => void; // 新增：選擇回調
+  onChoiceSelect?: (choice: DialogChoice) => void; // 選擇回調
   mode?: 'normal' | 'npc'; // 新增：NPC 模式
   npcChoices?: NpcDialogChoice[]; // 新增：NPC 對話選項
   onNpcChoiceSelect?: (choiceId: string) => void; // 新增：NPC 選擇回調
@@ -25,9 +22,6 @@ export default function DialogBox({
   onClose,
   autoClose = false,
   typewriterSpeed = 30,
-  onAddToHistory,
-  showHistory = false,
-  onShowHistory,
   onChoiceSelect,
   mode = 'normal',
   npcChoices,
@@ -53,9 +47,6 @@ export default function DialogBox({
 
   useEffect(() => {
     setIsVisible(true);
-    if (onAddToHistory && (!textSegments || currentSegmentText === textSegments[0])) {
-      onAddToHistory(dialog);
-    }
     let currentIndex = 0;
     let shouldSkip = false;
     setDisplayText('');
@@ -220,16 +211,6 @@ export default function DialogBox({
                 title="按住快速跳過"
               >
                 <SkipForward size={16} />
-              </button>
-            )}
-            {/* 對話歷史按鈕 */}
-            {onShowHistory && (
-              <button
-                onClick={onShowHistory}
-                className="text-gray-400 hover:text-blue-400 transition-all duration-200 p-1 hover:bg-white/10 rounded"
-                title="對話歷史"
-              >
-                <History size={16} />
               </button>
             )}
             <button

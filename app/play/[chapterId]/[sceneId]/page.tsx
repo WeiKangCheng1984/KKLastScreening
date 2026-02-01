@@ -33,7 +33,6 @@ import { scenes, chapters, items } from '@/data/gameData';
 import DeveloperPanel from '@/components/DeveloperPanel';
 import TutorialGuide from '@/components/TutorialGuide';
 import AudioControl from '@/components/AudioControl';
-import DialogHistory from '@/components/DialogHistory';
 import { preloadSVGBatch } from '@/lib/svgLoader';
 import { DialogChoice } from '@/types/game';
 import ChapterPuzzle from '@/components/ChapterPuzzle';
@@ -117,8 +116,6 @@ export default function PlayPage() {
   const [isSceneTransitioning, setIsSceneTransitioning] = useState(() => false);
   const [sceneLoading, setSceneLoading] = useState(() => false);
   const preloadedImagesRef = useRef<Set<string>>(new Set());
-  const [dialogHistory, setDialogHistory] = useState<Dialog[]>([]);
-  const [showDialogHistory, setShowDialogHistory] = useState(false);
   const [chapterProgress, setChapterProgress] = useState(0);
   const [showChapterPuzzle, setShowChapterPuzzle] = useState(false);
   // 場景切換相關狀態
@@ -2593,7 +2590,6 @@ export default function PlayPage() {
               if (node && npc) {
                 const dialog = buildDialogFromNpcNode(node, npc);
                 setCurrentDialog(dialog);
-                setDialogHistory((prev) => [...prev, dialog]);
               }
               return;
             }
@@ -2602,7 +2598,6 @@ export default function PlayPage() {
             const dialog = engine.triggerRandomNpcDialog(npcId);
             if (dialog) {
               setCurrentDialog(dialog);
-              setDialogHistory((prev) => [...prev, dialog]);
             }
           }}
           checkAvailability={(npc) => {
@@ -2878,11 +2873,6 @@ export default function PlayPage() {
           dialog={currentDialog}
           onClose={handleDialogClose}
           autoClose={false}
-          onAddToHistory={(dialog) => {
-            setDialogHistory(prev => [...prev, dialog]);
-          }}
-          showHistory={showDialogHistory}
-          onShowHistory={() => setShowDialogHistory(true)}
           onChoiceSelect={handleDialogChoice}
         />
       )}
@@ -2956,14 +2946,6 @@ export default function PlayPage() {
           />
         );
       })()}
-
-      {/* 對話歷史面板 */}
-      {showDialogHistory && (
-        <DialogHistory
-          dialogs={dialogHistory}
-          onClose={() => setShowDialogHistory(false)}
-        />
-      )}
 
       {/* 謎題輸入 */}
       {currentPuzzle && (
