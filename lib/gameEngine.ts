@@ -242,15 +242,22 @@ export class GameEngine {
   }
 
   solvePuzzle(puzzleId: string, input: string | string[] | number[] | Record<string, any>): boolean {
-    const scene = this.getCurrentScene();
+    // 第一章解謎／推理從選單開啟，可能不在放映廳；謎題只定義在 scene_ch1_cinema_a_hall，故由此場景取謎題
+    const isCh1MenuPuzzle = puzzleId === 'ch1_pair_matching' || /^ch1_reasoning_\d+$/.test(puzzleId);
+    const scene = isCh1MenuPuzzle
+      ? (scenes['scene_ch1_cinema_a_hall'] || null)
+      : this.getCurrentScene();
     if (!scene) return false;
 
-    const puzzle = scene.puzzles.find(p => p.id === puzzleId);
+    const puzzle = scene.puzzles.find((p: Puzzle) => p.id === puzzleId);
     if (!puzzle) return false;
 
     // 檢查謎題是否已經解決過
     const solvedFlag = `puzzle_${puzzleId}_solved`;
-    if (this.hasFlag(solvedFlag)) {
+    if (puzzle.type === 'pick_three') {
+      // pick_three：以 ch1_puzzle_done 為準，集滿三條線索前都允許重複送出
+      if (this.hasFlag('ch1_puzzle_done')) return false;
+    } else if (this.hasFlag(solvedFlag)) {
       // 謎題已經解決過，不再處理
       return false;
     }
@@ -336,10 +343,54 @@ export class GameEngine {
           solved = false;
         }
       }
+    } else if (puzzle.type === 'pair_matching') {
+      // 第一章解謎：3 組配對，組內與組間順序不計
+      const solutionPairs = puzzle.solution as [string, string][];
+      const inputPairs = input as [string, string][];
+      if (!Array.isArray(inputPairs) || inputPairs.length !== 3) {
+        solved = false;
+      } else {
+        const normalize = (pair: string[] | [string, string]) => JSON.stringify([...(Array.isArray(pair) ? pair : [])].sort());
+        const solutionSet = solutionPairs.map(p => normalize(p)).sort();
+        const inputSet = inputPairs.map(p => normalize(p)).sort();
+        solved = solutionSet.length === inputSet.length && solutionSet.every((s, i) => s === inputSet[i]);
+      }
+    } else if (puzzle.type === 'pick_three') {
+      // 第一章解謎：選 3 個道具，與三組正確組合比對（不計順序），命中且該組未解鎖則解鎖該線索
+      const solutionGroups = puzzle.solution as string[][];
+      const selected = input as string[];
+      if (!Array.isArray(selected) || selected.length !== 3 || !Array.isArray(solutionGroups) || solutionGroups.length !== 3) {
+        solved = false;
+      } else {
+        const normalize = (arr: string[]) => [...arr].slice().sort().join(',');
+        const selectedKey = normalize(selected);
+        for (let i = 0; i < 3; i++) {
+          const group = solutionGroups[i];
+          if (!Array.isArray(group) || group.length !== 3) continue;
+          if (normalize(group) !== selectedKey) continue;
+          const clueFlag = `ch1_clue_${i + 1}_unlocked`;
+          if (this.hasFlag(clueFlag)) {
+            solved = false;
+            break;
+          }
+          this.state.flags[clueFlag] = true;
+          this.state.flags['ch1_last_unlocked_combo'] = i + 1;
+          const allUnlocked = [1, 2, 3].every(j => this.state.flags[`ch1_clue_${j}_unlocked`]);
+          if (allUnlocked) {
+            this.state.flags['ch1_puzzle_done'] = true;
+            if (puzzle.onSolve) {
+              puzzle.onSolve.forEach(e => this.applyEffect(e));
+            }
+            this.state.flags[solvedFlag] = true;
+          }
+          solved = true;
+          break;
+        }
+      }
     }
     // 其他新謎題類型暫時返回 false，等待實作
 
-    if (solved && puzzle.onSolve) {
+    if (solved && puzzle.onSolve && puzzle.type !== 'pick_three') {
       puzzle.onSolve.forEach(effect => this.applyEffect(effect));
       // 標記謎題已解決
       this.state.flags[solvedFlag] = true;

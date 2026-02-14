@@ -26,7 +26,7 @@ import MazePath from '@/components/MazePath';
 import LogicSwitches from '@/components/LogicSwitches';
 import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
-import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu } from 'lucide-react';
+import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, ListOrdered, FlaskConical } from 'lucide-react';
 import Link from 'next/link';
 import { audioManager } from '@/lib/audioManager';
 import { scenes, chapters, items } from '@/data/gameData';
@@ -36,8 +36,11 @@ import AudioControl from '@/components/AudioControl';
 import { preloadSVGBatch } from '@/lib/svgLoader';
 import { DialogChoice } from '@/types/game';
 import ChapterPuzzle from '@/components/ChapterPuzzle';
+import PairMatchingPuzzle from '@/components/PairMatchingPuzzle';
+import PickThreePuzzle from '@/components/PickThreePuzzle';
 import ScoreDisplay from '@/components/ScoreDisplay';
 import NpcBar from '@/components/NpcBar';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // 獲取當前章節的所有場景
 const getCurrentChapterScenes = (chapterId: string): string[] => {
@@ -67,7 +70,18 @@ export default function PlayPage() {
   const chapterId = params.chapterId as string;
   const sceneId = params.sceneId as string;
   const debug = searchParams.get('debug') === '1';
-  const devMode = searchParams.get('dev') === '1';
+  // 開發者模式：由選單開關，並存入 localStorage（不再使用網址 ?dev=1）
+  const [devMode, setDevMode] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('devMode') === 'true') {
+      setDevMode(true);
+    }
+  }, []);
+  const setDevModeAndPersist = useCallback((on: boolean) => {
+    setDevMode(on);
+    if (typeof window !== 'undefined') localStorage.setItem('devMode', on ? 'true' : 'false');
+    if (!on) setShowDeveloperPanel(false);
+  }, []);
 
   // 使用 useRef 保持 GameEngine 實例，避免重新掛載時重置狀態
   const engineRef = useRef<GameEngine | null>(null);
@@ -118,6 +132,10 @@ export default function PlayPage() {
   const preloadedImagesRef = useRef<Set<string>>(new Set());
   const [chapterProgress, setChapterProgress] = useState(0);
   const [showChapterPuzzle, setShowChapterPuzzle] = useState(false);
+  // 第一章章末：解謎（6 道具配對）與推理（3 題字詞排序）
+  const [showCh1PairPuzzle, setShowCh1PairPuzzle] = useState(false);
+  const [showCh1ReasoningPuzzle, setShowCh1ReasoningPuzzle] = useState(false);
+  const [ch1ReasoningStep, setCh1ReasoningStep] = useState(0);
   // 場景切換相關狀態
   // 使用 useState 的函數形式確保服務器和客戶端初始狀態一致
   const [showSceneName, setShowSceneName] = useState(() => false);
@@ -475,12 +493,19 @@ export default function PlayPage() {
       return;
     }
 
+    // 僅關閉對話的選項（無其他效果）
+    if (choice.id === 'close_only') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+
     // 一般對話選擇
     engine.handleDialogChoice(choice);
 
-    // 第一章態度宣言選完後：顯示推理句（依本章最高洞察維度），再導向 ch2
-    const st = engine.getState();
-    if (st.flags?.ch1_attitude_declared && (choice.id === 'ch1_attitude_procedure' || choice.id === 'ch1_attitude_evidence' || choice.id === 'ch1_attitude_human' || choice.id === 'ch1_attitude_both')) {
+    // 第一章態度宣言四選一選完後：顯示推理句與進入第二章（handleDialogChoice 已於上方套用洞察與 ch1_attitude_declared）
+    if (choice.id === 'ch1_attitude_procedure' || choice.id === 'ch1_attitude_evidence' || choice.id === 'ch1_attitude_human' || choice.id === 'ch1_attitude_both') {
+      const st = engine.getState();
       const insights = st.insights || { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
       const p = insights.procedure_insight ?? 0;
       const h = insights.human_insight ?? 0;
@@ -659,7 +684,7 @@ export default function PlayPage() {
   }, [chapterId, sceneId]);
 
   // 統一的場景名稱顯示函數（必須在 useEffect 之前定義）
-  const showSceneNameWithTimer = useCallback((sceneNameToShow: string, duration: number = 4000) => {
+  const showSceneNameWithTimer = useCallback((sceneNameToShow: string, duration: number = 2000) => {
     // 清除舊的計時器（如果存在）
     if (sceneNameTimerRef.current) {
       clearTimeout(sceneNameTimerRef.current);
@@ -676,7 +701,7 @@ export default function PlayPage() {
     setIsSceneTransitioning(true);
     setSceneLoading(true);
     
-    // 設置場景名稱關閉計時器（4秒後同時關閉場景名稱和載入畫面）
+    // 設置場景名稱關閉計時器（2秒後同時關閉場景名稱和載入畫面）
     sceneNameTimerRef.current = setTimeout(() => {
       setShowSceneName(false);
       setIsSceneTransitioning(false);
@@ -685,7 +710,7 @@ export default function PlayPage() {
     }, duration);
     
     // 保留 sceneTransitionTimerRef 以備將來使用，但現在不需要額外延遲
-    // 場景名稱和載入畫面同時在 4 秒後關閉
+    // 場景名稱和載入畫面同時在 2 秒後關閉
   }, []);
 
   // 根據 URL 初始化狀態（如果狀態與 URL 不一致）
@@ -715,7 +740,7 @@ export default function PlayPage() {
       
       // 延遲到下一幀執行，確保在首次渲染完成後才更新狀態
       setTimeout(() => {
-        showSceneNameWithTimer(currentScene.name, 4000);
+        showSceneNameWithTimer(currentScene.name, 2000);
       }, 0);
     }
     
@@ -757,7 +782,7 @@ export default function PlayPage() {
         if (newScene) {
           // 延遲到下一幀執行，確保在首次渲染完成後才更新狀態
           setTimeout(() => {
-            showSceneNameWithTimer(newScene.name, 4000);
+            showSceneNameWithTimer(newScene.name, 2000);
           }, 0);
         }
       }
@@ -810,9 +835,9 @@ export default function PlayPage() {
     const progress = engine.getChapterProgress(chapterId);
     setChapterProgress(progress);
 
-    // 檢查章節謎題是否解鎖
+    // 檢查章節謎題是否解鎖（第一章不在此彈出，改由態度宣言後的解謎／推理流程處理）
     const isUnlocked = engine.checkChapterPuzzleUnlock(chapterId);
-    if (isUnlocked) {
+    if (isUnlocked && chapterId !== 'ch1') {
       // 檢查是否已經顯示過謎題
       const state = engine.getState();
       if (!state.flags[`chapter_puzzle_${chapterId}_shown`] && !showChapterPuzzle) {
@@ -2506,7 +2531,7 @@ export default function PlayPage() {
           <SceneNameDisplay
             sceneName={currentSceneName}
             show={showSceneName}
-            duration={4000}
+            duration={2000}
             onComplete={() => {
               setShowSceneName(false);
             }}
@@ -2633,17 +2658,28 @@ export default function PlayPage() {
           )}
         </button>
         
-        {/* 展開的選單 */}
-        {showMenu && (
-          <>
-            {/* 背景遮罩 */}
-            <div
-              onClick={() => setShowMenu(false)}
-              className="fixed inset-0 bg-black/40 z-40"
-            />
-            {/* 選單面板 */}
-            <div className="absolute top-14 right-0 w-64 bg-dark-surface/98 backdrop-blur-xl border border-dark-border rounded-lg shadow-2xl z-50 overflow-hidden">
-              <div className="p-2 space-y-1">
+        {/* 展開的選單：側邊抽屜 + 展開/收合動畫 */}
+        <AnimatePresence>
+          {showMenu && (
+            <>
+              {/* 背景遮罩 - 淡入淡出 */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setShowMenu(false)}
+                className="fixed inset-0 bg-black/40 z-40"
+              />
+              {/* 選單面板 - 從右緣滑入 */}
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
+                className="fixed top-0 right-0 h-full w-72 max-w-[85vw] bg-dark-surface/98 backdrop-blur-xl border-l border-dark-border shadow-2xl z-50 overflow-y-auto"
+              >
+              <div className="p-2 space-y-1 pt-14">
                 {/* 背包 */}
                 <button
                   onClick={() => {
@@ -2660,6 +2696,52 @@ export default function PlayPage() {
                     </span>
                   )}
                 </button>
+
+                {/* 第一章：解謎、推理（選單內自選） */}
+                {chapterId === 'ch1' && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                        const inv = engineRef.current?.getState().inventory ?? [];
+                        const required = ['item_ticket_stub', 'item_schedule_modified', 'item_projector_notes', 'item_light_control_note', 'item_black_plastic_fragment', 'item_cleaning_note'];
+                        const hasAll = required.every((id) => inv.includes(id));
+                        if (!hasAll) {
+                          setCurrentDialog({
+                            text: '請先收集齊第一章的六個道具：電影票根、播映時間表（塗改）、放映員的筆記、燈控紀錄、黑色塑膠碎片、清潔備忘。',
+                            type: 'narrator',
+                            choices: [{ id: 'close_only', text: '知道了' }],
+                          });
+                        } else {
+                          setShowCh1PairPuzzle(true);
+                        }
+                        setRefreshKey((prev) => prev + 1);
+                      }}
+                      className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
+                    >
+                      <span className="flex items-center gap-3">
+                        <Puzzle size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
+                        <span>解謎</span>
+                      </span>
+                      {state.flags?.ch1_puzzle_done && <span className="text-xs text-green-400">已完成</span>}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                        setCh1ReasoningStep(0);
+                        setShowCh1ReasoningPuzzle(true);
+                        setRefreshKey((prev) => prev + 1);
+                      }}
+                      className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
+                    >
+                      <span className="flex items-center gap-3">
+                        <ListOrdered size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
+                        <span>推理</span>
+                      </span>
+                      {state.flags?.ch1_reasoning_done && <span className="text-xs text-green-400">已完成</span>}
+                    </button>
+                  </>
+                )}
                 
                 {/* 音量控制 */}
                 <div className="px-4 py-3 bg-dark-card/50 border border-dark-border/50 rounded-lg">
@@ -2674,29 +2756,59 @@ export default function PlayPage() {
                   <ScoreDisplay gameState={state} showLegacyWeights={devMode} />
                 </div>
                 
-                {/* 開發者模式 */}
+                {/* 開發者模式：選單內開關，不再使用網址參數 */}
                 <button
                   onClick={() => {
                     if (devMode) {
-                      setShowDeveloperPanel(prev => {
-                        const newValue = !prev;
-                        console.log('開發者模式:', newValue ? '開啟' : '關閉');
-                        return newValue;
-                      });
+                      setShowDeveloperPanel((prev) => !prev);
                     } else {
-                      alert('開發者模式未啟用。請在 URL 中添加 ?dev=1');
+                      setDevModeAndPersist(true);
+                      setShowDeveloperPanel(true);
                     }
                     setShowMenu(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 border rounded-lg transition-all duration-200 text-sm font-medium group ${
-                    showDeveloperPanel && devMode
-                      ? 'bg-industrial-orange/30 border-industrial-orange text-orange-200 hover:bg-industrial-orange/40'
+                  className={`w-full flex items-center justify-between gap-3 px-4 py-3 border rounded-lg transition-all duration-200 text-sm font-medium group ${
+                    devMode
+                      ? showDeveloperPanel
+                        ? 'bg-industrial-orange/30 border-industrial-orange text-orange-200 hover:bg-industrial-orange/40'
+                        : 'bg-dark-card/50 border-dark-border/50 hover:border-industrial-orange/50 text-gray-300 hover:text-orange-200'
                       : 'bg-dark-card/50 border-dark-border/50 text-gray-500 hover:bg-dark-card hover:text-gray-400'
                   }`}
                 >
-                  <Code size={18} className="group-hover:scale-110 transition-transform" />
-                  <span>開發者模式</span>
+                  <span className="flex items-center gap-3">
+                    <Code size={18} className="group-hover:scale-110 transition-transform" />
+                    <span>{devMode ? '開發者模式 (開)' : '開啟開發者模式'}</span>
+                  </span>
+                  {devMode && <span className="text-xs text-green-400">開</span>}
                 </button>
+
+                {/* 測試模式：取得所有道具 */}
+                <div className="px-2 py-1">
+                  <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                    <FlaskConical size={12} />
+                    <span>測試模式</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!engineRef.current) return;
+                      const allItemIds = Object.keys(items);
+                      allItemIds.forEach((id) => {
+                        engineRef.current!.applyEffect({ type: 'addItem', itemId: id });
+                      });
+                      setRefreshKey((prev) => prev + 1);
+                      setShowMenu(false);
+                      setCurrentDialog({
+                        text: `已取得全部 ${allItemIds.length} 個道具。`,
+                        type: 'narrator',
+                        choices: [{ id: 'close_only', text: '知道了' }],
+                      });
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-amber-500/50 rounded-lg text-gray-300 hover:text-amber-200 transition-all duration-200 text-sm font-medium group"
+                  >
+                    <Package size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                    <span>取得所有道具</span>
+                  </button>
+                </div>
                 
                 {/* 放棄遊戲 */}
                 <button
@@ -2710,9 +2822,10 @@ export default function PlayPage() {
                   <span>放棄遊戲</span>
                 </button>
               </div>
-            </div>
-          </>
-        )}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* 場景名稱和切換按鈕 - 左上角浮動 */}
@@ -2831,10 +2944,11 @@ export default function PlayPage() {
                 <h2 className="text-lg font-semibold text-gray-200">背包</h2>
                 <button
                   onClick={() => setShowInventory(false)}
-                  className="p-1.5 text-gray-400 hover:text-white hover:bg-dark-card rounded transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-dark-card rounded-lg transition-colors min-h-[44px] min-w-[44px]"
                   title="關閉"
                 >
-                  <X size={20} />
+                  <X size={22} />
+                  <span className="text-sm font-medium sm:inline hidden">關閉</span>
                 </button>
               </div>
               
@@ -2946,6 +3060,161 @@ export default function PlayPage() {
           />
         );
       })()}
+
+      {/* 第一章章末：解謎（6 道具選 3 集滿三條線索 或 舊版 3 組配對）- 關閉時 exit 動畫 */}
+      <AnimatePresence>
+      {showCh1PairPuzzle && engineRef.current && (() => {
+        const ch1Hall = scenes['scene_ch1_cinema_a_hall'];
+        const pairPuzzle = ch1Hall?.puzzles?.find((p: { id: string }) => p.id === 'ch1_pair_matching');
+        if (!pairPuzzle) return null;
+        const ch1AttitudeDialog: Dialog = {
+          text: '你的態度宣言——',
+          type: 'narrator',
+          choices: [
+            { id: 'ch1_attitude_procedure', text: '「我會要求官方做全面稽核。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
+            { id: 'ch1_attitude_evidence', text: '「我先不驚動體系，先把動線與權限畫出來。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
+            { id: 'ch1_attitude_human', text: '「我想知道誰在遮蔽，遮蔽的原因。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
+            { id: 'ch1_attitude_both', text: '「我兩邊都要：上報，但先留底。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }, { target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
+          ],
+        };
+        const state = engineRef.current.getState();
+        const unlockedClues: [boolean, boolean, boolean] = [
+          !!state?.flags?.ch1_clue_1_unlocked,
+          !!state?.flags?.ch1_clue_2_unlocked,
+          !!state?.flags?.ch1_clue_3_unlocked,
+        ];
+        if (pairPuzzle.type === 'pick_three') {
+          return (
+            <motion.div key="ch1-pair-puzzle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <PickThreePuzzle
+              puzzle={pairPuzzle}
+              unlockedClues={unlockedClues}
+              onSolve={(selectedIds) => {
+                if (!engineRef.current) return;
+                const solved = engineRef.current.solvePuzzle('ch1_pair_matching', selectedIds);
+                if (solved) {
+                  setPuzzleError('');
+                  setRefreshKey((prev) => prev + 1);
+                  const nextState = engineRef.current.getState();
+                  const puzzleDone = nextState?.flags?.ch1_puzzle_done === true;
+                  const lastCombo = (nextState?.flags?.ch1_last_unlocked_combo as number) ?? 0;
+                  const clues = (pairPuzzle.config?.clues as string[] | undefined) ?? [];
+                  const clueText = lastCombo >= 1 && lastCombo <= 3 ? clues[lastCombo - 1] : '';
+                  if (puzzleDone) {
+                    setShowCh1PairPuzzle(false);
+                    const reasoningDone = nextState?.flags?.ch1_reasoning_done === true;
+                    setCurrentDialog(
+                      reasoningDone
+                        ? ch1AttitudeDialog
+                        : { text: '解謎完成。可從選單進行推理。', type: 'narrator', choices: [{ id: 'close_only', text: '知道了' }] }
+                    );
+                  } else if (clueText) {
+                    setCurrentDialog({ text: clueText, type: 'narrator', choices: [{ id: 'close_only', text: '知道了' }] });
+                  }
+                } else {
+                  setPuzzleError('此組合不正確，請再試一次。');
+                }
+              }}
+              onClose={() => {
+                setShowCh1PairPuzzle(false);
+                setPuzzleError('');
+              }}
+              error={puzzleError}
+              onErrorClear={() => setPuzzleError('')}
+            />
+            </motion.div>
+          );
+        }
+        return (
+          <motion.div key="ch1-pair-puzzle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <PairMatchingPuzzle
+            puzzle={pairPuzzle}
+            onSolve={(input) => {
+              if (!engineRef.current) return;
+              const solved = engineRef.current.solvePuzzle('ch1_pair_matching', input);
+              if (solved) {
+                setShowCh1PairPuzzle(false);
+                setPuzzleError('');
+                setRefreshKey((prev) => prev + 1);
+                const reasoningDone = engineRef.current.getState().flags?.ch1_reasoning_done === true;
+                setCurrentDialog(
+                  reasoningDone
+                    ? ch1AttitudeDialog
+                    : { text: '解謎完成。可從選單進行推理。', type: 'narrator', choices: [{ id: 'close_only', text: '知道了' }] }
+                );
+              } else {
+                setPuzzleError('配對不正確，請再試一次。');
+              }
+            }}
+            onClose={() => {
+              setShowCh1PairPuzzle(false);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+            inventory={engineRef.current.getState().inventory}
+          />
+          </motion.div>
+        );
+      })()}
+      </AnimatePresence>
+
+      {/* 第一章章末：推理（3 題字詞排序）- 關閉時 exit 動畫 */}
+      <AnimatePresence>
+      {showCh1ReasoningPuzzle && (() => {
+        const ch1Hall = scenes['scene_ch1_cinema_a_hall'];
+        const reasoningPuzzle = ch1Hall?.puzzles?.find((p: { id: string }) => p.id === `ch1_reasoning_${ch1ReasoningStep + 1}`);
+        if (!reasoningPuzzle) return null;
+        return (
+          <motion.div key="ch1-reasoning-puzzle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <ArrangementPuzzle
+            puzzle={reasoningPuzzle}
+            onSolve={(input) => {
+              if (!engineRef.current) return;
+              const puzzleId = `ch1_reasoning_${ch1ReasoningStep + 1}`;
+              const solved = engineRef.current.solvePuzzle(puzzleId, input);
+              if (solved) {
+                setPuzzleError('');
+                setRefreshKey((prev) => prev + 1);
+                if (ch1ReasoningStep < 2) {
+                  setCh1ReasoningStep((prev) => prev + 1);
+                } else {
+                  // 第三題完成：確保推理過關條件 ch1_reasoning_done 已設定
+                  engineRef.current.applyEffect({ type: 'setFlag', flag: 'ch1_reasoning_done', value: true });
+                  setShowCh1ReasoningPuzzle(false);
+                  setCh1ReasoningStep(0);
+                  const puzzleDone = engineRef.current.getState().flags?.ch1_puzzle_done === true;
+                  if (puzzleDone) {
+                    setCurrentDialog({
+                      text: '你的態度宣言——',
+                      type: 'narrator',
+                      choices: [
+                        { id: 'ch1_attitude_procedure', text: '「我會要求官方做全面稽核。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
+                        { id: 'ch1_attitude_evidence', text: '「我先不驚動體系，先把動線與權限畫出來。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
+                        { id: 'ch1_attitude_human', text: '「我想知道誰在遮蔽，遮蔽的原因。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
+                        { id: 'ch1_attitude_both', text: '「我兩邊都要：上報，但先留底。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }, { target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
+                      ],
+                    });
+                  } else {
+                    setCurrentDialog({ text: '推理完成。可從選單進行解謎。', type: 'narrator', choices: [{ id: 'close_only', text: '知道了' }] });
+                  }
+                }
+              } else {
+                setPuzzleError('順序不正確，請再試一次。');
+              }
+            }}
+            onClose={() => {
+              setShowCh1ReasoningPuzzle(false);
+              setCh1ReasoningStep(0);
+              setPuzzleError('');
+            }}
+            error={puzzleError}
+            onErrorClear={() => setPuzzleError('')}
+          />
+          </motion.div>
+        );
+      })()}
+      </AnimatePresence>
 
       {/* 謎題輸入 */}
       {currentPuzzle && (
@@ -3147,8 +3416,9 @@ export default function PlayPage() {
       {/* 開發者面板 */}
       {showDeveloperPanel && devMode && (
         <DeveloperPanel
-          onClose={() => {
-            console.log('開發者面板關閉');
+          onClose={() => setShowDeveloperPanel(false)}
+          onDisableDevMode={() => {
+            setDevModeAndPersist(false);
             setShowDeveloperPanel(false);
           }}
           currentChapterId={chapterId}

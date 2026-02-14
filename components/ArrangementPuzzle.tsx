@@ -42,11 +42,13 @@ export default function ArrangementPuzzle({ puzzle, onSolve, onClose, error: ext
 
   useEffect(() => {
     if (Array.isArray(puzzle.solution)) {
-      // 打亂順序
-      const shuffled = [...puzzle.solution].sort(() => Math.random() - 0.5);
+      const pool = [...puzzle.solution];
+      const distractors = (puzzle.config as { distractors?: string[] } | undefined)?.distractors;
+      if (distractors?.length) pool.push(...distractors);
+      const shuffled = pool.sort(() => Math.random() - 0.5);
       setOptions(shuffled);
     }
-  }, [puzzle.solution]);
+  }, [puzzle.solution, puzzle.config]);
 
   const handleOptionClick = (option: string) => {
     if (selected.includes(option)) {
@@ -64,9 +66,12 @@ export default function ArrangementPuzzle({ puzzle, onSolve, onClose, error: ext
     setSelected([]);
     setInternalError('');
     if (onErrorClear) onErrorClear();
-    // 重新打亂選項
+    // 重新打亂選項（含混淆詞）
     if (Array.isArray(puzzle.solution)) {
-      const shuffled = [...puzzle.solution].sort(() => Math.random() - 0.5);
+      const pool = [...puzzle.solution];
+      const distractors = (puzzle.config as { distractors?: string[] } | undefined)?.distractors;
+      if (distractors?.length) pool.push(...distractors);
+      const shuffled = pool.sort(() => Math.random() - 0.5);
       setOptions(shuffled);
     }
   };

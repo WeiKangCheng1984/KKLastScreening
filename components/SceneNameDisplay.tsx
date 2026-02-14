@@ -16,7 +16,7 @@ interface SceneNameDisplayProps {
 export default function SceneNameDisplay({
   sceneName,
   show,
-  duration = 4000, // 增加到 4 秒，讓玩家有足夠時間看到
+  duration = 2000, // 場景名稱大字顯示時長（2 秒）
   onComplete,
 }: SceneNameDisplayProps) {
   const [isVisible, setIsVisible] = useState(false);

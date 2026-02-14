@@ -8,11 +8,12 @@ import PuzzleTestPanel from './PuzzleTestPanel';
 
 interface DeveloperPanelProps {
   onClose: () => void;
+  onDisableDevMode?: () => void;
   currentChapterId: string;
   currentSceneId: string;
 }
 
-export default function DeveloperPanel({ onClose, currentChapterId, currentSceneId }: DeveloperPanelProps) {
+export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapterId, currentSceneId }: DeveloperPanelProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
   const [showPuzzleTest, setShowPuzzleTest] = useState(false);
@@ -41,12 +42,22 @@ export default function DeveloperPanel({ onClose, currentChapterId, currentScene
               <p className="text-xs text-gray-400 mt-1">快速跳轉到任何場景</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-white hover:bg-dark-border rounded-lg transition-colors"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            {onDisableDevMode && (
+              <button
+                onClick={onDisableDevMode}
+                className="px-3 py-1.5 text-xs text-amber-200 hover:text-white bg-amber-900/40 hover:bg-amber-800/50 border border-amber-600/50 rounded-lg transition-colors"
+              >
+                關閉開發者模式
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-400 hover:text-white hover:bg-dark-border rounded-lg transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* 場景列表 */}

@@ -180,12 +180,12 @@ export default function DialogBox({
       }`}
     >
       <div
-      className={`w-[360px] h-[360px] p-4 rounded-lg border-2 backdrop-blur-xl ${styles.container} pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated ${
+      className={`w-[min(360px,calc(100vw-2rem))] max-h-[85vh] min-h-[200px] flex flex-col p-4 rounded-lg border-2 backdrop-blur-xl ${styles.container} pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${
         isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'
       }`}
       >
         {/* 標題欄 - 添加圖示動畫 */}
-        <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/10">
+        <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/10 flex-shrink-0">
           <div className={`text-xs uppercase tracking-widest font-semibold ${styles.icon} flex items-center gap-2`}>
             {dialog.type === 'broadcast' && (
               <span className={`w-2 h-2 bg-red-400 rounded-full ${styles.pulse}`}></span>
@@ -222,8 +222,8 @@ export default function DialogBox({
           </div>
         </div>
 
-        {/* 對話內容容器 - 支持 SVG 和角色立繪佈局 */}
-        <div className={`flex gap-3 mb-3 ${
+        {/* 對話內容容器 - 可捲動、最大高度，支持 SVG 和角色立繪佈局 */}
+        <div className={`flex gap-3 mb-3 min-h-0 flex-1 overflow-y-auto ${
           // 優先顯示角色立繪
           dialog.characterPortrait ? (
             dialog.characterPosition === 'right' ? 'flex-row-reverse' : 'flex-row'
@@ -272,8 +272,8 @@ export default function DialogBox({
             </div>
           )}
 
-          {/* 對話文字內容 */}
-          <div className={`flex-1 text-sm leading-relaxed min-h-[3rem] whitespace-pre-line overflow-y-auto ${
+          {/* 對話文字內容 - 手機字體加大方便閱讀 */}
+          <div className={`flex-1 text-lg sm:text-base leading-relaxed min-h-[3rem] whitespace-pre-line overflow-y-auto max-h-[50vh] sm:max-h-none ${
             dialog.svgImage && (dialog.svgPosition === 'top' || dialog.svgPosition === 'bottom') ? 'order-2' : ''
           }`}>
           {displayText.split('').map((char, index) => {
@@ -306,7 +306,8 @@ export default function DialogBox({
           )}
         </div>
 
-        {/* 選擇題或繼續提示 */}
+        {/* 選擇題或繼續提示 - 固定於底部 */}
+        <div className="flex-shrink-0 mt-auto pt-2">
         {showSegmentContinue ? (
           <button
             type="button"
@@ -357,6 +358,7 @@ export default function DialogBox({
             <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </button>
         ) : null}
+        </div>
       </div>
     </div>
   );

@@ -206,8 +206,10 @@ export interface Puzzle {
     | 'sliding_puzzle'     // 滑塊拼圖
     | 'symbol_matching'    // 符號配對
     | 'maze_path'          // 迷宮路徑
-    | 'logic_switches';     // 邏輯開關
-  solution: string | string[] | number[] | Record<string, any>;
+    | 'logic_switches'     // 邏輯開關
+    | 'pair_matching'      // 第一章：6 道具兩兩配對（3 組）
+    | 'pick_three';        // 第一章：6 道具選 3 個，三組正確組合各對應一條線索
+  solution: string | string[] | number[] | Record<string, any> | [string, string][] | string[][];
   hint?: string;
   requirements?: Requirement[];
   onSolve?: Effect[];
@@ -238,6 +240,12 @@ export interface Puzzle {
     // 邏輯開關
     switches?: Array<{ id: string; initialState: boolean }>;
     logicRules?: string; // 邏輯表達式
+    // pair_matching：第一章解謎，3 組配對對應的線索文案
+    pairClues?: string[];
+    // pick_three：第一章解謎，3 組正確組合各對應一條線索
+    clues?: string[];
+    // arrangement：字詞排序題的混淆用詞（會與 solution 一起打亂供玩家選擇）
+    distractors?: string[];
   };
 }
 

@@ -97,15 +97,20 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
                 {npc.name}
               </span>
               
-              {/* Hover 提示 */}
+              {/* Hover 顯示名稱與提示 */}
               {hoveredNpc === npc.id && (
                 <motion.div
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/90 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none"
+                  className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none z-10"
                 >
-                  點擊對話
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-black/90" />
+                  <div className="bg-black/90 text-white text-xs font-medium px-3 py-1.5 rounded whitespace-nowrap shadow-lg">
+                    {npc.name}
+                  </div>
+                  <div className="text-[10px] text-white/80 px-2 py-0.5 rounded bg-black/70 whitespace-nowrap">
+                    點擊對話
+                  </div>
+                  <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-black/90" />
                 </motion.div>
               )}
             </motion.button>

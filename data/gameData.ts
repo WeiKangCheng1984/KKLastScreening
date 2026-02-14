@@ -51,7 +51,23 @@ export const items: Record<string, Item> = {
     svgSize: 'small',
     collectible: true,
   },
-  
+  'item_light_control_note': {
+    id: 'item_light_control_note',
+    name: '燈控紀錄',
+    description: '燈控面板旁的紀錄。\n\n當天為手動模式，需要有人親自操作。\n誰能接觸燈控，誰就能決定亮燈的時間。',
+    svgImage: '/svg/items/schedule_modified.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
+  'item_cleaning_note': {
+    id: 'item_cleaning_note',
+    name: '清潔備忘',
+    description: '廁所區域的清潔備忘。\n\n垃圾桶被清得很乾淨，像是有人刻意整理過。\n這種「乾淨」本身就很可疑。',
+    svgImage: '/svg/items/black_plastic_fragment.svg',
+    svgSize: 'small',
+    collectible: true,
+  },
+
   // 第二章：城市碎片（嫌犯 A）
   'item_recorder': {
     id: 'item_recorder',
@@ -381,14 +397,9 @@ export const scenes: Record<string, Scene> = {
       {
         id: 'ch1_wrapup',
         name: '章末收束',
-        description: '與林瑞堂最後確認，觸發章末收束與態度宣言。',
+        description: '與林瑞堂確認（選用劇情，不接態度宣言）。',
         requirements: [
           { type: 'hasInteracted', hotspotId: 'hotspot_ch1_wrapup' },
-          { type: 'hasFlag', flag: 'npc_lin_key_done', value: true },
-          { type: 'hasFlag', flag: 'npc_ashun_key_done', value: true },
-          { type: 'hasFlag', flag: 'npc_xiaozhang_key_done', value: true },
-          { type: 'hasFlag', flag: 'npc_zhou_jie_key_done', value: true },
-          { type: 'custom', customCheck: (state) => !state.flags.ch1_attitude_declared },
         ],
         effects: [
           {
@@ -403,29 +414,14 @@ export const scenes: Record<string, Scene> = {
                   nextDialog: {
                     text: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，就是在正常裡動手。',
                     type: 'narrator',
-                    choices: [
-                      {
-                        id: 'ch1_mood_continue',
-                        text: '繼續',
-                        nextDialog: {
-                          text: '你的態度宣言——',
-                          type: 'narrator',
-                          choices: [
-                            { id: 'ch1_attitude_procedure', text: '「我會要求官方做全面稽核。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-                            { id: 'ch1_attitude_evidence', text: '「我先不驚動體系，先把動線與權限畫出來。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-                            { id: 'ch1_attitude_human', text: '「我想知道誰在遮蔽，遮蔽的原因。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-                            { id: 'ch1_attitude_both', text: '「我兩邊都要：上報，但先留底。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }, { target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-                          ],
-                        },
-                      },
-                    ],
+                    choices: [{ id: 'close_only', text: '知道了' }],
                   },
                 },
               ],
             },
           },
         ],
-        oneTime: true,
+        oneTime: false,
       },
       // 好笑無意義互動（放映廳）
       { id: 'fun_popcorn', name: '爆米花殘渣', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_popcorn' }], effects: [{ type: 'showDialog', dialog: { text: '地上有幾顆沒吃完的爆米花。你忍不住想：最後一場電影，有人連結局都沒看完。', type: 'narrator' } }], oneTime: false },
@@ -457,6 +453,67 @@ export const scenes: Record<string, Scene> = {
           },
           { type: 'setFlag', flag: 'puzzle_ch1_solved', value: true },
           { type: 'setFlag', flag: 'chapter2_unlocked', value: true },
+        ],
+      },
+      // 第一章章末：解謎（6 道具選 3 個，三組正確組合各對應一條線索，集滿即完成）
+      {
+        id: 'ch1_pair_matching',
+        type: 'pick_three',
+        solution: [
+          ['item_ticket_stub', 'item_schedule_modified', 'item_projector_notes'],
+          ['item_projector_notes', 'item_light_control_note', 'item_schedule_modified'],
+          ['item_black_plastic_fragment', 'item_cleaning_note', 'item_ticket_stub'],
+        ],
+        hint: '選出三樣道具組合成線索。共有三種正確組合，集滿三條線索即完成。',
+        requirements: [
+          { type: 'hasItem', itemId: 'item_ticket_stub' },
+          { type: 'hasItem', itemId: 'item_schedule_modified' },
+          { type: 'hasItem', itemId: 'item_projector_notes' },
+          { type: 'hasItem', itemId: 'item_light_control_note' },
+          { type: 'hasItem', itemId: 'item_black_plastic_fragment' },
+          { type: 'hasItem', itemId: 'item_cleaning_note' },
+        ],
+        config: {
+          clues: [
+            '【推理】場次與亮燈時間完全吻合——兇手清楚知道何時熄燈、何時亮燈，才能利用這段黑暗行動。這表示他熟悉放映流程或能取得時程。',
+            '【推理】有人下達了「延後亮燈」的指示，且此人能接觸燈控。兇手若非親自操作，就是能影響操作者，代表具備內部權限或人際管道。',
+            '【推理】手套碎片出現在洗手台下方，且該處有異常清潔痕跡。可推論：兇手在現場處理過物品並刻意清理，熟悉動線且不想留下證據。',
+          ],
+        },
+        onSolve: [
+          { type: 'setFlag', flag: 'ch1_puzzle_done', value: true },
+        ],
+      },
+      // 第一章章末：推理題一（含混淆詞增加難度）
+      {
+        id: 'ch1_reasoning_1',
+        type: 'arrangement',
+        solution: ['兇手', '在', '規定的黑暗裡', '動手'],
+        hint: '請將打亂的字詞排成一句與案情有關的完整句子。',
+        requirements: [],
+        config: { distractors: ['也許', '然後', '觀眾', '燈光', '銀幕'] },
+        onSolve: [],
+      },
+      // 第一章章末：推理題二
+      {
+        id: 'ch1_reasoning_2',
+        type: 'arrangement',
+        solution: ['散場', '延後亮燈', '三分鐘', '是', '關鍵'],
+        hint: '請將打亂的字詞排成一句與案情有關的完整句子。',
+        requirements: [],
+        config: { distractors: ['所以', '因此', '流程', '清潔', '出口'] },
+        onSolve: [],
+      },
+      // 第一章章末：推理題三
+      {
+        id: 'ch1_reasoning_3',
+        type: 'arrangement',
+        solution: ['手套', '碎片', '留在', '洗手台', '下方'],
+        hint: '請將打亂的字詞排成一句與案情有關的完整句子。',
+        requirements: [],
+        config: { distractors: ['可能', '似乎', '廁所', '鏡子', '垃圾桶'] },
+        onSolve: [
+          { type: 'setFlag', flag: 'ch1_reasoning_done', value: true },
         ],
       },
     ],
@@ -586,6 +643,7 @@ export const scenes: Record<string, Scene> = {
     items: [
       items.item_schedule_modified,
       items.item_projector_notes,
+      items.item_light_control_note,
     ],
     hotspotEventMap: {
       'hotspot_screening_schedule': 'examine_screening_schedule',
@@ -629,11 +687,12 @@ export const scenes: Record<string, Scene> = {
           { type: 'hasInteracted', hotspotId: 'hotspot_light_control_panel' },
         ],
         effects: [
+          { type: 'addItem', itemId: 'item_light_control_note' },
           {
             type: 'showDialog',
             dialog: {
-              text: '燈控面板上的開關位置顯示：手動模式。\n\n這不是自動系統，需要有人親自操作。\n當天，有人選擇了手動控制。',
-              type: 'narrator',
+              text: '獲得：燈控紀錄\n\n燈控面板上的開關位置顯示：手動模式。\n\n這不是自動系統，需要有人親自操作。\n當天，有人選擇了手動控制。',
+              type: 'item',
             },
           },
           { type: 'setFlag', flag: 'clue_manual_light_control', value: true },
@@ -1132,25 +1191,10 @@ export const scenes: Record<string, Scene> = {
       { id: 'hotspot_fun_air_freshener', shape: 'rect', coords: [0.78, 0.15, 0.92, 0.28], description: '芳香劑', hint: '自動芳香劑。' },
       { id: 'hotspot_fun_faucet', shape: 'rect', coords: [0.42, 0.72, 0.58, 0.88], description: '水龍頭', hint: '水龍頭。' },
       { id: 'hotspot_fun_floor', shape: 'rect', coords: [0.5, 0.82, 0.7, 0.95], description: '地板反光', hint: '地板擦得很亮。' },
-      // 15 個謎題測試互動點（測試用）
-      { id: 'hotspot_test_input', shape: 'rect', coords: [0.02, 0.02, 0.14, 0.10], description: '測試-文字輸入', hint: '測試用。答案：TEST' },
-      { id: 'hotspot_test_sequence', shape: 'rect', coords: [0.18, 0.02, 0.30, 0.10], description: '測試-順序', hint: '測試用。答案順序：A,B,C' },
-      { id: 'hotspot_test_arrangement', shape: 'rect', coords: [0.34, 0.02, 0.46, 0.10], description: '測試-排列', hint: '測試用。答案順序：item1,item2,item3' },
-      { id: 'hotspot_test_combination', shape: 'rect', coords: [0.50, 0.02, 0.62, 0.10], description: '測試-組合', hint: '測試用。答案：id_a,id_b' },
-      { id: 'hotspot_test_visual_selection', shape: 'rect', coords: [0.66, 0.02, 0.78, 0.10], description: '測試-視覺選擇', hint: '測試用。答案：選「正確」' },
-      { id: 'hotspot_test_combination_lock', shape: 'rect', coords: [0.82, 0.02, 0.94, 0.10], description: '測試-密碼鎖', hint: '測試用。答案：12345' },
-      { id: 'hotspot_test_word_scramble', shape: 'rect', coords: [0.02, 0.14, 0.14, 0.22], description: '測試-拼字', hint: '測試用。答案：PUZZLE' },
-      { id: 'hotspot_test_wire_connection', shape: 'rect', coords: [0.18, 0.14, 0.30, 0.22], description: '測試-線對接', hint: '測試用。接對四條線即過' },
-      { id: 'hotspot_test_jigsaw', shape: 'rect', coords: [0.34, 0.14, 0.46, 0.22], description: '測試-拼圖', hint: '測試用。完成拼圖即過' },
-      { id: 'hotspot_test_rotating_dial', shape: 'rect', coords: [0.50, 0.14, 0.62, 0.22], description: '測試-旋轉轉盤', hint: '測試用。答案：[0,2,1,3] 四盤依序' },
-      { id: 'hotspot_test_sequence_memory', shape: 'rect', coords: [0.66, 0.14, 0.78, 0.22], description: '測試-序列記憶', hint: '測試用。答案：A,B,C,D' },
-      { id: 'hotspot_test_sliding_puzzle', shape: 'rect', coords: [0.82, 0.14, 0.94, 0.22], description: '測試-滑塊拼圖', hint: '測試用。排好即過' },
-      { id: 'hotspot_test_symbol_matching', shape: 'rect', coords: [0.02, 0.26, 0.14, 0.34], description: '測試-符號配對', hint: '測試用。配對完即過' },
-      { id: 'hotspot_test_maze_path', shape: 'rect', coords: [0.18, 0.26, 0.30, 0.34], description: '測試-迷宮', hint: '測試用。從起點走到終點即過' },
-      { id: 'hotspot_test_logic_switches', shape: 'rect', coords: [0.34, 0.26, 0.46, 0.34], description: '測試-邏輯開關', hint: '測試用。答案：s1開 s2關 s3開' },
     ],
     items: [
       items.item_black_plastic_fragment,
+      items.item_cleaning_note,
     ],
     hotspotEventMap: {
       'hotspot_sink_below': 'examine_sink_below',
@@ -1193,11 +1237,12 @@ export const scenes: Record<string, Scene> = {
           { type: 'hasInteracted', hotspotId: 'hotspot_trash_bin' },
         ],
         effects: [
+          { type: 'addItem', itemId: 'item_cleaning_note' },
           {
             type: 'showDialog',
             dialog: {
-              text: '垃圾桶裡很乾淨，幾乎是空的。\n\n沒有血跡，沒有可疑物品。\n垃圾被清得很乾淨，像是有人刻意整理過。\n\n但這種「乾淨」本身就很可疑。',
-              type: 'narrator',
+              text: '獲得：清潔備忘\n\n垃圾桶裡很乾淨，幾乎是空的。\n\n沒有血跡，沒有可疑物品。\n垃圾被清得很乾淨，像是有人刻意整理過。\n\n但這種「乾淨」本身就很可疑。',
+              type: 'item',
             },
           },
           { type: 'setFlag', flag: 'clue_clean_trash', value: true },
