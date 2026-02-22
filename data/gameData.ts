@@ -16,9 +16,9 @@ export const prologueSlides: string[] = [
   '你拉上外套，拿起筆記本，展開了一個新的任務。',
 ];
 
-// 道具定義 - 第一章：電影院 A
+// 道具定義 - 第一章：城市影城
 export const items: Record<string, Item> = {
-  // 第一章：電影院 A（命案現場）
+  // 第一章：城市影城（命案現場）
   'item_ticket_stub': {
     id: 'item_ticket_stub',
     name: '電影票根',
@@ -239,12 +239,12 @@ export const items: Record<string, Item> = {
 
 // 場景資料
 export const scenes: Record<string, Scene> = {
-  // ========== 第一章：電影院 A ==========
-  // 可探索空間一：電影院 A（命案現場）
+  // ========== 第一章：城市影城 ==========
+  // 可探索空間一：城市影城（命案現場）
   'scene_ch1_cinema_a_hall': {
     id: 'scene_ch1_cinema_a_hall',
     chapterId: 'ch1',
-    name: '電影院 A 放映廳',
+    name: '城市影城 放映廳',
     description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
     background: '/images/bg_ch1_cinema_a_hall_v1.png',
     hotspots: [
@@ -1797,7 +1797,7 @@ export const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '公告欄上貼著各種通知和活動海報。\n\n其中一張電影海報特別顯眼：\n正是電影院 A 播映的那部電影。\n\n海報已經有些破舊，像是貼了很久。',
+              text: '公告欄上貼著各種通知和活動海報。\n\n其中一張電影海報特別顯眼：\n正是城市影城 播映的那部電影。\n\n海報已經有些破舊，像是貼了很久。',
               type: 'narrator',
             },
           },
@@ -1907,7 +1907,7 @@ export const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '牆上的時鐘停在 23:10。\n\n不是電池沒電，而是被人刻意停止。\n這個時間，正好是電影院 A 案發的時間。\n\n他對「時間」有意識。',
+              text: '牆上的時鐘停在 23:10。\n\n不是電池沒電，而是被人刻意停止。\n這個時間，正好是城市影城 案發的時間。\n\n他對「時間」有意識。',
               type: 'narrator',
             },
           },
@@ -1979,7 +1979,7 @@ export const scenes: Record<string, Scene> = {
         id: 'puzzle_ch2_suspect_a_alibi',
         type: 'input',
         solution: '不可能',
-        hint: '時間計算：\n1. 22:30 離開辦公大樓\n2. 最快到達電影院 A：23:10（需要40分鐘）\n3. 但案發時間是 23:10-23:15\n\n結論：時間上幾乎不可能',
+        hint: '時間計算：\n1. 22:30 離開辦公大樓\n2. 最快到達城市影城：23:10（需要40分鐘）\n3. 但案發時間是 23:10-23:15\n\n結論：時間上幾乎不可能',
         requirements: [
           { type: 'hasItem', itemId: 'item_visitor_log' },
           { type: 'hasFlag', flag: 'clue_time_awareness', value: true },
@@ -3449,11 +3449,11 @@ export const scenes: Record<string, Scene> = {
 export const chapters: Record<string, Chapter> = {
   ch1: {
     id: 'ch1',
-    name: '第一章：電影院 A',
+    name: '第一章：城市影城',
     description: '死在散場之後的人',
     scenes: ['scene_ch1_cinema_a_hall', 'scene_ch1_projection_room', 'scene_ch1_restroom'],
     intro: {
-      title: '第一章：電影院 A',
+      title: '第一章：城市影城',
       subtitle: '死在散場之後的人',
       description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
       moodText: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，就是在正常裡動手。',

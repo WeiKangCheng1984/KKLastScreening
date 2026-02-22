@@ -92,7 +92,7 @@ export default function SceneNameDisplay({
             >
               {/* 使用故障文字效果 */}
               <div
-                className="text-[clamp(1.95rem,7.8vw,5.2rem)] md:text-[clamp(2.6rem,9.75vw,6.5rem)] font-black text-orange-400 tracking-wider leading-none"
+                className="text-[clamp(1.95rem,7.8vw,5.2rem)] font-black text-orange-400 tracking-wider leading-none"
                 style={{
                   textShadow: `
                     0 0 20px rgba(251, 146, 60, 0.5),

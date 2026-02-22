@@ -28,14 +28,16 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg relative overflow-hidden">
-      {/* 主選單底圖 WEBP：以手機直式滿版為主。建議 1080×1920（9:16），≤250KB，置於 /images/main_bg_placeholder.webp */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
-        style={{ backgroundImage: 'url(/images/main_bg_placeholder.webp)' }}
-      />
-      {/* 背景粒子效果 */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
+    <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+      {/* 桌面版：手機型窄版置中（與遊戲內一致） */}
+      <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg relative overflow-hidden md:max-w-[428px] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:border md:border-dark-border/50 md:[transform:translateZ(0)]">
+        {/* 主選單底圖 WEBP：以手機直式滿版為主。建議 1080×1920（9:16），≤250KB，置於 /images/main_bg_placeholder.webp */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+          style={{ backgroundImage: 'url(/images/main_bg_placeholder.webp)' }}
+        />
+        {/* 背景粒子效果 */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -63,8 +65,8 @@ export default function Home() {
       <div className={`text-center max-w-2xl px-4 transition-all duration-800 ${
         isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
       }`}>
-        <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent animate-fade-float" style={{ animationDelay: '0.1s' }}>
-          KK流程偵探：最後一場放映
+        <h1 className="text-[2.7rem] md:text-[3.375rem] font-bold mb-6 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent animate-fade-float text-center" style={{ animationDelay: '0.1s' }}>
+          KK流程偵探 最後一場放映
         </h1>
         <p className="text-lg text-orange-300/80 mb-8 animate-fade-float" style={{ animationDelay: '0.2s' }}>
           凌晨 00:19，一通沒有顯示來電的電話。城市影城，散場後五分鐘，有人死在 H 排 12 號。散場的燈，延後三分鐘亮起——你不是警察，你是 KK。
@@ -80,6 +82,7 @@ export default function Home() {
         <div className="mt-10 text-sm text-orange-200/60 animate-fade-float" style={{ animationDelay: '0.4s' }}>
           <p>使用滑鼠點擊場景中的物件進行互動</p>
         </div>
+      </div>
       </div>
     </div>
   );

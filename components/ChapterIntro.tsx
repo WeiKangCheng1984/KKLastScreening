@@ -356,8 +356,8 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
         {currentLayer >= 1 && (
           isChapter1 ? (
             <div className="opacity-100">
-              <h1 className="text-4xl md:text-6xl font-bold mb-2 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent">
-                {chapter.intro.title}
+              <h1 className="text-[2.025rem] md:text-[3.375rem] font-bold mb-2 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent text-center whitespace-pre-line">
+                {chapter.intro.title.replace(/：/g, '\n')}
               </h1>
               <p className="text-lg md:text-xl text-orange-300/80 mb-4">
                 {chapter.intro.subtitle}
@@ -365,8 +365,8 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
             </div>
           ) : (
             <SlideIn direction="up" delay={0.5} duration={1}>
-              <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent">
-                {chapter.intro.title}
+              <h1 className="text-[2.7rem] md:text-[4.05rem] font-bold mb-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent text-center whitespace-pre-line">
+                {chapter.intro.title.replace(/：/g, '\n')}
               </h1>
               <p className="text-xl md:text-2xl text-orange-300/80 mb-8">
                 {chapter.intro.subtitle}

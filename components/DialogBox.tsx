@@ -16,6 +16,8 @@ interface DialogBoxProps {
   mode?: 'normal' | 'npc'; // 新增：NPC 模式
   npcChoices?: NpcDialogChoice[]; // 新增：NPC 對話選項
   onNpcChoiceSelect?: (choiceId: string) => void; // 新增：NPC 選擇回調
+  /** 是否預留底部空間（如序章頁的略過按鈕），手機版對話框會上移 */
+  reserveBottomSpace?: boolean;
 }
 
 export default function DialogBox({ 
@@ -27,6 +29,7 @@ export default function DialogBox({
   mode = 'normal',
   npcChoices,
   onNpcChoiceSelect,
+  reserveBottomSpace = false,
 }: DialogBoxProps) {
   const [displayText, setDisplayText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
@@ -176,9 +179,11 @@ export default function DialogBox({
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-end justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none md:items-center md:p-8 md:pb-8 transition-opacity duration-500 ${
-        isVisible ? 'opacity-100' : 'opacity-0'
-      }`}
+      className={`fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8 md:pb-8 transition-opacity duration-500 ${
+        reserveBottomSpace
+          ? 'pb-[calc(3.5rem+max(1rem,env(safe-area-inset-bottom)))] md:pb-8'
+          : 'pb-[max(1rem,env(safe-area-inset-bottom))]'
+      } ${isVisible ? 'opacity-100' : 'opacity-0'}`}
     >
       <div
       className={`w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] flex flex-col p-4 rounded-lg border-2 backdrop-blur-xl ${styles.container} pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${

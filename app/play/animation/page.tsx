@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useRef, useState } from 'react';
-import { Play, SkipForward } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { getStep, getNextPath } from '@/data/flowConfig';
 
 const STEP_ID = 'animation_1';
@@ -36,15 +36,17 @@ export default function AnimationPage() {
   }, [goNext]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden p-3 sm:p-4">
-      {isTransitioning && (
-        <div className="fixed inset-0 z-50 bg-black animate-in fade-in duration-500 flex items-center justify-center">
-          <p className="text-orange-300">載入中...</p>
-        </div>
-      )}
+    <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+      {/* 桌面版：手機型窄版置中（與遊戲內一致） */}
+      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden p-3 sm:p-4 md:max-w-[428px] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:border md:border-dark-border/50 md:[transform:translateZ(0)]">
+        {isTransitioning && (
+          <div className="fixed inset-0 z-50 bg-black animate-in fade-in duration-500 flex items-center justify-center">
+            <p className="text-orange-300">載入中...</p>
+          </div>
+        )}
 
-      {/* 動畫框架：正方形 1:1、手機可完整呈現、雅致細框 */}
-      <div className="relative aspect-square w-[min(85vw,75vh)] max-w-[380px] overflow-hidden rounded-2xl border border-white/15 bg-neutral-950 shadow-xl shadow-black/40 ring-1 ring-inset ring-white/5">
+        {/* 動畫框架：正方形 1:1、手機可完整呈現、雅致細框 */}
+        <div className="relative aspect-square w-[min(85vw,75vh)] max-w-[380px] overflow-hidden rounded-2xl border border-white/15 bg-neutral-950 shadow-xl shadow-black/40 ring-1 ring-inset ring-white/5">
         {videoSrc ? (
           <>
             <video
@@ -83,29 +85,19 @@ export default function AnimationPage() {
         )}
       </div>
 
-      {/* 略過：置中下方 */}
-      {videoSrc && isPlaying && (
-        <div className="mt-4 flex justify-center sm:mt-6">
-          <button
-            type="button"
-            onClick={goNext}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/30 text-orange-100 rounded-xl text-sm font-medium"
-          >
-            略過
-          </button>
-        </div>
-      )}
-
-      {/* 右下角：快速測試流程前進（在「跳過第一章」左側） */}
-      <button
-        type="button"
-        onClick={goNext}
-        className="fixed bottom-6 right-44 z-20 inline-flex items-center gap-2 px-4 py-2 bg-orange-600/80 hover:bg-orange-600 border border-orange-400/50 text-white rounded-lg text-sm font-medium shadow-lg"
-        title="快速測試：跳過並進入下一步"
-      >
-        <SkipForward size={18} />
-        下一段
-      </button>
+        {/* 略過（與序章文案同風格：置於畫面下方中央） */}
+        {videoSrc && (
+          <div className="fixed left-0 right-0 flex justify-center z-20 pointer-events-auto pb-[max(0.5rem,env(safe-area-inset-bottom))] bottom-6">
+            <button
+              type="button"
+              onClick={goNext}
+              className="text-sm text-orange-200/60 hover:text-orange-200/80 underline underline-offset-2"
+            >
+              略過
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
