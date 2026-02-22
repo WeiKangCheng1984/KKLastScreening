@@ -7,6 +7,29 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        heading: [
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          'sans-serif',
+        ],
+        body: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          'Oxygen',
+          'Ubuntu',
+          'Cantarell',
+          'Fira Sans',
+          'Droid Sans',
+          '"Helvetica Neue"',
+          'sans-serif',
+        ],
+      },
       colors: {
         dark: {
           bg: '#0a0a0a',

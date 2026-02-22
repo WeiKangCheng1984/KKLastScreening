@@ -12,6 +12,11 @@ function getNpcAvatarSrc(npc: Npc): string | null {
   return getNpcPortraitUrl(npc.id, npc.portraitExpression ?? 1);
 }
 
+/** 人名與職稱斷行：在「（」前換行，例如 "林瑞堂（副理）" → 兩行顯示 */
+function formatNpcNameWithBreak(name: string): string {
+  return name.replace(/（/g, '\n（');
+}
+
 interface NpcRightStripProps {
   npcs: Npc[];
   onNpcClick: (npcId: string) => void;
@@ -37,13 +42,13 @@ export default function NpcRightStrip({
 
   return (
     <motion.div
-      initial={{ x: 20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: 20, opacity: 0 }}
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -10, opacity: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="fixed right-3 top-1/2 z-30 flex flex-col gap-2 -translate-y-1/2 pointer-events-none"
+      className="fixed left-1/2 -translate-x-1/2 top-20 z-30 flex flex-row gap-2 pointer-events-none"
     >
-      <div className="flex flex-col gap-2 pointer-events-auto">
+      <div className="flex flex-row gap-2 flex-wrap justify-center max-w-[min(90vw,960px)] overflow-x-auto overflow-y-hidden py-1 pointer-events-auto">
         <AnimatePresence>
           {availableNpcs.map((npc) => (
             <motion.button
@@ -56,11 +61,11 @@ export default function NpcRightStrip({
               onMouseEnter={() => setHoveredNpc(npc.id)}
               onMouseLeave={() => setHoveredNpc(null)}
               onClick={() => onNpcClick(npc.id)}
-              className="relative flex flex-col items-center gap-0.5 rounded-lg transition-colors hover:bg-white/10 group"
+              className="relative flex flex-col items-center gap-0.5 rounded-lg transition-colors hover:bg-white/10 group flex-shrink-0"
               title={npc.name}
             >
               <div
-                className={`relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-white/10 border-2 transition-colors flex-shrink-0 ${
+                className={`relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-white/10 border-2 transition-colors flex-shrink-0 ${
                   npc.id === activeNpcId
                     ? 'border-orange-400 ring-2 ring-orange-400/60 ring-offset-2 ring-offset-black/60'
                     : 'border-white/30 group-hover:border-white/50'
@@ -80,7 +85,7 @@ export default function NpcRightStrip({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-white/60" />
+                    <User className="w-5 h-5 text-white/60" />
                   </div>
                 )}
                 {hoveredNpc === npc.id && (
@@ -91,17 +96,17 @@ export default function NpcRightStrip({
                   />
                 )}
               </div>
-              <span className="text-[10px] md:text-xs text-white/80 group-hover:text-white text-center max-w-[4.5rem] min-w-0 leading-tight line-clamp-2 break-words">
-                {npc.name}
+              <span className="text-[10px] text-white/80 group-hover:text-white text-center min-w-[6em] max-w-[5.5rem] leading-tight line-clamp-2 break-words whitespace-pre-line">
+                {formatNpcNameWithBreak(npc.name)}
               </span>
               {hoveredNpc === npc.id && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="absolute right-full mr-2 top-1/2 -translate-y-1/2 flex flex-col items-end pointer-events-none z-10"
+                  className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 flex flex-col items-center pointer-events-none z-10"
                 >
-                  <div className="bg-black/90 text-white text-xs font-medium px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                    {npc.name}
+                  <div className="bg-black/90 text-white text-xs font-medium px-2 py-1 rounded whitespace-pre-line text-center shadow-lg min-w-[6em]">
+                    {formatNpcNameWithBreak(npc.name)}
                   </div>
                   <div className="text-[10px] text-white/80 px-1.5 py-0.5 rounded bg-black/70 whitespace-nowrap">
                     點擊對話

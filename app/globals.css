@@ -13,10 +13,7 @@
   }
 
   body {
-    @apply bg-dark-bg text-gray-200;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+    @apply bg-dark-bg text-gray-200 font-body;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -41,6 +38,17 @@
 }
 
 @layer utilities {
+  /* UI 字體階層 */
+  .text-ui-title {
+    @apply font-heading font-semibold text-base;
+  }
+  .text-ui-body {
+    @apply font-body text-[0.95rem] leading-relaxed;
+  }
+  .text-ui-caption {
+    @apply font-body text-xs text-gray-500 tracking-wider;
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;

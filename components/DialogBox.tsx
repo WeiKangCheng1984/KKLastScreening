@@ -176,18 +176,18 @@ export default function DialogBox({
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8 transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 flex items-end justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none md:items-center md:p-8 md:pb-8 transition-opacity duration-500 ${
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
     >
       <div
-      className={`w-[min(360px,calc(100vw-2rem))] max-h-[85vh] min-h-[200px] flex flex-col p-4 rounded-lg border-2 backdrop-blur-xl ${styles.container} pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${
+      className={`w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] flex flex-col p-4 rounded-lg border-2 backdrop-blur-xl ${styles.container} pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${
         isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'
       }`}
       >
         {/* 標題欄 - 添加圖示動畫 */}
-        <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/10 flex-shrink-0 gap-2">
-          <div className={`text-xs uppercase tracking-widest font-semibold ${styles.icon} flex items-center gap-2 min-w-0 break-words flex-1`}>
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/10 flex-shrink-0 gap-2">
+          <div className={`text-ui-title text-xs uppercase tracking-widest ${styles.icon} flex items-center gap-2 min-w-0 break-words flex-1`}>
             {dialog.type === 'broadcast' && (
               <span className={`w-2 h-2 bg-red-400 rounded-full ${styles.pulse}`}></span>
             )}
@@ -196,7 +196,9 @@ export default function DialogBox({
             {mode !== 'npc' && dialog.type === 'item' && '道具'}
             {mode !== 'npc' && dialog.type === 'system' && '系統'}
             {mode !== 'npc' && dialog.type === 'choice' && '選擇'}
-            {mode !== 'npc' && dialog.type === 'character' && (dialog.characterName || '角色')}
+            {mode !== 'npc' && dialog.type === 'character' && (
+              <span className="whitespace-pre-line min-w-[6em]">{(dialog.characterName || '角色').replace(/（/g, '\n（')}</span>
+            )}
             {mode !== 'npc' && !dialog.type && '旁白'}
           </div>
           <div className="flex items-center gap-2">

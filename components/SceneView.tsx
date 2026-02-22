@@ -218,9 +218,9 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
       // 計算中心點位置
       const centerX = (x + width) / 2;
       const centerY = (y + height) / 2;
-      // 使用 clamp() 響應式大小：最小 40px，理想 4vw，最大 64px
-      // 手機端會自動縮小，桌面端保持 64px
-      const responsiveSize = 'clamp(40px, 4vw, 64px)';
+      // 使用 clamp() 響應式大小：最小 40px，理想 4vw，最大 44px
+      // 手機端約 40px 剛好；桌面端不放大，維持與手機相近的點擊區
+      const responsiveSize = 'clamp(40px, 4vw, 44px)';
       
       return {
         position: 'absolute',

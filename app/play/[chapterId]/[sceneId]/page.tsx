@@ -26,7 +26,7 @@ import MazePath from '@/components/MazePath';
 import LogicSwitches from '@/components/LogicSwitches';
 import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
-import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, ListOrdered, FlaskConical } from 'lucide-react';
+import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, ListOrdered, FlaskConical, Brain } from 'lucide-react';
 import Link from 'next/link';
 import { audioManager } from '@/lib/audioManager';
 import { scenes, chapters, items } from '@/data/gameData';
@@ -2537,11 +2537,13 @@ export default function PlayPage() {
 
   return (
     <div className="relative min-h-screen bg-dark-bg overflow-hidden">
-      {/* 新手引導 */}
-      <TutorialGuide onComplete={handleTutorialComplete} />
-      
-      {/* 場景視圖 - 全屏沉浸式（不再因背包移動） */}
-      <div className="absolute inset-0">
+      {/* 桌面版：手機型窄版置中（約 428px），讓電腦玩家看到與手機相近的布局 */}
+      <div className="w-full min-h-screen md:max-w-[428px] md:mx-auto md:min-h-screen md:relative md:shadow-2xl md:rounded-[2rem] md:overflow-hidden md:[transform:translateZ(0)] md:border md:border-dark-border/50">
+        {/* 新手引導 */}
+        <TutorialGuide onComplete={handleTutorialComplete} />
+        
+        {/* 場景視圖 - 全屏沉浸式（不再因背包移動） */}
+        <div className="absolute inset-0">
         {/* 場景名稱顯示 */}
         {showSceneName && currentSceneName && (
           <SceneNameDisplay
@@ -2567,7 +2569,7 @@ export default function PlayPage() {
         <div className={`h-full w-full flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 gpu-accelerated ${
           isSceneTransitioning ? 'opacity-0' : 'opacity-100'
         }`}>
-          <div className={`relative w-full max-w-4xl aspect-square bg-dark-surface/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-dark-border/50 shadow-2xl transform transition-all duration-500 gpu-accelerated ${
+          <div className={`relative w-full max-w-[min(90vw,960px)] aspect-square bg-dark-surface/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-dark-border/50 shadow-2xl transform transition-all duration-500 gpu-accelerated ${
             isSceneTransitioning ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
           }`}>
             <SceneView
@@ -2582,10 +2584,10 @@ export default function PlayPage() {
             {prevScene && (
               <button
                 onClick={() => handleSceneNavigation(prevScene.id)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-12 h-12 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-6 h-6 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
                 title={`前往：${prevScene.name}`}
               >
-                <ChevronLeft size={24} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+                <ChevronLeft size={12} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
               </button>
             )}
             
@@ -2593,10 +2595,10 @@ export default function PlayPage() {
             {nextScene && (
               <button
                 onClick={() => handleSceneNavigation(nextScene.id)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-12 h-12 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-6 h-6 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
                 title={`前往：${nextScene.name}`}
               >
-                <ChevronRight size={24} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+                <ChevronRight size={12} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
               </button>
             )}
           </div>
@@ -2663,10 +2665,11 @@ export default function PlayPage() {
         <button
           type="button"
           onClick={() => setShowReasoningPanel(true)}
-          className="fixed bottom-20 right-6 z-30 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/90 hover:bg-orange-500 border-2 border-orange-400/80 text-white font-medium shadow-lg hover:scale-105 transition-all"
+          className="fixed bottom-20 right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-orange-500/90 hover:bg-orange-500 border-2 border-orange-400/80 text-white text-sm font-medium shadow-lg hover:scale-105 transition-all"
           title="推理分析"
         >
-          <FlaskConical size={24} />
+          <Brain size={20} />
+          <span>推理分析</span>
         </button>
       )}
 
@@ -2738,148 +2741,158 @@ export default function PlayPage() {
                 transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
                 className="fixed top-0 right-0 h-full w-72 max-w-[85vw] bg-dark-surface/98 backdrop-blur-xl border-l border-dark-border shadow-2xl z-50 overflow-y-auto"
               >
-              <div className="p-2 space-y-1 pt-14">
-                {/* 背包 */}
-                <button
-                  onClick={() => {
-                    setShowInventory(!showInventory);
-                    setShowMenu(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
-                >
-                  <Package size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
-                  <span>背包</span>
-                  {state.inventory.length > 0 && (
-                    <span className="ml-auto w-6 h-6 bg-industrial-orange rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
-                      {state.inventory.length}
-                    </span>
-                  )}
-                </button>
-
-                {/* 第一章：解謎、推理（選單內自選） */}
-                {chapterId === 'ch1' && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setShowMenu(false);
-                        const inv = engineRef.current?.getState().inventory ?? [];
-                        const required = ['item_ticket_stub', 'item_schedule_modified', 'item_projector_notes', 'item_light_control_note', 'item_black_plastic_fragment', 'item_cleaning_note'];
-                        const hasAll = required.every((id) => inv.includes(id));
-                        if (!hasAll) {
-                          setCurrentDialog({
-                            text: '請先收集齊第一章的六個道具：電影票根、播映時間表（塗改）、放映員的筆記、燈控紀錄、黑色塑膠碎片、清潔備忘。',
-                            type: 'narrator',
-                            choices: [{ id: 'close_only', text: '知道了' }],
-                          });
-                        } else {
-                          setShowCh1PairPuzzle(true);
-                        }
-                        setRefreshKey((prev) => prev + 1);
-                      }}
-                      className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
-                    >
-                      <span className="flex items-center gap-3">
-                        <Puzzle size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
-                        <span>解謎</span>
-                      </span>
-                      {state.flags?.ch1_puzzle_done && <span className="text-xs text-green-400">已完成</span>}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowMenu(false);
-                        setCh1ReasoningStep(0);
-                        setShowCh1ReasoningPuzzle(true);
-                        setRefreshKey((prev) => prev + 1);
-                      }}
-                      className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
-                    >
-                      <span className="flex items-center gap-3">
-                        <ListOrdered size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
-                        <span>推理</span>
-                      </span>
-                      {state.flags?.ch1_reasoning_done && <span className="text-xs text-green-400">已完成</span>}
-                    </button>
-                  </>
-                )}
-                
-                {/* 音量控制 */}
-                <div className="px-4 py-3 bg-dark-card/50 border border-dark-border/50 rounded-lg">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-sm font-medium text-gray-300">音量控制</span>
-                  </div>
-                  <AudioControl />
-                </div>
-                
-                {/* 計分系統（KK 洞察三維度；dev=1 時顯示舊 preferences） */}
-                <div className="px-4 py-3 bg-dark-card/50 border border-dark-border/50 rounded-lg">
-                  <ScoreDisplay gameState={state} showLegacyWeights={devMode} />
-                </div>
-                
-                {/* 開發者模式：選單內開關，不再使用網址參數 */}
-                <button
-                  onClick={() => {
-                    if (devMode) {
-                      setShowDeveloperPanel((prev) => !prev);
-                    } else {
-                      setDevModeAndPersist(true);
-                      setShowDeveloperPanel(true);
-                    }
-                    setShowMenu(false);
-                  }}
-                  className={`w-full flex items-center justify-between gap-3 px-4 py-3 border rounded-lg transition-all duration-200 text-sm font-medium group ${
-                    devMode
-                      ? showDeveloperPanel
-                        ? 'bg-industrial-orange/30 border-industrial-orange text-orange-200 hover:bg-industrial-orange/40'
-                        : 'bg-dark-card/50 border-dark-border/50 hover:border-industrial-orange/50 text-gray-300 hover:text-orange-200'
-                      : 'bg-dark-card/50 border-dark-border/50 text-gray-500 hover:bg-dark-card hover:text-gray-400'
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <Code size={18} className="group-hover:scale-110 transition-transform" />
-                    <span>{devMode ? '開發者模式 (開)' : '開啟開發者模式'}</span>
-                  </span>
-                  {devMode && <span className="text-xs text-green-400">開</span>}
-                </button>
-
-                {/* 測試模式：取得所有道具 */}
-                <div className="px-2 py-1">
-                  <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                    <FlaskConical size={12} />
-                    <span>測試模式</span>
-                  </div>
+              <div className="p-4 space-y-4 pt-16">
+                {/* 區塊一：遊戲 */}
+                <section className="space-y-4">
+                  <h3 className="text-ui-caption uppercase mb-2">遊戲</h3>
                   <button
                     onClick={() => {
-                      if (!engineRef.current) return;
-                      const allItemIds = Object.keys(items);
-                      allItemIds.forEach((id) => {
-                        engineRef.current!.applyEffect({ type: 'addItem', itemId: id });
-                      });
-                      setRefreshKey((prev) => prev + 1);
+                      setShowInventory(!showInventory);
                       setShowMenu(false);
-                      setCurrentDialog({
-                        text: `已取得全部 ${allItemIds.length} 個道具。`,
-                        type: 'narrator',
-                        choices: [{ id: 'close_only', text: '知道了' }],
-                      });
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-amber-500/50 rounded-lg text-gray-300 hover:text-amber-200 transition-all duration-200 text-sm font-medium group"
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
                   >
-                    <Package size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
-                    <span>取得所有道具</span>
+                    <Package size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
+                    <span>背包</span>
+                    {state.inventory.length > 0 && (
+                      <span className="ml-auto w-6 h-6 bg-industrial-orange rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                        {state.inventory.length}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* 解謎、推理：暫時隱藏 */}
+                  {false && chapterId === 'ch1' && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          const inv = engineRef.current?.getState().inventory ?? [];
+                          const required = ['item_ticket_stub', 'item_schedule_modified', 'item_projector_notes', 'item_light_control_note', 'item_black_plastic_fragment', 'item_cleaning_note'];
+                          const hasAll = required.every((id) => inv.includes(id));
+                          if (!hasAll) {
+                            setCurrentDialog({
+                              text: '請先收集齊第一章的六個道具：電影票根、播映時間表（塗改）、放映員的筆記、燈控紀錄、黑色塑膠碎片、清潔備忘。',
+                              type: 'narrator',
+                              choices: [{ id: 'close_only', text: '知道了' }],
+                            });
+                          } else {
+                            setShowCh1PairPuzzle(true);
+                          }
+                          setRefreshKey((prev) => prev + 1);
+                        }}
+                        className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
+                      >
+                        <span className="flex items-center gap-3">
+                          <Puzzle size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
+                          <span>解謎</span>
+                        </span>
+                        {state.flags?.ch1_puzzle_done && <span className="text-xs text-green-400">已完成</span>}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          setCh1ReasoningStep(0);
+                          setShowCh1ReasoningPuzzle(true);
+                          setRefreshKey((prev) => prev + 1);
+                        }}
+                        className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
+                      >
+                        <span className="flex items-center gap-3">
+                          <ListOrdered size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
+                          <span>推理</span>
+                        </span>
+                        {state.flags?.ch1_reasoning_done && <span className="text-xs text-green-400">已完成</span>}
+                      </button>
+                    </>
+                  )}
+                </section>
+
+                {/* 區塊二：設定 */}
+                <section className="space-y-4">
+                  <h3 className="text-ui-caption uppercase mb-2">設定</h3>
+                  <div className="px-4 py-3 bg-dark-card/50 border border-dark-border/50 rounded-lg">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-sm font-medium text-gray-300">音量控制</span>
+                    </div>
+                    <AudioControl />
+                  </div>
+                  {/* KK 洞察（計分）：暫時隱藏 */}
+                  {false && (
+                    <div className="px-4 py-3 bg-dark-card/50 border border-dark-border/50 rounded-lg">
+                      <ScoreDisplay gameState={state} showLegacyWeights={devMode} />
+                    </div>
+                  )}
+                </section>
+
+                {/* 區塊三：開發與測試 */}
+                <section className="space-y-4">
+                  <h3 className="text-ui-caption uppercase mb-2">開發與測試</h3>
+                  <button
+                    onClick={() => {
+                      if (devMode) {
+                        setShowDeveloperPanel((prev) => !prev);
+                      } else {
+                        setDevModeAndPersist(true);
+                        setShowDeveloperPanel(true);
+                      }
+                      setShowMenu(false);
+                    }}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 border rounded-lg transition-all duration-200 text-sm font-medium group ${
+                      devMode
+                        ? showDeveloperPanel
+                          ? 'bg-industrial-orange/30 border-industrial-orange text-orange-200 hover:bg-industrial-orange/40'
+                          : 'bg-dark-card/50 border-dark-border/50 hover:border-industrial-orange/50 text-gray-300 hover:text-orange-200'
+                        : 'bg-dark-card/50 border-dark-border/50 text-gray-500 hover:bg-dark-card hover:text-gray-400'
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Code size={18} className="group-hover:scale-110 transition-transform" />
+                      <span>{devMode ? '開發者模式 (開)' : '開啟開發者模式'}</span>
+                    </span>
+                    {devMode && <span className="text-xs text-green-400">開</span>}
+                  </button>
+                  <div className="px-2 py-0">
+                    <div className="text-ui-caption mb-2 flex items-center gap-1">
+                      <FlaskConical size={12} />
+                      <span>測試模式</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (!engineRef.current) return;
+                        const allItemIds = Object.keys(items);
+                        allItemIds.forEach((id) => {
+                          engineRef.current!.applyEffect({ type: 'addItem', itemId: id });
+                        });
+                        setRefreshKey((prev) => prev + 1);
+                        setShowMenu(false);
+                        setCurrentDialog({
+                          text: `已取得全部 ${allItemIds.length} 個道具。`,
+                          type: 'narrator',
+                          choices: [{ id: 'close_only', text: '知道了' }],
+                        });
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-amber-500/50 rounded-lg text-gray-300 hover:text-amber-200 transition-all duration-200 text-sm font-medium group"
+                    >
+                      <Package size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                      <span>取得所有道具</span>
+                    </button>
+                  </div>
+                </section>
+
+                {/* 區塊四：放棄遊戲（獨立區塊） */}
+                <div className="mt-6 pt-4 border-t border-dark-border space-y-4">
+                  <button
+                    onClick={() => {
+                      setShowQuitConfirm(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/40 hover:bg-red-900/50 border border-red-500/50 hover:border-red-500 rounded-lg text-gray-300 hover:text-red-200 transition-all duration-200 text-sm font-medium group"
+                  >
+                    <ArrowLeft size={18} className="group-hover:translate-x-[-2px] transition-transform" />
+                    <span>放棄遊戲</span>
                   </button>
                 </div>
-                
-                {/* 放棄遊戲 */}
-                <button
-                  onClick={() => {
-                    setShowQuitConfirm(true);
-                    setShowMenu(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-red-900/30 border border-dark-border/50 hover:border-red-500/50 rounded-lg text-gray-300 hover:text-red-300 transition-all duration-200 text-sm font-medium group"
-                >
-                  <ArrowLeft size={18} className="group-hover:translate-x-[-2px] transition-transform" />
-                  <span>放棄遊戲</span>
-                </button>
               </div>
               </motion.div>
             </>
@@ -2887,10 +2900,10 @@ export default function PlayPage() {
         </AnimatePresence>
       </div>
 
-      {/* 場景名稱和切換按鈕 - 左上角浮動 */}
-      <div className="absolute top-4 left-4 z-30 flex gap-2">
-        <div className="px-4 py-2 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg shadow-lg">
-          <div className="text-sm font-medium text-gray-300">{scene.name}</div>
+      {/* 場景名稱和切換按鈕 - 左上角浮動（縮小 40%） */}
+      <div className="absolute top-2.5 left-2.5 z-30 flex flex-col sm:flex-row gap-2.5">
+        <div className="px-2.5 py-1.5 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-md shadow-lg max-w-[200px] sm:max-w-[280px]">
+          <div className="text-ui-title text-sm text-gray-300 truncate" title={scene.name}>{scene.name}</div>
         </div>
         {/* 場景切換按鈕 - 顯示當前章節的所有場景 */}
         {(() => {
@@ -2898,11 +2911,11 @@ export default function PlayPage() {
           return currentChapterScenes.length > 1 && (
           <button
             onClick={() => setShowSceneSelector(!showSceneSelector)}
-            className="group flex items-center gap-2 px-4 py-2 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-lg text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg"
+            className="group flex items-center gap-1.5 px-2.5 py-1.5 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-md text-gray-300 hover:text-white hover:bg-dark-surface transition-all duration-200 shadow-lg"
             title="切換場景"
           >
-            <MapPin size={18} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
-            <ChevronDown size={16} className={`transition-transform ${showSceneSelector ? 'rotate-180' : ''}`} />
+            <MapPin size={11} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+            <ChevronDown size={10} className={`transition-transform ${showSceneSelector ? 'rotate-180' : ''}`} />
           </button>
           );
         })()}
@@ -3837,6 +3850,7 @@ export default function PlayPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

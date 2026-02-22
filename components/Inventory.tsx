@@ -61,7 +61,7 @@ export default function Inventory({ itemIds, onItemClick, currentSceneId }: Inve
       </div>
 
       {/* 道具網格 */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {itemIds.map(itemId => {
           const item = items[itemId];
           if (!item) return null;

@@ -6,6 +6,11 @@ import { User } from 'lucide-react';
 import { useState } from 'react';
 import SVGImage from './SVGImage';
 
+/** 人名與職稱斷行：在「（」前換行 */
+function formatNpcNameWithBreak(name: string): string {
+  return name.replace(/（/g, '\n（');
+}
+
 interface NpcBarProps {
   npcs: Npc[];
   onNpcClick: (npcId: string) => void;
@@ -92,9 +97,9 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
                 )}
               </div>
               
-              {/* NPC 名稱 */}
-              <span className="text-[10px] md:text-xs text-white/80 group-hover:text-white transition-colors text-center max-w-[4.5rem] min-w-0 leading-tight line-clamp-2 break-words">
-                {npc.name}
+              {/* NPC 名稱（人名與職稱斷行，第二行至少 6 字寬） */}
+              <span className="text-[10px] md:text-xs text-white/80 group-hover:text-white transition-colors text-center min-w-[6em] max-w-[5.5rem] leading-tight line-clamp-2 break-words whitespace-pre-line">
+                {formatNpcNameWithBreak(npc.name)}
               </span>
               
               {/* Hover 顯示名稱與提示 */}
@@ -104,8 +109,8 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
                   animate={{ opacity: 1, y: 0 }}
                   className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none z-10"
                 >
-                  <div className="bg-black/90 text-white text-xs font-medium px-3 py-1.5 rounded whitespace-nowrap shadow-lg">
-                    {npc.name}
+                  <div className="bg-black/90 text-white text-xs font-medium px-3 py-1.5 rounded whitespace-pre-line text-center shadow-lg min-w-[6em]">
+                    {formatNpcNameWithBreak(npc.name)}
                   </div>
                   <div className="text-[10px] text-white/80 px-2 py-0.5 rounded bg-black/70 whitespace-nowrap">
                     點擊對話
