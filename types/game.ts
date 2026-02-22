@@ -78,9 +78,10 @@ export interface Dialog {
   svgPosition?: 'top' | 'bottom' | 'left' | 'right'; // SVG 位置
   choices?: DialogChoice[]; // 新增：對話選擇（2選1或3選1）
   // 角色立繪相關
-  characterId?: string;  // 角色 ID
+  characterId?: string;  // 角色 ID（與 WEBP 命名 {characterId}_1.webp 對應）
   characterName?: string; // 角色名稱（顯示在對話框標題）
-  characterPortrait?: string; // 角色立繪圖片/SVG 路徑
+  characterPortrait?: string; // 角色立繪圖片/SVG 路徑（棄用：改用 WEBP，見 characterExpression）
+  characterExpression?: 1 | 2 | 3; // 頭像表情編號，對應 /images/characters/{characterId}_1|2|3.webp
   characterPosition?: 'left' | 'right'; // 立繪位置（左側或右側）
 }
 
@@ -148,7 +149,8 @@ export interface ConversationTurn {
   text: string;
   characterId: string;
   characterName: string;
-  characterPortrait?: string;
+  characterPortrait?: string; // 棄用：改用 WEBP，見 characterExpression
+  characterExpression?: 1 | 2 | 3; // 頭像表情，對應 /images/characters/{characterId}_1|2|3.webp
   characterPosition?: 'left' | 'right';
   speaker?: 'character' | 'player'; // 說話者是角色還是玩家
   delay?: number; // 這段對話的延遲時間（毫秒）
@@ -181,9 +183,11 @@ export interface RandomDialog {
 
 // NPC 定義
 export interface Npc {
-  id: string; // 例如 'npc_lin_ruitang'
+  id: string; // 例如 'npc_lin_ruitang'，對應頭像檔名 {id}_1.webp, {id}_2.webp, {id}_3.webp
   name: string; // 顯示名稱，例如 '林瑞堂（副理）'
-  portrait?: string; // 立繪路徑，例如 '/svg/characters/lin_ruitang.svg'
+  portrait?: string; // 立繪路徑（棄用：改用 WEBP 三表情）
+  portraitWebp?: string; // 頭像 WEBP 單檔（可選覆寫，未設則用 {id}_1.webp）
+  portraitExpression?: 1 | 2 | 3; // 右側頭像預設表情，未設為 1
   randomDialogs: RandomDialog[]; // 隨機對話池
   available?: boolean; // 是否可互動（可通過 flag 控制）
   availabilityRequirement?: Requirement; // 可互動的條件
@@ -322,5 +326,42 @@ export interface GameState {
   // 新增：NPC 對話模式狀態
   activeNpcDialogId?: string;
   activeNpcDialogNodeId?: string;
+  // 推理分析每章答案（供後續分岔）
+  reasoningAnswers?: Record<string, { q1: string; q2: string; q3: string | string[] }>;
+}
+
+// === 流程模組化（Flow） ===
+
+export type FlowStepType =
+  | 'main_menu'
+  | 'prologue_text'
+  | 'animation'
+  | 'chapter_intro'
+  | 'scene_explore'
+  | 'chapter_hub'
+  | 'scene_single';
+
+export interface FlowStepChoice {
+  id: string;
+  label: string;
+  sceneId?: string;
+  next?: string;
+}
+
+export interface FlowStep {
+  id: string;
+  type: FlowStepType;
+  next?: string;
+  choices?: FlowStepChoice[];
+  video?: string;
+  textSlides?: string[];
+  chapterId?: string;
+  sceneIds?: string[];
+  background?: string;
+}
+
+export interface FlowConfig {
+  steps: Record<string, FlowStep>;
+  firstStepId: string;
 }
 

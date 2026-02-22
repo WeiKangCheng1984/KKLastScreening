@@ -29,6 +29,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg relative overflow-hidden">
+      {/* 主選單底圖 WEBP：以手機直式滿版為主。建議 1080×1920（9:16），≤250KB，置於 /images/main_bg_placeholder.webp */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+        style={{ backgroundImage: 'url(/images/main_bg_placeholder.webp)' }}
+      />
       {/* 背景粒子效果 */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         {[...Array(20)].map((_, i) => (

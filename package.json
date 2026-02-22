@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fix:build": "node scripts/fix-next-eisdir.js",
+    "postinstall": "node scripts/fix-next-eisdir.js"
   },
   "dependencies": {
     "framer-motion": "^12.29.0",

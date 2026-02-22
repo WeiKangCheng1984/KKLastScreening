@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Play, ChevronLeft, ChevronRight, RotateCcw, Pause } from 'lucide-react';
 import { ChapterIntro as ChapterIntroType } from '@/types/game';
 import { audioManager } from '@/lib/audioManager';
+import { getChapterIntroContinuePath } from '@/data/flowConfig';
 import FadeIn from './animations/FadeIn';
 import SlideIn from './animations/SlideIn';
 import ParticleEffect from './animations/ParticleEffect';
@@ -35,7 +36,8 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
   const slides = chapter.intro.slides || [];
   const hasSlides = slides.length > 0;
   const isChapter1 = chapter.id === 'ch1';
-  const introVideo = chapter.intro.introVideo; // 新增：導讀影片
+  // 第一章動畫已於 /play/animation 播放，導讀頁不再重複播影片
+  const introVideo = isChapter1 ? undefined : chapter.intro.introVideo;
 
   // 分層顯示動畫 - 第一章快速呈現，其他章節正常速度
   useEffect(() => {
@@ -110,9 +112,10 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
       audioManager.stopAmbient();
     }
     
-    // 延遲導航，讓過場動畫完成
+    // 由流程設定決定：ch1 進第一景，ch2 進 hub 等
+    const nextPath = getChapterIntroContinuePath(chapter.id) || `/play/${chapter.id}/${chapter.scenes[0]}`;
     setTimeout(() => {
-      router.push(`/play/${chapter.id}/${chapter.scenes[0]}`);
+      router.push(nextPath);
     }, 500);
   };
 

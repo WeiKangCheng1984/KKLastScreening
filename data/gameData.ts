@@ -3469,28 +3469,6 @@ export const chapters: Record<string, Chapter> = {
       // 放置位置：/public/videos/intro_ch1_animation_v1.mp4
       introVideo: '/videos/intro_ch1_animation_v1.mp4',
     },
-    chapterPuzzle: {
-      id: 'ch1_final_puzzle',
-      type: 'combination',
-      solution: ['faded_photo', 'stopped_watch', 'bedside_key'],
-      hint: '將你在這個空間中找到的三個關鍵物品組合起來。\n\n它們代表著：痕跡、時間、身份。',
-      requirements: [
-        { type: 'hasItem', itemId: 'faded_photo' },
-        { type: 'hasItem', itemId: 'stopped_watch' },
-        { type: 'hasItem', itemId: 'bedside_key' },
-      ],
-      onSolve: [
-        {
-          type: 'showDialog',
-          dialog: {
-            text: '你理解了這個空間的意義。\n\n痕跡、時間、身份——這些物品告訴你：這裡假設你會留下。',
-            type: 'narrator',
-          },
-        },
-        { type: 'setFlag', flag: 'ch1_puzzle_solved', value: true },
-      ],
-    },
-    puzzleUnlockThreshold: 75,
   },
   ch2: {
     id: 'ch2',
@@ -3505,27 +3483,6 @@ export const chapters: Record<string, Chapter> = {
       // backgroundImage: '/images/intro_ch2_bg.png', // 需要放置圖片
       ambientAudio: '/audio/ambient/temple_intro.mp3',
     },
-    chapterPuzzle: {
-      id: 'ch2_final_puzzle',
-      type: 'input',
-      solution: '欠補換還',
-      hint: '從香客見證中找到的共同詞，依出現順序組成四個字。\n\n這代表著非正式系統的運作方式。',
-      requirements: [
-        { type: 'hasItem', itemId: 'witness_note' },
-        { type: 'hasItem', itemId: 'temple_charm' },
-      ],
-      onSolve: [
-        {
-          type: 'showDialog',
-          dialog: {
-            text: '你理解了非正式系統的運作方式。\n\n欠、補、換、還——這是一個循環，也是一個選擇。',
-            type: 'narrator',
-          },
-        },
-        { type: 'setFlag', flag: 'ch2_puzzle_solved', value: true },
-      ],
-    },
-    puzzleUnlockThreshold: 75,
   },
   ch3: {
     id: 'ch3',
@@ -3540,27 +3497,6 @@ export const chapters: Record<string, Chapter> = {
       // backgroundImage: '/images/intro_ch3_bg.png', // 需要放置圖片
       ambientAudio: '/audio/ambient/powerplant_intro.mp3',
     },
-    chapterPuzzle: {
-      id: 'ch3_final_puzzle',
-      type: 'arrangement',
-      solution: ['外觀', '扭力', '校正', '封條', '簽名', '封存'],
-      hint: '按照程序手冊的要求，將工具檢查的步驟按正確順序排列。\n\n先看得到，再碰得到；先確認，再使用。',
-      requirements: [
-        { type: 'hasItem', itemId: 'safety_manual' },
-        { type: 'hasItem', itemId: 'safety_cert' },
-      ],
-      onSolve: [
-        {
-          type: 'showDialog',
-          dialog: {
-            text: '你完全理解了程序的邏輯。\n\n制度保護你，但它更保護「制度自己」。',
-            type: 'narrator',
-          },
-        },
-        { type: 'setFlag', flag: 'ch3_puzzle_solved', value: true },
-      ],
-    },
-    puzzleUnlockThreshold: 75,
   },
   ch4: {
     id: 'ch4',
@@ -3575,33 +3511,6 @@ export const chapters: Record<string, Chapter> = {
       // backgroundImage: '/images/intro_ch4_bg.png', // 需要放置圖片
       ambientAudio: '/audio/ambient/disaster_intro.mp3',
     },
-    chapterPuzzle: {
-      id: 'ch4_final_puzzle',
-      type: 'visual_selection',
-      solution: ['self_persuasion_reason'],
-      hint: '在後果評估表中，選擇一個「最能說服自己」的理由。\n\n你以為你在選方法；其實你在選「你願意相信的自己」。',
-      requirements: [
-        { type: 'hasItem', itemId: 'consequence_report' },
-        { type: 'hasFlag', flag: 'quick_fix_used', value: true },
-      ],
-      options: [
-        { id: 'self_persuasion_reason', label: '我只是想解決問題', description: '最能說服自己的理由' },
-        { id: 'time_reason', label: '時間不夠', description: '時間緊迫' },
-        { id: 'risk_reason', label: '風險可控', description: '風險評估' },
-        { id: 'efficiency_reason', label: '效率優先', description: '效率考量' },
-      ],
-      onSolve: [
-        {
-          type: 'showDialog',
-          dialog: {
-            text: '你完成了自我說服。\n\n你第一次覺得「規則太慢了」。',
-            type: 'narrator',
-          },
-        },
-        { type: 'setFlag', flag: 'ch4_puzzle_solved', value: true },
-      ],
-    },
-    puzzleUnlockThreshold: 75,
   },
   ch5: {
     id: 'ch5',
@@ -3616,29 +3525,6 @@ export const chapters: Record<string, Chapter> = {
       // backgroundImage: '/images/intro_ch5_bg.png', // 需要放置圖片
       ambientAudio: '/audio/ambient/core_intro.mp3',
     },
-    chapterPuzzle: {
-      id: 'ch5_final_puzzle',
-      type: 'arrangement',
-      solution: ['fragment1', 'fragment2', 'fragment3', 'fragment4'],
-      hint: '將後果記錄中的文字碎片排序成一段「自白」。\n\n你以為是結算，其實是覆寫。',
-      requirements: [
-        { type: 'hasItem', itemId: 'consequence_record' },
-        { type: 'hasItem', itemId: 'self_persuasion_text' },
-        { type: 'hasFlag', flag: 'choice_made', value: true },
-      ],
-      onSolve: [
-        {
-          type: 'showDialog',
-          dialog: {
-            text: '你完成了身份文件的拼湊。\n\n你不再能說：那不是我。',
-            type: 'narrator',
-          },
-        },
-        { type: 'setFlag', flag: 'ch5_puzzle_solved', value: true },
-        { type: 'setFlag', flag: 'game_completed', value: true },
-      ],
-    },
-    puzzleUnlockThreshold: 75,
   },
 };
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { Dialog, DialogChoice, NpcDialogChoice } from '@/types/game';
 import { X, ChevronRight, SkipForward } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
@@ -223,9 +224,14 @@ export default function DialogBox({
         </div>
 
         {/* 對話內容容器 - 可捲動、最大高度，支持 SVG 和角色立繪佈局 */}
+        {(() => {
+          const portraitWebpUrl = dialog.characterId
+            ? getNpcPortraitUrl(dialog.characterId, dialog.characterExpression ?? 1)
+            : null;
+          const hasCharacterPortrait = Boolean(portraitWebpUrl || dialog.characterPortrait);
+          return (
         <div className={`flex gap-3 mb-3 min-h-0 flex-1 overflow-y-auto ${
-          // 優先顯示角色立繪
-          dialog.characterPortrait ? (
+          hasCharacterPortrait ? (
             dialog.characterPosition === 'right' ? 'flex-row-reverse' : 'flex-row'
           ) : (
             dialog.svgImage && dialog.svgPosition === 'left' ? 'flex-row' :
@@ -233,8 +239,19 @@ export default function DialogBox({
             'flex-col'
           )
         }`}>
-          {/* 角色立繪（優先顯示） */}
-          {dialog.characterPortrait && (
+          {/* 角色立繪：優先 WEBP（characterId + characterExpression），其次 characterPortrait（SVG） */}
+          {portraitWebpUrl && (
+            <div className="flex-shrink-0 flex items-end">
+              <div className="w-32 h-40 md:w-40 md:h-48 relative">
+                <img
+                  src={portraitWebpUrl}
+                  alt={dialog.characterName || '角色'}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          )}
+          {!portraitWebpUrl && dialog.characterPortrait && (
             <div className="flex-shrink-0 flex items-end">
               <div className="w-32 h-40 md:w-40 md:h-48 relative">
                 <SVGImage
@@ -249,7 +266,7 @@ export default function DialogBox({
           )}
           
           {/* SVG 圖片（根據位置顯示，如果沒有角色立繪） */}
-          {!dialog.characterPortrait && dialog.svgImage && (dialog.svgPosition === 'left' || dialog.svgPosition === 'right') && (
+          {!hasCharacterPortrait && dialog.svgImage && (dialog.svgPosition === 'left' || dialog.svgPosition === 'right') && (
             <div className="flex-shrink-0">
               <SVGImage
                 src={dialog.svgImage}
@@ -305,6 +322,8 @@ export default function DialogBox({
             </div>
           )}
         </div>
+          );
+        })()}
 
         {/* 選擇題或繼續提示 - 固定於底部 */}
         <div className="flex-shrink-0 mt-auto pt-2">

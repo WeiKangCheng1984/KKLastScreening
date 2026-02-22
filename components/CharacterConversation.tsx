@@ -1,5 +1,6 @@
 'use client';
 
+import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { DialogChoice, ConversationTurn } from '@/types/game';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import SVGImage from './SVGImage';
@@ -117,8 +118,11 @@ export default function CharacterConversation({
   // 繼續按鈕顯示條件：對話完成 + 不是最後一段 + 沒有選擇題
   const showContinue = isComplete && !isLastTurn && !showChoices;
 
-  // 固定人像框尺寸，避免載入前後或換段時位移；有無立繪都用同一區塊保留空間
-  const hasPortrait = Boolean(currentTurn.characterPortrait);
+  // 固定人像框尺寸；優先使用 WEBP（characterId + characterExpression），其次 characterPortrait（SVG）
+  const portraitWebpUrl = currentTurn.characterId
+    ? getNpcPortraitUrl(currentTurn.characterId, currentTurn.characterExpression ?? 1)
+    : null;
+  const hasPortrait = Boolean(portraitWebpUrl || currentTurn.characterPortrait);
   const portraitSize = 'w-[8rem] h-40 md:w-40 md:h-48'; // 128px×160px / 160px×192px
 
   return (
@@ -148,9 +152,15 @@ export default function CharacterConversation({
               }`}
               style={{ minWidth: '8rem', minHeight: '10rem' }}
             >
-              {hasPortrait ? (
+              {portraitWebpUrl ? (
+                <img
+                  src={portraitWebpUrl}
+                  alt={currentTurn.characterName}
+                  className="w-full h-full object-contain"
+                />
+              ) : currentTurn.characterPortrait ? (
                 <SVGImage
-                  src={currentTurn.characterPortrait!}
+                  src={currentTurn.characterPortrait}
                   alt={currentTurn.characterName}
                   className="w-full h-full object-contain"
                 />

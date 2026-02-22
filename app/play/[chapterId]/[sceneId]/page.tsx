@@ -39,7 +39,9 @@ import ChapterPuzzle from '@/components/ChapterPuzzle';
 import PairMatchingPuzzle from '@/components/PairMatchingPuzzle';
 import PickThreePuzzle from '@/components/PickThreePuzzle';
 import ScoreDisplay from '@/components/ScoreDisplay';
-import NpcBar from '@/components/NpcBar';
+import NpcRightStrip from '@/components/NpcRightStrip';
+import ReasoningPanel from '@/components/ReasoningPanel';
+import { reasoningByChapter } from '@/data/reasoningByChapter';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // 獲取當前章節的所有場景
@@ -62,6 +64,9 @@ const getAdjacentScenes = (chapterId: string, sceneId: string): { prev: string |
     next: currentIndex < chapterScenes.length - 1 ? chapterScenes[currentIndex + 1] : null,
   };
 };
+
+/** 場景謎題開關：false 時不開啟任何場景謎題彈窗（模組化改造） */
+const ENABLE_SCENE_PUZZLES = false;
 
 export default function PlayPage() {
   const params = useParams();
@@ -135,6 +140,7 @@ export default function PlayPage() {
   // 第一章章末：解謎（6 道具配對）與推理（3 題字詞排序）
   const [showCh1PairPuzzle, setShowCh1PairPuzzle] = useState(false);
   const [showCh1ReasoningPuzzle, setShowCh1ReasoningPuzzle] = useState(false);
+  const [showReasoningPanel, setShowReasoningPanel] = useState(false);
   const [ch1ReasoningStep, setCh1ReasoningStep] = useState(0);
   // 場景切換相關狀態
   // 使用 useState 的函數形式確保服務器和客戶端初始狀態一致
@@ -447,7 +453,7 @@ export default function PlayPage() {
   }, [engineRef, setCurrentDialog, setRefreshKey, addDialogsToQueue, items]);
 
   // 將 NpcDialogNode 轉成 Dialog 供 DialogBox 顯示；node.text 依 \n\n 分段，玩家按繼續逐段進行
-  const buildDialogFromNpcNode = useCallback((node: { text: string; choices: Array<{ id: string; label: string; effects?: any[]; insightEffects?: any[] }> }, npc: { id: string; name: string; portrait?: string }) => {
+  const buildDialogFromNpcNode = useCallback((node: { text: string; choices: Array<{ id: string; label: string; effects?: any[]; insightEffects?: any[] }> }, npc: { id: string; name: string; portrait?: string; portraitExpression?: 1 | 2 | 3 }) => {
     const segments = node.text.split(/\n\n+/).map((s: string) => s.trim()).filter(Boolean);
     const textSegments = segments.length > 0 ? segments : [node.text];
     return {
@@ -456,6 +462,7 @@ export default function PlayPage() {
       type: 'character' as const,
       characterId: npc.id,
       characterName: npc.name,
+      characterExpression: npc.portraitExpression ?? 1,
       characterPortrait: npc.portrait,
       choices: node.choices.map((c: { id: string; label: string; effects?: any[]; insightEffects?: any[] }) => ({
         id: c.id,
@@ -835,10 +842,9 @@ export default function PlayPage() {
     const progress = engine.getChapterProgress(chapterId);
     setChapterProgress(progress);
 
-    // 檢查章節謎題是否解鎖（第一章不在此彈出，改由態度宣言後的解謎／推理流程處理）
-    const isUnlocked = engine.checkChapterPuzzleUnlock(chapterId);
-    if (isUnlocked && chapterId !== 'ch1') {
-      // 檢查是否已經顯示過謎題
+    // 章節謎題已關閉（模組化改造：解謎由流程設定控制，目前不顯示）
+    const _isUnlocked = engine.checkChapterPuzzleUnlock(chapterId);
+    if (false && _isUnlocked && chapterId !== 'ch1') {
       const state = engine.getState();
       if (!state.flags[`chapter_puzzle_${chapterId}_shown`] && !showChapterPuzzle) {
         setShowChapterPuzzle(true);
@@ -1096,7 +1102,7 @@ export default function PlayPage() {
       });
       
       // 如果有可解的謎題，優先觸發第一個
-      if (availablePuzzles.length > 0) {
+      if (ENABLE_SCENE_PUZZLES && availablePuzzles.length > 0) {
         if (devMode) {
           console.log(`[謎題觸發] 觸發謎題: ${availablePuzzles[0].id} (hotspot: ${hotspotId})`);
         }
@@ -1268,7 +1274,7 @@ export default function PlayPage() {
         // 點下大門時播放尖銳金屬聲
         audioManager.playSFX('/audio/sfx/sfx_metal.mp3', 0.6);
         const doorPuzzle = scene.puzzles.find(p => p.id === 'door_code');
-        if (doorPuzzle) {
+        if (ENABLE_SCENE_PUZZLES && doorPuzzle) {
           setCurrentPuzzle(doorPuzzle);
           setRefreshKey(prev => prev + 1);
           return;
@@ -1308,7 +1314,7 @@ export default function PlayPage() {
       
       // 已滿足所有需求，檢查謎題需求並觸發謎題
       const bedPuzzle = scene.puzzles.find(p => p.id === 'bed_arrangement');
-      if (bedPuzzle) {
+      if (ENABLE_SCENE_PUZZLES && bedPuzzle) {
         // 再次驗證謎題需求（確保邏輯完整）
         const requirementsMet = engine.checkPuzzleRequirements(bedPuzzle);
         if (requirementsMet) {
@@ -1371,7 +1377,7 @@ export default function PlayPage() {
     // 第二空間特殊處理：密碼盤（觸發可選謎題）
     if (hotspotId === 'password_panel' && scene?.id === 'ch1_sc2') {
       const mirrorPuzzle = scene.puzzles.find(p => p.id === 'mirror_password');
-      if (mirrorPuzzle) {
+      if (ENABLE_SCENE_PUZZLES && mirrorPuzzle) {
         setCurrentPuzzle(mirrorPuzzle);
         setRefreshKey(prev => prev + 1);
         return;
@@ -1651,7 +1657,7 @@ export default function PlayPage() {
         return;
       }
       const descendPuzzle = scene.puzzles.find(p => p.id === 'descend');
-      if (descendPuzzle) {
+      if (ENABLE_SCENE_PUZZLES && descendPuzzle) {
         setCurrentPuzzle(descendPuzzle);
         setRefreshKey(prev => prev + 1);
         return;
@@ -1673,7 +1679,7 @@ export default function PlayPage() {
       // 先記錄互動，這樣後續檢查才能通過
       engine.addInteraction('boxes_area');
       const boxPuzzle = scene.puzzles.find(p => p.id === 'box_arrangement');
-      if (boxPuzzle) {
+      if (ENABLE_SCENE_PUZZLES && boxPuzzle) {
         // 檢查謎題需求
         const requirementsMet = engine.checkPuzzleRequirements(boxPuzzle);
         if (requirementsMet) {
@@ -1783,7 +1789,7 @@ export default function PlayPage() {
         return;
       }
       const exitPuzzle = scene.puzzles.find(p => p.id === 'final_exit');
-      if (exitPuzzle) {
+      if (ENABLE_SCENE_PUZZLES && exitPuzzle) {
         setCurrentPuzzle(exitPuzzle);
         setRefreshKey(prev => prev + 1);
         return;
@@ -2457,6 +2463,15 @@ export default function PlayPage() {
     state = engineRef.current.getState();
   }
 
+  // 推理分析按鈕：僅 ch1/ch2/ch3 且本章所有場景都已拜訪且尚未完成推理時顯示
+  const chapterScenes = getCurrentChapterScenes(chapterId);
+  const allScenesVisited =
+    chapterScenes.length > 0 && chapterScenes.every((s) => state.visitedScenes.includes(s));
+  const reasoningDone = !!state.flags[`${chapterId}_reasoning_done`];
+  const hasReasoningForChapter = !!reasoningByChapter[chapterId];
+  const showReasoningButton =
+    hasReasoningForChapter && allScenesVisited && !reasoningDone && !showSceneName;
+
   // 獲取相鄰場景（必須在條件返回之前定義）
   const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
   const prevScene = adjacentScenes.prev ? scenes[adjacentScenes.prev] : null;
@@ -2587,9 +2602,9 @@ export default function PlayPage() {
         </div>
       </div>
 
-      {/* NPC 互動欄 - 場景名稱顯示時隱藏 */}
+      {/* NPC 右側頭像列 - 場景名稱顯示時隱藏 */}
       {scene?.npcs && scene.npcs.length > 0 && !showSceneName && (
-        <NpcBar
+        <NpcRightStrip
           npcs={scene.npcs}
           activeNpcId={state?.activeNpcDialogId ?? undefined}
           onNpcClick={(npcId) => {
@@ -2639,6 +2654,49 @@ export default function PlayPage() {
             
             return true;
           }}
+        />
+      )}
+
+      {/* 推理分析按鈕（ch1/ch2/ch3 且本章全場景已訪且未完成時顯示） */}
+      {showReasoningButton && (
+        <button
+          type="button"
+          onClick={() => setShowReasoningPanel(true)}
+          className="fixed bottom-20 right-6 z-30 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/90 hover:bg-orange-500 border-2 border-orange-400/80 text-white font-medium shadow-lg hover:scale-105 transition-all"
+          title="推理分析"
+        >
+          <FlaskConical size={24} />
+        </button>
+      )}
+
+      {/* 推理分析面板（三題：選擇／字詞／道具連連看） */}
+      {showReasoningPanel && engineRef.current && (
+        <ReasoningPanel
+          chapterId={chapterId}
+          onSaveAnswer={(chId, q, value) => {
+            if (engineRef.current) engineRef.current.setReasoningAnswer(chId, q, value);
+          }}
+          onComplete={() => {
+            if (!engineRef.current) return;
+            engineRef.current.setReasoningComplete(chapterId);
+            setShowReasoningPanel(false);
+            setRefreshKey((k) => k + 1);
+            const nextChapterMap: Record<string, string> = {
+              navigate_to_ch2_intro: 'ch2',
+              navigate_to_ch3_intro: 'ch3',
+              navigate_to_ch4_intro: 'ch4',
+              navigate_to_ch5_intro: 'ch5',
+            };
+            const stateAfter = engineRef.current.getState();
+            for (const [flag, nextId] of Object.entries(nextChapterMap)) {
+              if (stateAfter.flags[flag]) {
+                engineRef.current.applyEffect({ type: 'setFlag', flag, value: false });
+                setTimeout(() => router.push(`/play/${nextId}/intro`), 300);
+                break;
+              }
+            }
+          }}
+          onClose={() => setShowReasoningPanel(false)}
         />
       )}
 
@@ -3030,8 +3088,8 @@ export default function PlayPage() {
 
       {/* 進度條 - 已隱藏（不顯示給玩家） */}
 
-      {/* 章節謎題 */}
-      {showChapterPuzzle && engineRef.current && (() => {
+      {/* 章節謎題（已關閉：由流程設定控制） */}
+      {false && showChapterPuzzle && engineRef.current && (() => {
         const chapter = chapters[chapterId];
         if (!chapter || !chapter.chapterPuzzle) return null;
         

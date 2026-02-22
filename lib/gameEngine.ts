@@ -69,6 +69,9 @@ export class GameEngine {
         evidence_insight: 0,
       };
     }
+    if (!this.state.reasoningAnswers) {
+      this.state.reasoningAnswers = {};
+    }
   }
 
   getState(): GameState {
@@ -546,6 +549,29 @@ export class GameEngine {
     }
   }
 
+  /** 寫入本章推理分析答案（Q1/Q2/Q3），會自動 persist */
+  setReasoningAnswer(chapterId: string, q: 'q1' | 'q2' | 'q3', value: string | string[]): void {
+    if (!this.state.reasoningAnswers) this.state.reasoningAnswers = {};
+    if (!this.state.reasoningAnswers[chapterId]) {
+      this.state.reasoningAnswers[chapterId] = { q1: '', q2: '', q3: '' };
+    }
+    const entry = this.state.reasoningAnswers[chapterId] as Record<string, string | string[]>;
+    entry[q] = value;
+  }
+
+  /** 標記本章推理完成並設定導向下一章 intro 的 flag（ch1→ch2, ch2→ch3, ch3→ch4） */
+  setReasoningComplete(chapterId: string): void {
+    const flagMap: Record<string, string> = {
+      ch1: 'navigate_to_ch2_intro',
+      ch2: 'navigate_to_ch3_intro',
+      ch3: 'navigate_to_ch4_intro',
+    };
+    const doneFlag = `${chapterId}_reasoning_done`;
+    this.applyEffect({ type: 'setFlag', flag: doneFlag, value: true });
+    const navFlag = flagMap[chapterId];
+    if (navFlag) this.applyEffect({ type: 'setFlag', flag: navFlag, value: true });
+  }
+
   // 從選擇ID提取維度名稱
   private extractDimensionFromChoiceId(choiceId: string): string | null {
     // 簡單的提取邏輯，可以根據實際需求調整
@@ -815,12 +841,13 @@ export class GameEngine {
       dialog.effects.forEach(effect => this.applyEffect(effect));
     }
 
-    // 返回 Dialog 對象，用於顯示對話框
+    // 返回 Dialog 對象，用於顯示對話框（頭像優先使用 WEBP：characterId + characterExpression）
     return {
       text: dialog.text,
       type: 'character',
       characterId: npcId,
       characterName: npc.name,
+      characterExpression: npc.portraitExpression ?? 1,
       characterPortrait: npc.portrait,
       characterPosition: 'left',
       choices: dialog.choices, // 傳遞選項
