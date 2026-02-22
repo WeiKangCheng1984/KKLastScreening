@@ -34,6 +34,7 @@ import DeveloperPanel from '@/components/DeveloperPanel';
 import TutorialGuide from '@/components/TutorialGuide';
 import AudioControl from '@/components/AudioControl';
 import { preloadSVGBatch } from '@/lib/svgLoader';
+import type { Puzzle as GamePuzzle } from '@/types/game';
 import { DialogChoice } from '@/types/game';
 import ChapterPuzzle from '@/components/ChapterPuzzle';
 import PairMatchingPuzzle from '@/components/PairMatchingPuzzle';
@@ -3092,13 +3093,13 @@ export default function PlayPage() {
       {false && showChapterPuzzle && engineRef.current && (() => {
         const chapter = chapters[chapterId];
         if (!chapter || !chapter.chapterPuzzle) return null;
-        
+        const puzzle = chapter.chapterPuzzle as GamePuzzle;
         return (
           <ChapterPuzzle
-            puzzle={chapter.chapterPuzzle}
+            puzzle={puzzle}
             onSolve={(input) => {
               if (engineRef.current) {
-                const solved = engineRef.current.solvePuzzle(chapter.chapterPuzzle!.id, input);
+                const solved = engineRef.current.solvePuzzle(puzzle.id, input);
                 if (solved) {
                   setShowChapterPuzzle(false);
                   setPuzzleError('');

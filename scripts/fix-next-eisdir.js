@@ -1,13 +1,17 @@
 /**
  * 修復 EISDIR: illegal operation on a directory, readlink '_app.js'
- * 發生於 Windows 非 C 槽或無 symlink 權限時，npm 會把 next 內的 _app.js 解成目錄。
- * 若 _app.js 是目錄則刪除並寫入正確內容。
+ * 使用 require.resolve 取得實際的 next 安裝路徑後修復。
  */
 const fs = require('fs');
 const path = require('path');
 
-const root = path.join(__dirname, '..');
-const appJsPath = path.join(root, 'node_modules', 'next', 'dist', 'pages', '_app.js');
+let appJsPath;
+try {
+  const nextPkg = require.resolve('next/package.json', { paths: [process.cwd()] });
+  appJsPath = path.join(path.dirname(nextPkg), 'dist', 'pages', '_app.js');
+} catch (_) {
+  appJsPath = path.resolve(process.cwd(), 'node_modules', 'next', 'dist', 'pages', '_app.js');
+}
 
 const APP_JS_CONTENT = `"use strict";
 Object.defineProperty(exports, "__esModule", {
@@ -49,13 +53,38 @@ if ((typeof exports.default === 'function' || (typeof exports.default === 'objec
 `;
 
 function fix() {
-  if (!fs.existsSync(appJsPath)) return;
-  const stat = fs.statSync(appJsPath);
-  if (!stat.isDirectory()) return;
+  if (!fs.existsSync(appJsPath)) {
+    console.log('[fix-next-eisdir] 路徑不存在，跳過:', appJsPath);
+    return;
+  }
+  let stat;
+  try {
+    stat = fs.statSync(appJsPath);
+  } catch (err) {
+    console.log('[fix-next-eisdir] stat 失敗:', err.message);
+    return;
+  }
+  if (stat.isDirectory()) {
+    try {
+      fs.rmSync(appJsPath, { recursive: true, force: true });
+      fs.writeFileSync(appJsPath, APP_JS_CONTENT, 'utf8');
+      console.log('[fix-next-eisdir] 已修復: _app.js 原為目錄，已改為檔案');
+    } catch (err) {
+      console.error('[fix-next-eisdir] 修復失敗:', err.message);
+      process.exit(1);
+    }
+    return;
+  }
 
-  fs.rmSync(appJsPath, { recursive: true, force: true });
-  fs.writeFileSync(appJsPath, APP_JS_CONTENT, 'utf8');
-  console.log('已修復: next/dist/pages/_app.js (原為目錄，已改為檔案)');
+  if (stat.isFile() && stat.size < 100) {
+    try {
+      fs.writeFileSync(appJsPath, APP_JS_CONTENT, 'utf8');
+      console.log('[fix-next-eisdir] 已修復: _app.js 內容過短，已覆寫');
+    } catch (err) {
+      console.error('[fix-next-eisdir] 修復失敗:', err.message);
+      process.exit(1);
+    }
+  }
 }
 
 fix();

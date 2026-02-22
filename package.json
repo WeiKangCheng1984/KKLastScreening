@@ -1,9 +1,10 @@
 {
-  "name": "fme-escape",
+  "name": "kklastscreening",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/fix-next-eisdir.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
