@@ -130,7 +130,7 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
       });
       
       // 播放閃電音效
-      audioManager.playSFX('/audio/sfx/sfx_lightning.mp3', 0.6);
+      audioManager.playSFX('/audio/sfx/kk_sfx_lightning.mp3', 0.6);
       
       // 觸發強烈閃爍
       setFlickerType('white');

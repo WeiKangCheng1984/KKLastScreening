@@ -81,9 +81,9 @@ export default function Flashlight({
     
     // 播放開關音效
     if (newEnabled) {
-      audioManager.playSFX('/audio/sfx/sfx_flashlight_on.mp3', 0.4);
+      audioManager.playSFX('/audio/sfx/kk_sfx_flashlight_on.mp3', 0.4);
     } else {
-      audioManager.playSFX('/audio/sfx/sfx_flashlight_off.mp3', 0.4);
+      audioManager.playSFX('/audio/sfx/kk_sfx_flashlight_off.mp3', 0.4);
     }
     
     // 更新光源狀態
@@ -157,7 +157,7 @@ export default function Flashlight({
           setEnabled(false);
           lightingManager.setLightEnabled(lightIdRef.current, false);
           onBatteryDepleted?.();
-          audioManager.playSFX('/audio/sfx/sfx_flashlight_off.mp3', 0.4);
+          audioManager.playSFX('/audio/sfx/kk_sfx_flashlight_off.mp3', 0.4);
           onToggle?.(false);
         }
         

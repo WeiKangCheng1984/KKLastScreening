@@ -1,261 +1,123 @@
-# 音效資源說明
+# KK流程偵探 — 音訊檔清單（新版）
 
-## 文件夾結構
+程式已改為使用以下路徑，請將製作好的配樂／音效放入對應資料夾，**檔名須與下表完全一致**。
+
+---
+
+## 資料夾結構
 
 ```
 public/audio/
-├── ambient/          # 環境音效（循環播放）
-│   ├── ambient_hospital.mp3          # 醫院環境音（第一、二空間）
-│   ├── ambient_corridor.mp3           # 走廊環境音（第二空間，可選）
-│   ├── ambient_room702.mp3            # 702病房環境音（第三空間）
-│   ├── ambient_balcony.mp3            # 陽台環境音（第四空間）
-│   └── ambient_terrace.mp3            # 露台環境音（第五空間）
-├── sfx/              # 互動音效（一次性）
-│   ├── sfx_drawer_open.mp3           # 抽屜打開（第一空間）
-│   ├── sfx_metal.mp3                 # 金屬聲（第一空間：門）
-│   ├── sfx_paper_rustle.mp3           # 紙張翻動（第二空間：值班表）
-│   ├── sfx_glass_break.mp3            # 玻璃破碎（第二空間：鏡子）
-│   ├── sfx_bed_wheel.mp3             # 病床輪子（第二空間：移動病床）
-│   ├── sfx_door_creak.mp3             # 門吱呀聲（第二空間：702門）
-│   ├── sfx_recorder_click.mp3         # 錄音筆按鍵（第三空間）
-│   ├── sfx_wardrobe_open.mp3          # 衣櫃打開（第三空間：跳嚇）
-│   ├── sfx_monitor_on.mp3             # 監控螢幕開啟（第三空間）
-│   ├── sfx_window_open.mp3             # 窗戶打開（第三空間）
-│   ├── sfx_rust_remover.mp3           # 除鏽劑使用（第四空間）
-│   ├── sfx_toolbox_open.mp3           # 工具箱打開（第四空間）
-│   ├── sfx_rope_tension.mp3           # 繩索固定（第四空間）
-│   ├── sfx_descend.mp3                # 垂降聲（第四空間）
-│   ├── sfx_box_drag.mp3               # 箱子拖動（第五空間）
-│   ├── sfx_box_open.mp3               # 箱子打開（第五空間）
-│   └── sfx_door_unlock.mp3            # 門解鎖（第五空間：最終出口）
-├── broadcast/        # 廣播音效
-│   ├── broadcast_static.mp3           # 廣播電流聲（所有廣播）
-│   └── broadcast_voice.mp3             # 廣播人聲（可選，疊加使用）
-└── horror/          # 恐怖音效
-    ├── horror_whisper.mp3             # 低語聲（第一空間：恐怖元素）
-    ├── horror_heartbeat.mp3           # 心跳聲（第二空間：恐怖元素）
-    ├── horror_breathing.mp3           # 呼吸聲（第三空間：恐怖元素）
-    ├── horror_wind.mp3                # 風聲（第四空間：恐怖元素）
-    └── horror_ambient.mp3              # 恐怖環境音（第五空間：恐怖元素）
+├── bgm/          # 背景音樂（循環播放）
+│   ├── kk_bgm_title.mp3
+│   ├── kk_bgm_prologue.mp3
+│   ├── kk_bgm_intro_ch1.mp3
+│   └── kk_bgm_ch1.mp3
+└── sfx/          # 一次性音效
+    ├── kk_sfx_ui_click.mp3
+    ├── kk_sfx_ui_hover.mp3
+    ├── kk_sfx_ui_collect.mp3
+    ├── kk_sfx_ui_puzzle_ok.mp3
+    ├── kk_sfx_ui_error.mp3
+    ├── kk_sfx_ui_item_use.mp3
+    ├── kk_sfx_scene_change.mp3
+    ├── kk_sfx_broadcast.mp3
+    ├── kk_sfx_transition_soft.mp3
+    ├── kk_sfx_flashlight_on.mp3
+    ├── kk_sfx_flashlight_off.mp3
+    ├── kk_sfx_lightning.mp3
+    └── （以下為劇情／互動用，可依章節需求製作）
+        kk_sfx_recorder_click.mp3
+        kk_sfx_glass_break.mp3
+        kk_sfx_paper_rustle.mp3
+        kk_sfx_rust_remover.mp3
+        kk_sfx_drawer_open.mp3
+        kk_sfx_bed_wheel.mp3
+        kk_sfx_door_creak.mp3
+        kk_sfx_toolbox_open.mp3
+        kk_sfx_rope_tension.mp3
+        kk_sfx_descend.mp3
+        kk_sfx_box_drag.mp3
+        kk_sfx_box_open.mp3
+        kk_sfx_door_unlock.mp3
+        kk_sfx_metal.mp3
+        kk_sfx_wardrobe_open.mp3
+        kk_sfx_monitor_on.mp3
+        kk_sfx_window_open.mp3
 ```
 
-## 各空間音效需求
+---
 
-### 第一空間：病房 701
+## 一、BGM（public/audio/bgm/）
 
-#### 環境音效
-- **ambient_hospital.mp3** (30-60秒，循環)
-  - 醫院環境音：消毒水聲、遠處腳步聲、設備運轉聲、滴水聲
-  - 音量建議：0.25
+| 檔名 | 用途 | 建議長度 | 風格建議 |
+|------|------|----------|----------|
+| **kk_bgm_title.mp3** | 遊戲開場主選單 | 30–60 秒可循環 | 沉穩、懸疑、低調，不搶標題 |
+| **kk_bgm_prologue.mp3** | 序章文案閱讀 | 30–60 秒可循環 | 敘事感、略帶緊張 |
+| **kk_bgm_intro_ch1.mp3** | 第一章章節介紹（導讀頁） | 30–90 秒可循環 | 導讀／預告感，可稍緊湊 |
+| **kk_bgm_ch1.mp3** | 第一章場景探索（放映廳／播映室／廁所共用） | 30–60 秒可循環 | 影城／放映廳氛圍，低頻、可帶輕微空調或人群餘韻 |
 
-#### 互動音效
-- **sfx_drawer_open.mp3** (0.5-2秒)
-  - 抽屜打開的聲音
-  - 觸發時機：用髮夾撬開抽屜
-  - 音量建議：0.7
-
-- **sfx_metal.mp3** (0.5-2秒)
-  - 尖銳金屬聲（點擊大門時）
-  - 觸發時機：點擊門
-  - 音量建議：0.6
-
-#### 廣播音效
-- **broadcast_static.mp3** (1-2秒)
-  - 廣播電流聲（廣播觸發時）
-  - 觸發時機：使用脈搏夾後
-  - 音量建議：0.7
-
-#### 恐怖音效
-- **horror_whisper.mp3** (2-5秒)
-  - 低語聲（恐怖元素）
-  - 觸發時機：隨機或特定互動後
-  - 音量建議：0.4
+- 格式：MP3，128–192 kbps。
+- 程式會設為循環播放，長度不必過長。
 
 ---
 
-### 第二空間：走廊
+## 二、SFX — UI 與通用（public/audio/sfx/）
 
-#### 環境音效
-- **ambient_hospital.mp3** (30-60秒，循環)
-  - 醫院環境音：消毒水聲、遠處腳步聲、設備運轉聲
-  - 音量建議：0.25
-
-#### 互動音效
-- **sfx_paper_rustle.mp3** (0.5-1秒)
-  - 紙張翻動（查看值班表）
-  - 觸發時機：點擊值班表
-  - 音量建議：0.5
-
-- **sfx_glass_break.mp3** (0.5-1秒)
-  - 玻璃破碎（收集鏡片碎角）
-  - 觸發時機：點擊鏡片碎角
-  - 音量建議：0.6
-
-- **sfx_bed_wheel.mp3** (1-2秒)
-  - 病床輪子滾動（移動病床）
-  - 觸發時機：排列病床時
-  - 音量建議：0.5
-
-- **sfx_door_creak.mp3** (1-2秒)
-  - 門吱呀聲（702門打開）
-  - 觸發時機：病床排列完成後，702門打開
-  - 音量建議：0.6
-
-#### 廣播音效
-- **broadcast_static.mp3** (1-2秒)
-  - 廣播電流聲（廣播觸發時）
-  - 觸發時機：病床排列完成後
-  - 音量建議：0.7
-
-#### 恐怖音效
-- **horror_heartbeat.mp3** (3-5秒)
-  - 心跳聲（恐怖元素）
-  - 觸發時機：隨機或特定互動後
-  - 音量建議：0.3
+| 檔名 | 用途 | 建議長度 | 風格建議 |
+|------|------|----------|----------|
+| **kk_sfx_ui_click.mp3** | 按鈕、Hotspot 點擊 | 0.1–0.3 秒 | 輕脆、不刺耳 |
+| **kk_sfx_ui_hover.mp3** | 滑鼠懸停（可選） | 0.1–0.2 秒 | 極輕提示 |
+| **kk_sfx_ui_collect.mp3** | 取得道具 | 0.3–0.6 秒 | 短促確認感 |
+| **kk_sfx_ui_puzzle_ok.mp3** | 謎題提交正確 | 0.3–0.5 秒 | 正向回饋 |
+| **kk_sfx_ui_error.mp3** | 錯誤／失敗提示 | 0.2–0.4 秒 | 溫和提醒 |
+| **kk_sfx_ui_item_use.mp3** | 背包中使用道具 | 0.2–0.5 秒 | 使用／觸發感 |
 
 ---
 
-### 第三空間：病房 702
+## 三、SFX — 場景與流程（public/audio/sfx/）
 
-#### 環境音效
-- **ambient_room702.mp3** (30-60秒，循環)
-  - 702病房環境音：更安靜、更壓抑的氛圍
-  - 音量建議：0.2
-
-#### 互動音效
-- **sfx_recorder_click.mp3** (0.3-0.5秒)
-  - 錄音筆按鍵（收集/使用錄音筆）
-  - 觸發時機：點擊錄音筆、播放錄音
-  - 音量建議：0.6
-
-- **sfx_wardrobe_open.mp3** (1-2秒)
-  - 衣櫃打開（跳嚇）
-  - 觸發時機：閱讀日記後點擊衣櫃
-  - 音量建議：0.8
-
-- **sfx_monitor_on.mp3** (1-2秒)
-  - 監控螢幕開啟（激活監控）
-  - 觸發時機：跳嚇後點擊監控螢幕
-  - 音量建議：0.5
-
-- **sfx_window_open.mp3** (2-3秒)
-  - 窗戶打開（打開落地窗）
-  - 觸發時機：使用手把打開窗戶
-  - 音量建議：0.6
-
-#### 廣播音效
-- **broadcast_static.mp3** (1-2秒)
-  - 廣播電流聲（廣播觸發時）
-  - 觸發時機：監控激活後
-  - 音量建議：0.7
-
-#### 恐怖音效
-- **horror_breathing.mp3** (3-5秒)
-  - 呼吸聲（恐怖元素）
-  - 觸發時機：隨機或特定互動後
-  - 音量建議：0.3
+| 檔名 | 用途 | 建議長度 | 風格建議 |
+|------|------|----------|----------|
+| **kk_sfx_scene_change.mp3** | 切換場景（左右箭頭） | 0.5–1.5 秒 | 輕過場、不突兀 |
+| **kk_sfx_broadcast.mp3** | 影城廣播／廣播類對話 | 1–2 秒 | 可帶 PA 感或輕微電流／雜訊，取代舊版純電流聲 |
+| **kk_sfx_transition_soft.mp3** | 過渡效果（場景轉場動畫等） | 0.5–1 秒 | 柔和過渡 |
+| **kk_sfx_lightning.mp3** | 閃爍／閃電效果（若場景使用） | 0.5–1 秒 | 短促電光感 |
+| **kk_sfx_flashlight_on.mp3** | 手電筒開啟 | 0.2–0.4 秒 | 開關感 |
+| **kk_sfx_flashlight_off.mp3** | 手電筒關閉 | 0.2–0.4 秒 | 開關感 |
 
 ---
 
-### 第四空間：702 陽台
+## 四、SFX — 劇情／互動用（public/audio/sfx/）
 
-#### 環境音效
-- **ambient_balcony.mp3** (30-60秒，循環)
-  - 陽台環境音：風聲、遠處城市聲音（但沒有燈火）
-  - 音量建議：0.25
+以下為程式內特定劇情或互動觸發時使用，可依章節需求再製作；**第一章未用到的可先留空或沿用暫用檔**。
 
-#### 互動音效
-- **sfx_rust_remover.mp3** (1-2秒)
-  - 除鏽劑使用（打開工具箱）
-  - 觸發時機：使用除鏽劑打開工具箱
-  - 音量建議：0.6
-
-- **sfx_toolbox_open.mp3** (1-2秒)
-  - 工具箱打開（獲得陶瓷破片）
-  - 觸發時機：工具箱打開
-  - 音量建議：0.7
-
-- **sfx_rope_tension.mp3** (1-2秒)
-  - 繩索固定（選擇固定點）
-  - 觸發時機：選擇固定點2
-  - 音量建議：0.5
-
-- **sfx_descend.mp3** (3-5秒)
-  - 垂降聲（垂降離開）
-  - 觸發時機：完成垂降謎題
-  - 音量建議：0.6
-
-#### 廣播音效
-- **broadcast_static.mp3** (1-2秒)
-  - 廣播電流聲（廣播觸發時）
-  - 觸發時機：垂降時
-  - 音量建議：0.7
-
-#### 恐怖音效
-- **horror_wind.mp3** (3-5秒)
-  - 風聲（恐怖元素）
-  - 觸發時機：隨機或特定互動後
-  - 音量建議：0.3
+| 檔名 | 用途 |
+|------|------|
+| kk_sfx_recorder_click.mp3 | 錄音筆按鍵 |
+| kk_sfx_glass_break.mp3 | 玻璃破碎 |
+| kk_sfx_paper_rustle.mp3 | 紙張翻動 |
+| kk_sfx_rust_remover.mp3 | 除鏽劑／噴劑使用 |
+| kk_sfx_drawer_open.mp3 | 抽屜打開 |
+| kk_sfx_bed_wheel.mp3 | 病床輪子 |
+| kk_sfx_door_creak.mp3 | 門吱呀聲 |
+| kk_sfx_toolbox_open.mp3 | 工具箱打開 |
+| kk_sfx_rope_tension.mp3 | 繩索拉緊 |
+| kk_sfx_descend.mp3 | 垂降 |
+| kk_sfx_box_drag.mp3 | 箱子拖動 |
+| kk_sfx_box_open.mp3 | 箱子打開 |
+| kk_sfx_door_unlock.mp3 | 門解鎖 |
+| kk_sfx_metal.mp3 | 金屬聲 |
+| kk_sfx_wardrobe_open.mp3 | 衣櫃打開 |
+| kk_sfx_monitor_on.mp3 | 監控螢幕開啟 |
+| kk_sfx_window_open.mp3 | 窗戶打開 |
 
 ---
 
-### 第五空間：二樓露台
+## 五、規格與注意事項
 
-#### 環境音效
-- **ambient_terrace.mp3** (30-60秒，循環)
-  - 露台環境音：更空曠、更壓抑的氛圍
-  - 音量建議：0.2
-
-#### 互動音效
-- **sfx_box_drag.mp3** (1-2秒)
-  - 箱子拖動（排列箱子）
-  - 觸發時機：排列箱子時
-  - 音量建議：0.5
-
-- **sfx_box_open.mp3** (1-2秒)
-  - 箱子打開（打開心臟箱獲得身份證）
-  - 觸發時機：完成拼箱排序後點擊心臟箱
-  - 音量建議：0.6
-
-- **sfx_door_unlock.mp3** (2-3秒)
-  - 門解鎖（最終出口）
-  - 觸發時機：輸入正確座標後
-  - 音量建議：0.7
-
-#### 恐怖音效
-- **horror_ambient.mp3** (3-5秒)
-  - 恐怖環境音（恐怖元素）
-  - 觸發時機：隨機或特定互動後
-  - 音量建議：0.3
-
----
-
-## 音效資源建議
-
-### 格式
-- **MP3** (相容性最佳)
-- **OGG** (檔案較小，但相容性較差)
-
-### 品質
-- 環境音：128-192 kbps
-- 音效：128 kbps
-- 恐怖音效：128 kbps
-
-### 長度
-- 環境音：30-60 秒（會循環播放）
-- 音效：0.5-3 秒
-- 廣播：1-2 秒
-- 恐怖音效：2-5 秒
-
-### 資源來源
-- [Freesound.org](https://freesound.org/) - 免費音效庫
-- [Zapsplat](https://www.zapsplat.com/) - 免費音效庫
-- [OpenGameArt](https://opengameart.org/) - 遊戲資源
-
-## 注意事項
-
-1. 所有音效檔案應放在 `public/audio/` 對應的子資料夾中
-2. 檔案名稱必須與程式碼中的路徑完全一致
-3. 建議使用小寫字母和底線命名（snake_case）
-4. 檔案大小建議控制在合理範圍內（單個檔案 < 500KB）
-5. 恐怖音效應適度使用，避免過度驚嚇玩家
+- **格式**：建議 MP3，相容性最佳。
+- **BGM**：128–192 kbps，可循環、無明顯結尾爆音。
+- **SFX**：128 kbps，短效、結尾可淡出避免啪聲。
+- 檔案請放在 `public/audio/bgm/` 或 `public/audio/sfx/`，**檔名與上表一致**（含 `kk_` 前綴與副檔名 `.mp3`）。
+- 若某音效尚未製作，程式播放時會靜默失敗，不影響遊戲進行；可先以靜音檔或舊檔暫代，再逐步抽換。

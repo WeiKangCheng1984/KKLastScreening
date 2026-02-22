@@ -2,15 +2,26 @@
 
 import { useRouter } from 'next/navigation';
 import { Play } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { audioManager } from '@/lib/audioManager';
+
+/** 開場 BGM：置於 public/audio/bgm/kk_bgm_title.mp3 */
+const BGM_TITLE = '/audio/bgm/kk_bgm_title.mp3';
 
 export default function Home() {
   const router = useRouter();
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  useEffect(() => {
+    audioManager.playAmbient(BGM_TITLE, 0.4);
+    return () => {
+      audioManager.stopAmbient();
+    };
+  }, []);
+
   const handleStartGame = () => {
     setIsTransitioning(true);
-    
+    audioManager.stopAmbient();
     // 清除所有遊戲記憶
     if (typeof window !== 'undefined') {
       try {

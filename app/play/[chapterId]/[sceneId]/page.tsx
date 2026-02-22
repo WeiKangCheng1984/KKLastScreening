@@ -171,7 +171,7 @@ export default function PlayPage() {
         // 檢查是否為廣播類型，需要特殊處理
         if (firstDialog.type === 'broadcast') {
           // 播放廣播音效
-          audioManager.playSFX('/audio/broadcast/broadcast_static.mp3', 0.7);
+          audioManager.playSFX('/audio/sfx/kk_sfx_broadcast.mp3', 0.7);
           // 觸發劇烈閃爍
           if (sceneViewRef.current) {
             sceneViewRef.current.triggerFlicker('intense');
@@ -283,16 +283,16 @@ export default function PlayPage() {
       }
     } else if (hotspotId === 'recorder_spot') {
       // 錄音筆播放音效
-      audioManager.playSFX('/audio/sfx/sfx_recorder_click.mp3', 0.6);
+      audioManager.playSFX('/audio/sfx/kk_sfx_recorder_click.mp3', 0.6);
     } else if (hotspotId === 'mirror_shard_spot') {
       // 鏡片碎角玻璃破碎音效
-      audioManager.playSFX('/audio/sfx/sfx_glass_break.mp3', 0.6);
+      audioManager.playSFX('/audio/sfx/kk_sfx_glass_break.mp3', 0.6);
     } else if (hotspotId === 'duty_schedule') {
       // 值班表紙張翻動音效
-      audioManager.playSFX('/audio/sfx/sfx_paper_rustle.mp3', 0.5);
+      audioManager.playSFX('/audio/sfx/kk_sfx_paper_rustle.mp3', 0.5);
     } else if (hotspotId === 'plant') {
       // 除鏽劑音效
-      audioManager.playSFX('/audio/sfx/sfx_rust_remover.mp3', 0.6);
+      audioManager.playSFX('/audio/sfx/kk_sfx_rust_remover.mp3', 0.6);
     }
     
     // 步驟8：觸發事件並處理道具獲得提示
@@ -650,7 +650,11 @@ export default function PlayPage() {
       const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_zhou_jie');
       if (npc) {
         engine.applyEffect({ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true });
-        engine.startNpcDialog('npc_zhou_jie', 'node_zhou_fragment_1');
+        const alreadyHaveFragment = !!currentState.flags?.black_fragment_found;
+        engine.startNpcDialog(
+          'npc_zhou_jie',
+          alreadyHaveFragment ? 'node_zhou_fragment_1_already_have' : 'node_zhou_fragment_1'
+        );
         const node = engine.getCurrentNpcDialogNode();
         if (node) {
           setTimeout(() => {
@@ -742,7 +746,7 @@ export default function PlayPage() {
           // 檢查是否為廣播類型，需要特殊處理
           if (nextDialog.type === 'broadcast') {
             // 播放廣播音效
-            audioManager.playSFX('/audio/broadcast/broadcast_static.mp3', 0.7);
+            audioManager.playSFX('/audio/sfx/kk_sfx_broadcast.mp3', 0.7);
             // 觸發劇烈閃爍
             if (sceneViewRef.current) {
               sceneViewRef.current.triggerFlicker('intense');
@@ -1158,11 +1162,12 @@ export default function PlayPage() {
       ambientStopTimeoutRef.current = null;
     }
     
-    const ch1AmbientPath = '/audio/ambient/ambient_ch1.mp3';
+    // 第一章場景 BGM：置於 public/audio/bgm/kk_bgm_ch1.mp3
+    const ch1BgmPath = '/audio/bgm/kk_bgm_ch1.mp3';
     const ambientMap: Record<string, { path: string; volume: number }> = {
-      'scene_ch1_cinema_a_hall': { path: ch1AmbientPath, volume: 0.7 },
-      'scene_ch1_projection_room': { path: ch1AmbientPath, volume: 0.7 },
-      'scene_ch1_restroom': { path: ch1AmbientPath, volume: 0.7 },
+      'scene_ch1_cinema_a_hall': { path: ch1BgmPath, volume: 0.7 },
+      'scene_ch1_projection_room': { path: ch1BgmPath, volume: 0.7 },
+      'scene_ch1_restroom': { path: ch1BgmPath, volume: 0.7 },
     };
     
     const ambient = ambientMap[sceneId];
@@ -1217,7 +1222,7 @@ export default function PlayPage() {
   // 統一的廣播處理函數（音效+閃光+對話）
   const handleBroadcast = useCallback((dialog: Dialog) => {
     // 播放廣播音效
-    audioManager.playSFX('/audio/broadcast/broadcast_static.mp3', 0.7);
+    audioManager.playSFX('/audio/sfx/kk_sfx_broadcast.mp3', 0.7);
     // 觸發劇烈閃爍
     triggerIntenseFlicker();
     // 顯示廣播對話
@@ -1357,7 +1362,7 @@ export default function PlayPage() {
       // 檢查是否有髮夾
       if (state.inventory.includes('rusty_hairpin')) {
         // 有髮夾，播放打開音效
-        audioManager.playSFX('/audio/sfx/sfx_drawer_open.mp3', 0.7);
+        audioManager.playSFX('/audio/sfx/kk_sfx_drawer_open.mp3', 0.7);
         // 有髮夾，觸發打開事件
         const result = engine.triggerEvent('open_drawer');
         if (result?.dialog) {
@@ -1381,7 +1386,7 @@ export default function PlayPage() {
     if (hotspotId === 'beds' && scene?.id === 'ch1_sc2') {
       const state = engine.getState();
       if (state.flags.beds_labels_revealed && state.inventory.includes('mirror_shard')) {
-        audioManager.playSFX('/audio/sfx/sfx_bed_wheel.mp3', 0.5);
+        audioManager.playSFX('/audio/sfx/kk_sfx_bed_wheel.mp3', 0.5);
       }
     }
 
@@ -1389,7 +1394,7 @@ export default function PlayPage() {
     if (hotspotId === 'door_702' && scene?.id === 'ch1_sc2') {
       const state = engine.getState();
       if (state.flags.door_702_open) {
-        audioManager.playSFX('/audio/sfx/sfx_door_creak.mp3', 0.6);
+        audioManager.playSFX('/audio/sfx/kk_sfx_door_creak.mp3', 0.6);
       }
     }
 
@@ -1397,14 +1402,14 @@ export default function PlayPage() {
 
     // 第四空間：除鏽劑使用（除鏽劑音效）
     if (hotspotId === 'plant' && scene?.id === 'ch1_sc4') {
-      audioManager.playSFX('/audio/sfx/sfx_rust_remover.mp3', 0.6);
+      audioManager.playSFX('/audio/sfx/kk_sfx_rust_remover.mp3', 0.6);
     }
 
     // 第四空間：工具箱打開（工具箱打開音效）
     if (hotspotId === 'toolbox' && scene?.id === 'ch1_sc4') {
       const state = engine.getState();
       if (state.inventory.includes('rust_remover')) {
-        audioManager.playSFX('/audio/sfx/sfx_toolbox_open.mp3', 0.7);
+        audioManager.playSFX('/audio/sfx/kk_sfx_toolbox_open.mp3', 0.7);
       }
     }
 
@@ -1412,7 +1417,7 @@ export default function PlayPage() {
     if (hotspotId === 'fixed_point_2' && scene?.id === 'ch1_sc4') {
       const state = engine.getState();
       if (state.inventory.includes('blank_nameplate') && state.flags.restraints_collected) {
-        audioManager.playSFX('/audio/sfx/sfx_rope_tension.mp3', 0.5);
+        audioManager.playSFX('/audio/sfx/kk_sfx_rope_tension.mp3', 0.5);
       }
     }
 
@@ -1420,7 +1425,7 @@ export default function PlayPage() {
     if (hotspotId === 'descend_point' && scene?.id === 'ch1_sc4') {
       const state = engine.getState();
       if (state.flags.fixed_point_selected) {
-        audioManager.playSFX('/audio/sfx/sfx_descend.mp3', 0.6);
+        audioManager.playSFX('/audio/sfx/kk_sfx_descend.mp3', 0.6);
       }
     }
 
@@ -1428,7 +1433,7 @@ export default function PlayPage() {
     if (hotspotId === 'boxes_area' && scene?.id === 'ch1_sc5') {
       const state = engine.getState();
       if (state.flags.label_read && state.flags.pain_patch_found) {
-        audioManager.playSFX('/audio/sfx/sfx_box_drag.mp3', 0.5);
+        audioManager.playSFX('/audio/sfx/kk_sfx_box_drag.mp3', 0.5);
       }
     }
 
@@ -1436,7 +1441,7 @@ export default function PlayPage() {
     if (hotspotId === 'heart_box' && scene?.id === 'ch1_sc5') {
       const state = engine.getState();
       if (state.flags.boxes_arranged) {
-        audioManager.playSFX('/audio/sfx/sfx_box_open.mp3', 0.6);
+        audioManager.playSFX('/audio/sfx/kk_sfx_box_open.mp3', 0.6);
       }
     }
 
@@ -1444,7 +1449,7 @@ export default function PlayPage() {
     if (hotspotId === 'exit' && scene?.id === 'ch1_sc5') {
       const state = engine.getState();
       if (state.flags.final_password_revealed || state.flags.coordinates_revealed) {
-        audioManager.playSFX('/audio/sfx/sfx_door_unlock.mp3', 0.7);
+        audioManager.playSFX('/audio/sfx/kk_sfx_door_unlock.mp3', 0.7);
       }
     }
 
@@ -1454,7 +1459,7 @@ export default function PlayPage() {
       if (!state.flags.door_701_open) {
         // 門未打開，觸發謎題
         // 點下大門時播放尖銳金屬聲
-        audioManager.playSFX('/audio/sfx/sfx_metal.mp3', 0.6);
+        audioManager.playSFX('/audio/sfx/kk_sfx_metal.mp3', 0.6);
         const doorPuzzle = scene.puzzles.find(p => p.id === 'door_code');
         if (ENABLE_SCENE_PUZZLES && doorPuzzle) {
           setCurrentPuzzle(doorPuzzle);
@@ -1604,7 +1609,7 @@ export default function PlayPage() {
         return;
       }
       // 播放音效和閃爍效果
-      audioManager.playSFX('/audio/sfx/sfx_wardrobe_open.mp3', 0.8);
+      audioManager.playSFX('/audio/sfx/kk_sfx_wardrobe_open.mp3', 0.8);
       if (sceneViewRef.current) {
         sceneViewRef.current.triggerFlicker('intense');
       }
@@ -1650,7 +1655,7 @@ export default function PlayPage() {
         return;
       }
       // 播放音效
-      audioManager.playSFX('/audio/sfx/sfx_monitor_on.mp3', 0.5);
+      audioManager.playSFX('/audio/sfx/kk_sfx_monitor_on.mp3', 0.5);
       // 記錄互動，然後觸發激活事件
       engine.addInteraction('monitor');
       const result = engine.triggerEvent('monitor_activation');
@@ -1766,7 +1771,7 @@ export default function PlayPage() {
         return;
       } else {
         // 有手把，播放音效並顯示文案
-        audioManager.playSFX('/audio/sfx/sfx_window_open.mp3', 0.6);
+        audioManager.playSFX('/audio/sfx/kk_sfx_window_open.mp3', 0.6);
         // 顯示文案
         setCurrentDialog({
           text: '你把手把插入落地窗的鎖孔，轉動。窗戶緩緩打開，外面的風吹進來，帶著鐵鏽和消毒水的味道。\n\n你終於可以離開這個「展示用的」房間了。',
@@ -1981,7 +1986,7 @@ export default function PlayPage() {
         return;
       }
       // 播放音效
-      audioManager.playSFX('/audio/sfx/sfx_toolbox_open.mp3', 0.7);
+      audioManager.playSFX('/audio/sfx/kk_sfx_toolbox_open.mp3', 0.7);
       // 記錄互動，然後觸發打開事件
       engine.addInteraction('toolbox');
       const result = engine.triggerEvent('open_toolbox');
@@ -2549,14 +2554,25 @@ export default function PlayPage() {
     state = engineRef.current.getState();
   }
 
-  // 推理分析按鈕：僅 ch1/ch2/ch3 且本章所有場景都已拜訪且尚未完成推理時顯示
+  // 推理分析按鈕：僅 ch1/ch2/ch3 且本章所有場景都已拜訪且尚未完成推理時顯示；ch1 另須至少 3 位 NPC 已完成敏感問題
   const chapterScenes = getCurrentChapterScenes(chapterId);
   const allScenesVisited =
     chapterScenes.length > 0 && chapterScenes.every((s) => state.visitedScenes.includes(s));
   const reasoningDone = !!state.flags[`${chapterId}_reasoning_done`];
   const hasReasoningForChapter = !!reasoningByChapter[chapterId];
+  const ch1Flags = state.flags || {};
+  const ch1SensitiveCount = [
+    ch1Flags.npc_lin_sensitive_done,
+    ch1Flags.npc_ashun_sensitive_done,
+    ch1Flags.npc_xiaozhang_sensitive_done,
+    ch1Flags.npc_zhou_jie_sensitive_done,
+  ].filter(Boolean).length;
   const showReasoningButton =
-    hasReasoningForChapter && allScenesVisited && !reasoningDone && !showSceneName;
+    hasReasoningForChapter &&
+    allScenesVisited &&
+    !reasoningDone &&
+    !showSceneName &&
+    (chapterId !== 'ch1' || ch1SensitiveCount >= 3);
 
   // 獲取相鄰場景（必須在條件返回之前定義）
   const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
@@ -2574,7 +2590,7 @@ export default function PlayPage() {
     lastDisplayedSceneRef.current = targetSceneId;
     
     // 播放場景切換音效
-    audioManager.playSFX('/audio/sfx/sfx_scene_transition.mp3', 0.3);
+    audioManager.playSFX('/audio/sfx/kk_sfx_scene_change.mp3', 0.3);
     
     // 切換場景，但保留所有狀態
     engine.applyEffect({

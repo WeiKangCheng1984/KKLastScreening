@@ -74,7 +74,7 @@ export default function Inventory({ itemIds, onItemClick, currentSceneId }: Inve
               onClick={() => {
                 onItemClick?.(itemId);
                 // 播放使用音效
-                const audio = new Audio('/audio/sfx/sfx_item_use.mp3');
+                const audio = new Audio('/audio/sfx/kk_sfx_ui_item_use.mp3');
                 audio.volume = 0.3;
                 audio.play().catch(() => {});
               }}

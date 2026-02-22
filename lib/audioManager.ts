@@ -96,14 +96,14 @@ export class AudioManager {
     }
   }
 
-  // 播放互動音效（根據類型）
+  // 播放互動音效（根據類型）— 路徑統一為 /audio/sfx/kk_sfx_*.mp3
   playInteractionSFX(type: 'click' | 'hover' | 'collect' | 'puzzle' | 'error'): void {
     const sfxMap: Record<string, string> = {
-      click: '/audio/sfx/sfx_click.mp3',
-      hover: '/audio/sfx/sfx_hover.mp3',
-      collect: '/audio/sfx/sfx_item_collect.mp3',
-      puzzle: '/audio/sfx/sfx_puzzle_submit.mp3',
-      error: '/audio/sfx/sfx_error.mp3',
+      click: '/audio/sfx/kk_sfx_ui_click.mp3',
+      hover: '/audio/sfx/kk_sfx_ui_hover.mp3',
+      collect: '/audio/sfx/kk_sfx_ui_collect.mp3',
+      puzzle: '/audio/sfx/kk_sfx_ui_puzzle_ok.mp3',
+      error: '/audio/sfx/kk_sfx_ui_error.mp3',
     };
     
     const path = sfxMap[type];

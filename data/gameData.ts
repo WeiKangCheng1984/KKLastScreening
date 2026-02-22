@@ -3523,8 +3523,8 @@ export const chapters: Record<string, Chapter> = {
       description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
       moodText: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，就是在正常裡動手。',
       // backgroundImage: '/images/intro_ch1_bg.png', // 需要放置圖片
-      // 第一章導讀音樂：路徑 /public/audio/ambient/，檔名可為 intro_ch1.mp3 或沿用 apartment_intro.wav
-      ambientAudio: '/audio/ambient/apartment_intro.wav',
+      // 第一章導讀 BGM：置於 public/audio/bgm/kk_bgm_intro_ch1.mp3
+      ambientAudio: '/audio/bgm/kk_bgm_intro_ch1.mp3',
       // 導讀影片：文字說明後播放的動畫影片
       // 建議格式：MP4 (H.264編碼，兼容性最好)
       // 建議尺寸：1920x1080 或 1280x720
@@ -3798,6 +3798,14 @@ export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       ],
     },
     // === 敏感問題二：你找到什麼／燈晚亮（黑色碎片三選一 → 燈晚亮 → 內心旁白）===
+    // 若玩家已從洗手台取得碎片（black_fragment_found），改由此節點進入，避免重複給碎片
+    'node_zhou_fragment_1_already_have': {
+      id: 'node_zhou_fragment_1_already_have',
+      npcId: 'npc_zhou_jie',
+      text: '周姊點點頭：「你已經找到那片了吧。那就好。」\n\nKK：「嗯。」\n\n周姊沒有多說，只是又看了一眼洗手台的方向。',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_zhou_fragment_2',
+    },
     'node_zhou_fragment_1': {
       id: 'node_zhou_fragment_1',
       npcId: 'npc_zhou_jie',

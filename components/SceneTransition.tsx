@@ -33,11 +33,12 @@ export default function SceneTransition({
 
     // 播放過渡音效
     if (config.type !== 'none') {
+      // 過渡效果統一使用同一音效；置於 public/audio/sfx/kk_sfx_transition_soft.mp3
       const soundMap: Record<string, string> = {
-        warp: '/audio/sfx/sfx_warp.mp3',
-        portal: '/audio/sfx/sfx_portal.mp3',
-        dissolve: '/audio/sfx/sfx_dissolve.mp3',
-        flip: '/audio/sfx/sfx_flip.mp3',
+        warp: '/audio/sfx/kk_sfx_transition_soft.mp3',
+        portal: '/audio/sfx/kk_sfx_transition_soft.mp3',
+        dissolve: '/audio/sfx/kk_sfx_transition_soft.mp3',
+        flip: '/audio/sfx/kk_sfx_transition_soft.mp3',
       };
       
       const soundPath = soundMap[config.type];
