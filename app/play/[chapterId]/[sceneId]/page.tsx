@@ -33,6 +33,7 @@ import { scenes, chapters, items } from '@/data/gameData';
 import DeveloperPanel from '@/components/DeveloperPanel';
 import TutorialGuide from '@/components/TutorialGuide';
 import AudioControl from '@/components/AudioControl';
+import MuteAllButton from '@/components/MuteAllButton';
 import { preloadSVGBatch } from '@/lib/svgLoader';
 import type { Puzzle as GamePuzzle } from '@/types/game';
 import { DialogChoice } from '@/types/game';
@@ -2930,6 +2931,9 @@ export default function PlayPage() {
           onClose={() => setShowReasoningPanel(false)}
         />
       )}
+
+      {/* 正上方：一鍵關閉／開啟所有聲音 */}
+      <MuteAllButton />
 
       {/* 浮動控制按鈕組 - 右上角（統一收納選單） */}
       <div className="absolute top-4 right-4 z-30">

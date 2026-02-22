@@ -6,6 +6,7 @@ import { prologueSlides } from '@/data/gameData';
 import { getNextPath } from '@/data/flowConfig';
 import DialogBox from '@/components/DialogBox';
 import { audioManager } from '@/lib/audioManager';
+import MuteAllButton from '@/components/MuteAllButton';
 
 /** 序章背景圖：置於 public/images/prologue_bg.webp（建議尺寸 828×1284 或 1080×1920，直式） */
 const PROLOGUE_BG = '/images/prologue_bg.webp';
@@ -50,6 +51,7 @@ export default function ProloguePage() {
     <div className="min-h-screen bg-dark-bg flex items-center justify-center">
       {/* 桌面版：手機型窄版置中（與遊戲內一致） */}
       <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black via-neutral-900 to-black relative overflow-hidden px-4 md:max-w-[428px] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:border md:border-dark-border/50 md:[transform:translateZ(0)]">
+        <MuteAllButton />
         {/* 序章背景圖（可選：放置 prologue_bg.webp 即顯示） */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"

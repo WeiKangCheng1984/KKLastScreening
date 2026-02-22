@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Play } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { audioManager } from '@/lib/audioManager';
+import MuteAllButton from '@/components/MuteAllButton';
 
 /** 開場 BGM：置於 public/audio/bgm/kk_bgm_title.mp3 */
 const BGM_TITLE = '/audio/bgm/kk_bgm_title.mp3';
@@ -42,6 +43,7 @@ export default function Home() {
     <div className="min-h-screen bg-dark-bg flex items-center justify-center">
       {/* 桌面版：手機型窄版置中（與遊戲內一致） */}
       <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg relative overflow-hidden md:max-w-[428px] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:border md:border-dark-border/50 md:[transform:translateZ(0)]">
+        <MuteAllButton />
         {/* 主選單底圖 WEBP：以手機直式滿版為主。建議 1080×1920（9:16），≤250KB，置於 /images/main_bg_placeholder.webp */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
