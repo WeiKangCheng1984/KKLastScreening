@@ -93,7 +93,7 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
               </div>
               
               {/* NPC 名稱 */}
-              <span className="text-[10px] md:text-xs text-white/80 group-hover:text-white transition-colors text-center max-w-[60px] truncate leading-tight">
+              <span className="text-[10px] md:text-xs text-white/80 group-hover:text-white transition-colors text-center max-w-[4.5rem] min-w-0 leading-tight line-clamp-2 break-words">
                 {npc.name}
               </span>
               

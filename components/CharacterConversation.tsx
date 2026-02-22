@@ -181,7 +181,7 @@ export default function CharacterConversation({
             <div className={`flex-1 min-w-0 flex flex-col ${isPlayer ? 'bg-blue-900/30' : 'bg-gray-900/30'} rounded-lg p-4 border ${isPlayer ? 'border-blue-500/30' : 'border-gray-500/30'}`}>
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isPlayer ? 'bg-blue-400' : 'bg-orange-400'}`} />
-                <span className="text-sm font-medium text-gray-300 truncate">
+                <span className="text-sm font-medium text-gray-300 break-words min-w-0">
                   {currentTurn.characterName}
                 </span>
                 {isPlayer && (

@@ -186,8 +186,8 @@ export default function DialogBox({
       }`}
       >
         {/* 標題欄 - 添加圖示動畫 */}
-        <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/10 flex-shrink-0">
-          <div className={`text-xs uppercase tracking-widest font-semibold ${styles.icon} flex items-center gap-2`}>
+        <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/10 flex-shrink-0 gap-2">
+          <div className={`text-xs uppercase tracking-widest font-semibold ${styles.icon} flex items-center gap-2 min-w-0 break-words flex-1`}>
             {dialog.type === 'broadcast' && (
               <span className={`w-2 h-2 bg-red-400 rounded-full ${styles.pulse}`}></span>
             )}

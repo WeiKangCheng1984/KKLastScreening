@@ -91,7 +91,7 @@ export default function NpcRightStrip({
                   />
                 )}
               </div>
-              <span className="text-[10px] md:text-xs text-white/80 group-hover:text-white text-center max-w-[56px] truncate leading-tight">
+              <span className="text-[10px] md:text-xs text-white/80 group-hover:text-white text-center max-w-[4.5rem] min-w-0 leading-tight line-clamp-2 break-words">
                 {npc.name}
               </span>
               {hoveredNpc === npc.id && (
