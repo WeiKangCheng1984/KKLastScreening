@@ -2,11 +2,8 @@
 
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { DialogChoice, ConversationTurn } from '@/types/game';
-import { useEffect, useState, useRef, useCallback } from 'react';
-import SVGImage from './SVGImage';
-import DialogChoiceComponent from './DialogChoice';
-import { motion } from 'framer-motion';
-import { ChevronRight, User } from 'lucide-react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import CharacterConversationCard from './CharacterConversationCard';
 
 export interface CharacterConversationProps {
   conversation: ConversationTurn[];
@@ -122,112 +119,31 @@ export default function CharacterConversation({
   const portraitWebpUrl = currentTurn.characterId
     ? getNpcPortraitUrl(currentTurn.characterId, currentTurn.characterExpression ?? 1)
     : null;
-  const hasPortrait = Boolean(portraitWebpUrl || currentTurn.characterPortrait);
-  const portraitSize = 'w-[8rem] h-40 md:w-40 md:h-48'; // 128px×160px / 160px×192px
+  const portraitSize = 'w-24 h-[7.5rem] md:w-[7.5rem] md:h-[9rem]'; // 縮小 25%：原 128×160 / 160×192 → 96×120 / 120×144
 
-  return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none ${className}`}>
-      <div className="pointer-events-auto w-full max-w-2xl px-4">
-        {/* 不依 currentTurn.id 重掛載整張卡片，只更新內容，避免人像框位移 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="bg-dark-card/95 backdrop-blur-md border border-dark-border rounded-lg shadow-2xl p-6"
-        >
-          {/* 方案 4：可下一句時點擊整區（人像+對話+繼續）觸發下一句，保留繼續按鈕 */}
-          <div
-            role={showContinue ? 'button' : undefined}
-            tabIndex={showContinue ? 0 : undefined}
-            onClick={showContinue ? handleNext : undefined}
-            onKeyDown={showContinue ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleNext(); } } : undefined}
-            className={showContinue ? 'cursor-pointer outline-none rounded-lg -m-2 p-2 focus-visible:ring-2 focus-visible:ring-orange-400/50' : ''}
-          >
-            {/* 角色立繪 + 對話：固定左側人像框寬高，右側 min-w-0 防止擠壓重疊 */}
-            <div className={`flex items-stretch gap-4 mb-4 ${currentTurn.characterPosition === 'right' ? 'flex-row-reverse' : ''}`}>
-            {/* 方案 2：人像框層次（陰影/邊框）+ 無立繪時替身（首字或圖示） */}
-            <div
-              className={`flex-shrink-0 ${portraitSize} overflow-hidden rounded-lg bg-dark-surface/50 border shadow-lg ring-1 ring-white/10 ${
-                isPlayer ? 'border-blue-500/30' : 'border-orange-400/30'
-              }`}
-              style={{ minWidth: '8rem', minHeight: '10rem' }}
-            >
-              {portraitWebpUrl ? (
-                <img
-                  src={portraitWebpUrl}
-                  alt={currentTurn.characterName}
-                  className="w-full h-full object-contain"
-                />
-              ) : currentTurn.characterPortrait ? (
-                <SVGImage
-                  src={currentTurn.characterPortrait}
-                  alt={currentTurn.characterName}
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-dark-card/60 text-white/70" aria-hidden>
-                  {currentTurn.characterName?.trim() ? (
-                    <span className="text-4xl md:text-5xl font-medium select-none" aria-hidden>
-                      {currentTurn.characterName.trim().charAt(0)}
-                    </span>
-                  ) : (
-                    <User className="w-16 h-16 md:w-20 md:h-20 text-white/50" aria-hidden />
-                  )}
-                </div>
-              )}
-            </div>
+  // 方案 C：整張卡片固定總高度，上方內容區 + 下方固定按鈕區，避免「繼續」出現時跳動
+  const cardWidth = 'min(360px, calc(100vw - 2rem))';
+  const cardHeight = '19rem'; // 304px，固定總高
+  const textAreaHeight = '7rem'; // 112px，約 4～5 行
+  const buttonAreaHeight = '3.5rem'; // 56px，固定按鈕區
 
-            {/* 對話框：flex-1 + min-w-0 避免壓到人像 */}
-            <div className={`flex-1 min-w-0 flex flex-col ${isPlayer ? 'bg-blue-900/30' : 'bg-gray-900/30'} rounded-lg p-4 border ${isPlayer ? 'border-blue-500/30' : 'border-gray-500/30'}`}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isPlayer ? 'bg-blue-400' : 'bg-orange-400'}`} />
-                <span className="text-sm font-medium text-gray-300 break-words min-w-[6em] whitespace-pre-line">
-                  {currentTurn.characterName.replace(/（/g, '\n（')}
-                </span>
-                {isPlayer && (
-                  <span className="text-xs text-gray-500 flex-shrink-0">（你）</span>
-                )}
-              </div>
-              <div className="text-sm text-gray-200 leading-relaxed min-h-[60px] break-words">
-                {displayText}
-                {!isComplete && (
-                  <span className="inline-block w-2 h-5 bg-orange-400 ml-1 animate-pulse align-middle" />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* 繼續按鈕（保留，與點擊整區並存） */}
-          {showContinue && (
-            <div className="mt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                className="px-6 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/50 rounded-lg transition-colors text-sm text-orange-400 hover:text-orange-300 font-medium flex items-center gap-2 cursor-pointer hover:border-orange-400"
-              >
-                <span>繼續</span>
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
-          </div>
-
-          {/* 選擇題 */}
-          {showChoices && isComplete && (
-            <div className="mt-4 space-y-2">
-              {finalChoices.map((choice) => (
-                <button
-                  key={choice.id}
-                  onClick={() => handleChoice(choice)}
-                  className="w-full px-4 py-3 text-left bg-dark-surface/50 hover:bg-dark-surface border border-dark-border hover:border-orange-400/50 rounded-lg transition-colors text-sm text-gray-300 hover:text-orange-400"
-                >
-                  {choice.text}
-                </button>
-              ))}
-            </div>
-          )}
-        </motion.div>
-      </div>
-    </div>
-  );
+  return React.createElement(CharacterConversationCard, {
+    wrapperClassName: `fixed inset-0 z-50 flex items-center justify-center pointer-events-none ${className}`,
+    cardWidth,
+    cardHeight,
+    textAreaHeight,
+    buttonAreaHeight,
+    showContinue,
+    showChoices,
+    isComplete,
+    finalChoices,
+    onNext: handleNext,
+    onChoice: handleChoice,
+    onClose: onComplete,
+    currentTurn,
+    isPlayer,
+    portraitWebpUrl,
+    portraitSize,
+    displayText,
+  });
 }

@@ -230,6 +230,12 @@ export default function DialogBox({
           </div>
         </div>
 
+        {dialog.title && (
+          <div className="text-ui-caption text-white/70 mb-2 flex-shrink-0">
+            {dialog.title}
+          </div>
+        )}
+
         {/* 對話內容容器 - 可捲動、最大高度，支持 SVG 和角色立繪佈局 */}
         {(() => {
           const portraitWebpUrl = dialog.characterId
@@ -249,7 +255,7 @@ export default function DialogBox({
           {/* 角色立繪：優先 WEBP（characterId + characterExpression），其次 characterPortrait（SVG） */}
           {portraitWebpUrl && (
             <div className="flex-shrink-0 flex items-end">
-              <div className="w-32 h-40 md:w-40 md:h-48 relative">
+              <div className="w-24 h-[7.5rem] md:w-[7.5rem] md:h-[9rem] relative">
                 <img
                   src={portraitWebpUrl}
                   alt={dialog.characterName || '角色'}
@@ -260,7 +266,7 @@ export default function DialogBox({
           )}
           {!portraitWebpUrl && dialog.characterPortrait && (
             <div className="flex-shrink-0 flex items-end">
-              <div className="w-32 h-40 md:w-40 md:h-48 relative">
+              <div className="w-24 h-[7.5rem] md:w-[7.5rem] md:h-[9rem] relative">
                 <SVGImage
                   src={dialog.characterPortrait}
                   alt={dialog.characterName || '角色'}

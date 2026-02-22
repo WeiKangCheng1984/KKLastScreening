@@ -154,17 +154,20 @@ export default function PlayPage() {
   const sceneTransitionTimerRef = useRef<NodeJS.Timeout | null>(null);
   // 道具獲得提示狀態
   const [showItemNotification, setShowItemNotification] = useState(false);
-  const [obtainedItem, setObtainedItem] = useState<{ id: string; name: string; image?: string; svgImage?: string } | null>(null);
+  const [obtainedItem, setObtainedItem] = useState<{ id: string; name: string; image?: string; svgImage?: string; description?: string } | null>(null);
 
-  // 添加對話到隊列（需要在 handleItemCollection 之前定義）
-  const addDialogsToQueue = useCallback((dialogs: Dialog[]) => {
+  // 添加對話到隊列（需要在 handleItemCollection 之前定義）；interactionName 為選填，用於顯示互動點名稱於對話框上方
+  const addDialogsToQueue = useCallback((dialogs: Dialog[], interactionName?: string) => {
     if (dialogs.length === 0) return;
-    
+    const toQueue = interactionName
+      ? [{ ...dialogs[0], title: interactionName }, ...dialogs.slice(1)]
+      : dialogs;
+
     // 使用函數式更新來避免閉包問題
     setCurrentDialog(current => {
       if (!current) {
         // 如果當前沒有對話，直接顯示第一個，其餘加入隊列
-        const firstDialog = dialogs[0];
+        const firstDialog = toQueue[0];
         // 檢查是否為廣播類型，需要特殊處理
         if (firstDialog.type === 'broadcast') {
           // 播放廣播音效
@@ -182,23 +185,23 @@ export default function PlayPage() {
           // 廣播對話需要特殊處理，先返回 null，然後在 setTimeout 中設置
           setTimeout(() => {
             setCurrentDialog(firstDialog);
-            if (dialogs.length > 1) {
-              setDialogQueue(dialogs.slice(1));
+            if (toQueue.length > 1) {
+              setDialogQueue(toQueue.slice(1));
             }
           }, 0);
           return null;
         } else {
           // 使用 setTimeout 確保狀態更新順序正確
           setTimeout(() => {
-            if (dialogs.length > 1) {
-              setDialogQueue(dialogs.slice(1));
+            if (toQueue.length > 1) {
+              setDialogQueue(toQueue.slice(1));
             }
           }, 0);
           return firstDialog;
         }
       } else {
         // 如果當前有對話，將所有新對話加入隊列
-        setDialogQueue(prev => [...prev, ...dialogs]);
+        setDialogQueue(prev => [...prev, ...toQueue]);
         return current;
       }
     });
@@ -319,66 +322,11 @@ export default function PlayPage() {
             name: item.name,
             image: item.image,
             svgImage: item.svgImage,
+            description: item.description,
           });
           setShowItemNotification(true);
-          
-          // 1.5秒後關閉提示，然後顯示對話框（縮短等待時間）
-          setTimeout(() => {
-            setShowItemNotification(false);
-            setObtainedItem(null);
-            
-            // 檢查是否為角色對話事件
-            const isCharacterDialog = /^(character_\d_|person_)(first|second|third|fourth|fifth)_talk$/.test(eventId) || 
-                                      /^talk_to_(character_|person)/.test(eventId);
-            
-            if (isCharacterDialog) {
-              // 映射事件 ID 到對話鏈 ID
-              let conversationId: string | null = null;
-              if (eventId === 'talk_to_character_1' || eventId.startsWith('character_1_')) {
-                conversationId = 'character_1_conversation';
-              } else if (eventId === 'talk_to_character_2' || eventId.startsWith('character_2_')) {
-                conversationId = 'character_2_conversation';
-              } else if (eventId === 'talk_to_person' || eventId.startsWith('person_')) {
-                conversationId = 'person_conversation';
-              }
-              
-              // 如果找到對應的對話鏈，使用新系統
-              if (conversationId && characterConversations[conversationId]) {
-                const conversation = characterConversations[conversationId];
-                
-                // 檢查是否已經完成過
-                if (conversation.onComplete?.setFlag) {
-                  const flag = conversation.onComplete.setFlag;
-                  if (engine.hasFlag(flag)) {
-                    return true;
-                  }
-                }
-                
-                // 顯示角色對話
-                setCurrentConversation(conversation);
-                setRefreshKey(prev => prev + 1);
-                return true;
-              }
-            }
-            
-            // 處理對話顯示
-            const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
-            const dialogs: Dialog[] = [];
-            
-            dialogEffects.forEach((effect: any) => {
-              if (effect.dialog) {
-                dialogs.push(effect.dialog);
-              }
-            });
-            
-            if (dialogs.length > 0) {
-              addDialogsToQueue(dialogs);
-            }
-            
-            setRefreshKey(prev => prev + 1);
-          }, 1500); // 縮短為 1.5 秒
-          
-          return true; // 已處理
+          setRefreshKey(prev => prev + 1);
+          return true; // 已處理（方案 C：點擊浮動提示後關閉）
         }
       }
       
@@ -429,7 +377,8 @@ export default function PlayPage() {
         });
         
         if (dialogs.length > 0) {
-          addDialogsToQueue(dialogs);
+          const hotspot = scene.hotspots.find(h => h.id === hotspotId);
+          addDialogsToQueue(dialogs, hotspot?.description);
         }
         
         setRefreshKey(prev => prev + 1);
@@ -1542,22 +1491,10 @@ export default function PlayPage() {
               name: item.name,
               image: item.image,
               svgImage: item.svgImage,
+              description: item.description,
             });
             setShowItemNotification(true);
-            
-            // 1.5秒後關閉提示，然後顯示對話框（縮短等待時間）
-            setTimeout(() => {
-              setShowItemNotification(false);
-              setObtainedItem(null);
-              
-              if (result.dialog) {
-                setCurrentDialog(result.dialog);
-              } else if (dialogEffects[0]?.dialog) {
-                setCurrentDialog(dialogEffects[0].dialog);
-              }
-              setRefreshKey(prev => prev + 1);
-            }, 1500); // 縮短為 1.5 秒
-            
+            setRefreshKey(prev => prev + 1);
             return;
           }
         }
@@ -1751,20 +1688,10 @@ export default function PlayPage() {
               name: item.name,
               image: item.image,
               svgImage: item.svgImage,
+              description: item.description,
             });
             setShowItemNotification(true);
-            
-            // 1.5秒後關閉提示，然後顯示對話框（縮短等待時間）
-            setTimeout(() => {
-              setShowItemNotification(false);
-              setObtainedItem(null);
-              
-              if (dialogEffects[0]?.dialog) {
-                setCurrentDialog(dialogEffects[0].dialog);
-              }
-              setRefreshKey(prev => prev + 1);
-            }, 1500); // 縮短為 1.5 秒
-            
+            setRefreshKey(prev => prev + 1);
             return;
           }
         }
@@ -1846,46 +1773,10 @@ export default function PlayPage() {
               name: item.name,
               image: item.image,
               svgImage: item.svgImage,
+              description: item.description,
             });
             setShowItemNotification(true);
-            
-            // 1.5秒後關閉提示，然後顯示對話框（縮短等待時間）
-            setTimeout(() => {
-              setShowItemNotification(false);
-              setObtainedItem(null);
-              
-              // 構建對話隊列：先顯示道具描述，再顯示事件對話
-              const dialogs: Dialog[] = [];
-              
-              // 添加道具描述對話（藍色框）
-              addItemEffects.forEach((effect: any) => {
-                const eid = effect?.itemId;
-                const item = eid != null ? items[eid] : undefined;
-                if (item) {
-                  dialogs.push({
-                    text: `獲得：${item.name}\n\n${item.description}`,
-                    type: 'item',
-                    svgImage: item.svgImage,
-                    svgPosition: 'left',
-                  });
-                }
-              });
-              
-              // 添加事件對話（旁白/系統）
-              dialogEffects.forEach((effect: any) => {
-                if (effect.dialog) {
-                  dialogs.push(effect.dialog);
-                }
-              });
-              
-              // 使用對話隊列顯示
-              if (dialogs.length > 0) {
-                addDialogsToQueue(dialogs);
-              }
-              
-              setRefreshKey(prev => prev + 1);
-            }, 1500); // 縮短為 1.5 秒
-            
+            setRefreshKey(prev => prev + 1);
             return;
           }
         }
@@ -1989,7 +1880,8 @@ export default function PlayPage() {
                   }
                 });
                 if (dialogs.length > 0) {
-                  addDialogsToQueue(dialogs);
+                  const hotspot = scene.hotspots.find(h => h.id === hotspotId);
+                  addDialogsToQueue(dialogs, hotspot?.description);
                 }
               }
               setRefreshKey(prev => prev + 1);
@@ -2162,37 +2054,33 @@ export default function PlayPage() {
     }
     
     const result = engine.useItem(itemId);
+    const itemData = items[itemId];
+    const showItemAsNotification = () => {
+      if (itemData) {
+        setObtainedItem({
+          id: itemData.id,
+          name: itemData.name,
+          image: itemData.image,
+          svgImage: itemData.svgImage,
+          description: itemData.description,
+        });
+        setShowItemNotification(true);
+        setRefreshKey(prev => prev + 1);
+      }
+    };
+
     if (result.success) {
       if (result.openPanel === 'pulse_clip') {
-        // 打開脈搏夾面板
         setShowPulseClip(true);
       } else if (result.dialog) {
         setCurrentDialog(result.dialog);
       } else {
-        const item = scene?.items.find(i => i.id === itemId);
-        const itemData = items[itemId];
-        if (item) {
-          setCurrentDialog({
-            text: item.description,
-            type: 'item',
-            svgImage: itemData?.svgImage,
-            svgPosition: 'left',
-          });
-        }
+        showItemAsNotification();
       }
     } else {
-      const item = scene?.items.find(i => i.id === itemId);
-      const itemData = items[itemId];
-      if (item) {
-        setCurrentDialog({
-          text: item.description,
-          type: 'item',
-          svgImage: itemData?.svgImage,
-          svgPosition: 'left',
-        });
-      }
+      // 不受場景限制：用全域 items 顯示，與首次發現時相同（浮動提示）
+      showItemAsNotification();
     }
-    setRefreshKey(prev => prev + 1);
   }, [scene]); // engine 來自 useRef，不需要在依賴中
 
   const handlePuzzleSolve = useCallback((input: string | string[] | number[] | Record<string, any>) => {
@@ -2251,45 +2139,10 @@ export default function PlayPage() {
                       name: item.name,
                       image: item.image,
                       svgImage: item.svgImage,
+                      description: item.description,
                     });
                     setShowItemNotification(true);
-                    
-                    // 1.5秒後關閉提示，然後添加對話（縮短等待時間）
-                    setTimeout(() => {
-                      setShowItemNotification(false);
-                      setObtainedItem(null);
-                      
-                      eventAddItemEffects.forEach((addItemEffect: any) => {
-                        const eid = addItemEffect?.itemId;
-                        const item = eid != null ? items[eid] : undefined;
-                        if (item) {
-                          dialogEffects.push({
-                            type: 'showDialog',
-                            dialog: {
-                              text: `獲得：${item.name}\n\n${item.description}`,
-                              type: 'item',
-                              svgImage: item.svgImage,
-                              svgPosition: 'left',
-                            },
-                          });
-                        }
-                      });
-                      
-                      // 處理對話隊列
-                      const dialogs: Dialog[] = [];
-                      dialogEffects.forEach((effect: any) => {
-                        if (effect.dialog) {
-                          dialogs.push(effect.dialog);
-                        }
-                      });
-                      
-                      if (dialogs.length > 0) {
-                        addDialogsToQueue(dialogs);
-                      }
-                      
-                      setRefreshKey(prev => prev + 1);
-                    }, 1500); // 縮短為 1.5 秒
-                    
+                    setRefreshKey(prev => prev + 1);
                     return;
                   }
                 }
@@ -3044,11 +2897,13 @@ export default function PlayPage() {
           itemName={obtainedItem.name}
           itemImage={obtainedItem.image}
           itemSvgImage={obtainedItem.svgImage}
+          itemDescription={obtainedItem.description}
           show={showItemNotification}
-          duration={1500} // 縮短為 1.5 秒，讓動畫更明顯
+          dismissOnTap
           onComplete={() => {
             setShowItemNotification(false);
             setObtainedItem(null);
+            setRefreshKey(prev => prev + 1);
           }}
         />
       )}

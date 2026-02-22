@@ -4,12 +4,66 @@ alwaysApply: true
 
 # 核心框架
 
-Next.js 14（App Router）：章節 / 場景用路由呈現（/play/[chapterId]/[sceneId]）
-TypeScript 5：用型別鎖住內容結構（Scene/Hotspot/Event/Requirement/Effect），避免劇情越改越崩
-Tailwind CSS 3：快速做沉浸式 UI（暗色、霧面、卡片、對話框）
-Lucide React：線索牆、音量、返回、提示等輕量圖示
-Framer Motion：動畫效果（淡入淡出、粒子效果等）
-部署：Vercel：靜態資產 + SSR/CSR 混用、快速迭代上線
+- **Next.js 14**（App Router）：章節／場景以路由呈現（`/play/[chapterId]/[sceneId]`）
+- **TypeScript 5**：型別鎖住內容結構（Scene / Hotspot / Event / Requirement / Effect / Dialog / ConversationTurn），避免劇情越改越崩
+- **Tailwind CSS 3**：沉浸式 UI（暗色、霧面、卡片、對話框）
+- **Lucide React**：線索牆、音量、返回、提示、X、ChevronRight、User 等輕量圖示
+- **Framer Motion**：動畫效果（淡入淡出、粒子、AnimatePresence）
+- **部署**：Vercel，靜態資產 + SSR/CSR 混用、快速迭代上線
+
+---
+
+# 技術架構與專案結構
+
+## 路由一覽（App Router）
+
+| 路徑 | 說明 |
+|------|------|
+| `/` | 首頁 |
+| `/play` | 遊戲入口（需導向章節／場景） |
+| `/play/prologue` | 序章 |
+| `/play/animation` | 動畫頁 |
+| `/play/[chapterId]/intro` | 章節介紹（標題、導讀影片等） |
+| `/play/[chapterId]/[sceneId]` | 主遊玩頁：場景探索、Hotspot、對話、謎題 |
+| `/play/ch2/hub` | 第二章 Hub（若存在） |
+
+## 目錄與關鍵檔案
+
+| 目錄／檔案 | 用途 |
+|------------|------|
+| `app/` | 頁面與 layout（`layout.tsx`, `page.tsx`, `globals.css`） |
+| `app/play/[chapterId]/[sceneId]/page.tsx` | 場景主頁：SceneView、GameEngine、DialogBox、CharacterConversation、Hotspot、背包、道具取得、NPC 對話 |
+| `components/` | 所有 UI 組件（見下方組件清單） |
+| `lib/` | 遊戲邏輯與工具：`gameEngine.ts`、`characterPortrait.ts`、`audioManager.ts`、`flowController.ts`、`responsiveUtils.ts`、`svgLoader.ts`、`svgPreloader.ts`、`svgDragSystem.ts`、`performanceUtils.ts`、`transitionEffects.ts`、`lightingManager.ts` |
+| `data/` | `gameData.ts`（場景／道具／事件／謎題／章節）、`characterConversations.ts`（角色對話鏈）、`reasoningByChapter.ts`、`flowConfig.ts` |
+| `types/game.ts` | 所有 TypeScript 型別（GameState, Scene, Event, Dialog, ConversationTurn, DialogChoice, Item, Puzzle, Npc, InsightsState 等） |
+| `public/` | 靜態資產：背景圖、道具圖、`/images/characters/` 角色頭像 WEBP、`/audio/`、`/videos/`、`/svg/` |
+
+## 關鍵組件與檔案對照
+
+| 功能 | 組件／檔案 |
+|------|------------|
+| 場景主畫面、Hotspot、背景 | `SceneView.tsx` |
+| 一般對話、道具描述、系統訊息 | `DialogBox.tsx` |
+| 角色多段對話（NPC 對話框） | `CharacterConversation.tsx`（邏輯）+ `CharacterConversationCard.tsx`（UI，含繼續／X／選擇題） |
+| 取得道具浮動提示 | `ItemObtainedNotification.tsx` |
+| 背包 | `Inventory.tsx`、`ItemIcon.tsx` |
+| 場景內 NPC 頭像條 | `NpcRightStrip.tsx` |
+| 章節介紹、導讀影片 | `ChapterIntro.tsx` |
+| 謎題 | `ChapterPuzzle.tsx`、各謎題組件（PuzzleInput, CombinationLock, JigsawPuzzle, SlidingPuzzle, WordScramble, WireConnection, RotatingDial, SymbolMatching, MazePath, SequenceMemory, LogicSwitches, VisualSelectionPuzzle, ArrangementPuzzle, PairMatchingPuzzle, PickThreePuzzle 等） |
+| 分數與選擇 | `ScoreDisplay.tsx` |
+| 開發者／Debug | `DeveloperPanel.tsx`（`?dev=1`）、場景 debug（`?debug=1` 顯示 Hotspot） |
+| 其他 UI／效果 | `SceneNameDisplay`、`SceneTransition`、`AudioControl`、`DialogChoice`、`effects/`、`animations/`、`puzzle-svg/` |
+
+---
+
+# 玩法概要
+
+- **探索**：在章節內切換場景（左右箭頭、場景選擇器），點擊 Hotspot 觸發事件。
+- **收集**：符合條件時取得道具，僅顯示浮動提示（ItemObtainedNotification），不排入一般對話佇列；背包點擊道具與「首次發現」同呈現（浮動提示＋描述）。
+- **對話**：一般對話（DialogBox）與角色多段對話（CharacterConversation）雙系統；角色對話可帶選擇題、影響分數／洞察。
+- **謎題**：章節謎題與場景內謎題，依條件解鎖，解完可觸發事件／道具。
+- **分數與選擇**：選擇權重寫入 `state.score`、`state.weights`、`state.choices`；洞察三維度（procedure_insight, human_insight, evidence_insight）與偏好變量由 `types/game.ts` 定義。
 
 ---
 
@@ -27,11 +81,9 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 ## 【2】物件圖（道具/線索/特寫）
 
 - **尺寸**：長邊 384px（需要更清楚才用 512px）
-- **格式**：
-  - 需要透明：PNG
-  - 一般物件：WebP（較小）
+- **格式**：需要透明用 PNG，一般用 WebP
 - **單張大小上限**：≤ 80KB（特寫可放寬到 120KB）
-- **命名**：`item_{id}_v{版}.webp/png`
+- **命名**：`item_{id}_v{版}.webp` 或 `.png`
 - **範例**：`item_faded_photo_v1.png`
 
 ---
@@ -39,8 +91,7 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 ## 【3】UI 圖
 
 - **圖示**：一律用 Lucide React（SVG），不做 PNG icon
-- **尺寸**：540×540 或更小
-- **大小**：≤ 80KB
+- **尺寸**：540×540 或更小，大小 ≤ 80KB
 
 ---
 
@@ -51,7 +102,7 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 - **最小可點尺寸**：手機至少等效 44×44px
 - **響應式尺寸**：使用 `clamp(40px, 4vw, 64px)` 確保跨裝置適配
 - **視覺樣式**：白色半透明邊框（`border-white/30`），背景（`bg-white/5`）
-- **提醒效果**：若隱若現的脈衝動畫（`animate-ping`, `animate-pulse`），使用白色低透明度
+- **提醒效果**：若隱若現的脈衝動畫（`animate-ping`, `animate-pulse`），白色低透明度
 - **預設禁止重疊**（不要做 priority 複雜規則）
 - **必做 debug**：`?debug=1` 顯示 hotspot 框與 id（正常模式透明可點）
 
@@ -67,11 +118,11 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 ## 【6】遊戲引擎系統（GameEngine）
 
 ### 核心功能
-- **狀態管理**：`GameState` 包含當前章節、場景、道具、flags、互動記錄、分數等
+- **狀態管理**：`GameState` 包含當前章節、場景、道具、flags、互動記錄、分數、weights、choices、preferences、insights 等
 - **狀態持久化**：使用 `localStorage` 自動保存遊戲狀態
 - **事件系統**：基於 `Requirement` 條件觸發 `Event`，執行 `Effect`
 - **謎題系統**：支援 15+ 種謎題類型，基於條件解鎖
-- **分數系統**：追蹤玩家選擇的權重（`weight`），計算總分數和各維度權重
+- **分數系統**：追蹤玩家選擇的權重（`weight`），計算總分數與各維度權重
 
 ### 主要方法
 - `checkRequirement(req)`：檢查單個需求條件
@@ -80,6 +131,10 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 - `applyEffect(effect)`：應用效果（添加道具、設置 flag、顯示對話等）
 - `solvePuzzle(puzzleId, solution)`：解決謎題
 - `addChoice(choiceId, weight)`：記錄玩家選擇並更新分數
+
+### 實作位置
+- **檔案**：`lib/gameEngine.ts`
+- **資料**：`data/gameData.ts`（scenes, items, chapters, npcDialogs 等）
 
 ---
 
@@ -90,51 +145,49 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 #### 7.1 普通對話系統（DialogBox）
 - **用途**：一般對話、道具描述、系統訊息、旁白
 - **類型**：`narrator` | `broadcast` | `item` | `system` | `choice` | `character`
-- **功能**：
-  - 打字機效果（可配置速度）
-  - 對話歷史記錄
-  - 選擇題支援（2選1或3選1）
-  - SVG 圖片顯示
-- **觸發方式**：通過 `Event` 的 `showDialog` 效果
+- **功能**：打字機效果（可配置速度）、對話歷史、選擇題（2選1或3選1）、SVG 圖片、**標題**（`Dialog.title`）
+- **觸發方式**：通過 `Event` 的 `showDialog` 效果；或由 `addDialogsToQueue(interactionName)` 等排隊顯示
 
-#### 7.2 角色對話系統（CharacterConversation）
-- **用途**：角色互動對話，形成有來有往的對話流程
+#### 7.2 角色對話系統（CharacterConversation + CharacterConversationCard）
+- **用途**：角色互動對話，有來有往的多段對話流程
+- **實作分工**：
+  - **CharacterConversation.tsx**：狀態與邏輯（currentIndex、打字機、handleNext、handleChoice），**不使用 JSX**，以 `React.createElement(CharacterConversationCard, props)` 渲染，避免編譯器將 `return (` 後的 `<` 誤判為比較運算符。
+  - **CharacterConversationCard.tsx**：純 UI，接收 props，含人像、對話氣泡、**右上角操作列**、下方選擇題區。
 - **特點**：
-  - 自動連續播放多段對話
-  - 支持角色立繪顯示
-  - 區分玩家和角色對話（`speaker: 'player' | 'character'`）
+  - 自動連續播放多段對話（`ConversationTurn[]`）
+  - 角色立繪：優先 `lib/characterPortrait.ts` 的 WEBP（`characterId` + `characterExpression`），其次 `characterPortrait`（SVG）
+  - 區分玩家與角色（`speaker: 'player' | 'character'`）
   - 打字機效果 + 淡入淡出動畫（無位置跳動）
-  - 每段對話完成後顯示「繼續」按鈕（玩家無法跳過）
-  - 最後一段可顯示選擇題
+  - **繼續按鈕**：在**對話框右上角**，位於 **X 關閉鈕左邊**；點 X 呼叫 `onClose`（通常為 `onComplete`）
+  - 最後一段可顯示選擇題（在下方固定高度按鈕區，選項多時區塊內捲動）
 - **配置位置**：`data/characterConversations.ts`
-- **觸發方式**：點擊角色 HOTSPOT 時自動識別並使用此系統
+- **觸發方式**：點擊角色 HOTSPOT，事件 ID 匹配 `talk_to_character_*` 或 `character_*_talk`，自動載入對應對話鏈
 
 ---
 
 ## 【8】謎題系統
 
 ### 支援的謎題類型（15+ 種）
-
-1. `input` - 文字輸入謎題
+1. `input` - 文字輸入謎題（PuzzleInput）
 2. `sequence` - 順序謎題
-3. `arrangement` - 排列謎題
+3. `arrangement` - 排列謎題（ArrangementPuzzle）
 4. `combination` - 組合謎題
-5. `visual_selection` - 視覺選擇謎題
-6. `combination_lock` - 密碼鎖
-7. `word_scramble` - 拼字遊戲
-8. `wire_connection` - 顏色線對接
-9. `jigsaw` - 拼圖
-10. `rotating_dial` - 旋轉轉盤
-11. `sequence_memory` - 序列記憶
-12. `sliding_puzzle` - 滑塊拼圖
-13. `symbol_matching` - 符號配對
-14. `maze_path` - 迷宮路徑
-15. `logic_switches` - 邏輯開關
+5. `visual_selection` - 視覺選擇（VisualSelectionPuzzle）
+6. `combination_lock` - 密碼鎖（CombinationLock）
+7. `word_scramble` - 拼字（WordScramble）
+8. `wire_connection` - 顏色線對接（WireConnection）
+9. `jigsaw` - 拼圖（JigsawPuzzle）
+10. `rotating_dial` - 旋轉轉盤（RotatingDial）
+11. `sequence_memory` - 序列記憶（SequenceMemory）
+12. `sliding_puzzle` - 滑塊拼圖（SlidingPuzzle）
+13. `symbol_matching` - 符號配對（SymbolMatching）
+14. `maze_path` - 迷宮路徑（MazePath）
+15. `logic_switches` - 邏輯開關（LogicSwitches）
 
 ### 謎題配置
-- **解鎖條件**：通過 `requirements` 定義
-- **解決後效果**：通過 `onSolve` 定義（可觸發事件、添加道具等）
-- **章節謎題**：每個章節可有一個章節謎題，達到探索進度閾值後解鎖
+- **解鎖條件**：透過 `requirements` 定義
+- **解決後效果**：透過 `onSolve` 定義（可觸發事件、添加道具等）
+- **章節謎題**：每章可有一個章節謎題，達到探索進度閾值後解鎖（ChapterPuzzle）
 
 ---
 
@@ -143,11 +196,14 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 ### 道具類型
 - **可收集**：`collectible: true`，可加入背包
 - **可使用**：`usable: true`，可在特定場景使用
-- **顯示方式**：支持 PNG/WebP 圖片或 SVG
+- **顯示方式**：支援 PNG/WebP 圖片或 SVG（`item.image`、`item.svgImage`）
 
 ### 道具互動
-- **收集**：點擊 HOTSPOT → 檢查條件 → 添加道具 → 顯示對話
-- **查看**：點擊背包中的道具 → 顯示描述對話
+- **收集**：點擊 HOTSPOT → 檢查條件 → 添加道具 → **僅顯示浮動提示**（ItemObtainedNotification），不將「獲得：xxx」排入一般對話佇列
+- **取得道具浮動提示**（ItemObtainedNotification）：
+  - **方案 C**：`dismissOnTap: true` 時不自動關閉，顯示道具名稱與**描述**，點擊卡片或 X 關閉；關閉後呼叫 `onComplete`
+  - 傳入 `itemDescription`、`itemImage`/`itemSvgImage`，與「首次發現」一致
+- **查看**：點擊背包中的道具 → 以**與首次發現相同的方式**呈現（浮動提示＋描述），不受場景限制，使用全域 `items[itemId]`
 - **使用**：在特定場景使用道具觸發事件
 
 ---
@@ -159,7 +215,7 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 2. 系統查找 `hotspotEventMap` 對應的事件 ID
 3. 檢查事件 `requirements`（道具、flag、互動記錄等）
 4. 條件滿足 → 觸發事件 → 應用 `effects`
-5. 如果是 `oneTime: true`，標記為已互動
+5. 若為 `oneTime: true`，標記為已互動
 
 ### 事件效果類型
 - `addItem` - 添加道具
@@ -171,9 +227,8 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 - `changeScene` - 切換場景
 
 ### 特殊事件：角色對話
-- 事件 ID 匹配模式：`talk_to_character_*` 或 `character_*_talk`
-- 自動使用 `CharacterConversation` 系統
-- 從 `characterConversations.ts` 載入對話配置
+- 事件 ID 匹配：`talk_to_character_*` 或 `character_*_talk`
+- 自動使用 CharacterConversation 系統，從 `data/characterConversations.ts` 載入對話鏈
 
 ---
 
@@ -181,32 +236,25 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 
 ### 分數追蹤
 - **總分數**：`state.score`（累加所有選擇的權重）
-- **維度權重**：`state.weights`（記錄各維度的權重，如 `acceptance`, `resistance`, `hesitation`）
-- **選擇記錄**：`state.choices`（記錄所有選擇的時間戳和權重）
+- **維度權重**：`state.weights`（如 acceptance, resistance, hesitation）
+- **選擇記錄**：`state.choices`（時間戳與權重）
+- **洞察三維度**：`state.insights`（procedure_insight, human_insight, evidence_insight）
+- **偏好變量**：`state.preferences`（見 types/game.ts PreferencesState）
 
 ### 選擇權重
-- **正權重**：接受、承擔責任等（如 `weight: 10`）
-- **負權重**：拒絕、離開等（如 `weight: -5`）
-- **零權重**：中性選擇
+- 正權重：接受、承擔等；負權重：拒絕、離開等；零權重：中性
 
 ### 顯示組件
-- `ScoreDisplay`：顯示總分數、各維度權重、選擇次數
-- 整合在右上角選單中
+- `ScoreDisplay`：總分、各維度權重、選擇次數，整合在右上角選單
 
 ---
 
 ## 【12】音效系統（AudioManager）
 
-### 音效類型
-- **環境音**（Ambient）：場景背景音效
-- **廣播音效**（Broadcast）：廣播靜電音等
-- **恐怖音效**（Horror）：呼吸聲、心跳聲、風聲等
-- **音效**（SFX）：門解鎖、金屬聲、紙張翻動等
-
-### 管理功能
-- 自動播放/停止環境音
-- 音效音量控制
-- 背景音樂管理
+- **檔案**：`lib/audioManager.ts`
+- **音效類型**：環境音（Ambient）、廣播（Broadcast）、恐怖（Horror）、SFX
+- **管理功能**：自動播放/停止環境音、音效音量控制、背景音樂管理
+- **路徑**：`/audio/ambient/`、`/audio/broadcast/`、`/audio/horror/`、`/audio/sfx/`
 
 ---
 
@@ -214,73 +262,51 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 
 ### 主要 UI 組件
 - **選單系統**：右上角統一選單（退出、音效、背包、開發者模式、分數顯示）
-- **背包系統**：浮動覆蓋層，不壓縮主畫面
-- **對話框**：固定尺寸 360×360px，支持打字機效果
-- **開發者面板**：`?dev=1` 啟用，顯示狀態、快速跳轉等
-- **章節介紹**：支持文字、圖片、影片、輪播
-- **章節影片**：支持播放、重播、暫停、跳過
+- **背包**：浮動覆蓋層，不壓縮主畫面（Inventory、ItemIcon）
+- **對話框**：固定尺寸 360×360px，支援打字機效果、標題、角色立繪（DialogBox）
+- **角色對話框**：固定卡片寬高（CharacterConversationCard），右上角繼續＋X，下方固定高度按鈕區（選擇題）
+- **場景 NPC 頭像**：NpcRightStrip，顯示當前場景 NPC，頭像尺寸約 +15% 適配
+- **開發者面板**：`?dev=1` 啟用（DeveloperPanel）
+- **章節介紹**：ChapterIntro（文字、圖片、影片、輪播、導讀影片）
 
 ### 響應式設計
-- 使用 `clamp()` 函數實現響應式尺寸
-- 手機端和桌面端統一 UI
-- HOTSPOT 使用響應式尺寸（`clamp(40px, 4vw, 64px)`）
+- `clamp()` 實現響應式尺寸；HOTSPOT 使用 `clamp(40px, 4vw, 64px)`；手機與桌面統一考量
 
 ---
 
 ## 【14】視覺效果系統
 
-### 場景效果
-- **閃爍效果**：已移除（之前用於恐怖氛圍）
-- **環境光調整**：根據場景調整亮度
-- **過渡動畫**：場景切換時的淡入淡出
-
-### 動畫效果
-- **Framer Motion**：用於對話切換、組件進入/退出
-- **淡入淡出**：角色對話使用 `opacity` 動畫（無位置跳動）
-- **打字機效果**：對話文字逐字顯示
+- **場景效果**：環境光調整、場景切換淡入淡出（無閃爍）
+- **動畫**：Framer Motion 用於對話切換、組件進出；角色對話 opacity 動畫（無位置跳動）；打字機效果
 
 ---
 
 ## 【15】章節與場景系統
 
-### 章節結構
-- **5 個 ROOM**，每個 ROOM 包含 3 個 SPACE（場景）
-- **章節介紹**：標題、副標題、描述、心理文字、背景圖/影片、導讀影片
-- **章節謎題**：可選，達到探索進度閾值後解鎖
-
-### 場景切換
-- **左右箭頭**：切換同章節內的場景
-- **場景選擇器**：快速跳轉到已訪問的場景
-- **自動保存**：場景切換時自動保存狀態
+- **章節結構**：5 個 ROOM，每 ROOM 含 3 個 SPACE（場景）
+- **章節介紹**：標題、副標題、描述、心理文字、背景圖/影片、導讀影片（`/play/[chapterId]/intro`）
+- **場景切換**：左右箭頭、場景選擇器、自動保存
 
 ---
 
 ## 【16】開發與調試
 
-### 開發者模式
-- **啟用方式**：URL 參數 `?dev=1`
-- **功能**：
-  - 開發者面板（狀態查看、快速跳轉）
-  - 調試日誌
-  - 場景選擇器
-  - Flag 管理
-
-### Debug 模式
-- **啟用方式**：URL 參數 `?debug=1`
-- **功能**：顯示所有 HOTSPOT 的邊框和 ID
+- **開發者模式**：`?dev=1` → DeveloperPanel（狀態、快速跳轉、場景選擇器、Flag 管理）
+- **Debug 模式**：`?debug=1` → 顯示所有 HOTSPOT 邊框與 id
 
 ---
 
 ## 【17】資料結構
 
 ### 主要資料檔案
-- `data/gameData.ts`：場景、道具、事件、謎題、章節定義
-- `data/characterConversations.ts`：角色對話鏈配置
-- `types/game.ts`：所有 TypeScript 型別定義
+- **data/gameData.ts**：場景、道具、事件、謎題、章節、NPC 等
+- **data/characterConversations.ts**：角色對話鏈（ConversationTurn[]、finalChoices）
+- **data/reasoningByChapter.ts**：章節推理相關
+- **data/flowConfig.ts**：流程設定
+- **types/game.ts**：所有 TypeScript 型別（GameState, Scene, Event, Dialog, DialogChoice, ConversationTurn, CharacterConversation, Item, Puzzle, Npc, InsightsState, PreferencesState 等）
 
 ### 狀態持久化
-- **localStorage**：自動保存 `GameState`
-- **恢復機制**：頁面重新載入時自動恢復狀態
+- **localStorage**：自動保存 GameState；頁面重新載入時恢復
 
 ---
 
@@ -290,28 +316,32 @@ Framer Motion：動畫效果（淡入淡出、粒子效果等）
 - `bg_ch{章}_sc{場}_v{版}.png`
 
 ### 道具圖
-- `item_{id}_v{版}.webp/png`
+- `item_{id}_v{版}.webp` 或 `.png`
 
-### 角色立繪
-- `/svg/characters/{characterId}.svg`
+### 角色立繪／頭像
+- **WEBP（優先）**：`public/images/characters/{characterId}_{1|2|3}.webp`  
+  例：`npc_lin_ruitang_1.webp`、`npc_ashun_2.webp`  
+  由 `lib/characterPortrait.ts` 的 `getNpcPortraitUrl(characterId, expression)` 取得路徑
+- **SVG（備援）**：`/svg/characters/{characterId}.svg`
 
-### 音效檔案
+### 音效
 - 環境音：`/audio/ambient/{name}.mp3`
 - 廣播：`/audio/broadcast/{name}.mp3`
-- 恐怖音效：`/audio/horror/{name}.mp3`
+- 恐怖：`/audio/horror/{name}.mp3`
 - 音效：`/audio/sfx/{name}.mp3`
 
 ### 章節影片
-- 導讀影片：`/videos/intro_ch{章}_animation_v{版}.mp4` 或自訂檔名（如 `木木.mp4`）
+- 導讀：`/videos/intro_ch{章}_animation_v{版}.mp4` 或自訂檔名（如 `木木.mp4`）
 
 ---
 
 ## 【19】重要設計原則
 
-1. **型別安全**：所有遊戲內容都通過 TypeScript 型別定義，避免結構錯誤
-2. **條件驅動**：事件和謎題都基於條件系統，確保邏輯清晰
-3. **狀態管理**：所有遊戲狀態由 `GameEngine` 統一管理
-4. **組件化**：UI 組件獨立，易於維護和擴展
-5. **響應式優先**：所有 UI 元素都考慮手機和桌面端適配
-6. **無跳過機制**：角色對話必須完整觀看，確保劇情體驗
-7. **視覺穩定**：使用淡入淡出動畫，避免位置跳動造成視覺疲勞
+1. **型別安全**：所有遊戲內容透過 TypeScript 型別定義（types/game.ts），避免結構錯誤
+2. **條件驅動**：事件與謎題基於 Requirement 條件系統，邏輯清晰
+3. **狀態管理**：遊戲狀態由 GameEngine 統一管理，localStorage 持久化
+4. **組件化**：UI 組件獨立（components/），邏輯與工具在 lib/，資料在 data/
+5. **響應式優先**：UI 與 Hotspot 考量手機與桌面
+6. **無跳過機制**：角色對話須完整觀看，繼續在右上角、選擇題在下方固定區
+7. **視覺穩定**：淡入淡出動畫、固定卡片高度，避免「繼續」出現時跳動
+8. **編譯相容**：CharacterConversation 主檔不以 JSX 回傳，改以 React.createElement(CharacterConversationCard) 避免部分環境下「Expected jsx identifier」錯誤

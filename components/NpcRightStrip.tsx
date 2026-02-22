@@ -46,7 +46,7 @@ export default function NpcRightStrip({
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -10, opacity: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="fixed left-1/2 -translate-x-1/2 top-20 z-30 flex flex-row gap-2 pointer-events-none"
+      className="fixed left-1/2 -translate-x-1/2 top-16 z-30 flex flex-row gap-2 pointer-events-none"
     >
       <div className="flex flex-row gap-2 flex-wrap justify-center max-w-[min(90vw,960px)] overflow-x-auto overflow-y-hidden py-1 pointer-events-auto">
         <AnimatePresence>
@@ -65,7 +65,7 @@ export default function NpcRightStrip({
               title={npc.name}
             >
               <div
-                className={`relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-white/10 border-2 transition-colors flex-shrink-0 ${
+                className={`relative w-[2.875rem] h-[2.875rem] md:w-[3.45rem] md:h-[3.45rem] rounded-full overflow-hidden bg-white/10 border-2 transition-colors flex-shrink-0 ${
                   npc.id === activeNpcId
                     ? 'border-orange-400 ring-2 ring-orange-400/60 ring-offset-2 ring-offset-black/60'
                     : 'border-white/30 group-hover:border-white/50'

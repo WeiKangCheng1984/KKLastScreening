@@ -70,6 +70,8 @@ export interface DialogChoice {
 
 export interface Dialog {
   text: string;
+  /** 對話框上方顯示的標題（例如互動點名稱） */
+  title?: string;
   /** 分段顯示（NPC 進階對話）：依序顯示，每段按「繼續」下一段，最後一段後顯示選擇 */
   textSegments?: string[];
   type?: 'narrator' | 'broadcast' | 'item' | 'system' | 'choice' | 'character';

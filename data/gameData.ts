@@ -276,13 +276,6 @@ export const scenes: Record<string, Scene> = {
         description: '地上的電影票根',
         hint: '一張被撕得很乾淨的票根，靜靜躺在地上。',
       },
-      {
-        id: 'hotspot_ch1_wrapup',
-        shape: 'rect',
-        coords: [0.75, 0.75, 0.95, 0.92],
-        description: '回報林瑞堂（結束本章）',
-        hint: '與林瑞堂做最後確認，結束本章。',
-      },
       // 好笑無意義互動點（放映廳）
       { id: 'hotspot_fun_popcorn', shape: 'rect', coords: [0.08, 0.3, 0.2, 0.45], description: '爆米花殘渣', hint: '地上有幾顆沒吃完的爆米花。' },
       { id: 'hotspot_fun_cup', shape: 'rect', coords: [0.22, 0.5, 0.35, 0.62], description: '空飲料杯', hint: '一個空杯還插著吸管。' },
@@ -300,7 +293,6 @@ export const scenes: Record<string, Scene> = {
       'hotspot_dead_collar': 'observe_collar',
       'hotspot_side_aisle_light': 'observe_light',
       'hotspot_ticket_stub': 'examine_ticket_stub',
-      'hotspot_ch1_wrapup': 'ch1_wrapup',
       'hotspot_fun_popcorn': 'fun_popcorn',
       'hotspot_fun_cup': 'fun_cup',
       'hotspot_fun_jacket': 'fun_jacket',
@@ -393,35 +385,6 @@ export const scenes: Record<string, Scene> = {
           { type: 'setFlag', flag: 'ticket_stub_collected', value: true },
         ],
         oneTime: true,
-      },
-      {
-        id: 'ch1_wrapup',
-        name: '章末收束',
-        description: '與林瑞堂確認（選用劇情，不接態度宣言）。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_ch1_wrapup' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '林瑞堂：「KK…我們都配合。你看，資料你也拿到了。可以先到這裡嗎？還有下一場要開。」\n\nKK：「你一直說流程正常。」\n「可我看到的是：有人在規定的黑暗裡，做了一件不該被看見的事。」\n\n林瑞堂想說話又吞回去。',
-              type: 'narrator',
-              choices: [
-                {
-                  id: 'ch1_wrapup_continue',
-                  text: '繼續',
-                  nextDialog: {
-                    text: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，就是在正常裡動手。',
-                    type: 'narrator',
-                    choices: [{ id: 'close_only', text: '知道了' }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-        oneTime: false,
       },
       // 好笑無意義互動（放映廳）
       { id: 'fun_popcorn', name: '爆米花殘渣', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_popcorn' }], effects: [{ type: 'showDialog', dialog: { text: '地上有幾顆沒吃完的爆米花。你忍不住想：最後一場電影，有人連結局都沒看完。', type: 'narrator' } }], oneTime: false },
@@ -557,6 +520,18 @@ export const scenes: Record<string, Scene> = {
             type: 'casual',
             weight: 2,
           },
+          {
+            id: 'casual_6',
+            text: '「我們跟警方都配合到底了，拜託別再擴大…對大家都好。」',
+            type: 'casual',
+            weight: 2,
+          },
+          {
+            id: 'casual_7',
+            text: '「散場時間表都在那邊，你要查什麼都可以。我們真的沒什麼好藏的。」',
+            type: 'casual',
+            weight: 2,
+          },
         ],
         available: true,
       },
@@ -589,12 +564,18 @@ export const scenes: Record<string, Scene> = {
             type: 'casual',
             weight: 2,
           },
+          {
+            id: 'casual_5',
+            text: '「散場那幾分鐘人都在動，誰停下來誰就顯眼。反過來說，懂動線的人就知道什麼時候不顯眼。」',
+            type: 'casual',
+            weight: 2,
+          },
         ],
         available: true,
       },
     ],
   },
-  
+
   // 可探索空間二：播映室
   'scene_ch1_projection_room': {
     id: 'scene_ch1_projection_room',
