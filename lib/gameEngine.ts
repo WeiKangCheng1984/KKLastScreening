@@ -72,6 +72,9 @@ export class GameEngine {
     if (!this.state.reasoningAnswers) {
       this.state.reasoningAnswers = {};
     }
+    if (!this.state.npcCasualTalkCount) {
+      this.state.npcCasualTalkCount = {};
+    }
   }
 
   getState(): GameState {
@@ -644,26 +647,30 @@ export class GameEngine {
 
   // === NPC 對話系統方法 ===
 
-  // 開始 NPC 對話
-  startNpcDialog(dialogId: string): void {
-    // dialogId 格式：npc_{npcId}，例如 npc_lin_ruitang
-    // 找到第一個節點（通常是 node_01_surface 或類似的起始節點）
+  // 開始 NPC 對話（可選指定起始節點，用於林瑞堂等「兩條敏感問題二選一」）
+  startNpcDialog(dialogId: string, startNodeId?: string): void {
     const dialogTree = npcDialogs[dialogId];
     if (!dialogTree) {
       console.warn(`NPC 對話樹不存在: ${dialogId}`);
       return;
     }
 
-    // 找到第一個節點（按 id 排序或使用約定）
-    const firstNodeId = Object.keys(dialogTree).find(id => id.includes('01') || id.includes('surface') || id.includes('intro')) || Object.keys(dialogTree)[0];
-    
-    if (firstNodeId) {
+    const firstNodeId = startNodeId ?? Object.keys(dialogTree).find(id => id.includes('01') || id.includes('surface') || id.includes('intro')) ?? Object.keys(dialogTree)[0];
+    if (firstNodeId && dialogTree[firstNodeId]) {
       this.state.activeNpcDialogId = dialogId;
       this.state.activeNpcDialogNodeId = firstNodeId;
-      console.log(`[NPC 對話] 開始對話: ${dialogId}, 節點: ${firstNodeId}`);
     } else {
-      console.warn(`[NPC 對話] 無法找到第一個節點: ${dialogId}`);
+      console.warn(`[NPC 對話] 無法找到節點: ${firstNodeId ?? 'first'} (對話樹: ${dialogId})`);
     }
+  }
+
+  getNpcCasualTalkCount(npcId: string): number {
+    return this.state.npcCasualTalkCount?.[npcId] ?? 0;
+  }
+
+  incrementNpcCasualTalk(npcId: string): void {
+    if (!this.state.npcCasualTalkCount) this.state.npcCasualTalkCount = {};
+    this.state.npcCasualTalkCount[npcId] = (this.state.npcCasualTalkCount[npcId] ?? 0) + 1;
   }
 
   // 獲取當前 NPC 對話節點

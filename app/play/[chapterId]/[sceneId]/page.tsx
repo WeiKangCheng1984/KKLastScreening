@@ -430,6 +430,238 @@ export default function PlayPage() {
     const scene = engine.getCurrentScene();
     const currentState = engine.getState();
 
+    // 林瑞堂：選擇後 DialogBox 會呼叫 onClose()，需延遲設定下一個對話以免被清掉
+    if (choice.id === 'lin_sensitive_skip') {
+      setTimeout(() => {
+        if (!engineRef.current) return;
+        const d = engineRef.current.triggerRandomNpcDialog('npc_lin_ruitang');
+        if (d) {
+          engineRef.current.incrementNpcCasualTalk('npc_lin_ruitang');
+          setCurrentDialog(d);
+        }
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+      return;
+    }
+    if (choice.id === 'lin_sensitive_ask') {
+      setTimeout(() => {
+        setCurrentDialog({
+          text: '你只能問一個方向。問了，另一個就不能再提。',
+          type: 'narrator',
+          choices: [
+            { id: 'lin_branch_light', text: '我想問：散場的燈為什麼晚亮？誰能改這個表、誰在流程上游？' },
+            { id: 'lin_branch_fear', text: '我想問：你是不是害怕兇手，還是害怕你上面的長官？' },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+      return;
+    }
+    if (choice.id === 'lin_branch_light' && scene?.npcs) {
+      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_lin_ruitang');
+      if (npc) {
+        engine.applyEffect({ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true });
+        engine.startNpcDialog('npc_lin_ruitang', 'node_lin_light_1');
+        const node = engine.getCurrentNpcDialogNode();
+        if (node) {
+          setTimeout(() => {
+            setCurrentDialog(buildDialogFromNpcNode(node, npc));
+            setRefreshKey((prev) => prev + 1);
+          }, 0);
+        }
+      }
+      return;
+    }
+    if (choice.id === 'lin_branch_fear' && scene?.npcs) {
+      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_lin_ruitang');
+      if (npc) {
+        engine.applyEffect({ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true });
+        engine.startNpcDialog('npc_lin_ruitang', 'node_lin_fear_1');
+        const node = engine.getCurrentNpcDialogNode();
+        if (node) {
+          setTimeout(() => {
+            setCurrentDialog(buildDialogFromNpcNode(node, npc));
+            setRefreshKey((prev) => prev + 1);
+          }, 0);
+        }
+      }
+      return;
+    }
+
+    // 阿順：再聊聊 / 問敏感 → 兩選一（散場空窗 / 監視器死角）
+    if (choice.id === 'ashun_sensitive_skip') {
+      setTimeout(() => {
+        if (!engineRef.current) return;
+        const d = engineRef.current.triggerRandomNpcDialog('npc_ashun');
+        if (d) {
+          engineRef.current.incrementNpcCasualTalk('npc_ashun');
+          setCurrentDialog(d);
+        }
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+      return;
+    }
+    if (choice.id === 'ashun_sensitive_ask') {
+      setTimeout(() => {
+        setCurrentDialog({
+          text: '你只能問一個方向。問了，另一個就不能再提。',
+          type: 'narrator',
+          choices: [
+            { id: 'ashun_branch_window', text: '我想問：散場後那一兩分鐘，誰在看？空窗有多大？' },
+            { id: 'ashun_branch_deadzone', text: '我想問：監視器死角在哪？你真的確定嗎？' },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+      return;
+    }
+    if (choice.id === 'ashun_branch_window' && scene?.npcs) {
+      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_ashun');
+      if (npc) {
+        engine.applyEffect({ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true });
+        engine.startNpcDialog('npc_ashun', 'node_ashun_window_1');
+        const node = engine.getCurrentNpcDialogNode();
+        if (node) {
+          setTimeout(() => {
+            setCurrentDialog(buildDialogFromNpcNode(node, npc));
+            setRefreshKey((prev) => prev + 1);
+          }, 0);
+        }
+      }
+      return;
+    }
+    if (choice.id === 'ashun_branch_deadzone' && scene?.npcs) {
+      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_ashun');
+      if (npc) {
+        engine.applyEffect({ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true });
+        engine.startNpcDialog('npc_ashun', 'node_ashun_deadzone_1');
+        const node = engine.getCurrentNpcDialogNode();
+        if (node) {
+          setTimeout(() => {
+            setCurrentDialog(buildDialogFromNpcNode(node, npc));
+            setRefreshKey((prev) => prev + 1);
+          }, 0);
+        }
+      }
+      return;
+    }
+
+    // 小張：再聊聊 / 問敏感 → 兩選一（表格與權限 / 口頭指示）
+    if (choice.id === 'xiaozhang_sensitive_skip') {
+      setTimeout(() => {
+        if (!engineRef.current) return;
+        const d = engineRef.current.triggerRandomNpcDialog('npc_xiaozhang');
+        if (d) {
+          engineRef.current.incrementNpcCasualTalk('npc_xiaozhang');
+          setCurrentDialog(d);
+        }
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+      return;
+    }
+    if (choice.id === 'xiaozhang_sensitive_ask') {
+      setTimeout(() => {
+        setCurrentDialog({
+          text: '你只能問一個方向。問了，另一個就不能再提。',
+          type: 'narrator',
+          choices: [
+            { id: 'xiaozhang_branch_table', text: '我想問：燈延後三分鐘是誰改的？表格誰能改、誰在流程上游？' },
+            { id: 'xiaozhang_branch_oral', text: '我想問：有人跟你說過什麼嗎？口頭指示、像背 SOP 的那個人。' },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+      return;
+    }
+    if (choice.id === 'xiaozhang_branch_table' && scene?.npcs) {
+      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_xiaozhang');
+      if (npc) {
+        engine.applyEffect({ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true });
+        engine.startNpcDialog('npc_xiaozhang', 'node_xiaozhang_table_1');
+        const node = engine.getCurrentNpcDialogNode();
+        if (node) {
+          setTimeout(() => {
+            setCurrentDialog(buildDialogFromNpcNode(node, npc));
+            setRefreshKey((prev) => prev + 1);
+          }, 0);
+        }
+      }
+      return;
+    }
+    if (choice.id === 'xiaozhang_branch_oral' && scene?.npcs) {
+      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_xiaozhang');
+      if (npc) {
+        engine.applyEffect({ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true });
+        engine.startNpcDialog('npc_xiaozhang', 'node_xiaozhang_oral_1');
+        const node = engine.getCurrentNpcDialogNode();
+        if (node) {
+          setTimeout(() => {
+            setCurrentDialog(buildDialogFromNpcNode(node, npc));
+            setRefreshKey((prev) => prev + 1);
+          }, 0);
+        }
+      }
+      return;
+    }
+
+    // 周姊：再聊聊 / 問敏感 → 兩選一（哪裡太乾淨 / 你找到什麼）
+    if (choice.id === 'zhou_sensitive_skip') {
+      setTimeout(() => {
+        if (!engineRef.current) return;
+        const d = engineRef.current.triggerRandomNpcDialog('npc_zhou_jie');
+        if (d) {
+          engineRef.current.incrementNpcCasualTalk('npc_zhou_jie');
+          setCurrentDialog(d);
+        }
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+      return;
+    }
+    if (choice.id === 'zhou_sensitive_ask') {
+      setTimeout(() => {
+        setCurrentDialog({
+          text: '你只能問一個方向。問了，另一個就不能再提。',
+          type: 'narrator',
+          choices: [
+            { id: 'zhou_branch_clean', text: '我想問：你說「太乾淨」，哪裡太乾淨？誰在急著擦？' },
+            { id: 'zhou_branch_fragment', text: '我想問：你找到什麼？燈晚亮你怎麼確定？' },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+      return;
+    }
+    if (choice.id === 'zhou_branch_clean' && scene?.npcs) {
+      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_zhou_jie');
+      if (npc) {
+        engine.applyEffect({ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true });
+        engine.startNpcDialog('npc_zhou_jie', 'node_zhou_clean_1');
+        const node = engine.getCurrentNpcDialogNode();
+        if (node) {
+          setTimeout(() => {
+            setCurrentDialog(buildDialogFromNpcNode(node, npc));
+            setRefreshKey((prev) => prev + 1);
+          }, 0);
+        }
+      }
+      return;
+    }
+    if (choice.id === 'zhou_branch_fragment' && scene?.npcs) {
+      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_zhou_jie');
+      if (npc) {
+        engine.applyEffect({ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true });
+        engine.startNpcDialog('npc_zhou_jie', 'node_zhou_fragment_1');
+        const node = engine.getCurrentNpcDialogNode();
+        if (node) {
+          setTimeout(() => {
+            setCurrentDialog(buildDialogFromNpcNode(node, npc));
+            setRefreshKey((prev) => prev + 1);
+          }, 0);
+        }
+      }
+      return;
+    }
+
     // NPC 關鍵對話模式：使用 handleNpcDialogChoice，並顯示下一節點或結束
     if (currentState.activeNpcDialogId) {
       engine.handleNpcDialogChoice(choice.id);
@@ -2469,12 +2701,138 @@ export default function PlayPage() {
             const st = engine.getState();
             const flags = st.flags || {};
 
-            // 關鍵對話解鎖條件與完成 flag
+            // 林瑞堂：方案 B+A（閒聊 ≥3 次 + 觀察點），問敏感問題前先選擇，兩條敏感問題二選一
+            if (npcId === 'npc_lin_ruitang') {
+              const casualCount = engine.getNpcCasualTalkCount('npc_lin_ruitang');
+              const observed = !!flags.observed_any_ch1;
+              const sensitiveDone = !!flags.npc_lin_sensitive_done;
+
+              if (sensitiveDone) {
+                const dialog = engine.triggerRandomNpcDialog(npcId);
+                if (dialog) {
+                  engine.incrementNpcCasualTalk(npcId);
+                  setCurrentDialog(dialog);
+                }
+                return;
+              }
+              if (observed && casualCount >= 3) {
+                setCurrentDialog({
+                  text: '你覺得時機差不多了，可以試著往深一點問。',
+                  type: 'narrator',
+                  choices: [
+                    { id: 'lin_sensitive_ask', text: '我想問一些比較敏感的問題。' },
+                    { id: 'lin_sensitive_skip', text: '先不用，再聊聊就好。' },
+                  ],
+                });
+                return;
+              }
+              const dialog = engine.triggerRandomNpcDialog(npcId);
+              if (dialog) {
+                engine.incrementNpcCasualTalk(npcId);
+                setCurrentDialog(dialog);
+              }
+              return;
+            }
+
+            // 阿順：閒聊 ≥3 + 觀察點，問敏感／再聊聊，兩條敏感二選一
+            if (npcId === 'npc_ashun') {
+              const casualCount = engine.getNpcCasualTalkCount('npc_ashun');
+              const observed = !!flags.observed_any_ch1;
+              const sensitiveDone = !!flags.npc_ashun_sensitive_done;
+              if (sensitiveDone) {
+                const dialog = engine.triggerRandomNpcDialog(npcId);
+                if (dialog) {
+                  engine.incrementNpcCasualTalk(npcId);
+                  setCurrentDialog(dialog);
+                }
+                return;
+              }
+              if (observed && casualCount >= 3) {
+                setCurrentDialog({
+                  text: '你覺得時機差不多了，可以試著往深一點問。',
+                  type: 'narrator',
+                  choices: [
+                    { id: 'ashun_sensitive_ask', text: '我想問一些比較敏感的問題。' },
+                    { id: 'ashun_sensitive_skip', text: '先不用，再聊聊就好。' },
+                  ],
+                });
+                return;
+              }
+              const dialogAshun = engine.triggerRandomNpcDialog(npcId);
+              if (dialogAshun) {
+                engine.incrementNpcCasualTalk(npcId);
+                setCurrentDialog(dialogAshun);
+              }
+              return;
+            }
+
+            // 小張：播映室已解鎖＋已觀察＋閒聊 ≥3，問敏感／再聊聊，兩條敏感二選一
+            if (npcId === 'npc_xiaozhang') {
+              const casualCount = engine.getNpcCasualTalkCount('npc_xiaozhang');
+              const observed = !!flags.projection_room_observed && !!flags.projection_room_unlocked;
+              const sensitiveDone = !!flags.npc_xiaozhang_sensitive_done;
+              if (sensitiveDone) {
+                const dialog = engine.triggerRandomNpcDialog(npcId);
+                if (dialog) {
+                  engine.incrementNpcCasualTalk(npcId);
+                  setCurrentDialog(dialog);
+                }
+                return;
+              }
+              if (observed && casualCount >= 3) {
+                setCurrentDialog({
+                  text: '你覺得時機差不多了，可以試著往深一點問。',
+                  type: 'narrator',
+                  choices: [
+                    { id: 'xiaozhang_sensitive_ask', text: '我想問一些比較敏感的問題。' },
+                    { id: 'xiaozhang_sensitive_skip', text: '先不用，再聊聊就好。' },
+                  ],
+                });
+                return;
+              }
+              const dialogXz = engine.triggerRandomNpcDialog(npcId);
+              if (dialogXz) {
+                engine.incrementNpcCasualTalk(npcId);
+                setCurrentDialog(dialogXz);
+              }
+              return;
+            }
+
+            // 周姊：廁所已觀察＋閒聊 ≥3，問敏感／再聊聊，兩條敏感二選一
+            if (npcId === 'npc_zhou_jie') {
+              const casualCount = engine.getNpcCasualTalkCount('npc_zhou_jie');
+              const observed = !!flags.observed_restroom_ch1;
+              const sensitiveDone = !!flags.npc_zhou_jie_sensitive_done;
+              if (sensitiveDone) {
+                const dialog = engine.triggerRandomNpcDialog(npcId);
+                if (dialog) {
+                  engine.incrementNpcCasualTalk(npcId);
+                  setCurrentDialog(dialog);
+                }
+                return;
+              }
+              if (observed && casualCount >= 3) {
+                setCurrentDialog({
+                  text: '你覺得時機差不多了，可以試著往深一點問。',
+                  type: 'narrator',
+                  choices: [
+                    { id: 'zhou_sensitive_ask', text: '我想問一些比較敏感的問題。' },
+                    { id: 'zhou_sensitive_skip', text: '先不用，再聊聊就好。' },
+                  ],
+                });
+                return;
+              }
+              const dialogZhou = engine.triggerRandomNpcDialog(npcId);
+              if (dialogZhou) {
+                engine.incrementNpcCasualTalk(npcId);
+                setCurrentDialog(dialogZhou);
+              }
+              return;
+            }
+
+            // 其餘 NPC：關鍵對話解鎖條件與完成 flag（沿用原邏輯；阿順／小張／周姊已改走閒聊+敏感流程，不在此列）
             const keyDialogUnlocked: Record<string, () => boolean> = {
-              npc_lin_ruitang: () => !!flags.observed_any_ch1 && !flags.npc_lin_key_done,
-              npc_ashun: () => !!flags.observed_any_ch1 && !flags.npc_ashun_key_done,
-              npc_xiaozhang: () => !!flags.projection_room_unlocked && !flags.npc_xiaozhang_key_done,
-              npc_zhou_jie: () => !flags.npc_zhou_jie_key_done,
+              // npc_ashun / npc_xiaozhang / npc_zhou_jie 已改為閒聊+敏感二選一，不再使用 key 對話
             };
             const check = keyDialogUnlocked[npcId];
             const useKeyDialog = check?.() ?? false;
@@ -2490,7 +2848,7 @@ export default function PlayPage() {
               return;
             }
 
-            // 隨機對話
+            // 隨機對話（其餘 NPC 不計入閒聊次數）
             const dialog = engine.triggerRandomNpcDialog(npcId);
             if (dialog) {
               setCurrentDialog(dialog);

@@ -111,7 +111,7 @@ export default function CharacterConversation({
 
   const isPlayer = currentTurn.speaker === 'player';
   const isLastTurn = currentIndex === conversation.length - 1;
-  const showChoices = isLastTurn && finalChoices && finalChoices.length > 0;
+  const showChoices = Boolean(isLastTurn && finalChoices && finalChoices.length > 0);
   // 繼續按鈕顯示條件：對話完成 + 不是最後一段 + 沒有選擇題
   const showContinue = isComplete && !isLastTurn && !showChoices;
 

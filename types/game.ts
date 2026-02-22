@@ -328,6 +328,8 @@ export interface GameState {
   // 新增：NPC 對話模式狀態
   activeNpcDialogId?: string;
   activeNpcDialogNodeId?: string;
+  // NPC 閒聊次數（方案 B：閒聊 ≥3 次才可問敏感問題）
+  npcCasualTalkCount?: Record<string, number>;
   // 推理分析每章答案（供後續分岔）
   reasoningAnswers?: Record<string, { q1: string; q2: string; q3: string | string[] }>;
 }
