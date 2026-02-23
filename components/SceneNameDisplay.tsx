@@ -66,51 +66,53 @@ export default function SceneNameDisplay({
           {/* 全螢幕背景遮罩 - 阻止下層交互 */}
           <div className="absolute inset-0 bg-black/20 pointer-events-auto" />
           
-          {/* 光束背景層 */}
-          <BeamEffect
-            show={isVisible}
-            direction="right"
-            speed={duration / 1000} // 將毫秒轉換為秒，與場景名稱顯示同步
-            color="#fb923c"
-            width={300}
-            intensity={0.4}
-          />
-          
-          {/* 大文字特效 - 全屏居中 */}
-          <div className="text-center px-4 relative z-10 w-full pointer-events-none">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -30 }}
-              transition={{
-                type: 'spring',
-                stiffness: 200,
-                damping: 20,
-                duration: 0.6,
-              }}
-              className="w-full"
-            >
-              {/* 使用故障文字效果 */}
-              <div
-                className="text-[clamp(1.95rem,7.8vw,5.2rem)] font-black text-orange-400 tracking-wider leading-none"
-                style={{
-                  textShadow: `
-                    0 0 20px rgba(251, 146, 60, 0.5),
-                    0 0 40px rgba(251, 146, 60, 0.3),
-                    0 0 60px rgba(251, 146, 60, 0.2),
-                    0 0 80px rgba(251, 146, 60, 0.1)
-                  `,
-                  WebkitTextStroke: '1px rgba(251, 146, 60, 0.3)',
+          {/* 桌面版：限制在 428px 手機框架內，與遊戲主體一致；手機版全寬 */}
+          <div className="w-full px-4 md:max-w-[428px] md:mx-auto relative z-10 pointer-events-none flex flex-col items-center justify-center">
+            {/* 光束背景層 */}
+            <BeamEffect
+              show={isVisible}
+              direction="right"
+              speed={duration / 1000}
+              color="#fb923c"
+              width={300}
+              intensity={0.4}
+            />
+            
+            {/* 大文字：手機用較大字、桌面限在 428px 內不超出，長名稱可換行 */}
+            <div className="text-center w-full min-w-0">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: -30 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 20,
+                  duration: 0.6,
                 }}
+                className="w-full min-w-0"
               >
-                <GlitchText
-                  text={sceneName}
-                  intensity="medium"
-                  duration={showGlitch ? 300 : 0}
-                  className="block"
-                />
-              </div>
-            </motion.div>
+                <div
+                  className="font-black text-orange-400 tracking-wider leading-tight break-words text-[clamp(1.95rem,7.8vw,5.2rem)] md:text-[clamp(1.5rem,4.5vw,2.75rem)]"
+                  style={{
+                    textShadow: `
+                      0 0 20px rgba(251, 146, 60, 0.5),
+                      0 0 40px rgba(251, 146, 60, 0.3),
+                      0 0 60px rgba(251, 146, 60, 0.2),
+                      0 0 80px rgba(251, 146, 60, 0.1)
+                    `,
+                    WebkitTextStroke: '1px rgba(251, 146, 60, 0.3)',
+                  }}
+                >
+                  <GlitchText
+                    text={sceneName}
+                    intensity="medium"
+                    duration={showGlitch ? 300 : 0}
+                    className="block"
+                  />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
       )}

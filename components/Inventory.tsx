@@ -1,17 +1,18 @@
 'use client';
 
-import { items } from '@/data/gameData';
+import type { Item } from '@/types/game';
 import { Package, Sparkles, CheckCircle, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SVGImage from './SVGImage';
 
 interface InventoryProps {
   itemIds: string[];
+  items: Record<string, Item>;
   onItemClick?: (itemId: string) => void;
   currentSceneId?: string;
 }
 
-export default function Inventory({ itemIds, onItemClick, currentSceneId }: InventoryProps) {
+export default function Inventory({ itemIds, items, onItemClick, currentSceneId }: InventoryProps) {
   const [newItems, setNewItems] = useState<Set<string>>(new Set());
   const [prevItemIds, setPrevItemIds] = useState<string[]>([]);
 

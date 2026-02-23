@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { chapters } from '@/data/gameData';
+import { chapters } from '@/data/chapters';
 import ChapterIntro from '@/components/ChapterIntro';
 
 export default function ChapterIntroPage() {

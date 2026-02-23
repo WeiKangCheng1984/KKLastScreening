@@ -1,12 +1,12 @@
 'use client';
 
-import { Puzzle } from '@/types/game';
+import type { Puzzle as PuzzleType, Item } from '@/types/game';
 import { useState, useEffect } from 'react';
 import { X, Check, Lock } from 'lucide-react';
-import { items } from '@/data/gameData';
 
 interface PickThreePuzzleProps {
-  puzzle: Puzzle;
+  puzzle: PuzzleType;
+  items: Record<string, Item>;
   onSolve: (selectedIds: string[]) => void;
   onClose: () => void;
   error?: string;
@@ -16,6 +16,7 @@ interface PickThreePuzzleProps {
 
 export default function PickThreePuzzle({
   puzzle,
+  items,
   onSolve,
   onClose,
   error: externalError = '',

@@ -2,6 +2,7 @@
 
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { GameEngine } from '@/lib/gameEngine';
 import { Dialog } from '@/types/game';
 import SceneView, { SceneViewRef } from '@/components/SceneView';
@@ -29,15 +30,14 @@ import UVLightPanel from '@/components/UVLightPanel';
 import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, ListOrdered, FlaskConical, Brain } from 'lucide-react';
 import Link from 'next/link';
 import { audioManager } from '@/lib/audioManager';
-import { scenes, chapters, items } from '@/data/gameData';
+import { chapters } from '@/data/chapters';
+import { getChapterData } from '@/data/getChapterData';
 import DeveloperPanel from '@/components/DeveloperPanel';
 import TutorialGuide from '@/components/TutorialGuide';
 import AudioControl from '@/components/AudioControl';
 import MuteAllButton from '@/components/MuteAllButton';
 import { preloadSVGBatch } from '@/lib/svgLoader';
-import type { Puzzle as GamePuzzle } from '@/types/game';
 import { DialogChoice } from '@/types/game';
-import ChapterPuzzle from '@/components/ChapterPuzzle';
 import PairMatchingPuzzle from '@/components/PairMatchingPuzzle';
 import PickThreePuzzle from '@/components/PickThreePuzzle';
 import ScoreDisplay from '@/components/ScoreDisplay';
@@ -66,9 +66,6 @@ const getAdjacentScenes = (chapterId: string, sceneId: string): { prev: string |
     next: currentIndex < chapterScenes.length - 1 ? chapterScenes[currentIndex + 1] : null,
   };
 };
-
-/** 場景謎題開關：false 時不開啟任何場景謎題彈窗（模組化改造） */
-const ENABLE_SCENE_PUZZLES = false;
 
 export default function PlayPage() {
   const params = useParams();
@@ -108,6 +105,23 @@ export default function PlayPage() {
     engineRef.current = new GameEngine(savedState || undefined);
   }
   const engine = engineRef.current;
+
+  // 章節資料按需載入：載入後 engine 才有 scenes/items，供下方 scenes/items 使用
+  const [chapterDataReady, setChapterDataReady] = useState(false);
+  useEffect(() => {
+    if (!chapterId) return;
+    getChapterData(chapterId).then((data) => {
+      if (data && engineRef.current) {
+        engineRef.current.loadChapterData(data);
+        setChapterDataReady(true);
+      }
+    }).catch((err) => {
+      console.warn('getChapterData failed:', err);
+    });
+  }, [chapterId]);
+
+  const scenes = chapterDataReady ? engine.getScenes() : {};
+  const items = chapterDataReady ? engine.getItems() : {};
 
   // 定義所有 state，確保在 useEffect 之前
   const [currentDialog, setCurrentDialog] = useState<Dialog | null>(null);
@@ -150,6 +164,8 @@ export default function PlayPage() {
   const [currentSceneName, setCurrentSceneName] = useState(() => '');
   // 追蹤上次顯示的場景，確保每次切換都顯示
   const lastDisplayedSceneRef = useRef<string>('');
+  /** 目前場景名稱顯示時長（ms），傳給 SceneNameDisplay 與父層計時一致 */
+  const sceneNameDurationRef = useRef<number>(2000);
   // 追蹤場景名稱顯示計時器，避免重複設置
   const sceneNameTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sceneTransitionTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -888,14 +904,13 @@ export default function PlayPage() {
       clearTimeout(sceneTransitionTimerRef.current);
       sceneTransitionTimerRef.current = null;
     }
-    
+    sceneNameDurationRef.current = duration;
     // 設置場景名稱
     setCurrentSceneName(sceneNameToShow);
     setShowSceneName(true);
     setIsSceneTransitioning(true);
     setSceneLoading(true);
-    
-    // 設置場景名稱關閉計時器（2秒後同時關閉場景名稱和載入畫面）
+    // 設置場景名稱關閉計時器（與 duration 一致）
     sceneNameTimerRef.current = setTimeout(() => {
       setShowSceneName(false);
       setIsSceneTransitioning(false);
@@ -904,7 +919,10 @@ export default function PlayPage() {
     }, duration);
     
     // 保留 sceneTransitionTimerRef 以備將來使用，但現在不需要額外延遲
-    // 場景名稱和載入畫面同時在 2 秒後關閉
+  }, []);
+
+  const handleSceneNameComplete = useCallback(() => {
+    setShowSceneName(false);
   }, []);
 
   // 根據 URL 初始化狀態（如果狀態與 URL 不一致）
@@ -912,7 +930,7 @@ export default function PlayPage() {
     if (!engineRef.current) return;
     const engine = engineRef.current;
     const state = engine.getState();
-    
+
     // 獲取當前場景信息
     const currentScene = scenes[sceneId];
     if (!currentScene) return;
@@ -991,18 +1009,17 @@ export default function PlayPage() {
       }
     }
     
-    // 清理函數：清除所有計時器
+    // 清理函數：清除計時器；導航切換場景時關閉大字，避免殘留
     return () => {
-      // 清除場景名稱顯示計時器
       if (sceneNameTimerRef.current) {
         clearTimeout(sceneNameTimerRef.current);
         sceneNameTimerRef.current = null;
       }
-      // 清除場景過渡計時器
       if (sceneTransitionTimerRef.current) {
         clearTimeout(sceneTransitionTimerRef.current);
         sceneTransitionTimerRef.current = null;
       }
+      setShowSceneName(false);
     };
   }, [chapterId, sceneId, showSceneNameWithTimer]);
 
@@ -1146,8 +1163,10 @@ export default function PlayPage() {
     return () => clearTimeout(timer);
   }, [refreshKey, router, chapterId, sceneId]); // engine 來自 useRef，不需要在依賴中
 
-  // 獲取當前場景（必須在所有使用它的 Hooks 和函數定義之前定義）
-  const scene = engineRef.current?.getCurrentScene() || null;
+  // 獲取當前場景：以 engine 狀態為準，導航後若尚未同步則用 URL sceneId 從已載入 scenes 查詢，避免短暫顯示「場景不存在」
+  const scene =
+    engineRef.current?.getCurrentScene() ||
+    (sceneId && scenes[sceneId] ? scenes[sceneId] : null);
 
   // 環境音：cleanup 延遲停止（給 Strict Mode 取消用）、目前播放路徑（同曲目不重播）
   const ambientStopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1289,15 +1308,7 @@ export default function PlayPage() {
         return false;
       });
       
-      // 如果有可解的謎題，優先觸發第一個
-      if (ENABLE_SCENE_PUZZLES && availablePuzzles.length > 0) {
-        if (devMode) {
-          console.log(`[謎題觸發] 觸發謎題: ${availablePuzzles[0].id} (hotspot: ${hotspotId})`);
-        }
-        setCurrentPuzzle(availablePuzzles[0]);
-        setRefreshKey(prev => prev + 1);
-        return; // 觸發謎題，不再處理事件
-      } else if (devMode) {
+      if (devMode) {
         // 調試：顯示為什麼謎題沒有觸發
         const allPuzzles = scene.puzzles.filter(p => {
           const solvedFlag = `puzzle_${p.id}_solved`;
@@ -1461,12 +1472,6 @@ export default function PlayPage() {
         // 門未打開，觸發謎題
         // 點下大門時播放尖銳金屬聲
         audioManager.playSFX('/audio/sfx/kk_sfx_metal.mp3', 0.6);
-        const doorPuzzle = scene.puzzles.find(p => p.id === 'door_code');
-        if (ENABLE_SCENE_PUZZLES && doorPuzzle) {
-          setCurrentPuzzle(doorPuzzle);
-          setRefreshKey(prev => prev + 1);
-          return;
-        }
       } else {
         // 門已打開，顯示確認對話
         setShowDoor701Confirm(true);
@@ -1500,25 +1505,6 @@ export default function PlayPage() {
         return;
       }
       
-      // 已滿足所有需求，檢查謎題需求並觸發謎題
-      const bedPuzzle = scene.puzzles.find(p => p.id === 'bed_arrangement');
-      if (ENABLE_SCENE_PUZZLES && bedPuzzle) {
-        // 再次驗證謎題需求（確保邏輯完整）
-        const requirementsMet = engine.checkPuzzleRequirements(bedPuzzle);
-        if (requirementsMet) {
-          setCurrentPuzzle(bedPuzzle);
-          setRefreshKey(prev => prev + 1);
-          return;
-        } else {
-          // 如果需求未滿足，顯示提示
-          setCurrentDialog({
-            text: '你需要先使用鏡片碎角看清病床上的標籤。',
-            type: 'narrator',
-          });
-          setRefreshKey(prev => prev + 1);
-          return;
-        }
-      }
     }
 
     // 第二空間特殊處理：破碎的鏡子（純提示，增強沉浸感）
@@ -1564,12 +1550,7 @@ export default function PlayPage() {
 
     // 第二空間特殊處理：密碼盤（觸發可選謎題）
     if (hotspotId === 'password_panel' && scene?.id === 'ch1_sc2') {
-      const mirrorPuzzle = scene.puzzles.find(p => p.id === 'mirror_password');
-      if (ENABLE_SCENE_PUZZLES && mirrorPuzzle) {
-        setCurrentPuzzle(mirrorPuzzle);
-        setRefreshKey(prev => prev + 1);
-        return;
-      }
+      return; // 場景謎題目前關閉
     }
 
     // 第二空間特殊處理：值班表（如果已經有便條，觸發重新閱讀事件）
@@ -1832,12 +1813,6 @@ export default function PlayPage() {
         setRefreshKey(prev => prev + 1);
         return;
       }
-      const descendPuzzle = scene.puzzles.find(p => p.id === 'descend');
-      if (ENABLE_SCENE_PUZZLES && descendPuzzle) {
-        setCurrentPuzzle(descendPuzzle);
-        setRefreshKey(prev => prev + 1);
-        return;
-      }
     }
 
     // 第五空間特殊處理：箱子區域（觸發拼箱排序謎題）
@@ -1854,33 +1829,6 @@ export default function PlayPage() {
       }
       // 先記錄互動，這樣後續檢查才能通過
       engine.addInteraction('boxes_area');
-      const boxPuzzle = scene.puzzles.find(p => p.id === 'box_arrangement');
-      if (ENABLE_SCENE_PUZZLES && boxPuzzle) {
-        // 檢查謎題需求
-        const requirementsMet = engine.checkPuzzleRequirements(boxPuzzle);
-        if (requirementsMet) {
-          setCurrentPuzzle(boxPuzzle);
-          setRefreshKey(prev => prev + 1);
-          return;
-        } else {
-          // 提供更詳細的提示
-          const missingRequirements: string[] = [];
-          if (!state.flags.label_read) {
-            missingRequirements.push('查看冷鏈運輸標籤');
-          }
-          if (!state.flags.pain_patch_found) {
-            missingRequirements.push('查看止痛貼片盒');
-          }
-          setCurrentDialog({
-            text: missingRequirements.length > 0 
-              ? `你需要先${missingRequirements.join('和')}，才能了解這些箱子的用途和排序規則。`
-              : '你需要先了解這些箱子的用途和排序規則。',
-            type: 'narrator',
-          });
-          setRefreshKey(prev => prev + 1);
-          return;
-        }
-      }
     }
 
     // 第五空間特殊處理：心臟箱（需要先完成排序）
@@ -1951,12 +1899,6 @@ export default function PlayPage() {
           text: '逃生口需要座標密碼才能打開。你需要先完成拼箱排序或查看身份證背面。',
           type: 'narrator',
         });
-        setRefreshKey(prev => prev + 1);
-        return;
-      }
-      const exitPuzzle = scene.puzzles.find(p => p.id === 'final_exit');
-      if (ENABLE_SCENE_PUZZLES && exitPuzzle) {
-        setCurrentPuzzle(exitPuzzle);
         setRefreshKey(prev => prev + 1);
         return;
       }
@@ -2580,43 +2522,39 @@ export default function PlayPage() {
   const prevScene = adjacentScenes.prev ? scenes[adjacentScenes.prev] : null;
   const nextScene = adjacentScenes.next ? scenes[adjacentScenes.next] : null;
 
-  // 切換到相鄰場景的處理函數（必須在條件返回之前定義）
+  // 箭頭切換：嚴格順序「先大字特效 → 再切換場景」。先只顯示大字（不改 engine/URL），延遲後再切換，避免分拆載入或 early return 導致大字被蓋掉
   const handleSceneNavigation = useCallback((targetSceneId: string) => {
     if (!engineRef.current) return;
     const engine = engineRef.current;
-    const targetScene = scenes[targetSceneId];
+    const targetScene = engine.getScenes()[targetSceneId];
     if (!targetScene) return;
 
-    // 更新追蹤的場景
     lastDisplayedSceneRef.current = targetSceneId;
-    
-    // 播放場景切換音效
     audioManager.playSFX('/audio/sfx/kk_sfx_scene_change.mp3', 0.3);
-    
-    // 切換場景，但保留所有狀態
-    engine.applyEffect({
-      type: 'changeScene',
-      chapterId: targetScene.chapterId,
-      sceneId: targetSceneId,
-    });
-    
-    // 保存狀態
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('gameState', JSON.stringify(engine.getState()));
-      } catch (e) {
-        console.warn('無法保存遊戲狀態:', e);
-      }
-    }
-    
-    // 延遲到下一幀執行，確保在首次渲染完成後才更新狀態
+
+    // 步驟 1：只顯示大字（不改 engine、不 router），此時仍為舊場景，不會觸發「場景不存在」或 chapterData 重算
+    showSceneNameWithTimer(targetScene.name, 4000);
+
+    // 步驟 2：延遲後再切換場景與 URL（大字已穩定顯示）
+    const sceneSwitchDelayMs = 1200;
     setTimeout(() => {
-      showSceneNameWithTimer(targetScene.name, 4000);
-    }, 0);
-    
-    // 導航到新場景
-    router.push(`/play/${targetScene.chapterId}/${targetSceneId}`);
-    setRefreshKey(prev => prev + 1);
+      if (!engineRef.current) return;
+      const eng = engineRef.current;
+      eng.applyEffect({
+        type: 'changeScene',
+        chapterId: targetScene.chapterId,
+        sceneId: targetSceneId,
+      });
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('gameState', JSON.stringify(eng.getState()));
+        } catch (e) {
+          console.warn('無法保存遊戲狀態:', e);
+        }
+      }
+      router.push(`/play/${targetScene.chapterId}/${targetSceneId}`);
+      setRefreshKey((prev) => prev + 1);
+    }, sceneSwitchDelayMs);
   }, [router, showSceneNameWithTimer]);
 
   // 新手引導完成處理（必須在條件返回之前定義）
@@ -2624,41 +2562,60 @@ export default function PlayPage() {
     // 引導完成後可以執行任何初始化操作
   }, []);
 
+  // 大字場景名稱改為 Portal 掛到 body，避免「場景不存在」/「載入場景…」early return 時被一併卸載
+  const sceneNameOverlay =
+    typeof document !== 'undefined' &&
+    showSceneName &&
+    currentSceneName &&
+    createPortal(
+      <SceneNameDisplay
+        sceneName={currentSceneName}
+        show={showSceneName}
+        duration={sceneNameDurationRef.current || 2000}
+        onComplete={handleSceneNameComplete}
+      />,
+      document.body
+    );
+
   if (!scene) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-xl mb-4">場景不存在</div>
-          <Link href="/" className="text-blue-400 hover:text-blue-300">
-            返回首頁
-          </Link>
+      <>
+        {sceneNameOverlay}
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-xl mb-4">場景不存在</div>
+            <Link href="/" className="text-blue-400 hover:text-blue-300">
+              返回首頁
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
+    );
+  }
+
+  if (!chapterDataReady) {
+    return (
+      <>
+        {sceneNameOverlay}
+        <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+          <div className="text-center text-gray-400">載入場景…</div>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-dark-bg overflow-hidden">
-      {/* 桌面版：手機型窄版置中（約 428px），讓電腦玩家看到與手機相近的布局 */}
-      <div className="w-full min-h-screen md:max-w-[428px] md:mx-auto md:min-h-screen md:relative md:shadow-2xl md:rounded-[2rem] md:overflow-hidden md:[transform:translateZ(0)] md:border md:border-dark-border/50">
-        {/* 新手引導 */}
-        <TutorialGuide onComplete={handleTutorialComplete} />
-        
-        {/* 場景視圖 - 全屏沉浸式（不再因背包移動） */}
-        <div className="absolute inset-0">
-        {/* 場景名稱顯示 */}
-        {showSceneName && currentSceneName && (
-          <SceneNameDisplay
-            sceneName={currentSceneName}
-            show={showSceneName}
-            duration={2000}
-            onComplete={() => {
-              setShowSceneName(false);
-            }}
-          />
-        )}
-
-        {/* 場景過渡遮罩（載入指示器） */}
+    <>
+      {sceneNameOverlay}
+      <div className="relative min-h-screen bg-dark-bg overflow-hidden">
+        {/* 桌面版：手機型窄版置中（約 428px），讓電腦玩家看到與手機相近的布局 */}
+        <div className="w-full min-h-screen md:max-w-[428px] md:mx-auto md:min-h-screen md:relative md:shadow-2xl md:rounded-[2rem] md:overflow-hidden md:[transform:translateZ(0)] md:border md:border-dark-border/50">
+          {/* 新手引導 */}
+          <TutorialGuide onComplete={handleTutorialComplete} />
+          
+          {/* 場景視圖 - 全屏沉浸式（不再因背包移動） */}
+          <div className="absolute inset-0">
+          {/* 場景過渡遮罩（載入指示器） */}
         {isSceneTransitioning && !showSceneName && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-fade-in flex items-center justify-center gpu-accelerated">
             <div className="text-center">
@@ -2682,23 +2639,23 @@ export default function PlayPage() {
               interactionCount={interactionCount}
             />
             
-            {/* 左側箭頭 - 切換到上一個場景 */}
-            {prevScene && (
+            {/* 左側箭頭 - 切換到上一個場景（依章節場景列表顯示，不依賴 scenes 鍵值） */}
+            {adjacentScenes.prev && (
               <button
-                onClick={() => handleSceneNavigation(prevScene.id)}
+                onClick={() => handleSceneNavigation(adjacentScenes.prev!)}
                 className="absolute left-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-6 h-6 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
-                title={`前往：${prevScene.name}`}
+                title={prevScene ? `前往：${prevScene.name}` : '上一場景'}
               >
                 <ChevronLeft size={12} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
               </button>
             )}
             
             {/* 右側箭頭 - 切換到下一個場景 */}
-            {nextScene && (
+            {adjacentScenes.next && (
               <button
-                onClick={() => handleSceneNavigation(nextScene.id)}
+                onClick={() => handleSceneNavigation(adjacentScenes.next!)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-6 h-6 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
-                title={`前往：${nextScene.name}`}
+                title={nextScene ? `前往：${nextScene.name}` : '下一場景'}
               >
                 <ChevronRight size={12} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
               </button>
@@ -3259,6 +3216,7 @@ export default function PlayPage() {
               <div className="flex-1 overflow-y-auto p-4">
                 <Inventory
                   itemIds={state.inventory}
+                  items={items}
                   onItemClick={handleItemClick}
                   currentSceneId={sceneId}
                 />
@@ -3335,37 +3293,6 @@ export default function PlayPage() {
 
       {/* 進度條 - 已隱藏（不顯示給玩家） */}
 
-      {/* 章節謎題（已關閉：由流程設定控制） */}
-      {false && showChapterPuzzle && engineRef.current && (() => {
-        const chapter = chapters[chapterId];
-        if (!chapter || !chapter.chapterPuzzle) return null;
-        const puzzle = chapter.chapterPuzzle as GamePuzzle;
-        return (
-          <ChapterPuzzle
-            puzzle={puzzle}
-            onSolve={(input) => {
-              if (engineRef.current) {
-                const solved = engineRef.current.solvePuzzle(puzzle.id, input);
-                if (solved) {
-                  setShowChapterPuzzle(false);
-                  setPuzzleError('');
-                  setRefreshKey(prev => prev + 1);
-                } else {
-                  setPuzzleError('答案不正確，再試試看。');
-                }
-              }
-            }}
-            onClose={() => {
-              setShowChapterPuzzle(false);
-              setPuzzleError('');
-            }}
-            chapterName={chapter.name}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        );
-      })()}
-
       {/* 第一章章末：解謎（6 道具選 3 集滿三條線索 或 舊版 3 組配對）- 關閉時 exit 動畫 */}
       <AnimatePresence>
       {showCh1PairPuzzle && engineRef.current && (() => {
@@ -3393,6 +3320,7 @@ export default function PlayPage() {
             <motion.div key="ch1-pair-puzzle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
             <PickThreePuzzle
               puzzle={pairPuzzle}
+              items={items}
               unlockedClues={unlockedClues}
               onSolve={(selectedIds) => {
                 if (!engineRef.current) return;
@@ -3434,6 +3362,7 @@ export default function PlayPage() {
           <motion.div key="ch1-pair-puzzle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <PairMatchingPuzzle
             puzzle={pairPuzzle}
+            items={items}
             onSolve={(input) => {
               if (!engineRef.current) return;
               const solved = engineRef.current.solvePuzzle('ch1_pair_matching', input);
@@ -3728,6 +3657,8 @@ export default function PlayPage() {
           }}
           currentChapterId={chapterId}
           currentSceneId={sceneId}
+          scenes={scenes}
+          chapters={chapters}
         />
       )}
 
@@ -4085,6 +4016,7 @@ export default function PlayPage() {
       )}
       </div>
     </div>
+    </>
   );
 }
 

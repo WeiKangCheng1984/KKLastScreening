@@ -1,9 +1,9 @@
 'use client';
 
+import type { Scene, Chapter } from '@/types/game';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Code, MapPin, Puzzle } from 'lucide-react';
-import { scenes, chapters } from '@/data/gameData';
 import PuzzleTestPanel from './PuzzleTestPanel';
 
 interface DeveloperPanelProps {
@@ -11,14 +11,15 @@ interface DeveloperPanelProps {
   onDisableDevMode?: () => void;
   currentChapterId: string;
   currentSceneId: string;
+  scenes: Record<string, Scene>;
+  chapters: Record<string, Chapter>;
 }
 
-export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapterId, currentSceneId }: DeveloperPanelProps) {
+export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapterId, currentSceneId, scenes, chapters }: DeveloperPanelProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
   const [showPuzzleTest, setShowPuzzleTest] = useState(false);
 
-  // 獲取所有場景
   const allScenes = Object.values(scenes);
 
   const handleSceneJump = (chapterId: string, sceneId: string) => {

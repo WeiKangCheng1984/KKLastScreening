@@ -1,8 +1,11 @@
 import { GameState, Scene, Event, Requirement, Effect, Puzzle, Item, DialogChoice, PlayerChoice, NpcDialogNode, PreferenceEffect, RandomDialog, Npc, Dialog, InsightsState, InsightEffect } from '@/types/game';
-import { scenes, items, chapters, npcDialogs } from '@/data/gameData';
+import { chapters } from '@/data/chapters';
 
 export class GameEngine {
   private state: GameState;
+  private scenes: Record<string, Scene> = {};
+  private items: Record<string, Item> = {};
+  private npcDialogs: Record<string, Record<string, NpcDialogNode>> = {};
 
   constructor(initialState?: GameState) {
     this.state = initialState || {
@@ -81,8 +84,22 @@ export class GameEngine {
     return { ...this.state };
   }
 
+  loadChapterData(data: { scenes: Record<string, Scene>; items: Record<string, Item>; npcDialogs: Record<string, Record<string, NpcDialogNode>> }): void {
+    Object.assign(this.scenes, data.scenes);
+    Object.assign(this.items, data.items);
+    Object.assign(this.npcDialogs, data.npcDialogs);
+  }
+
+  getScenes(): Record<string, Scene> {
+    return this.scenes;
+  }
+
+  getItems(): Record<string, Item> {
+    return this.items;
+  }
+
   getCurrentScene(): Scene | null {
-    return scenes[this.state.currentScene] || null;
+    return this.scenes[this.state.currentScene] || null;
   }
 
   hasItem(itemId: string): boolean {
@@ -251,7 +268,7 @@ export class GameEngine {
     // 第一章解謎／推理從選單開啟，可能不在放映廳；謎題只定義在 scene_ch1_cinema_a_hall，故由此場景取謎題
     const isCh1MenuPuzzle = puzzleId === 'ch1_pair_matching' || /^ch1_reasoning_\d+$/.test(puzzleId);
     const scene = isCh1MenuPuzzle
-      ? (scenes['scene_ch1_cinema_a_hall'] || null)
+      ? (this.scenes['scene_ch1_cinema_a_hall'] || null)
       : this.getCurrentScene();
     if (!scene) return false;
 
@@ -410,7 +427,7 @@ export class GameEngine {
       return { success: false };
     }
 
-    const item = items[itemId];
+    const item = this.items[itemId];
     if (!item || !item.usable) {
       return { success: false };
     }
@@ -458,7 +475,7 @@ export class GameEngine {
 
   // 計算場景探索進度
   calculateExplorationProgress(sceneId: string): number {
-    const scene = scenes[sceneId];
+    const scene = this.scenes[sceneId];
     if (!scene) return 0;
 
     const totalItems = scene.items.filter(item => item.collectible).length;
@@ -649,7 +666,7 @@ export class GameEngine {
 
   // 開始 NPC 對話（可選指定起始節點，用於林瑞堂等「兩條敏感問題二選一」）
   startNpcDialog(dialogId: string, startNodeId?: string): void {
-    const dialogTree = npcDialogs[dialogId];
+    const dialogTree = this.npcDialogs[dialogId];
     if (!dialogTree) {
       console.warn(`NPC 對話樹不存在: ${dialogId}`);
       return;
@@ -679,7 +696,7 @@ export class GameEngine {
       return null;
     }
 
-    const dialogTree = npcDialogs[this.state.activeNpcDialogId];
+    const dialogTree = this.npcDialogs[this.state.activeNpcDialogId];
     if (!dialogTree) {
       console.warn(`[NPC 對話] 對話樹不存在: ${this.state.activeNpcDialogId}`);
       return null;

@@ -1,12 +1,12 @@
 'use client';
 
-import { Puzzle } from '@/types/game';
+import type { Puzzle as PuzzleType, Item } from '@/types/game';
 import { useState, useEffect } from 'react';
 import { X, Link2 } from 'lucide-react';
-import { items } from '@/data/gameData';
 
 interface PairMatchingPuzzleProps {
-  puzzle: Puzzle;
+  puzzle: PuzzleType;
+  items: Record<string, Item>;
   onSolve: (input: [string, string][]) => void;
   onClose: () => void;
   error?: string;
@@ -16,6 +16,7 @@ interface PairMatchingPuzzleProps {
 
 export default function PairMatchingPuzzle({
   puzzle,
+  items,
   onSolve,
   onClose,
   error: externalError = '',

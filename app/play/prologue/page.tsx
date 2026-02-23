@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
-import { prologueSlides } from '@/data/gameData';
+import { prologueSlides } from '@/data/chapters';
 import { getNextPath } from '@/data/flowConfig';
 import DialogBox from '@/components/DialogBox';
 import { audioManager } from '@/lib/audioManager';

@@ -310,7 +310,64 @@ alwaysApply: true
 
 ---
 
-## 【18】檔案命名規範
+## 【18】gameData 分章與按需載入（新增章節依據）
+
+本專案採「輕量 chapters + 按章動態載入」架構，首屏與 intro 不載入整份 gameData；遊玩頁依 `chapterId` 動態載入該章資料並與 engine 合併。**新增章節時請依下列結構與流程操作。**
+
+### 18.1 輕量章節定義 `data/chapters.ts`
+
+- 匯出：`prologueSlides`、`chapters`（章節列表與 meta）。
+- **新增章節時**：在 `chapters` 中新增一筆，例如：
+  - `ch2: { id: 'ch2', name: '...', description: '...', scenes: ['scene_ch2_...', ...], intro: { title, subtitle, description, moodText, ambientAudio, introVideo, ... } }`
+- 此檔僅含章節定義與序章文案，供 intro、prologue、play 共用；**不要**在此放 scenes/items/npcDialogs 細部內容。
+
+### 18.2 分章資料檔 `data/getChapterData.ts` 與來源
+
+- **取得章節資料**：`getChapterData(chapterId): Promise<ChapterData | null>` 由 `data/getChapterData.ts` 匯出。
+- 內部依 `chapters[chapterId].scenes` 從 **單一完整 gameData**（`data/gameData.ts`）篩選出該章的 `scenes`、`items`、`npcDialogs`（僅 ch1 有 npcDialogs 時可依 chapterId 篩選）。
+- **若改為分檔**（如 `gameDataCh1.ts` … `gameDataCh5.ts`）：每檔 export 該章 `{ scenes, items, npcDialogs }`；`getChapterData` 改為依 `chapterId` 動態 `import('./gameDataChX')` 或 map 對應後回傳。**新增章節時**：新增對應 `gameDataChX.ts` 並在 `getChapterData` 的 map/switch 中加入該章。
+
+### 18.3 GameEngine 依賴注入與合併
+
+- **檔案**：`lib/gameEngine.ts`。
+- Engine **不**直接 import 完整 gameData；內部維護 `scenes`、`items`、`npcDialogs`（私有），並有：
+  - `loadChapterData(data: { scenes, items, npcDialogs })`：以 `Object.assign` 與現有資料合併，不覆蓋已有 key。
+  - `getScenes()` / `getItems()`：供 play 頁與需合併後資料的組件使用。
+- **新增章節**：無須改 engine 邏輯，只要 `getChapterData(chX)` 回傳正確結構即可。
+
+### 18.4 Play 頁載入流程 `app/play/[chapterId]/[sceneId]/page.tsx`
+
+- **chapters**：從 `@/data/chapters` import。
+- **scenes / items**：從 `engine.getScenes()` / `engine.getItems()` 取得（須在 `chapterDataReady` 後才有資料）。
+- **載入時機**：`useEffect([chapterId])` 內呼叫 `getChapterData(chapterId)` → 取得後 `engine.loadChapterData(data)` → `setChapterDataReady(true)`。
+- **首次渲染**：未載入前可顯示「載入場景…」，避免 `getCurrentScene()` 或 `scenes[sceneId]` 為空導致錯誤或閃「場景不存在」。
+- **場景切換（箭頭）**：上一景／下一景依 `chapters[chapterId].scenes` 與當前 `sceneId` 計算（`getAdjacentScenes`），不依賴尚未載入的 scenes；箭頭點擊時先顯示大字特效、延遲後再切換 engine 與 URL，大字以 Portal 掛到 body 避免 early return 影響。
+
+### 18.5 依 props 取得資料的組件（不直接 import gameData）
+
+- **Inventory**、**DeveloperPanel**、**PickThreePuzzle**、**PairMatchingPuzzle** 等：由上層（play 頁）傳入 `items`、必要時 `scenes` / `chapters`（來自 engine 合併後或 play 頁 state），**不要**直接從 `@/data/gameData` import。
+- **新增章節**：只要 play 頁依 `getChapterData` 載入並合併，這些組件會自動拿到新章資料，無須改組件 import。
+
+### 18.6 Intro / Prologue 頁
+
+- **intro**：`import { chapters } from '@/data/chapters'`。
+- **prologue**：`import { prologueSlides } from '@/data/chapters'`（或從 gameData 再匯出 chapters 的入口亦可）。
+
+### 18.7 新增章節檢查清單
+
+1. 在 `data/chapters.ts` 的 `chapters` 中新增該章（id、name、scenes 陣列、intro 等）。
+2. 若採分檔：新增 `data/gameDataChX.ts`，export 該章 `scenes`、`items`、`npcDialogs`；並在 `getChapterData` 中對應到該章。
+3. 若仍用單一 gameData：在 gameData 中新增該章場景／道具／事件／npcDialogs，確保 `getChapterData` 的篩選邏輯會包含新章（例如依 `chapter.scenes` 與 `chapterId`）。
+4. 確認 play 頁在 `chapterId` 為新章時能載入並顯示（載入中 → 場景列表與箭頭、背包、開發者面板皆正常）。
+5. 跑一次 `npm run build` 與手動測試：進入新章 intro → 場景切換、背包、謎題、NPC 對話（若有）行為正確。
+
+### 18.8 死碼與關閉功能
+
+- 不保留 `ENABLE_SCENE_PUZZLES` 或 `false && showChapterPuzzle` 等死碼；若章節謎題日後啟用，改由流程／選單控制單獨載入，或從版控還原對應區塊。
+
+---
+
+## 【19】檔案命名規範
 
 ### 場景背景圖
 - `bg_ch{章}_sc{場}_v{版}.png`
@@ -335,7 +392,7 @@ alwaysApply: true
 
 ---
 
-## 【19】重要設計原則
+## 【20】重要設計原則
 
 1. **型別安全**：所有遊戲內容透過 TypeScript 型別定義（types/game.ts），避免結構錯誤
 2. **條件驅動**：事件與謎題基於 Requirement 條件系統，邏輯清晰
