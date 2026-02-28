@@ -2,7 +2,7 @@ import { Chapter, Scene, Item, Hotspot, Event, Puzzle, Dialog, NpcDialogNode, Np
 
 // 序章文案（KK流程偵探：最後一場放映）
 export const prologueSlides: string[] = [
-  '凌晨 00:19，你的手機震了一下。',
+  '凌晨 00:39，你的手機震了一下。',
   '不是通知，是一通沒有顯示來電的電話，像城市不想留下指紋。',
   '「KK？」對方壓低聲音，「偵查隊。需要你來一趟。」',
   '你坐起來，窗外的霓虹還亮著，像一部不肯散場的電影。',
@@ -22,7 +22,7 @@ export const items: Record<string, Item> = {
   'item_ticket_stub': {
     id: 'item_ticket_stub',
     name: '電影票根',
-    description: '一張被撕得很乾淨的票根，靜靜躺在地上。\n\n座位號碼：H排12號\n場次時間：22:40\n\n票根邊緣整齊，像是被人小心處理過。',
+    description: '一張被撕得很乾淨的票根，靜靜躺在地上。\n\n座位號碼：H排12號\n場次時間：22:30\n\n票根邊緣整齊，像是被人小心處理過。',
     svgImage: '/svg/items/ticket_stub.svg',
     svgSize: 'medium',
     collectible: true,
@@ -172,7 +172,7 @@ export const items: Record<string, Item> = {
   'item_ticket_system_timestamp': {
     id: 'item_ticket_system_timestamp',
     name: '票務系統時間戳',
-    description: '票務系統的時間戳記錄著所有交易時間。\n\n案發當晚的記錄：\n22:40 場次，H排12號\n購票時間：案發當天下午\n\n這個時間戳，與第一章死亡時間完全吻合。\n太吻合了，像是刻意安排。',
+    description: '票務系統的時間戳記錄著所有交易時間。\n\n案發當晚的記錄：\n22:30 場次，H排12號\n購票時間：案發當天下午\n\n這個時間戳，與第一章死亡時間完全吻合。\n太吻合了，像是刻意安排。',
     svgImage: '/svg/items/ticket_system_timestamp.svg',
     svgSize: 'medium',
     collectible: true,
@@ -188,7 +188,7 @@ export const items: Record<string, Item> = {
   'item_security_camera_replay': {
     id: 'item_security_camera_replay',
     name: '監視器回放',
-    description: '監視器回放顯示了案發當晚的情況。\n\n時間戳：23:12\n地點：清潔通道\n\n畫面中，黃志誠走進清潔通道。\n然後，消失了 47 秒。\n\n47秒後，他從另一個出口出現。\n手裡端著清潔工具，像是剛完成工作。',
+    description: '監視器回放顯示了案發當晚的情況。\n\n時間戳：00:12\n地點：清潔通道\n\n畫面中，黃志誠走進清潔通道。\n然後，消失了 47 秒。\n\n47秒後，他從另一個出口出現。\n手裡端著清潔工具，像是剛完成工作。',
     svgImage: '/svg/items/security_camera_replay.svg',
     svgSize: 'medium',
     collectible: true,
@@ -324,7 +324,7 @@ export const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：電影票根\n\n一張被撕得很乾淨的票根，靜靜躺在地上。\n\n座位號碼：H排12號\n場次時間：22:40\n\n票根邊緣整齊，像是被人小心處理過。',
+              text: '獲得：電影票根\n\n一張被撕得很乾淨的票根，靜靜躺在地上。\n\n座位號碼：H排12號\n場次時間：22:30\n\n票根邊緣整齊，像是被人小心處理過。',
               type: 'item',
             },
           },
@@ -349,7 +349,7 @@ export const scenes: Record<string, Scene> = {
         id: 'puzzle_ch1_how_murder_happened',
         type: 'input',
         solution: '延後亮燈3分鐘',
-        hint: '拼合線索：\n1. 亮燈延後（播映時間表 + 燈控面板）\n2. 監視器時間（90秒內離開）\n3. 死亡時間（散場後，約23:10-23:15）\n\n推理過程：\n- 兇手知道燈會延後3分鐘\n- 利用這3分鐘完成犯案\n- 在燈亮前離開現場',
+        hint: '拼合線索：\n1. 亮燈延後（播映時間表 + 燈控面板）\n2. 監視器時間（90秒內離開）\n3. 死亡時間（散場後，約00:10-00:15）\n\n推理過程：\n- 兇手知道燈會延後3分鐘\n- 利用這3分鐘完成犯案\n- 在燈亮前離開現場',
         requirements: [
           { type: 'hasItem', itemId: 'item_schedule_modified' },
           { type: 'hasFlag', flag: 'clue_light_delay_confirmed', value: true },
@@ -692,7 +692,7 @@ export const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '監視器畫面正在播放案發當晚的錄影。\n\n時間戳：23:12\n畫面：散場後的放映廳\n\n在昏暗的光線中，一個身影快速移動。\n90秒內，從座位區到出口，然後消失。',
+              text: '監視器畫面正在播放案發當晚的錄影。\n\n時間戳：00:12\n畫面：散場後的放映廳\n\n在昏暗的光線中，一個身影快速移動。\n90秒內，從座位區到出口，然後消失。',
               type: 'narrator',
             },
           },
@@ -1847,7 +1847,7 @@ export const scenes: Record<string, Scene> = {
         shape: 'rect',
         coords: [0.7, 0.1, 0.9, 0.3],
         description: '牆上的時鐘',
-        hint: '牆上的時鐘停在 23:10。不是電池沒電，而是被人刻意停止。',
+        hint: '牆上的時鐘停在 00:10。不是電池沒電，而是被人刻意停止。',
       },
       {
         id: 'hotspot_drawer',
@@ -1921,7 +1921,7 @@ export const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '牆上的時鐘停在 23:10。\n\n不是電池沒電，而是被人刻意停止。\n這個時間，正好是城市影城 案發的時間。\n\n他對「時間」有意識。',
+              text: '牆上的時鐘停在 00:10。\n\n不是電池沒電，而是被人刻意停止。\n這個時間，正好是城市影城 案發的時間。\n\n他對「時間」有意識。',
               type: 'narrator',
             },
           },
@@ -1993,7 +1993,7 @@ export const scenes: Record<string, Scene> = {
         id: 'puzzle_ch2_suspect_a_alibi',
         type: 'input',
         solution: '不可能',
-        hint: '時間計算：\n1. 22:30 離開辦公大樓\n2. 最快到達城市影城：23:10（需要40分鐘）\n3. 但案發時間是 23:10-23:15\n\n結論：時間上幾乎不可能',
+        hint: '時間計算：\n1. 22:30 離開辦公大樓\n2. 最快到達城市影城：23:10（需要40分鐘）\n3. 但案發時間是 00:10-00:15\n\n結論：時間上幾乎不可能',
         requirements: [
           { type: 'hasItem', itemId: 'item_visitor_log' },
           { type: 'hasFlag', flag: 'clue_time_awareness', value: true },
