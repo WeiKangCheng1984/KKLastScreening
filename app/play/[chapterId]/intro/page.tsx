@@ -31,7 +31,7 @@ export default function ChapterIntroPage() {
     setIsLoading(false);
   }, [chapterId, chapter, router]);
 
-  const phoneFrameClass = 'w-full min-h-screen md:max-w-[428px] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:overflow-hidden md:border md:border-dark-border/50 md:[transform:translateZ(0)]';
+  const phoneFrameClass = 'w-full min-h-screen md:max-w-[clamp(428px,42vw,600px)] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:overflow-hidden md:border md:border-dark-border/50 md:[transform:translateZ(0)]';
 
   if (isLoading || !chapter || !chapter.intro) {
     return (

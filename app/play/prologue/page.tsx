@@ -50,7 +50,7 @@ export default function ProloguePage() {
   return (
     <div className="min-h-screen bg-dark-bg flex items-center justify-center">
       {/* 桌面版：手機型窄版置中（與遊戲內一致） */}
-      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black via-neutral-900 to-black relative overflow-hidden px-4 md:max-w-[428px] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:border md:border-dark-border/50 md:[transform:translateZ(0)]">
+      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black via-neutral-900 to-black relative overflow-hidden px-4 md:max-w-[clamp(428px,42vw,600px)] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:border md:border-dark-border/50 md:[transform:translateZ(0)]">
         <MuteAllButton />
         {/* 序章背景圖（可選：放置 prologue_bg.webp 即顯示） */}
         <div

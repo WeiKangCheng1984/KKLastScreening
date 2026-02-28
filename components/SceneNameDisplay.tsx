@@ -67,7 +67,7 @@ export default function SceneNameDisplay({
           <div className="absolute inset-0 bg-black/20 pointer-events-auto" />
           
           {/* 桌面版：限制在 428px 手機框架內，與遊戲主體一致；手機版全寬 */}
-          <div className="w-full px-4 md:max-w-[428px] md:mx-auto relative z-10 pointer-events-none flex flex-col items-center justify-center">
+          <div className="w-full px-4 md:max-w-[clamp(428px,42vw,600px)] md:mx-auto relative z-10 pointer-events-none flex flex-col items-center justify-center">
             {/* 光束背景層 */}
             <BeamEffect
               show={isVisible}

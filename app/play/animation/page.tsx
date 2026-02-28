@@ -38,7 +38,7 @@ export default function AnimationPage() {
   return (
     <div className="min-h-screen bg-dark-bg flex items-center justify-center">
       {/* 桌面版：手機型窄版置中（與遊戲內一致） */}
-      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden p-3 sm:p-4 md:max-w-[428px] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:border md:border-dark-border/50 md:[transform:translateZ(0)]">
+      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden p-3 sm:p-4 md:max-w-[clamp(428px,42vw,600px)] md:mx-auto md:min-h-screen md:shadow-2xl md:rounded-[2rem] md:border md:border-dark-border/50 md:[transform:translateZ(0)]">
         {isTransitioning && (
           <div className="fixed inset-0 z-50 bg-black animate-in fade-in duration-500 flex items-center justify-center">
             <p className="text-orange-300">載入中...</p>

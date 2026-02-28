@@ -4,7 +4,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { GameEngine } from '@/lib/gameEngine';
-import { Dialog } from '@/types/game';
+import { Dialog, Hotspot } from '@/types/game';
 import SceneView, { SceneViewRef } from '@/components/SceneView';
 import DialogBox from '@/components/DialogBox';
 import CharacterConversation from '@/components/CharacterConversation';
@@ -44,6 +44,7 @@ import ScoreDisplay from '@/components/ScoreDisplay';
 import NpcRightStrip from '@/components/NpcRightStrip';
 import ReasoningPanel from '@/components/ReasoningPanel';
 import { reasoningByChapter } from '@/data/reasoningByChapter';
+import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // 獲取當前章節的所有場景
@@ -66,6 +67,14 @@ const getAdjacentScenes = (chapterId: string, sceneId: string): { prev: string |
     next: currentIndex < chapterScenes.length - 1 ? chapterScenes[currentIndex + 1] : null,
   };
 };
+
+function getHotspotCenter(hotspot: Hotspot): { x: number; y: number } {
+  if (hotspot.shape === 'rect' && hotspot.coords.length >= 4) {
+    const [x, , w, h] = hotspot.coords;
+    return { x: (x + w) / 2, y: (hotspot.coords[1] + h) / 2 };
+  }
+  return { x: 0.5, y: 0.5 };
+}
 
 export default function PlayPage() {
   const params = useParams();
@@ -126,6 +135,13 @@ export default function PlayPage() {
   // 定義所有 state，確保在 useEffect 之前
   const [currentDialog, setCurrentDialog] = useState<Dialog | null>(null);
   const [dialogQueue, setDialogQueue] = useState<Dialog[]>([]);
+  const [zoomOverlay, setZoomOverlay] = useState<{
+    active: boolean;
+    background: string;
+    zoomCenter: { x: number; y: number };
+    dialogs: Dialog[];
+    interactionName?: string;
+  } | null>(null);
   const [currentPuzzle, setCurrentPuzzle] = useState<any>(null);
   const [puzzleError, setPuzzleError] = useState<string>('');
   const [refreshKey, setRefreshKey] = useState(0);
@@ -956,9 +972,10 @@ export default function PlayPage() {
       }, 0);
     }
     
-    // 場景切換時清空對話隊列
+    // 場景切換時清空對話隊列與 Zoom 覆蓋層
     setCurrentDialog(null);
     setDialogQueue([]);
+    setZoomOverlay(null);
     
     // 確保當前章節的所有場景都被標記為可訪問（添加到 visitedScenes）
     // 這樣玩家就可以在該章節的三個空間間自由切換
@@ -1346,10 +1363,18 @@ export default function PlayPage() {
     };
 
     if (narrativeHotspots[hotspotId]) {
-      setCurrentDialog({
-        text: narrativeHotspots[hotspotId],
-        type: 'narrator',
-      });
+      const text = narrativeHotspots[hotspotId];
+      if (chapterId === 'ch1') {
+        const hotspot = scene.hotspots.find((h) => h.id === hotspotId);
+        setZoomOverlay({
+          active: true,
+          background: scene.background,
+          zoomCenter: hotspot ? getHotspotCenter(hotspot) : { x: 0.5, y: 0.5 },
+          dialogs: [{ text, type: 'narrator' }],
+        });
+      } else {
+        setCurrentDialog({ text, type: 'narrator' });
+      }
       setRefreshKey(prev => prev + 1);
       return;
     }
@@ -2061,7 +2086,17 @@ export default function PlayPage() {
                 });
                 if (dialogs.length > 0) {
                   const hotspot = scene.hotspots.find(h => h.id === hotspotId);
-                  addDialogsToQueue(dialogs, hotspot?.description);
+                  if (chapterId === 'ch1') {
+                    setZoomOverlay({
+                      active: true,
+                      background: scene.background,
+                      zoomCenter: hotspot ? getHotspotCenter(hotspot) : { x: 0.5, y: 0.5 },
+                      dialogs,
+                      interactionName: hotspot?.description,
+                    });
+                  } else {
+                    addDialogsToQueue(dialogs, hotspot?.description);
+                  }
                 }
               }
               setRefreshKey(prev => prev + 1);
@@ -2079,13 +2114,24 @@ export default function PlayPage() {
     // 如果沒有特殊處理，顯示 hotspot 提示
     const hotspot = scene.hotspots.find(h => h.id === hotspotId);
     if (hotspot?.hint) {
-      setCurrentDialog({
+      const hintDialog: Dialog = {
         text: hotspot.hint || hotspot.description || '',
         type: 'narrator',
-      });
+      };
+      if (chapterId === 'ch1') {
+        setZoomOverlay({
+          active: true,
+          background: scene.background,
+          zoomCenter: getHotspotCenter(hotspot),
+          dialogs: [hintDialog],
+          interactionName: hotspot.description,
+        });
+      } else {
+        setCurrentDialog(hintDialog);
+      }
       setRefreshKey(prev => prev + 1);
     }
-  }, [scene, handleItemCollection, addDialogsToQueue]); // engine 來自 useRef，不需要在依賴中
+  }, [scene, handleItemCollection, addDialogsToQueue, chapterId]); // engine 來自 useRef，不需要在依賴中
 
   const handleItemClick = useCallback((itemId: string) => {
     if (!engineRef.current) return;
@@ -2609,7 +2655,7 @@ export default function PlayPage() {
       {sceneNameOverlay}
       <div className="relative min-h-screen bg-dark-bg overflow-hidden">
         {/* 桌面版：手機型窄版置中（約 428px），讓電腦玩家看到與手機相近的布局 */}
-        <div className="w-full min-h-screen md:max-w-[428px] md:mx-auto md:min-h-screen md:relative md:shadow-2xl md:rounded-[2rem] md:overflow-hidden md:[transform:translateZ(0)] md:border md:border-dark-border/50">
+        <div className="w-full min-h-screen md:max-w-[clamp(428px,42vw,600px)] md:mx-auto md:min-h-screen md:relative md:shadow-2xl md:rounded-[2rem] md:overflow-hidden md:[transform:translateZ(0)] md:border md:border-dark-border/50">
           {/* 新手引導 */}
           <TutorialGuide onComplete={handleTutorialComplete} />
           
@@ -2638,6 +2684,18 @@ export default function PlayPage() {
               debug={debug}
               interactionCount={interactionCount}
             />
+
+            {/* 第一章互動框 Zoom 特寫覆蓋層 */}
+            {zoomOverlay?.active && scene && (
+              <HotspotZoomOverlay
+                visible={true}
+                background={zoomOverlay.background}
+                zoomCenter={zoomOverlay.zoomCenter}
+                dialogs={zoomOverlay.dialogs}
+                interactionName={zoomOverlay.interactionName}
+                onClose={() => setZoomOverlay(null)}
+              />
+            )}
             
             {/* 左側箭頭 - 切換到上一個場景（依章節場景列表顯示，不依賴 scenes 鍵值） */}
             {adjacentScenes.prev && (
