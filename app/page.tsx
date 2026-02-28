@@ -1,14 +1,16 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Play } from 'lucide-react';
+import { Play, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import MuteAllButton from '@/components/MuteAllButton';
+import PasswordLoadModal from '@/components/PasswordLoadModal';
 
 export default function Home() {
   const router = useRouter();
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   // 方案一：全遊戲一首 BGM，開頭頁若尚未播放則播放，離開時不中斷
   useEffect(() => {
@@ -30,11 +32,19 @@ export default function Home() {
         console.warn('無法清除遊戲記憶:', e);
       }
     }
-    
+
     // 等待過場動畫完成後導航到序章，再進入第一章導讀
     setTimeout(() => {
       router.push('/play/prologue');
     }, 800);
+  };
+
+  const handlePasswordSuccess = (chapterId: string) => {
+    setShowPasswordModal(false);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      router.push(`/play/${chapterId}/intro`);
+    }, 500);
   };
 
   return (
@@ -90,6 +100,20 @@ export default function Home() {
           <Play size={24} />
           開始遊戲
         </button>
+        <button
+          type="button"
+          onClick={() => setShowPasswordModal(true)}
+          className="mt-4 inline-flex items-center gap-2 px-8 py-3 bg-dark-surface/80 hover:bg-dark-surface border border-dark-border/50 text-gray-200 hover:text-white rounded-xl transition-all duration-200 text-base font-medium"
+          style={{ animationDelay: '0.35s' }}
+        >
+          <BookOpen size={20} />
+          從章節繼續
+        </button>
+        <PasswordLoadModal
+          open={showPasswordModal}
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={handlePasswordSuccess}
+        />
         <div className="mt-10 text-sm text-orange-200/60 animate-fade-float" style={{ animationDelay: '0.4s' }}>
           <p>使用滑鼠點擊場景中的物件進行互動</p>
         </div>

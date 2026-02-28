@@ -3457,6 +3457,19 @@ export const scenes: Record<string, Scene> = {
       type: 'narrator',
     },
   },
+
+  // ========== 第六章（占位，待補） ==========
+  scene_ch6_start: {
+    id: 'scene_ch6_start',
+    chapterId: 'ch6',
+    name: '第六章',
+    description: '第六章場景（待補內容）',
+    background: '/images/bg_ch1_cinema_a_hall_v1.webp',
+    hotspots: [],
+    items: [],
+    events: [],
+    puzzles: [],
+  },
 };
 
 // 章節定義
@@ -3537,6 +3550,19 @@ export const chapters: Record<string, Chapter> = {
       description: '城市沒有警鈴。沒有倒數。只有一場正常播放的電影，和一個你必須自己做出的決定。',
       moodText: '如果你錯了，沒有人會提醒你。\n\n如果你對了，也沒有人會恭喜你。\n\n因為這不是遊戲，這是選擇。',
       // backgroundImage: '/images/intro_ch5_bg.webp', // 需要放置圖片
+      ambientAudio: '/audio/ambient/core_intro.mp3',
+    },
+  },
+  ch6: {
+    id: 'ch6',
+    name: '第六章',
+    description: '（待補）',
+    scenes: ['scene_ch6_start'],
+    intro: {
+      title: '第六章',
+      subtitle: '（待補）',
+      description: '第六章內容尚未完成。',
+      moodText: '',
       ambientAudio: '/audio/ambient/core_intro.mp3',
     },
   },

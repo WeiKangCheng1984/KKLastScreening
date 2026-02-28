@@ -84,4 +84,17 @@ export const chapters: Record<string, Chapter> = {
       ambientAudio: '/audio/ambient/core_intro.mp3',
     },
   },
+  ch6: {
+    id: 'ch6',
+    name: '第六章',
+    description: '（待補）',
+    scenes: ['scene_ch6_start'],
+    intro: {
+      title: '第六章',
+      subtitle: '（待補）',
+      description: '第六章內容尚未完成。',
+      moodText: '',
+      ambientAudio: '/audio/ambient/core_intro.mp3',
+    },
+  },
 };

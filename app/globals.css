@@ -56,6 +56,15 @@
     overflow: hidden;
   }
 
+  /* 隱藏滾動條（密碼轉盤等） */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* 平滑過渡 */
   .transition-smooth {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
