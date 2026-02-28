@@ -6,6 +6,9 @@ export const GAME_BGM = '/audio/bgm/kk_bgm_title.mp3';
 export class AudioManager {
   private ambientAudio: HTMLAudioElement | null = null;
   private currentAmbientPath: string | null = null;
+  /** 手機端 autoplay 被擋時暫存，待使用者手勢後再播 */
+  private pendingAmbientPath: string | null = null;
+  private pendingAmbientVolume: number = 0.4;
   private sfxCache: Map<string, HTMLAudioElement> = new Map();
   private masterVolume: number = 0.7;
   private sfxVolume: number = 0.8;
@@ -34,19 +37,48 @@ export class AudioManager {
   playAmbient(audioPath: string, volume?: number): void {
     this.stopAmbient();
     if (!audioPath || this.isMuted) return;
-    
+
+    const vol = volume !== undefined ? volume : this.ambientVolume;
     try {
       const audio = new Audio(audioPath);
       audio.loop = true;
-      audio.volume = (volume !== undefined ? volume : this.ambientVolume) * this.masterVolume;
-      audio.play().catch((err) => {
-        console.warn('無法播放環境音:', err);
-      });
+      audio.volume = vol * this.masterVolume;
       this.ambientAudio = audio;
       this.currentAmbientPath = audioPath;
+      this.pendingAmbientPath = null;
+      audio
+        .play()
+        .then(() => {})
+        .catch(() => {
+          // 手機/瀏覽器阻擋 autoplay：暫存，等使用者手勢後由 tryPlayPendingAmbient() 再播
+          this.pendingAmbientPath = audioPath;
+          this.pendingAmbientVolume = vol;
+          if (this.ambientAudio === audio) {
+            try {
+              audio.pause();
+              audio.currentTime = 0;
+            } catch (_) {}
+            this.ambientAudio = null;
+            this.currentAmbientPath = null;
+          }
+        });
     } catch (error) {
       console.warn('載入環境音失敗:', error);
     }
+  }
+
+  /** 是否有待播的 BGM（autoplay 被擋時） */
+  getPendingAmbientPath(): string | null {
+    return this.pendingAmbientPath;
+  }
+
+  /** 使用者手勢後呼叫，嘗試播放暫存的 BGM（解決手機端 autoplay 政策） */
+  tryPlayPendingAmbient(): void {
+    if (!this.pendingAmbientPath || this.isMuted) return;
+    const path = this.pendingAmbientPath;
+    const vol = this.pendingAmbientVolume;
+    this.pendingAmbientPath = null;
+    this.playAmbient(path, vol);
   }
 
   /** 目前正在播放的環境音路徑，若未播放則為 null */
@@ -131,6 +163,7 @@ export class AudioManager {
       this.ambientAudio = null;
     }
     this.currentAmbientPath = null;
+    // 不清除 pendingAmbientPath，讓手勢後仍可重試
   }
 
   // 設定音量

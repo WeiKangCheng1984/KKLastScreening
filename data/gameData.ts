@@ -329,6 +329,7 @@ export const scenes: Record<string, Scene> = {
             },
           },
           { type: 'setFlag', flag: 'ticket_stub_collected', value: true },
+          { type: 'setFlag', flag: 'observed_any_ch1', value: true },
         ],
         oneTime: true,
       },

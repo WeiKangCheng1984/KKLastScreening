@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { AudioUnlockOnInteraction } from '@/components/AudioUnlockOnInteraction';
 
 export const metadata: Metadata = {
   title: '最後一場放映 - 偵探遊戲',
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="zh-TW">
       <body className="bg-dark-bg text-gray-200 antialiased">
+        <AudioUnlockOnInteraction />
         {children}
       </body>
     </html>
