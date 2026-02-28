@@ -246,121 +246,67 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch1',
     name: '城市影城 放映廳',
     description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
-    background: '/images/bg_ch1_cinema_a_hall_v1.png',
+    background: '/images/bg_ch1_cinema_a_hall_v1.webp',
     hotspots: [
-      {
-        id: 'hotspot_h_row_armrest',
-        shape: 'rect',
-        coords: [0.4, 0.5, 0.55, 0.65],
-        description: 'H 排 12 號座椅扶手',
-        hint: '扶手乾淨得不自然。不是沒人碰，是有人怕留下。',
-      },
-      {
-        id: 'hotspot_dead_collar',
-        shape: 'rect',
-        coords: [0.45, 0.55, 0.6, 0.7],
-        description: '死者衣領／頸側',
-        hint: '不是亂打。是角度。是熟練。',
-      },
-      {
-        id: 'hotspot_side_aisle_light',
-        shape: 'rect',
-        coords: [0.7, 0.1, 0.9, 0.22],
-        description: '側走道與出口燈箱',
-        hint: '燈箱亮得像規則本身。可規則，也會投下陰影。',
-      },
       {
         id: 'hotspot_ticket_stub',
         shape: 'rect',
-        coords: [0.35, 0.65, 0.45, 0.75],
+        coords: [1.19, 1.62, 0.15, 0.15],
         description: '地上的電影票根',
         hint: '一張被撕得很乾淨的票根，靜靜躺在地上。',
       },
       // 好笑無意義互動點（放映廳）
-      { id: 'hotspot_fun_popcorn', shape: 'rect', coords: [0.08, 0.3, 0.2, 0.45], description: '爆米花殘渣', hint: '地上有幾顆沒吃完的爆米花。' },
-      { id: 'hotspot_fun_cup', shape: 'rect', coords: [0.22, 0.5, 0.35, 0.62], description: '空飲料杯', hint: '一個空杯還插著吸管。' },
-      { id: 'hotspot_fun_jacket', shape: 'rect', coords: [0.58, 0.4, 0.68, 0.55], description: '椅背上的外套', hint: '一件外套掛在椅背上。' },
-      { id: 'hotspot_fun_pillow', shape: 'rect', coords: [0.12, 0.7, 0.28, 0.85], description: '影廳頸枕', hint: '影廳提供的頸枕，上頭寫著「請勿帶出」。' },
-      { id: 'hotspot_fun_screen_dust', shape: 'rect', coords: [0.72, 0.35, 0.85, 0.5], description: '銀幕邊角', hint: '銀幕邊角有一小塊灰。' },
-      { id: 'hotspot_fun_ac', shape: 'rect', coords: [0.5, 0.08, 0.65, 0.2], description: '冷氣出風口', hint: '冷氣呼呼吹。' },
-      { id: 'hotspot_fun_exit_sign', shape: 'rect', coords: [0.5, 0.75, 0.65, 0.88], description: '散場告示', hint: '「散場請依序離場」。' },
+      { id: 'hotspot_fun_popcorn', shape: 'rect', coords: [1.55, 1.6, 0.15, 0.15], description: '爆米花殘渣', hint: '地上有幾顆沒吃完的爆米花。' },
+      { id: 'hotspot_fun_cup', shape: 'rect', coords: [0.03, 1.38, 0.15, 0.15], description: '空飲料杯', hint: '一個空杯還插著吸管。' },
+      { id: 'hotspot_fun_jacket', shape: 'rect', coords: [0.02, 1.5, 0.15, 0.15], description: '椅背上的外套', hint: '一件外套掛在椅背上。' },
+      { id: 'hotspot_fun_screen_dust', shape: 'rect', coords: [1.75, 1.2, 0.15, 0.15], description: '銀幕邊角', hint: '銀幕邊角有一小塊灰。' },
+      { id: 'hotspot_fun_ac', shape: 'rect', coords: [0.52, 0.15, 0.15, 0.15], description: '冷氣出風口', hint: '冷氣呼呼吹。' },
+      { id: 'hotspot_fun_exit_sign', shape: 'rect', coords: [0.12, 1.1, 0.15, 0.15], description: '散場告示', hint: '「散場請依序離場」。' },
+      { id: 'hotspot_fun_seat_number', shape: 'rect', coords: [1.1, 1.45, 0.15, 0.15], description: '座位號碼牌', hint: '椅背上的座位號碼。' },
+      { id: 'hotspot_fun_carpet_stain', shape: 'rect', coords: [0.58, 1.25, 0.15, 0.15], description: '地毯污漬', hint: '地毯上有一小塊深色污漬。' },
+      { id: 'hotspot_fun_popcorn_bucket', shape: 'rect', coords: [0.70, 1.72, 0.15, 0.15], description: '空爆米花桶', hint: '一個倒地的空爆米花桶。' },
+      {
+        id: 'hotspot_victim_seat',
+        shape: 'rect',
+        coords: [0.44, 1.62, 0.2, 0.22],
+        description: '死者座位',
+        hint: 'H 排 12 號。散場後唯一沒有站起來的那個位子。',
+      },
     ],
     items: [
       items.item_ticket_stub,
     ],
     hotspotEventMap: {
-      'hotspot_h_row_armrest': 'observe_armrest',
-      'hotspot_dead_collar': 'observe_collar',
-      'hotspot_side_aisle_light': 'observe_light',
       'hotspot_ticket_stub': 'examine_ticket_stub',
       'hotspot_fun_popcorn': 'fun_popcorn',
       'hotspot_fun_cup': 'fun_cup',
       'hotspot_fun_jacket': 'fun_jacket',
-      'hotspot_fun_pillow': 'fun_pillow',
       'hotspot_fun_screen_dust': 'fun_screen_dust',
       'hotspot_fun_ac': 'fun_ac',
       'hotspot_fun_exit_sign': 'fun_exit_sign',
+      'hotspot_fun_seat_number': 'fun_seat_number',
+      'hotspot_fun_carpet_stain': 'fun_carpet_stain',
+      'hotspot_fun_popcorn_bucket': 'fun_popcorn_bucket',
+      'hotspot_victim_seat': 'observe_victim_seat',
     },
     events: [
       {
-        id: 'observe_armrest',
-        name: '觀察 H 排扶手',
+        id: 'observe_victim_seat',
+        name: '觀察死者座位',
         description: 'KK 旁白。',
         requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_h_row_armrest' },
-          { type: 'custom', customCheck: (state) => !state.flags.observed_armrest },
+          { type: 'hasInteracted', hotspotId: 'hotspot_victim_seat' },
+          { type: 'custom', customCheck: (state) => !state.flags.observed_victim_seat },
         ],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '扶手乾淨得不自然。不是沒人碰，是有人怕留下。',
+              text: 'H 排 12 號。散場後唯一沒有站起來的那個位子。椅背微微後傾，像有人還坐在那裡，只是再也不會動了。周圍的座位都空了，只有這裡留下一個人的形狀。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'observed_armrest', value: true },
-          { type: 'setFlag', flag: 'observed_any_ch1', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'observe_collar',
-        name: '觀察死者衣領／頸側',
-        description: 'KK 旁白。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_dead_collar' },
-          { type: 'custom', customCheck: (state) => !state.flags.observed_collar },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '不是亂打。是角度。是熟練。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'observed_collar', value: true },
-          { type: 'setFlag', flag: 'observed_any_ch1', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'observe_light',
-        name: '觀察側走道與出口燈箱',
-        description: 'KK 旁白。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_side_aisle_light' },
-          { type: 'custom', customCheck: (state) => !state.flags.observed_light },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '燈箱亮得像規則本身。可規則，也會投下陰影。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'observed_light', value: true },
+          { type: 'setFlag', flag: 'observed_victim_seat', value: true },
           { type: 'setFlag', flag: 'observed_any_ch1', value: true },
           { type: 'setFlag', flag: 'projection_room_unlocked', value: true },
         ],
@@ -390,10 +336,12 @@ export const scenes: Record<string, Scene> = {
       { id: 'fun_popcorn', name: '爆米花殘渣', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_popcorn' }], effects: [{ type: 'showDialog', dialog: { text: '地上有幾顆沒吃完的爆米花。你忍不住想：最後一場電影，有人連結局都沒看完。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_cup', name: '空飲料杯', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_cup' }], effects: [{ type: 'showDialog', dialog: { text: '一個空杯還插著吸管。上面印著「中杯可樂」。至少兇手不是大杯派。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_jacket', name: '椅背上的外套', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_jacket' }], effects: [{ type: 'showDialog', dialog: { text: '一件外套掛在椅背上。主人大概忘了帶走。或者，再也不會回來拿。', type: 'narrator' } }], oneTime: false },
-      { id: 'fun_pillow', name: '影廳頸枕', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_pillow' }], effects: [{ type: 'showDialog', dialog: { text: '影廳提供的頸枕。上頭寫著「請勿帶出」。你沒有帶出。你只是看看。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_screen_dust', name: '銀幕邊角', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_screen_dust' }], effects: [{ type: 'showDialog', dialog: { text: '銀幕邊角有一小塊灰。不影響破案。但你有點想把它擦掉。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_ac', name: '冷氣出風口', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_ac' }], effects: [{ type: 'showDialog', dialog: { text: '冷氣呼呼吹。你突然想：如果案發那天冷氣壞了，兇手會不會更焦慮？', type: 'narrator' } }], oneTime: false },
       { id: 'fun_exit_sign', name: '散場告示', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_exit_sign' }], effects: [{ type: 'showDialog', dialog: { text: '「散場請依序離場」。大家都依序了。除了一個人。', type: 'narrator' } }], oneTime: false },
+      { id: 'fun_seat_number', name: '座位號碼牌', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_seat_number' }], effects: [{ type: 'showDialog', dialog: { text: '你盯著號碼牌看了三秒。H排12號。你開始認真考慮要不要把這張椅子帶回去當紀念。不，你沒有。你是專業的。', type: 'narrator' } }], oneTime: false },
+      { id: 'fun_carpet_stain', name: '地毯污漬', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_carpet_stain' }], effects: [{ type: 'showDialog', dialog: { text: '你蹲下來聞了聞。……你立刻站起來，並決定這一段不會出現在任何正式紀錄裡。可樂。一定是可樂。', type: 'narrator' } }], oneTime: false },
+      { id: 'fun_popcorn_bucket', name: '空爆米花桶', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_popcorn_bucket' }], effects: [{ type: 'showDialog', dialog: { text: '你盯著空桶看了很久。如果兇手當時正在吃爆米花，他會選鹹的還是甜的？……你揉了揉太陽穴。該休息了。', type: 'narrator' } }], oneTime: false },
     ],
     puzzles: [
       {
@@ -612,44 +560,44 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch1',
     name: '播映室',
     description: '播映室裡，控制台和設備都在正常運作。但在這片正常中，有什麼被改動過。',
-    background: '/images/bg_ch1_projection_room_v1.png',
+    background: '/images/bg_ch1_projection_room_v1.webp',
     hotspots: [
       {
         id: 'hotspot_screening_schedule',
         shape: 'rect',
-        coords: [0.2, 0.2, 0.5, 0.4],
+        coords: [0.16, 0.22, 0.22, 0.18],
         description: '播映時間表',
         hint: '一張被塗改過的播映時間表。原本的亮燈時間被劃掉，旁邊用紅筆寫著新的時間。',
       },
       {
         id: 'hotspot_light_control_panel',
         shape: 'rect',
-        coords: [0.5, 0.3, 0.8, 0.6],
+        coords: [0.44, 0.38, 0.28, 0.24],
         description: '燈控面板',
         hint: '燈控面板上的開關位置顯示：手動模式。這不是自動系統，需要有人親自操作。',
       },
       {
         id: 'hotspot_projector_notes',
         shape: 'rect',
-        coords: [0.1, 0.5, 0.4, 0.7],
+        coords: [0.06, 0.52, 0.18, 0.2],
         description: '放映員的筆記',
         hint: '一張便條紙貼在控制台上。字跡匆忙，但內容清楚。',
       },
       {
         id: 'hotspot_security_monitor',
         shape: 'rect',
-        coords: [0.6, 0.6, 0.9, 0.9],
+        coords: [0.68, 0.68, 0.24, 0.22],
         description: '監視器畫面',
         hint: '監視器畫面正在播放案發當晚的錄影。在昏暗的光線中，一個身影快速移動。',
       },
       // 好笑無意義互動（播映室）
-      { id: 'hotspot_fun_coffee', shape: 'rect', coords: [0.05, 0.15, 0.18, 0.3], description: '咖啡杯', hint: '小張的咖啡杯。' },
-      { id: 'hotspot_fun_snack', shape: 'rect', coords: [0.82, 0.15, 0.95, 0.28], description: '零食袋', hint: '一包沒吃完的洋芋片。' },
-      { id: 'hotspot_fun_chair_wheel', shape: 'rect', coords: [0.35, 0.72, 0.48, 0.88], description: '椅子輪子', hint: '控制椅的輪子。' },
-      { id: 'hotspot_fun_sticker', shape: 'rect', coords: [0.75, 0.25, 0.88, 0.38], description: '按鈕上的貼紙', hint: '某個按鈕上貼著「勿按」。' },
-      { id: 'hotspot_fun_remote', shape: 'rect', coords: [0.08, 0.75, 0.22, 0.9], description: '冷氣遙控器', hint: '冷氣遙控器。' },
-      { id: 'hotspot_fun_magazine', shape: 'rect', coords: [0.5, 0.05, 0.65, 0.18], description: '舊雜誌', hint: '一本過期的電影雜誌。' },
-      { id: 'hotspot_fun_whiteboard', shape: 'rect', coords: [0.15, 0.35, 0.3, 0.48], description: '白板', hint: '白板上畫著一個笑臉。' },
+      { id: 'hotspot_fun_coffee', shape: 'rect', coords: [0.03, 0.18, 0.12, 0.14], description: '咖啡杯', hint: '小張的咖啡杯。' },
+      { id: 'hotspot_fun_snack', shape: 'rect', coords: [0.86, 0.16, 0.1, 0.12], description: '零食袋', hint: '一包沒吃完的洋芋片。' },
+      { id: 'hotspot_fun_chair_wheel', shape: 'rect', coords: [0.34, 0.76, 0.14, 0.16], description: '椅子輪子', hint: '控制椅的輪子。' },
+      { id: 'hotspot_fun_sticker', shape: 'rect', coords: [0.74, 0.26, 0.12, 0.1], description: '按鈕上的貼紙', hint: '某個按鈕上貼著「勿按」。' },
+      { id: 'hotspot_fun_remote', shape: 'rect', coords: [0.04, 0.78, 0.1, 0.15], description: '冷氣遙控器', hint: '冷氣遙控器。' },
+      { id: 'hotspot_fun_magazine', shape: 'rect', coords: [0.5, 0.04, 0.16, 0.12], description: '舊雜誌', hint: '一本過期的電影雜誌。' },
+      { id: 'hotspot_fun_whiteboard', shape: 'rect', coords: [0.18, 0.36, 0.14, 0.12], description: '白板', hint: '白板上畫著一個笑臉。' },
     ],
     items: [
       items.item_schedule_modified,
@@ -1198,37 +1146,37 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch1',
     name: '廁所',
     description: '廁所裡很乾淨，幾乎是空的。但在這片乾淨中，你感覺到一種刻意。',
-    background: '/images/bg_ch1_restroom_v1.png',
+    background: '/images/bg_ch1_restroom_v1.webp',
     hotspots: [
       {
         id: 'hotspot_sink_below',
         shape: 'rect',
-        coords: [0.4, 0.5, 0.6, 0.7],
+        coords: [0.36, 0.5, 0.2, 0.18],
         description: '洗手台下方',
         hint: '在洗手台下方，你發現了一小片黑色塑膠。',
       },
       {
         id: 'hotspot_trash_bin',
         shape: 'rect',
-        coords: [0.2, 0.6, 0.4, 0.8],
+        coords: [0.18, 0.62, 0.16, 0.18],
         description: '垃圾桶',
         hint: '垃圾桶裡很乾淨，幾乎是空的。',
       },
       {
         id: 'hotspot_mirror',
         shape: 'rect',
-        coords: [0.6, 0.2, 0.9, 0.5],
+        coords: [0.7, 0.28, 0.2, 0.24],
         description: '鏡子',
         hint: '你在鏡子裡看見自己，和一個沒有留下痕跡的人。',
       },
       // 好笑無意義互動（廁所）
-      { id: 'hotspot_fun_dryer', shape: 'rect', coords: [0.08, 0.25, 0.22, 0.42], description: '烘手機', hint: '烘手機。' },
-      { id: 'hotspot_fun_soap', shape: 'rect', coords: [0.35, 0.35, 0.48, 0.48], description: '洗手乳', hint: '洗手乳是檸檬味。' },
-      { id: 'hotspot_fun_towel', shape: 'rect', coords: [0.72, 0.55, 0.88, 0.7], description: '擦手紙', hint: '擦手紙盒上寫著「一次取用一張」。' },
-      { id: 'hotspot_fun_sign', shape: 'rect', coords: [0.12, 0.55, 0.28, 0.72], description: '標語', hint: '牆上貼著「如廁後請沖水」。' },
-      { id: 'hotspot_fun_air_freshener', shape: 'rect', coords: [0.78, 0.15, 0.92, 0.28], description: '芳香劑', hint: '自動芳香劑。' },
-      { id: 'hotspot_fun_faucet', shape: 'rect', coords: [0.42, 0.72, 0.58, 0.88], description: '水龍頭', hint: '水龍頭。' },
-      { id: 'hotspot_fun_floor', shape: 'rect', coords: [0.5, 0.82, 0.7, 0.95], description: '地板反光', hint: '地板擦得很亮。' },
+      { id: 'hotspot_fun_dryer', shape: 'rect', coords: [0.05, 0.26, 0.12, 0.14], description: '烘手機', hint: '烘手機。' },
+      { id: 'hotspot_fun_soap', shape: 'rect', coords: [0.34, 0.36, 0.1, 0.1], description: '洗手乳', hint: '洗手乳是檸檬味。' },
+      { id: 'hotspot_fun_towel', shape: 'rect', coords: [0.76, 0.56, 0.12, 0.14], description: '擦手紙', hint: '擦手紙盒上寫著「一次取用一張」。' },
+      { id: 'hotspot_fun_sign', shape: 'rect', coords: [0.1, 0.58, 0.14, 0.14], description: '標語', hint: '牆上貼著「如廁後請沖水」。' },
+      { id: 'hotspot_fun_air_freshener', shape: 'rect', coords: [0.8, 0.14, 0.1, 0.12], description: '芳香劑', hint: '自動芳香劑。' },
+      { id: 'hotspot_fun_faucet', shape: 'rect', coords: [0.46, 0.76, 0.14, 0.14], description: '水龍頭', hint: '水龍頭。' },
+      { id: 'hotspot_fun_floor', shape: 'rect', coords: [0.54, 0.86, 0.16, 0.12], description: '地板反光', hint: '地板擦得很亮。' },
     ],
     items: [
       items.item_black_plastic_fragment,
@@ -1562,7 +1510,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch2',
     name: '公園',
     description: '夜晚的公園很安靜，安靜到你會以為，任何坐在這裡的人，都在等一個沒有來的人。',
-    background: '/images/bg_ch2_park_v1.png',
+    background: '/images/bg_ch2_park_v1.webp',
     hotspots: [
       {
         id: 'hotspot_park_bench',
@@ -1725,7 +1673,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch2',
     name: '辦公大樓',
     description: '這棟大樓沒有情緒，它只記錄進出。每一扇門、每一部電梯、每一個打卡機，都在記錄著時間和位置。',
-    background: '/images/bg_ch2_office_building_v1.png',
+    background: '/images/bg_ch2_office_building_v1.webp',
     hotspots: [
       {
         id: 'hotspot_visitor_log',
@@ -1884,7 +1832,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch2',
     name: '嫌犯 A 住所',
     description: '他的房間很乾淨，乾淨得像是隨時準備被檢查。每一樣東西都放在固定的位置，每一本書都按照某種邏輯排列。',
-    background: '/images/bg_ch2_suspect_a_residence_v1.png',
+    background: '/images/bg_ch2_suspect_a_residence_v1.webp',
     hotspots: [
       {
         id: 'hotspot_desk',
@@ -2076,7 +2024,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch3',
     name: '電影院 B',
     description: '電影院B的放映廳。這裡的散場時間與第一案的時間節奏接近。太接近了，像是刻意安排。',
-    background: '/images/bg_ch3_cinema_b_v1.png',
+    background: '/images/bg_ch3_cinema_b_v1.webp',
     hotspots: [
       {
         id: 'hotspot_screening_schedule_b',
@@ -2239,7 +2187,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch3',
     name: '電影院 C',
     description: '電影院C的放映廳。這裡有全自動燈控系統，準時亮燈，無法延後。但「準時」本身，也是一種可預測性。',
-    background: '/images/bg_ch3_cinema_c_v1.png',
+    background: '/images/bg_ch3_cinema_c_v1.webp',
     hotspots: [
       {
         id: 'hotspot_auto_light_system_c',
@@ -2408,7 +2356,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch3',
     name: '控制室・認同制度',
     description: '你認同制度，信任規則。',
-    background: '/images/bg_ch3_sc3_v1.png',
+    background: '/images/bg_ch3_sc3_v1.webp',
     hotspots: [
       {
         id: 'simulation',
@@ -2569,7 +2517,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch4',
     name: '地震後・程序開始動搖',
     description: '地震發生，程序開始出現壓力。',
-    background: '/images/bg_ch4_sc1_v1.png',
+    background: '/images/bg_ch4_sc1_v1.webp',
     hotspots: [
       {
         id: 'earthquake_alarm',
@@ -2753,7 +2701,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch4',
     name: '異物事件・規則與時間衝突',
     description: 'FME（異物防止）事件處理，規則與時間衝突。',
-    background: '/images/bg_ch4_sc2_v1.png',
+    background: '/images/bg_ch4_sc2_v1.webp',
     hotspots: [
       {
         id: 'foreign_object',
@@ -2953,7 +2901,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch4',
     name: '壓力點・自我說服',
     description: '自我說服，開始考慮捷徑。',
-    background: '/images/bg_ch4_sc3_v1.png',
+    background: '/images/bg_ch4_sc3_v1.webp',
     hotspots: [
       {
         id: 'consequence_table',
@@ -3102,7 +3050,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch5',
     name: '核心入口・承認兩套系統',
     description: '最嚴密、最神聖、最不可犯錯的地方。藍色光芒安靜地存在著。',
-    background: '/images/bg_ch5_sc1_v1.png',
+    background: '/images/bg_ch5_sc1_v1.webp',
     hotspots: [
       {
         id: 'formal_procedure',
@@ -3261,7 +3209,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch5',
     name: '核心操作・做出選擇',
     description: '做出選擇，行動。',
-    background: '/images/bg_ch5_sc2_v1.png',
+    background: '/images/bg_ch5_sc2_v1.webp',
     hotspots: [
       {
         id: 'operation_panel',
@@ -3385,7 +3333,7 @@ export const scenes: Record<string, Scene> = {
     chapterId: 'ch5',
     name: '後果・承擔',
     description: '承擔後果，完成「身份覆蓋」。',
-    background: '/images/bg_ch5_sc3_v1.png',
+    background: '/images/bg_ch5_sc3_v1.webp',
     hotspots: [
       {
         id: 'consequence_record_spot',
@@ -3522,7 +3470,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '死在散場之後的人',
       description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
       moodText: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，就是在正常裡動手。',
-      // backgroundImage: '/images/intro_ch1_bg.png', // 需要放置圖片
+      // backgroundImage: '/images/intro_ch1_bg.webp', // 需要放置圖片
       // 第一章導讀 BGM：置於 public/audio/bgm/kk_bgm_intro_ch1.mp3
       ambientAudio: '/audio/bgm/kk_bgm_intro_ch1.mp3',
       // 導讀影片：文字說明後播放的動畫影片
@@ -3545,7 +3493,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '第一個嫌犯 A',
       description: '一個「看起來很像兇手的人」。\n\n嫌犯 A 幾乎完美符合「動機想像」，卻在時間與行為上完全對不上。',
       moodText: '當一個人符合你想像中的「動機」，\n你會不會反而忽略「他根本來不及」？',
-      // backgroundImage: '/images/intro_ch2_bg.png', // 需要放置圖片
+      // backgroundImage: '/images/intro_ch2_bg.webp', // 需要放置圖片
       ambientAudio: '/audio/ambient/temple_intro.mp3',
     },
   },
@@ -3559,7 +3507,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '兩個電影院，一次機會',
       description: '你以為第二章是在排除嫌疑，其實只是替第三章鋪路。',
       moodText: '因為現在，世界不會等你慢慢想。\n\n如果你現在不選邊站，下一個人就會死。',
-      // backgroundImage: '/images/intro_ch3_bg.png', // 需要放置圖片
+      // backgroundImage: '/images/intro_ch3_bg.webp', // 需要放置圖片
       ambientAudio: '/audio/ambient/powerplant_intro.mp3',
     },
   },
@@ -3573,7 +3521,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '每個人都站在正確的位置',
       description: '嫌疑全面攤開、動機與能力同時對齊。',
       moodText: '如果一切都合理，那我到底在抓什麼？',
-      // backgroundImage: '/images/intro_ch4_bg.png', // 需要放置圖片
+      // backgroundImage: '/images/intro_ch4_bg.webp', // 需要放置圖片
       ambientAudio: '/audio/ambient/disaster_intro.mp3',
     },
   },
@@ -3587,7 +3535,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '抉擇',
       description: '城市沒有警鈴。沒有倒數。只有一場正常播放的電影，和一個你必須自己做出的決定。',
       moodText: '如果你錯了，沒有人會提醒你。\n\n如果你對了，也沒有人會恭喜你。\n\n因為這不是遊戲，這是選擇。',
-      // backgroundImage: '/images/intro_ch5_bg.png', // 需要放置圖片
+      // backgroundImage: '/images/intro_ch5_bg.webp', // 需要放置圖片
       ambientAudio: '/audio/ambient/core_intro.mp3',
     },
   },

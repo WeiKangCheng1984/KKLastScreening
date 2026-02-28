@@ -12,7 +12,7 @@ export const flowConfig: FlowConfig = {
     prologue_text: {
       id: 'prologue_text',
       type: 'prologue_text',
-      next: 'animation_1',
+      next: 'ch1_intro',
     },
     animation_1: {
       id: 'animation_1',

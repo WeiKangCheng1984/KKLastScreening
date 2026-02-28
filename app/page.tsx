@@ -79,10 +79,10 @@ export default function Home() {
         isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
       }`}>
         <h1 className="text-[2.7rem] md:text-[3.375rem] font-bold mb-6 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent animate-fade-float text-center" style={{ animationDelay: '0.1s' }}>
-          KK流程偵探 最後一場放映
+          KK流程偵探<br />最後一場放映
         </h1>
         <p className="text-lg text-orange-300/80 mb-8 animate-fade-float" style={{ animationDelay: '0.2s' }}>
-          凌晨 00:19，一通沒有顯示來電的電話。城市影城，散場後五分鐘，有人死在 H 排 12 號。散場的燈，延後三分鐘亮起——你不是警察，你是 KK。
+          不要凌晨 00:19，一通沒有顯示來電的電話。城市影城，散場後五分鐘，有人死在 H 排 12 號。散場的燈，延後三分鐘亮起，你不是警察，你只是 KK。
         </p>
         <button
           onClick={handleStartGame}

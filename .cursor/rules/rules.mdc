@@ -71,10 +71,10 @@ alwaysApply: true
 
 - **固定比例**：1:1（正方形）
 - **固定尺寸**：540×540px
-- **格式**：PNG
+- **格式**：WebP（優先；需透明或相容性時可用 PNG）
 - **單張大小上限**：≤ 250KB（超過就重壓或降畫質）
-- **命名**：`bg_ch{章}_sc{場}_v{版}.png`
-- **範例**：`bg_ch1_sc1_v1.png`（ROOM 1, SPACE 1, 版本1）
+- **命名**：`bg_ch{章}_sc{場}_v{版}.webp`
+- **範例**：`bg_ch1_sc1_v1.webp`（ROOM 1, SPACE 1, 版本1）
 
 ---
 
@@ -83,8 +83,8 @@ alwaysApply: true
 - **尺寸**：長邊 384px（需要更清楚才用 512px）
 - **格式**：需要透明用 PNG，一般用 WebP
 - **單張大小上限**：≤ 80KB（特寫可放寬到 120KB）
-- **命名**：`item_{id}_v{版}.webp` 或 `.png`
-- **範例**：`item_faded_photo_v1.png`
+- **命名**：`item_{id}_v{版}.webp`（優先）或 `.png`
+- **範例**：`item_faded_photo_v1.webp`
 
 ---
 
@@ -370,10 +370,10 @@ alwaysApply: true
 ## 【19】檔案命名規範
 
 ### 場景背景圖
-- `bg_ch{章}_sc{場}_v{版}.png`
+- `bg_ch{章}_sc{場}_v{版}.webp`
 
 ### 道具圖
-- `item_{id}_v{版}.webp` 或 `.png`
+- `item_{id}_v{版}.webp`（優先）或 `.png`
 
 ### 角色立繪／頭像
 - **WEBP（優先）**：`public/images/characters/{characterId}_{1|2|3}.webp`  

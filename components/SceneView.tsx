@@ -215,20 +215,21 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
   const getHotspotStyle = (hotspot: Hotspot): React.CSSProperties => {
     if (hotspot.shape === 'rect' && hotspot.coords.length >= 4) {
       const [x, y, width, height] = hotspot.coords;
-      // 計算中心點位置
+      // 計算中心點位置（圓心）
       const centerX = (x + width) / 2;
       const centerY = (y + height) / 2;
-      // 使用 clamp() 響應式大小：最小 40px，理想 4vw，最大 44px
-      // 手機端約 40px 剛好；桌面端不放大，維持與手機相近的點擊區
-      const responsiveSize = 'clamp(40px, 4vw, 44px)';
-      
+      // 圓形直徑：基礎尺寸 × (0.6 + 半徑比例)，讓 coords 的 width/height 影響圓的大小
+      const sizeFactor = 0.6 + (width + height) / 2 * 0.8; // 約 0.64 ~ 1.0
+      const responsiveSize = `calc(clamp(40px, 4vw, 44px) * ${sizeFactor})`;
+
       return {
         position: 'absolute',
         left: `${centerX * 100}%`,
         top: `${centerY * 100}%`,
         width: responsiveSize,
         height: responsiveSize,
-        transform: 'translate(-50%, -50%)', // 以中心點定位
+        borderRadius: '50%',
+        transform: 'translate(-50%, -50%)',
         cursor: 'pointer',
       };
     }
