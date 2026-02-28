@@ -1,6 +1,11 @@
 // 音效管理器
+
+/** 全遊戲統一 BGM：從開頭到結局同一首輪播，置於 public/audio/bgm/kk_bgm_title.mp3 */
+export const GAME_BGM = '/audio/bgm/kk_bgm_title.mp3';
+
 export class AudioManager {
   private ambientAudio: HTMLAudioElement | null = null;
+  private currentAmbientPath: string | null = null;
   private sfxCache: Map<string, HTMLAudioElement> = new Map();
   private masterVolume: number = 0.7;
   private sfxVolume: number = 0.8;
@@ -38,9 +43,15 @@ export class AudioManager {
         console.warn('無法播放環境音:', err);
       });
       this.ambientAudio = audio;
+      this.currentAmbientPath = audioPath;
     } catch (error) {
       console.warn('載入環境音失敗:', error);
     }
+  }
+
+  /** 目前正在播放的環境音路徑，若未播放則為 null */
+  getCurrentAmbientPath(): string | null {
+    return this.currentAmbientPath;
   }
 
   // 環境音漸變
@@ -119,6 +130,7 @@ export class AudioManager {
       this.ambientAudio.currentTime = 0;
       this.ambientAudio = null;
     }
+    this.currentAmbientPath = null;
   }
 
   // 設定音量

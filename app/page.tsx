@@ -3,26 +3,24 @@
 import { useRouter } from 'next/navigation';
 import { Play } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { audioManager } from '@/lib/audioManager';
+import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import MuteAllButton from '@/components/MuteAllButton';
-
-/** 開場 BGM：置於 public/audio/bgm/kk_bgm_title.mp3 */
-const BGM_TITLE = '/audio/bgm/kk_bgm_title.mp3';
 
 export default function Home() {
   const router = useRouter();
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // 方案一：全遊戲一首 BGM，開頭頁若尚未播放則播放，離開時不中斷
   useEffect(() => {
-    audioManager.playAmbient(BGM_TITLE, 0.4);
-    return () => {
-      audioManager.stopAmbient();
-    };
+    if (audioManager.getCurrentAmbientPath() !== GAME_BGM) {
+      audioManager.playAmbient(GAME_BGM, 0.4);
+    }
+    return () => {};
   }, []);
 
   const handleStartGame = () => {
     setIsTransitioning(true);
-    audioManager.stopAmbient();
+    // 不停止 BGM，讓音樂一路播到結局
     // 清除所有遊戲記憶
     if (typeof window !== 'undefined') {
       try {

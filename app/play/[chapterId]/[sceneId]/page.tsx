@@ -29,7 +29,7 @@ import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
 import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, ListOrdered, FlaskConical, Brain } from 'lucide-react';
 import Link from 'next/link';
-import { audioManager } from '@/lib/audioManager';
+import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import { chapters } from '@/data/chapters';
 import { getChapterData } from '@/data/getChapterData';
 import DeveloperPanel from '@/components/DeveloperPanel';
@@ -891,22 +891,18 @@ export default function PlayPage() {
     // 預載入當前場景
     preloadImage(currentScene.background);
     
-    // 預載入相鄰場景圖片（延遲載入，避免阻塞）
-    const timeoutId = setTimeout(() => {
-      const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
-      if (adjacentScenes.prev) {
-        const prevScene = scenes[adjacentScenes.prev];
-        if (prevScene) preloadImage(prevScene.background);
-      }
-      if (adjacentScenes.next) {
-        const nextScene = scenes[adjacentScenes.next];
-        if (nextScene) preloadImage(nextScene.background);
-      }
-    }, 500);
+    // 預載入相鄰場景圖片（立即載入，提升切換流暢度）
+    const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
+    if (adjacentScenes.prev) {
+      const prevScene = scenes[adjacentScenes.prev];
+      if (prevScene) preloadImage(prevScene.background);
+    }
+    if (adjacentScenes.next) {
+      const nextScene = scenes[adjacentScenes.next];
+      if (nextScene) preloadImage(nextScene.background);
+    }
     
-    return () => {
-      clearTimeout(timeoutId);
-    };
+    return () => {};
   }, [chapterId, sceneId]);
 
   // 統一的場景名稱顯示函數（必須在 useEffect 之前定義）
@@ -1185,61 +1181,13 @@ export default function PlayPage() {
     engineRef.current?.getCurrentScene() ||
     (sceneId && scenes[sceneId] ? scenes[sceneId] : null);
 
-  // 環境音：cleanup 延遲停止（給 Strict Mode 取消用）、目前播放路徑（同曲目不重播）
-  const ambientStopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastAmbientSceneIdRef = useRef<string | null>(null);
-  const currentAmbientPathRef = useRef<string | null>(null);
-
-  // 進入場景時播放環境音（帶漸變效果）- 以 URL 的 sceneId 為準
+  // 方案一：全遊戲一首 BGM，進入場景時若尚未播放則播放，切場景不中斷
   useEffect(() => {
     if (!sceneId) return;
-    
-    if (ambientStopTimeoutRef.current) {
-      clearTimeout(ambientStopTimeoutRef.current);
-      ambientStopTimeoutRef.current = null;
+    if (!audioManager.getCurrentAmbientPath()) {
+      audioManager.playAmbient(GAME_BGM, 0.4);
     }
-    
-    // 第一章場景 BGM：置於 public/audio/bgm/kk_bgm_ch1.mp3
-    const ch1BgmPath = '/audio/bgm/kk_bgm_ch1.mp3';
-    const ambientMap: Record<string, { path: string; volume: number }> = {
-      'scene_ch1_cinema_a_hall': { path: ch1BgmPath, volume: 0.7 },
-      'scene_ch1_projection_room': { path: ch1BgmPath, volume: 0.7 },
-      'scene_ch1_restroom': { path: ch1BgmPath, volume: 0.7 },
-    };
-    
-    const ambient = ambientMap[sceneId];
-    const isSameSceneReRun = lastAmbientSceneIdRef.current === sceneId;
-    lastAmbientSceneIdRef.current = sceneId;
-    
-    if (ambient) {
-      const isSameTrack = currentAmbientPathRef.current === ambient.path;
-      // 同一場景重跑（Strict Mode）：不重播
-      if (isSameSceneReRun) {
-        // 不做事，音樂繼續
-      } else if (isSameTrack) {
-        // 第一章三場景共用同一曲目：不 stop 不重播，只確保音量
-        audioManager.fadeAmbient(ambient.volume, 300);
-      } else {
-        // 新曲目：正常播放
-        currentAmbientPathRef.current = ambient.path;
-        audioManager.playAmbient(ambient.path, 0);
-        setTimeout(() => {
-          audioManager.fadeAmbient(ambient.volume, 1000);
-        }, 100);
-      }
-    }
-    
-    return () => {
-      if (!ambient) return;
-      ambientStopTimeoutRef.current = setTimeout(() => {
-        audioManager.fadeAmbient(0, 500);
-        ambientStopTimeoutRef.current = setTimeout(() => {
-          audioManager.stopAmbient();
-          currentAmbientPathRef.current = null;
-          ambientStopTimeoutRef.current = null;
-        }, 500);
-      }, 100);
-    };
+    return () => {};
   }, [sceneId]);
 
   // 觸發劇烈閃爍（廣播時使用）

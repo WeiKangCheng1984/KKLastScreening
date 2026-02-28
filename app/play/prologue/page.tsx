@@ -5,31 +5,24 @@ import { useState, useCallback, useEffect } from 'react';
 import { prologueSlides } from '@/data/chapters';
 import { getNextPath } from '@/data/flowConfig';
 import DialogBox from '@/components/DialogBox';
-import { audioManager } from '@/lib/audioManager';
+import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import MuteAllButton from '@/components/MuteAllButton';
 
 /** 序章背景圖：置於 public/images/prologue_bg.webp（建議尺寸 828×1284 或 1080×1920，直式） */
 const PROLOGUE_BG = '/images/prologue_bg.webp';
-/** 序章 BGM：置於 public/audio/bgm/kk_bgm_prologue.mp3 */
-const BGM_PROLOGUE = '/audio/bgm/kk_bgm_prologue.mp3';
 
 export default function ProloguePage() {
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // 方案一：若尚未播放 BGM 則播放（從書籤/直連進入時也有音樂），不中斷
   useEffect(() => {
-    audioManager.playAmbient(BGM_PROLOGUE, 0.4);
-    return () => {
-      audioManager.stopAmbient();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isTransitioning) {
-      audioManager.stopAmbient();
+    if (!audioManager.getCurrentAmbientPath()) {
+      audioManager.playAmbient(GAME_BGM, 0.4);
     }
-  }, [isTransitioning]);
+    return () => {};
+  }, []);
 
   const handleContinue = useCallback(() => {
     if (currentSlide < prologueSlides.length - 1) {

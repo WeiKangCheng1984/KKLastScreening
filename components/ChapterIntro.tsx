@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Play, ChevronLeft, ChevronRight, RotateCcw, Pause } from 'lucide-react';
 import { ChapterIntro as ChapterIntroType } from '@/types/game';
-import { audioManager } from '@/lib/audioManager';
+import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import { getChapterIntroContinuePath } from '@/data/flowConfig';
+import { scenes as scenesMap } from '@/data/gameData';
 import FadeIn from './animations/FadeIn';
 import SlideIn from './animations/SlideIn';
 import ParticleEffect from './animations/ParticleEffect';
@@ -39,11 +40,34 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
   // 第一章動畫已於 /play/animation 播放，導讀頁不再重複播影片
   const introVideo = isChapter1 ? undefined : chapter.intro.introVideo;
 
+  // 方案二：導讀頁預載該章第一個場景背景圖，點「開始探索」時已進快取
+  useEffect(() => {
+    const firstSceneId = chapter.scenes?.[0];
+    if (!firstSceneId) return;
+    const firstScene = scenesMap[firstSceneId];
+    const bg = firstScene?.background;
+    if (!bg) return;
+
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = bg;
+    document.head.appendChild(link);
+    const img = new Image();
+    img.onload = () => {
+      if (link.parentNode) document.head.removeChild(link);
+    };
+    img.onerror = () => {
+      if (link.parentNode) document.head.removeChild(link);
+    };
+    img.src = bg;
+  }, [chapter.scenes]);
+
   // 分層顯示動畫 - 第一章快速呈現，其他章節正常速度
   useEffect(() => {
-    // 播放環境音（如果有）
-    if (chapter.intro.ambientAudio) {
-      audioManager.playAmbient(chapter.intro.ambientAudio, 0.5);
+    // 方案一：若尚未播放 BGM 則播放，離開時不中斷
+    if (!audioManager.getCurrentAmbientPath()) {
+      audioManager.playAmbient(GAME_BGM, 0.5);
     }
 
     if (isChapter1) {
@@ -57,9 +81,6 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
 
       return () => {
         timers.forEach(clearTimeout);
-        if (chapter.intro.ambientAudio) {
-          audioManager.stopAmbient();
-        }
       };
     } else {
       // 其他章節：正常速度
@@ -72,12 +93,9 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
 
       return () => {
         timers.forEach(clearTimeout);
-        if (chapter.intro.ambientAudio) {
-          audioManager.stopAmbient();
-        }
       };
     }
-  }, [chapter.intro.ambientAudio, isChapter1]);
+  }, [isChapter1]);
 
   const handleContinue = () => {
     // 如果有導讀影片且尚未播放，先播放影片
@@ -107,10 +125,7 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
       localStorage.setItem(`chapter_${chapter.id}_intro_seen`, 'true');
     }
     
-    // 停止環境音
-    if (chapter.intro.ambientAudio) {
-      audioManager.stopAmbient();
-    }
+    // 不停止 BGM，讓音樂持續到結局
     
     // 由流程設定決定：ch1 進第一景，ch2 進 hub 等
     const nextPath = getChapterIntroContinuePath(chapter.id) || `/play/${chapter.id}/${chapter.scenes[0]}`;

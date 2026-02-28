@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { audioManager } from '@/lib/audioManager';
 import { lightingManager, LightSource } from '@/lib/lightingManager';
 import { getAnimationQuality, isMobileDevice } from '@/lib/performanceUtils';
-import HoverGlow from './effects/HoverGlow';
 import RippleEffect from './effects/RippleEffect';
 
 interface SceneViewProps {
@@ -273,9 +272,8 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
         )}
       </div>
 
-      {/* Hotspots */}
+      {/* Hotspots - 方案一：完全隱藏，僅點擊/觸控當下有回饋（無 hover 提示、無游標變化） */}
       {scene.hotspots.map(hotspot => {
-        const isHovered = hoveredHotspot === hotspot.id;
         const isClicked = clickedHotspot === hotspot.id;
         
         return (
@@ -287,11 +285,10 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
             onMouseLeave={() => setHoveredHotspot(null)}
             className={`
               transition-all duration-200 gpu-accelerated rounded-full
-              ${debug ? 'border-4 border-orange-500 bg-orange-500/40' : 'border border-white/30 bg-white/5'}
-              ${isHovered && !debug ? 'bg-white/10 border-white/50 shadow-lg shadow-white/20 scale-105' : ''}
-              ${isClicked ? 'bg-white/15 border-white/60 scale-95' : ''}
+              ${debug ? 'border-4 border-orange-500 bg-orange-500/40 cursor-pointer' : 'border-transparent bg-transparent cursor-default'}
+              ${isClicked && debug ? 'bg-white/15 border-white/60 scale-95' : ''}
             `}
-            title={debug ? `${hotspot.id}: ${hotspot.description || ''}` : hotspot.hint}
+            title={debug ? `${hotspot.id}: ${hotspot.description || ''}` : ''}
           >
             {/* Debug 標籤 */}
             {debug && (
@@ -300,27 +297,7 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
               </div>
             )}
 
-            {/* Hover 提示浮動標籤 - 縮小50% */}
-            {isHovered && !debug && hotspot.hint && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-1.5 py-0.75 bg-orange-950/95 backdrop-blur-md border border-orange-700/50 rounded text-[10px] leading-tight text-orange-100 whitespace-nowrap shadow-lg z-50 pointer-events-none animate-fade-float">
-                {hotspot.hint}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                  <div className="w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-orange-700/50"></div>
-                </div>
-              </div>
-            )}
-
-            {/* 懸停發光效果 */}
-            {isHovered && !debug && (
-              <HoverGlow
-                isActive={true}
-                intensity="medium"
-                color="#fb923c"
-                size={80}
-              />
-            )}
-
-            {/* 點擊波紋效果 - 使用 RippleEffect 組件 */}
+            {/* 點擊波紋效果 - 點擊當下唯一視覺回饋 */}
             {showRipple && ripplePosition && ripplePosition.hotspotId === hotspot.id && (
               <RippleEffect
                 show={true}
@@ -329,16 +306,6 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
                 duration={600}
                 size={120}
               />
-            )}
-
-            {/* 可互動脈衝效果 - 簡化版（保留微弱的提醒效果） */}
-            {!debug && (
-              <>
-                {/* 外層脈衝動畫 - 非常微弱的向外擴散 */}
-                <div className="absolute inset-[-6px] border border-white/10 rounded-full animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
-                {/* 中心發光點 - 非常微弱（白色） */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/30 rounded-full opacity-40"></div>
-              </>
             )}
           </div>
         );

@@ -268,7 +268,7 @@ export const scenes: Record<string, Scene> = {
       {
         id: 'hotspot_victim_seat',
         shape: 'rect',
-        coords: [0.44, 1.62, 0.2, 0.22],
+        coords: [0.44, 1.45, 0.2, 0.22],
         description: '死者座位',
         hint: 'H 排 12 號。散場後唯一沒有站起來的那個位子。',
       },
