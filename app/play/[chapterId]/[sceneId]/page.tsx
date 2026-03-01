@@ -500,6 +500,7 @@ export default function PlayPage() {
       if (npcId === 'npc_ashun') engine.applyEffect({ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true });
       if (npcId === 'npc_xiaozhang') engine.applyEffect({ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true });
       if (npcId === 'npc_zhou_jie') engine.applyEffect({ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true });
+      // npc_asu: flag 由對話樹結尾 setFlag 設定，不在此預設
       engine.startNpcDialog(npcId, nodeId);
       const node = engine.getCurrentNpcDialogNode();
       if (node) {
@@ -515,6 +516,7 @@ export default function PlayPage() {
     if (choice.id === 'ashun_sensitive_skip') { closeAndRandom('npc_ashun'); return; }
     if (choice.id === 'xiaozhang_sensitive_skip') { closeAndRandom('npc_xiaozhang'); return; }
     if (choice.id === 'zhou_sensitive_skip') { closeAndRandom('npc_zhou_jie'); return; }
+    if (choice.id === 'asu_sensitive_skip') { closeAndRandom('npc_asu'); return; }
 
     // 問敏感 → 第二層：選哪一條
     if (choice.id === 'lin_sensitive_ask') {
@@ -545,6 +547,13 @@ export default function PlayPage() {
       ]});
       return;
     }
+    if (choice.id === 'asu_sensitive_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_asu', text: '你只能挑一個方向追問。問了，另外一個今晚就只能留在心裡。', choices: [
+        { id: 'asu_branch_1', text: '我想問：妳為什麼會牽扯進這些事故？妳跟兩年前的樓梯間，跟他，到底是什麼關係？' },
+        { id: 'asu_branch_2', text: '我想問：「三起事故」這句話在妳眼裡，是威脅、是計畫，還是某種妳很熟悉的分類方式？' },
+      ]});
+      return;
+    }
 
     // 選定敏感題目 → 進入 NPC 對話樹
     if (choice.id === 'lin_branch_light') { closeAndStartBranch('npc_lin_ruitang', 'node_lin_light_1'); return; }
@@ -571,6 +580,8 @@ export default function PlayPage() {
       }
       return;
     }
+    if (choice.id === 'asu_branch_1') { closeAndStartBranch('npc_asu', 'node_asu_sensitive1_1'); return; }
+    if (choice.id === 'asu_branch_2') { closeAndStartBranch('npc_asu', 'node_asu_sensitive2_1'); return; }
   }, [sensitiveGate, buildDialogFromNpcNode]);
 
   // 處理對話選擇
@@ -2641,6 +2652,42 @@ export default function PlayPage() {
                   if (dialogZhou) {
                     engine.incrementNpcCasualTalk(npcId);
                     setCurrentDialog(dialogZhou);
+                  }
+                  return;
+                }
+
+                if (npcId === 'npc_asu') {
+                  const casualCount = engine.getNpcCasualTalkCount('npc_asu');
+                  const sensitiveDone = !!flags.npc_asu_sensitive_done;
+                  const inv = st?.inventory ?? [];
+                  const hasVictimInfo = inv.includes('item_victim_basic_info');
+                  const hasEncryptedAndDraft = inv.includes('item_encrypted_messages') && inv.includes('item_column_draft');
+                  const canAskSensitive = hasVictimInfo || hasEncryptedAndDraft;
+
+                  if (sensitiveDone) {
+                    const dialog = engine.triggerRandomNpcDialog(npcId);
+                    if (dialog) {
+                      engine.incrementNpcCasualTalk(npcId);
+                      setCurrentDialog(dialog);
+                    }
+                    return;
+                  }
+                  if (casualCount >= 3 && canAskSensitive) {
+                    setSensitiveGate({
+                      step: 'ask_or_skip',
+                      npcId: 'npc_asu',
+                      text: '妳覺得氣氛已經沉到一個程度，可以試著往深一點問。',
+                      choices: [
+                        { id: 'asu_sensitive_ask', text: '我想問一些比較敏感的問題。' },
+                        { id: 'asu_sensitive_skip', text: '先看資料就好，暫時不問。' },
+                      ],
+                    });
+                    return;
+                  }
+                  const dialogAsu = engine.triggerRandomNpcDialog(npcId);
+                  if (dialogAsu) {
+                    engine.incrementNpcCasualTalk(npcId);
+                    setCurrentDialog(dialogAsu);
                   }
                   return;
                 }

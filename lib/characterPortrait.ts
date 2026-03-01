@@ -50,6 +50,7 @@ export const NPC_PORTRAIT_IDS = [
   'npc_ashun',
   'npc_xiaozhang',
   'npc_zhou_jie',
+  'npc_asu',
   'kitchen_voice',
   'shadow_person',
   'bedroom_shadow',

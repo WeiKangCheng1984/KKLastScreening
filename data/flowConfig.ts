@@ -31,17 +31,29 @@ export const flowConfig: FlowConfig = {
     ch2_intro: {
       id: 'ch2_intro',
       type: 'chapter_intro',
-      next: 'ch2_hub',
+      next: 'ch2_explore',
       chapterId: 'ch2',
+    },
+    ch2_explore: {
+      id: 'ch2_explore',
+      type: 'scene_explore',
+      next: 'ch3_intro',
+      chapterId: 'ch2',
+      sceneIds: ['scene_ch2_park', 'scene_ch2_asu_car'],
+    },
+    ch3_intro: {
+      id: 'ch3_intro',
+      type: 'chapter_intro',
+      next: '',
+      chapterId: 'ch3',
     },
     ch2_hub: {
       id: 'ch2_hub',
       type: 'chapter_hub',
       chapterId: 'ch2',
       choices: [
-        { id: 'scene_ch2_park', label: '公園', sceneId: 'scene_ch2_park' },
-        { id: 'scene_ch2_office_building', label: '辦公大樓', sceneId: 'scene_ch2_office_building' },
-        { id: 'scene_ch2_suspect_a_residence', label: '嫌犯A住所', sceneId: 'scene_ch2_suspect_a_residence' },
+        { id: 'scene_ch2_park', label: '城市影城外 公園', sceneId: 'scene_ch2_park' },
+        { id: 'scene_ch2_asu_car', label: '阿蘇的車裡', sceneId: 'scene_ch2_asu_car' },
       ],
     },
   },

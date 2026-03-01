@@ -68,7 +68,57 @@ export const items: Record<string, Item> = {
     collectible: true,
   },
 
-  // 第二章：城市碎片（嫌犯 A）
+  // 第二章：死者是誰（受害者手機解密線索）
+  'item_victim_basic_info': {
+    id: 'item_victim_basic_info',
+    name: '受害者基礎資料（吳亞／烏鴉）',
+    description: '死者姓名：吳亞，綽號「烏鴉」。\n\n職業：專欄作家，長期撰寫城市治理、公共建設、企業黑箱等議題。\n他習慣用化名和代稱寫東西，專欄裡很少出現完整機構名稱，但熟悉圈內的人看了都知道在指哪幾家。\n近期專欄多次提到「節能設備」、「外包驗收」、「安全與數字交換」。\n在媒體圈小有名氣，也小有仇人，留言區一半讚、一半罵。',
+    svgImage: '/svg/items/visitor_log.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
+  'item_encrypted_messages': {
+    id: 'item_encrypted_messages',
+    name: '加密訊息紀錄（部分解碼）',
+    description: '從一個標記為「Unknown」的對話窗中還原出的片段：\n「……為什麼不把資訊完……」\n「……用三起事故來揭……」\n「……她也在場，你確定要這樣寫？」\n\n其餘訊息多為亂碼或遺失。時間戳集中在命案前一週。\n無法分辨誰發出、誰回覆，只知道這不是一般閒聊。\n「她」是誰、到底在場的是誰，暫時只能當成一個刻意被留在那裡的鉤子。',
+    svgImage: '/svg/items/projector_notes.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
+  'item_column_draft': {
+    id: 'item_column_draft',
+    name: '專欄草稿片段（節能設備）',
+    description: '記事本 App 裡的未發表草稿。標題：「節能設備，誰省了電，誰省了責任？」\n\n草稿指出：新導入的影城節能設備，不只調整照明與空調，更會改變「散場的節奏、逃生路線的亮暗、紀錄檔案的寫入方式」。\n文中對某些配合廠商用字含糊，句子像故意留下空格：「有一部分的人，比較擅長把事故變成『改善提案』。」\n末段停在：「如果我要談這件事，得從兩年前的某個樓梯間開始。」\n草稿未送出，顯示最後編輯時間在命案前兩天。',
+    svgImage: '/svg/items/schedule_modified.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
+  'item_unfinished_recording': {
+    id: 'item_unfinished_recording',
+    name: '未完成錄音（備忘_事故）',
+    description: '錄音檔案標題為「備忘_事故」。\n\n內容提到：\n「……他們一直說那是個案。可是結案報告有兩個版本，一個給內部、一個給外面……」\n之後被中斷。錄製時間落在命案前一晚。\n聲音刻意經過處理，像怕被辨識出來。\n這段錄音證明：烏鴉已經接觸到過去事故被「改寫」的證據，也知道「誰看哪一個版本」。',
+    svgImage: '/svg/items/recorder.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
+  'item_coded_contacts': {
+    id: 'item_coded_contacts',
+    name: '代號聯絡人',
+    description: '受害者通訊錄中的幾個特殊聯絡人：\n\n「城市影城W」：備註為「影廳見」，最近一次通話在命案當晚前不久。\n「聯合影城C」：備註「表單／審查」，通話多集中在節能設備導入的時期。\n「光芒影城R」：備註寫著「梯間／試行」，通話記錄集中在兩年前某段時間與最近幾週。\n\n這些名字不屬於一般社交，更像是他自己的調查用代稱，把人當作流程節點記錄。',
+    svgImage: '/svg/items/visitor_log.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
+  'item_location_record': {
+    id: 'item_location_record',
+    name: '行蹤紀錄（定位）',
+    description: '警方提供的定位紀錄顯示：\n命案前一週，吳亞頻繁往返幾家影城、設備商辦公室和一棟老舊商務大樓。\n那棟老樓的 GPS 訊號時常跳點，定位圖上出現一堆重疊的小圓點，像系統也不太想記住那個地方。\n命案當晚，他提前抵達城市影城附近，停留時間超過兩小時，路線軌跡在影城周圍畫出一圈又一圈。\n這些行程和他草稿裡提到的「節能設備」與「樓梯間」高度重疊，卻又沒有任何正式行程紀錄可以對得上。',
+    svgImage: '/svg/items/schedule_modified.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
+
+  // 第二章：城市碎片（嫌犯 A）— 以下保留供他章使用
   'item_recorder': {
     id: 'item_recorder',
     name: '錄音筆',
@@ -499,7 +549,7 @@ export const scenes: Record<string, Scene> = {
       {
         id: 'npc_ashun',
         name: '阿順（巡場保全）',
-        portrait: '/svg/characters/ashun.svg',
+        portrait: '/svg/characters/asu.svg',
         randomDialogs: [
           {
             id: 'casual_1',
@@ -1504,171 +1554,448 @@ export const scenes: Record<string, Scene> = {
     ],
   },
   
-  // ========== 第二章：城市碎片（嫌犯 A） ==========
-  // 可探索空間一：公園（公開空間）
+  // ========== 第二章：死者是誰 ==========
+  // 場景一：城市影城外 公園
   'scene_ch2_park': {
     id: 'scene_ch2_park',
     chapterId: 'ch2',
-    name: '公園',
-    description: '夜晚的公園很安靜，安靜到你會以為，任何坐在這裡的人，都在等一個沒有來的人。',
+    name: '城市影城外 公園',
+    description: '路燈偏黃，照在被踩皺的影城傳單上，紙邊翹起。長椅木板有舊雨痕、鞋底磨白的刮痕，還留著一個被煙頭燙過的小洞，像誰在等人的時候把耐心壓成灰。遠處仍看得到「城市影城」的招牌。風一陣一陣吹，爆米花油味跟冷空氣裡的清潔劑味糾纏，像兩種證詞互相搶話。',
     background: '/images/bg_ch2_park_v1.webp',
     hotspots: [
-      {
-        id: 'hotspot_park_bench',
-        shape: 'rect',
-        coords: [0.3, 0.4, 0.6, 0.6],
-        description: '長椅',
-        hint: '長椅的一側被坐得特別塌，像是有人固定坐在同一個位置。',
-      },
-      {
-        id: 'hotspot_park_trash',
-        shape: 'rect',
-        coords: [0.5, 0.6, 0.7, 0.8],
-        description: '垃圾桶',
-        hint: '垃圾桶裡很乾淨，但底部有一支錄音筆。',
-      },
-      {
-        id: 'hotspot_park_cigarette_butts',
-        shape: 'rect',
-        coords: [0.1, 0.5, 0.3, 0.7],
-        description: '地上的煙蒂',
-        hint: '地上散落著幾根煙蒂，但排列很奇怪。',
-      },
-      {
-        id: 'hotspot_park_streetlight',
-        shape: 'rect',
-        coords: [0.7, 0.1, 0.9, 0.3],
-        description: '路燈',
-        hint: '路燈亮得很準時，沒有人能延後它。',
-      },
+      { id: 'hotspot_park_bench', shape: 'rect', coords: [0.3, 0.4, 0.5, 0.35], description: '公園長椅', hint: '長椅上有舊雨痕、踩黑的煙頭和刮痕。' },
+      { id: 'hotspot_park_flyer', shape: 'rect', coords: [0.15, 0.55, 0.35, 0.25], description: '地上的影城傳單', hint: '傳單被鞋跟踩到紙纖維起毛。' },
+      { id: 'hotspot_park_cup', shape: 'rect', coords: [0.5, 0.6, 0.25, 0.22], description: '垃圾桶裡的紙杯', hint: '杯壁上有用油性筆寫的字：「烏」。' },
+      { id: 'hotspot_park_sign', shape: 'rect', coords: [0.65, 0.08, 0.3, 0.25], description: '遠處的影城招牌', hint: '「城市影城」四個字還亮著。' },
+      { id: 'hotspot_park_phone', shape: 'rect', coords: [0.72, 0.35, 0.22, 0.2], description: '手機通知列', hint: '警方傳來新訊息。' },
+      { id: 'hotspot_park_vending', shape: 'rect', coords: [0.08, 0.25, 0.2, 0.35], description: '自動販賣機', hint: '閃著飲料燈箱的販賣機。' },
+      { id: 'hotspot_park_cat', shape: 'rect', coords: [0.45, 0.72, 0.22, 0.18], description: '流浪貓', hint: '長椅底下有一隻貓。' },
+      { id: 'hotspot_park_signboard', shape: 'rect', coords: [0.08, 0.65, 0.25, 0.2], description: '公園告示牌', hint: '生鏽的告示牌上寫著「夜間請降低音量」。' },
     ],
-    items: [
-      items.item_recorder,
-    ],
+    items: [],
     hotspotEventMap: {
       'hotspot_park_bench': 'examine_park_bench',
-      'hotspot_park_trash': 'examine_park_trash',
-      'hotspot_park_cigarette_butts': 'examine_cigarette_butts',
-      'hotspot_park_streetlight': 'examine_streetlight',
+      'hotspot_park_flyer': 'examine_park_flyer',
+      'hotspot_park_cup': 'examine_park_cup',
+      'hotspot_park_sign': 'examine_park_sign',
+      'hotspot_park_phone': 'examine_park_phone',
+      'hotspot_park_vending': 'examine_park_vending',
+      'hotspot_park_cat': 'examine_park_cat',
+      'hotspot_park_signboard': 'examine_park_signboard',
     },
     events: [
       {
         id: 'examine_park_bench',
-        name: '檢查長椅',
-        description: '你檢查長椅。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_park_bench' },
-        ],
+        name: '公園長椅',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_park_bench' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '幾道淺白痕，方向朝影城。像有人站起來又坐下，反覆練習「走」這件事。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_park_flyer',
+        name: '地上的影城傳單',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_park_flyer' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '標題是「節能新世代設備導入」。內文像公關稿，照片亮得過曝，觀眾的臉糊成白。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_park_cup',
+        name: '垃圾桶裡的紙杯',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_park_cup' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '剩一圈融冰；杯蓋裂了一道小縫。杯身被人寫過字，像只來得及寫出一個開頭就收筆——你看不出那是「烏」、還是「U」。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_park_sign',
+        name: '遠處的影城招牌',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_park_sign' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '「城市影城」四個字還亮著，招牌邊緣有幾顆燈泡忽明忽暗。\n\n風一吹，晃動的樹影剛好遮住 H 那個字，像有人在這一夜刻意把字母藏起來。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_park_phone',
+        name: '手機通知列',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_park_phone' }],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '長椅的一側被坐得特別塌，像是有人固定坐在同一個位置。\n\n木質表面已經被磨得光滑，留下了時間的痕跡。\n這個位置正對著公園入口，可以看到所有進出的人。',
+              text: '手機震動在你手心敲了一下。\n\n「局內技術組已完成部分解密，請 KK 協助內容判讀。」\n\n公園沒什麼聲音，這行字顯得特別吵。\n\n風又吹了一次。你聽到車門關上的聲音，像有人把夜色扣上扣環。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'clue_suspect_a_habit_spot', value: true },
+          { type: 'setFlag', flag: 'victim_phone_decrypt_ready', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'examine_park_trash',
-        name: '檢查垃圾桶',
-        description: '你檢查垃圾桶，發現錄音筆。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_park_trash' },
-          { type: 'hasFlag', flag: 'clue_suspect_a_habit_spot', value: true },
+        id: 'examine_park_vending',
+        name: '自動販賣機',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_park_vending' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '螢幕輪播「加十元升級大杯」，每次切圖都會發出一聲很輕的嗶，像在提醒你：夜晚還有選項。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_park_cat',
+        name: '流浪貓',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_park_cat' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '尾巴慢慢晃，眼睛在陰影裡反光。牠對垃圾桶那杯飲料聞一下就走，像在表示：人類的線索太甜。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_park_signboard',
+        name: '公園告示牌',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_park_signboard' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '生鏽寫著「夜間請降低音量」。今晚大家很配合，除了手機通知。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+    ],
+    puzzles: [],
+    initialDialog: {
+      text: '警方把一個死人的生活拆成附件，發給你。\n\n標題冷冰冰——「城市影城H12_受害人手機_部分解密」。\n旁邊多了一句：「工程師阿蘇會到場協助判讀。」\n\n你一向先看現場，再看名字。這次順序顛倒。名字藏在訊息裡，像有人把他活過的每一天倒帶，倒到你面前，要求你把那卷帶子看完。\n\n真正黏人的問題，除了「他是誰」，還有：「他究竟戳到了哪一層，才會被這樣收場？」',
+      type: 'narrator',
+    },
+    npcs: [
+      {
+        id: 'npc_asu',
+        name: '阿蘇（工程師）',
+        portrait: '/svg/characters/asu.svg',
+        randomDialogs: [
+          { id: 'asu_casual_1', text: '「你看這些訊息，像威脅，又有一點像兩個人在互相拗稿。」', type: 'casual', weight: 3 },
+          { id: 'asu_casual_2', text: '「工程系的人最怕兩種人，一種是什麼都不懂，一種是懂太多還故意裝不知道。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_3', text: '「他把影城寫進專欄，結果人被留在影城裡。這種對稱，很難說是巧合。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_4', text: '「節能設備本來是好東西啊，省電、省錢，所有簡報都這樣寫。可是一旦有人發現它可以順便省掉責任，就會開始長得怪怪的。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_5', text: '「系統通常比人老實，可是設計系統的人不一定。這點我很有資格抱怨。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_6', text: '「他給聯絡人取名字的方式很工程師，全部用代碼。其實這種人死掉，調查起來很煩，卻也比較有路徑可以追。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_7', text: '「『三起事故』這個說法，很熟。寫技術文件的人才會把東西分成一、二、三這樣。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_8', text: '「如果你把這些聊天紀錄當成八卦，它們就只會變成八卦；你把它們當線路，它們才會開始帶電。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_9', text: '「有時候我覺得他很像一個沒受過訓練的工程師，把城市當機房亂摸。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_10', text: '「喔對，我有回過他的信，只是回得很不耐煩。沒想到…」\n她話說到一半停住，手指在方向盤上敲了兩下。', type: 'casual', weight: 2 },
         ],
+        available: true,
+      },
+    ],
+  },
+
+  // 場景二：阿蘇的車裡
+  'scene_ch2_asu_car': {
+    id: 'scene_ch2_asu_car',
+    chapterId: 'ch2',
+    name: '阿蘇的車裡',
+    description: '小型掀背車停在路邊。後座堆著筆電包、工具箱、幾卷網路線，半掩拉鍊露出纏在一起的線頭，像一團被放棄的脈絡。前座兩杯便利商店咖啡喝到一半，杯口印著溫度警語，咖啡香早就冷掉，只剩苦味在車內打轉。儀表板被手機螢幕映出淡藍光，像這台車也在做夢。',
+    background: '/images/bg_ch2_park_v1.webp',
+    hotspots: [
+      { id: 'hotspot_car_phone_main', shape: 'rect', coords: [0.35, 0.25, 0.35, 0.35], description: '受害者手機主畫面', hint: '桌布是一張城市夜景，聯絡人顯示吳亞。' },
+      { id: 'hotspot_car_unknown_chat', shape: 'rect', coords: [0.25, 0.38, 0.5, 0.2], description: '通訊紀錄 Unknown', hint: '聊天視窗多數訊息被標成亂碼。' },
+      { id: 'hotspot_car_an_chat', shape: 'rect', coords: [0.25, 0.6, 0.5, 0.15], description: '通訊紀錄 An', hint: '聯絡人名稱：「An」，頭像是一杯拿鐵拉花。' },
+      { id: 'hotspot_car_notepad', shape: 'rect', coords: [0.72, 0.3, 0.22, 0.25], description: '記事本筆記_未發表', hint: '未發表的草稿。' },
+      { id: 'hotspot_car_recording', shape: 'rect', coords: [0.72, 0.58, 0.22, 0.2], description: '錄音備忘_事故', hint: '播放鍵按下去，車內多了一個被刻意壓低處理過的男人聲音。' },
+      { id: 'hotspot_car_contacts', shape: 'rect', coords: [0.08, 0.35, 0.2, 0.25], description: '聯絡人列表', hint: '城市影城W、聯合影城C、光芒影城R。' },
+      { id: 'hotspot_car_location', shape: 'rect', coords: [0.08, 0.65, 0.2, 0.22], description: '系統定位紀錄', hint: '定位紀錄像是一張被畫滿螢光筆的城市地圖。' },
+      { id: 'hotspot_car_toolbox', shape: 'rect', coords: [0.75, 0.78, 0.2, 0.15], description: '後座工具箱', hint: '打不開，只能看見上面的貼紙。' },
+      { id: 'hotspot_car_coffee', shape: 'rect', coords: [0.4, 0.72, 0.2, 0.18], description: '便利商店咖啡杯', hint: '杯子上用油性筆寫著「A」和「K」。' },
+      { id: 'hotspot_car_charm', shape: 'rect', coords: [0.5, 0.05, 0.15, 0.15], description: '車上吊飾', hint: '後視鏡上掛著一個像素風電路板造型吊飾。' },
+    ],
+    items: [
+      items.item_victim_basic_info,
+      items.item_encrypted_messages,
+      items.item_column_draft,
+      items.item_unfinished_recording,
+      items.item_coded_contacts,
+      items.item_location_record,
+    ],
+    hotspotEventMap: {
+      'hotspot_car_phone_main': 'examine_car_phone_main',
+      'hotspot_car_unknown_chat': 'examine_car_unknown_chat',
+      'hotspot_car_an_chat': 'examine_car_an_chat',
+      'hotspot_car_notepad': 'examine_car_notepad',
+      'hotspot_car_recording': 'examine_car_recording',
+      'hotspot_car_contacts': 'examine_car_contacts',
+      'hotspot_car_location': 'examine_car_location',
+      'hotspot_car_toolbox': 'examine_car_toolbox',
+      'hotspot_car_coffee': 'examine_car_coffee',
+      'hotspot_car_charm': 'examine_car_charm',
+    },
+    events: [
+      {
+        id: 'examine_car_phone_main',
+        name: '受害者手機主畫面',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_phone_main' }],
         effects: [
-          { type: 'addItem', itemId: 'item_recorder' },
+          { type: 'addItem', itemId: 'item_victim_basic_info' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：錄音筆\n\n垃圾桶裡很乾淨，但底部有一支錄音筆。\n\n黑色的外殼，看起來很新。\n像是被人刻意丟棄，但又放在一個容易被發現的位置。',
+              text: '獲得：受害者基礎資料\n\n桌布是一張城市夜景，構圖歪了一點。街口有個模糊人影，臉被移動殘影拉長，看不出是誰。\n\n解鎖後，聯絡人卡片浮出名字：「吳亞」。備註欄寫著：「烏鴉」。',
               type: 'item',
             },
           },
           {
             type: 'showDialog',
             dialog: {
-              text: '內容（可播放）：\n「我不是恨她。\n我只是討厭，\n散場後那種被留下來的感覺。\n\n電影結束了，所有人都走了。\n只有你，還坐在那裡。\n等著一個不會來的人。」',
+              text: '阿蘇瞟一眼，像不小心承認自己有在看新聞：\n\n「專欄作家。你知道那種人，字比睡眠多。」\n「之前寫過捷運外包驗收那篇……轉很兇。」\n「他不寫完整機構名，卻很會讓人對號入座。」\n「圈內人看得懂，圈外人只覺得他在陰陽怪氣。」\n\n她說完又縮回螢幕前，像剛才那句話會留下指紋。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'recorder_found', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'examine_cigarette_butts',
-        name: '檢查地上的煙蒂',
-        description: '你檢查地上的煙蒂。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_park_cigarette_butts' },
-        ],
+        id: 'examine_car_unknown_chat',
+        name: '通訊紀錄 Unknown',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_unknown_chat' }],
         effects: [
+          { type: 'addItem', itemId: 'item_encrypted_messages' },
           {
             type: 'showDialog',
             dialog: {
-              text: '地上散落著幾根煙蒂，但排列很奇怪。\n\n它們不是隨意丟棄的，而是被刻意擺放。\n像是有人想要留下痕跡，但又不想留下自己的痕跡。',
+              text: '獲得：加密訊息紀錄\n\n聊天視窗裡多數訊息被標成亂碼或「無法還原」。幾行殘破文字像從碎紙機裡撈起來：\n\n「……為什麼不把資訊完……」\n「……用三起事故來揭……」\n「……她也在場，你確定要這樣寫？」\n\n時間戳落在命案前一週到案發前一天。發話方與對話方都只剩「Unknown」，像兩張沒有臉的口供。',
+              type: 'item',
+            },
+          },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '阿蘇皺眉：\n\n「這種對話很挑人。」\n「要嘛兩邊都知道在講什麼，要嘛只有一邊知道。」\n「還有第三種——有人希望你以為你知道。」\n「『她也在場』這句，像故意留鉤子。」\n「鉤子留得太漂亮，通常不是釣魚，是釣你。」',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'clue_cigarette_butts_abnormal', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'examine_streetlight',
-        name: '檢查路燈',
-        description: '你檢查路燈。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_park_streetlight' },
-        ],
+        id: 'examine_car_an_chat',
+        name: '通訊紀錄 An',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_an_chat' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '對話窗顯示「An」，頭像是一杯拿鐵拉花。可讀內容零碎：\n\n「……如果你真的曝光，那個人會先弄死你……」\n「……上次樓梯間的事，你也在——」\n\n末尾停在兩個字：「算了。」\n\n阿蘇看著那兩個字，笑一下，笑得很短：\n\n「人最擅長把『算了』當結案。」\n「但結案通常只對一個人有利。」\n「這個 An……可能是朋友，也可能只是他需要一個人聽他慌。」\n「你先別把它當核心。它太像核心了。」',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_car_notepad',
+        name: '記事本筆記_未發表',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_notepad' }],
         effects: [
+          { type: 'addItem', itemId: 'item_column_draft' },
           {
             type: 'showDialog',
             dialog: {
-              text: '路燈亮得很準時，\n沒有人能延後它。\n\n在這種公共空間，時間是固定的。\n不像電影院，可以被人為控制。\n\n這裡的一切都很準時，很確定。',
+              text: '獲得：專欄草稿片段\n\n標題寫著：「節能設備，誰省了電，誰省了責任？」\n\n內文提到影城導入的新設備，語氣像簡報，卻又藏著不安：他列了幾個「可能」——遠端控制照明、調整散場節奏、把疏散流程變得更像表格。他寫得像確定，其實更像把聽來的傳言整理成條列。中間一句被反覆刪改，退格痕跡像牙印：\n「有些亮起來的數字，比螢幕上的還好看。」\n\n草稿停在一行：\n「如果我要談這件事，得從兩年前的某個樓梯間開始。」\n游標停在「樓梯間」後面，好像他盯著那兩個字盯太久，最後什麼都沒打出來。',
+              type: 'item',
+            },
+          },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '阿蘇低聲念出標題，像在測試它是否會咬人：\n\n「省電省錢，簡報都會說。」\n「有人看見它省掉的東西不只電，就開始睡不好。」\n「他把猜測寫得像規格……這種人通常不想等證據。」\n「也可能證據早就被他看過一次，只是不能寫出來。」',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'clue_public_space_time_fixed', value: true },
         ],
+        oneTime: true,
+      },
+      {
+        id: 'examine_car_recording',
+        name: '錄音備忘_事故',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_recording' }],
+        effects: [
+          { type: 'addItem', itemId: 'item_unfinished_recording' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '獲得：未完成錄音\n\n播放鍵按下去，車內多了一個被刻意壓低處理過的男聲，像戴著面具說話：\n\n「……他們一直說那是個案。可是結案報告有兩個版本，一個給內部、一個給外面……」\n\n聲音戛然而止，長度停在 00:27。檔案資訊顯示錄製時間：命案前一晚 23:41。',
+              type: 'item',
+            },
+          },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '阿蘇把音量調小：\n\n「他怕被辨識。」\n「也怕錄下來的東西比他本人活得久。」\n「『兩個版本』這句，聽起來像傳言。」\n「傳言可怕的地方在於——它常常從真相漏出來。」',
+              type: 'narrator',
+            },
+          },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'examine_car_contacts',
+        name: '聯絡人列表',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_contacts' }],
+        effects: [
+          { type: 'addItem', itemId: 'item_coded_contacts' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '獲得：代號聯絡人\n\n通訊錄裡有幾個特別的聯絡人：\n\n「城市影城W」——備註：「影廳見」\n「聯合影城C」——備註：「表單／審查」\n「光芒影城R」——備註：「梯間／試行」\n\n最近通話集中在案發前一週，另有兩年前一段密集期。',
+              type: 'item',
+            },
+          },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '阿蘇手指停在螢幕上，像碰到一條帶電的線：\n\n「這命名方式……像他在做索引。」\n「人被他放進代碼裡，變得很好排列。」\n「排列不代表理解。」\n「理解很麻煩，索引比較省力。」\n「你看備註——影廳、表單、梯間……像三個節點。」\n「也像三個坑。」',
+              type: 'narrator',
+            },
+          },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'examine_car_location',
+        name: '系統定位紀錄',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_location' }],
+        effects: [
+          { type: 'addItem', itemId: 'item_location_record' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '獲得：行蹤紀錄\n\n定位紀錄像一張被螢光筆畫滿的地圖。\n命案前一週，他在幾個點來回：住家、三家影城、一棟設備公司商辦、還有一棟外牆長滿舊管線的老式商務大樓。那棟老樓 GPS 訊號常跳點，地圖上重疊一堆小圓點，像系統也不太想記住那裡。\n\n命案當晚，他比電影開場早到近一個半小時，在城市影城附近繞圈，軌跡像一個被畫壞的橢圓。你看著那圈圈，想到第一章那三分鐘的黑。有人會在黑裡走路；也有人會在黑裡等人。',
+              type: 'item',
+            },
+          },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '阿蘇：「他不是迷路。」\n「像在確認某件事會不會發生。」\n「或者確認某個人會不會出現。」\n「你以為那是焦慮，其實可能是排程。」\n\n她說到最後兩個字，自己先停一下，像不小心踩到職業病。',
+              type: 'narrator',
+            },
+          },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'examine_car_toolbox',
+        name: '後座工具箱',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_toolbox' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '寫著「線路是誠實的」。旁邊的 QR code 被刮花掃不出來，誠實也有保固期限。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_car_coffee',
+        name: '便利商店咖啡杯',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_coffee' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '杯身已經不再溫熱，紙杯變得有點軟。今晚唯一還在冒熱氣的，大概只剩硬碟。',
+            type: 'narrator',
+          },
+        }],
+        oneTime: true,
+      },
+      {
+        id: 'examine_car_charm',
+        name: '車上吊飾',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_charm' }],
+        effects: [{
+          type: 'showDialog',
+          dialog: {
+            text: '吊飾在車裡晃來晃去，笑臉一直換角度。\n\n有種錯覺，好像整台車都在眨眼。',
+            type: 'narrator',
+          },
+        }],
         oneTime: true,
       },
     ],
-    puzzles: [
-      {
-        id: 'puzzle_ch2_park_recorder_owner',
-        type: 'input',
-        solution: '是',
-        hint: '比對錄音內容和語氣：\n1. 內容提到「散場後被留下來的感覺」\n2. 與嫌犯A的背景（前電影院放映助理）吻合\n3. 語氣冷靜、理性\n\n結論：是他的聲音，但內容更像自我分析，不是威脅',
-        requirements: [
-          { type: 'hasItem', itemId: 'item_recorder' },
-          { type: 'hasFlag', flag: 'clue_suspect_a_habit_spot', value: true },
-          { type: 'hasFlag', flag: 'clue_public_space_time_fixed', value: true },
-        ],
-        onSolve: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你理解了：錄音筆是嫌犯A的。\n\n這顯示他理解「脆弱」，但沒有跨過那條線。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'puzzle_ch2_park_solved', value: true },
-          { type: 'setFlag', flag: 'office_building_unlocked', value: true },
-        ],
-      },
-    ],
+    puzzles: [],
     initialDialog: {
-      text: '夜晚的公園很安靜，\n安靜到你會以為，\n任何坐在這裡的人，都在等一個沒有來的人。',
+      text: '阿蘇把筆電翻開，線在她指尖繞一圈，插進警方提供的解密終端。\n\n阿蘇：「坐好。」\n她視線沒離開螢幕。\n\n阿蘇：「手機解完密，只是開始。接下來要解讀這個人。」\n阿蘇：「我先說清楚，我不替警方背書。我只替資料負責。」\n她停半秒，又補一句，像在防禦。\n阿蘇：「資料有時候也不值得信任。」',
       type: 'narrator',
     },
+    npcs: [
+      {
+        id: 'npc_asu',
+        name: '阿蘇（工程師）',
+        portrait: '/svg/characters/asu.svg',
+        randomDialogs: [
+          { id: 'asu_casual_1', text: '「你看這些訊息，像威脅，又有一點像兩個人在互相拗稿。」', type: 'casual', weight: 3 },
+          { id: 'asu_casual_2', text: '「工程系的人最怕兩種人，一種是什麼都不懂，一種是懂太多還故意裝不知道。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_3', text: '「他把影城寫進專欄，結果人被留在影城裡。這種對稱，很難說是巧合。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_4', text: '「節能設備本來是好東西啊，省電、省錢，所有簡報都這樣寫。可是一旦有人發現它可以順便省掉責任，就會開始長得怪怪的。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_5', text: '「系統通常比人老實，可是設計系統的人不一定。這點我很有資格抱怨。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_6', text: '「他給聯絡人取名字的方式很工程師，全部用代碼。其實這種人死掉，調查起來很煩，卻也比較有路徑可以追。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_7', text: '「『三起事故』這個說法，很熟。寫技術文件的人才會把東西分成一、二、三這樣。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_8', text: '「如果你把這些聊天紀錄當成八卦，它們就只會變成八卦；你把它們當線路，它們才會開始帶電。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_9', text: '「有時候我覺得他很像一個沒受過訓練的工程師，把城市當機房亂摸。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_10', text: '「喔對，我有回過他的信，只是回得很不耐煩。沒想到…」\n她話說到一半停住，手指在方向盤上敲了兩下。', type: 'casual', weight: 2 },
+        ],
+        available: true,
+      },
+    ],
   },
-  
-  // 可探索空間二：辦公大樓（嫌犯 A 現職）
+
+  // 可探索空間二：辦公大樓（嫌犯 A 現職）— 自 ch2 流程移除，保留供他章使用
   'scene_ch2_office_building': {
     id: 'scene_ch2_office_building',
     chapterId: 'ch2',
@@ -3903,6 +4230,85 @@ export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
         },
       ],
  // 對話結束
+    },
+  },
+
+  // 第二章 阿蘇（工程師）— 敏感一：為什麼來／受害者資料怎麼看；敏感二：三起事故誰在放風聲（二選一）
+  npc_asu: {
+    'node_asu_sensitive1_1': {
+      id: 'node_asu_sensitive1_1',
+      npcId: 'npc_asu',
+      text: 'KK：「妳可以把資料丟回警方，洗個澡睡覺。為什麼要坐在這裡陪我熬夜？」\n\n阿蘇盯著螢幕，笑了一下，但那不是愉快的笑。\n阿蘇：「因為他死在流程裡。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_2',
+    },
+    'node_asu_sensitive1_2': {
+      id: 'node_asu_sensitive1_2',
+      npcId: 'npc_asu',
+      text: 'KK：「很多人死在流程裡。」\n\n阿蘇把筆電合起來又打開，像需要一個動作冷靜一下。\n阿蘇：「兩年前那起樓梯間事故，我是技術顧問之一。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_3',
+    },
+    'node_asu_sensitive1_3': {
+      id: 'node_asu_sensitive1_3',
+      npcId: 'npc_asu',
+      text: 'KK：「妳覺得自己有責任？」\n\n阿蘇：「我覺得那份報告有兩個版本。」\n她說這句時，聲音壓得比剛剛低，指節在觸控板上停住。',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_4',
+    },
+    'node_asu_sensitive1_4': {
+      id: 'node_asu_sensitive1_4',
+      npcId: 'npc_asu',
+      text: 'KK：「妳認識他？」\n\n阿蘇：「看過名字，收過一封很長很長的信，全是抱怨和猜測。」\n她勾了一下嘴角：「他問過我一些系統問題，我回了兩句，叫他不要拿事故當寫作素材。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_5',
+    },
+    'node_asu_sensitive1_5': {
+      id: 'node_asu_sensitive1_5',
+      npcId: 'npc_asu',
+      text: 'KK：「他沒聽？」\n\n阿蘇：「他有停手一陣子。只是寫得慢一點，不代表放棄。」\n她把那封信的寄件人頁面打開又關掉，「我那時候只覺得他煩，沒有想到會變命案。」',
+      choices: [
+        {
+          id: 'choice_asu_s1_done',
+          label: '（結束對話）',
+          description: '此分支不再出現 KK 內心旁白，只留給玩家自己拼。',
+          effects: [{ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true }],
+        },
+      ],
+    },
+    'node_asu_sensitive2_1': {
+      id: 'node_asu_sensitive2_1',
+      npcId: 'npc_asu',
+      text: 'KK：「這句：『用三起事故來揭……』妳覺得是誰寫的？」\n\n阿蘇：「看格式，很像他。可是那個『你為什麼不把資訊完……』比較像對話另一頭的人。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_2',
+    },
+    'node_asu_sensitive2_2': {
+      id: 'node_asu_sensitive2_2',
+      npcId: 'npc_asu',
+      text: 'KK：「兩邊都像？」\n\n阿蘇聳了一下肩：「一邊很想把真話全部講出來，一邊很清楚什麼可以講、什麼不行。這兩種人聊天，句子就會長這樣。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_3',
+    },
+    'node_asu_sensitive2_3': {
+      id: 'node_asu_sensitive2_3',
+      npcId: 'npc_asu',
+      text: 'KK：「如果這不是單純威脅，而是某種計畫，妳覺得它在講『三件接下來要發生的事』，還是在唸一份目錄？」\n\n阿蘇沉默幾秒，視線從螢幕上移開，盯著前擋風玻璃上那一圈沒擦乾淨的雨痕。\n\n阿蘇：「平常寫技術文件的時候，我們說『三起』，多半是在分類，不是在許願。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_4',
+    },
+    'node_asu_sensitive2_4': {
+      id: 'node_asu_sensitive2_4',
+      npcId: 'npc_asu',
+      text: 'KK：「分類什麼？」\n\n阿蘇：「同一種 bug、同一種偷懶、同一批人的習慣。如果是他寫的，他很可能是在幫對方整理他們犯過幾次一樣的錯。」\n\n她伸手把音量調小：「不過也有可能是對面故意這樣寫給他看，讓他以為自己踩到的是大案。」',
+      choices: [
+        {
+          id: 'choice_asu_s2_done',
+          label: '（結束對話）',
+          description: '',
+          effects: [{ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true }],
+        },
+      ],
     },
   },
 };
