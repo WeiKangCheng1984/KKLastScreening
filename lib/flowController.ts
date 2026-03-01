@@ -10,7 +10,7 @@ import type { GameState } from '@/types/game';
 
 /**
  * 依當前步驟 id 回傳應導向的 Next.js 路徑。
- * @param stepId 當前步驟 id（如 'prologue_text', 'animation_1', 'ch2_hub'）
+ * @param stepId 當前步驟 id（如 'prologue_text', 'ch1_intro', 'ch2_hub'）
  * @param sceneId 可選；當 stepId 為 chapter_hub 時傳入選擇的場景 id
  */
 export function getNextPath(stepId: string, sceneId?: string): string {

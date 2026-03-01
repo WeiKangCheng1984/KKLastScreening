@@ -14,12 +14,6 @@ export const flowConfig: FlowConfig = {
       type: 'prologue_text',
       next: 'ch1_intro',
     },
-    animation_1: {
-      id: 'animation_1',
-      type: 'animation',
-      next: 'ch1_intro',
-      video: '/videos/intro_ch1_animation_v1.mp4',
-    },
     ch1_intro: {
       id: 'ch1_intro',
       type: 'chapter_intro',
@@ -92,8 +86,6 @@ export function getNextPath(stepId: string, sceneId?: string): string {
   switch (next.type) {
     case 'prologue_text':
       return '/play/prologue';
-    case 'animation':
-      return '/play/animation';
     case 'chapter_intro':
       if (next.chapterId) return `/play/${next.chapterId}/intro`;
       return '/';

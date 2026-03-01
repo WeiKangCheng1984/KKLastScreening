@@ -36,9 +36,7 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
   const mediaType = chapter.intro.mediaType || 'image';
   const slides = chapter.intro.slides || [];
   const hasSlides = slides.length > 0;
-  const isChapter1 = chapter.id === 'ch1';
-  // 第一章動畫已於 /play/animation 播放，導讀頁不再重複播影片
-  const introVideo = isChapter1 ? undefined : chapter.intro.introVideo;
+  const introVideo = chapter.intro.introVideo;
 
   // 方案二：導讀頁預載該章第一個場景背景圖，點「開始探索」時已進快取
   useEffect(() => {
@@ -63,39 +61,23 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
     img.src = bg;
   }, [chapter.scenes]);
 
-  // 分層顯示動畫 - 第一章快速呈現，其他章節正常速度
+  // 分層顯示動畫 - 各章節一致
   useEffect(() => {
-    // 方案一：若尚未播放 BGM 則播放，離開時不中斷
     if (!audioManager.getCurrentAmbientPath()) {
       audioManager.playAmbient(GAME_BGM, 0.5);
     }
 
-    if (isChapter1) {
-      // 第一章：快速呈現，減少動畫
-      const timers = [
-        setTimeout(() => setCurrentLayer(1), 200),   // 標題 - 快速
-        setTimeout(() => setCurrentLayer(2), 600),   // 描述 - 快速
-        setTimeout(() => setCurrentLayer(3), 1000),   // 心理文字 - 快速
-        setTimeout(() => setIsReady(true), 1500),     // 顯示繼續按鈕 - 快速
-      ];
+    const timers = [
+      setTimeout(() => setCurrentLayer(1), 500),
+      setTimeout(() => setCurrentLayer(2), 2000),
+      setTimeout(() => setCurrentLayer(3), 3500),
+      setTimeout(() => setIsReady(true), 5000),
+    ];
 
-      return () => {
-        timers.forEach(clearTimeout);
-      };
-    } else {
-      // 其他章節：正常速度
-      const timers = [
-        setTimeout(() => setCurrentLayer(1), 500),
-        setTimeout(() => setCurrentLayer(2), 2000),
-        setTimeout(() => setCurrentLayer(3), 3500),
-        setTimeout(() => setIsReady(true), 5000),
-      ];
-
-      return () => {
-        timers.forEach(clearTimeout);
-      };
-    }
-  }, [isChapter1]);
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, []);
 
   const handleContinue = () => {
     // 如果有導讀影片且尚未播放，先播放影片
@@ -266,8 +248,8 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
         </div>
       )}
 
-      {/* 背景粒子效果 - 第一章減少或取消 */}
-      {!isChapter1 && <ParticleEffect count={15} color="rgba(251, 146, 60, 0.5)" />}
+      {/* 背景粒子效果：各章節一致 */}
+      <ParticleEffect count={15} color="rgba(251, 146, 60, 0.5)" />
 
       {/* 導讀影片播放 - 方形框架（響應式） */}
       {showVideo && introVideo && (
@@ -367,48 +349,29 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
       <div className={`relative z-10 text-center max-w-4xl px-6 transition-opacity duration-500 ${
         isTransitioning ? 'opacity-0' : 'opacity-100'
       }`}>
-        {/* 第一層：標題 - 第一章減少動畫 */}
+        {/* 第一層：標題 */}
         {currentLayer >= 1 && (
-          isChapter1 ? (
-            <div className="opacity-100">
-              <h1 className="text-[2.025rem] md:text-[3.375rem] font-bold mb-2 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent text-center whitespace-pre-line">
-                {chapter.intro.title.replace(/：/g, '\n')}
-              </h1>
-              <p className="text-lg md:text-xl text-orange-300/80 mb-4">
-                {chapter.intro.subtitle}
-              </p>
-            </div>
-          ) : (
-            <SlideIn direction="up" delay={0.5} duration={1}>
-              <h1 className="text-[2.7rem] md:text-[4.05rem] font-bold mb-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent text-center whitespace-pre-line">
-                {chapter.intro.title.replace(/：/g, '\n')}
-              </h1>
-              <p className="text-xl md:text-2xl text-orange-300/80 mb-8">
-                {chapter.intro.subtitle}
-              </p>
-            </SlideIn>
-          )
+          <SlideIn direction="up" delay={0.5} duration={1}>
+            <h1 className="text-[2.7rem] md:text-[4.05rem] font-bold mb-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent text-center whitespace-pre-line">
+              {chapter.intro.title.replace(/：/g, '\n')}
+            </h1>
+            <p className="text-xl md:text-2xl text-orange-300/80 mb-8">
+              {chapter.intro.subtitle}
+            </p>
+          </SlideIn>
         )}
 
-        {/* 第二層：描述 - 第一章簡化 */}
+        {/* 第二層：描述 */}
         {currentLayer >= 2 && (
-          isChapter1 ? (
-            <div className="opacity-100">
-              <p className="text-sm md:text-base text-gray-300 leading-relaxed mb-4">
-                {chapter.intro.description}
-              </p>
-            </div>
-          ) : (
-            <SlideIn direction="up" delay={0.3} duration={1}>
-              <p className="text-lg md:text-xl text-gray-300 leading-relaxed mb-8">
-                {chapter.intro.description}
-              </p>
-            </SlideIn>
-          )
+          <SlideIn direction="up" delay={0.3} duration={1}>
+            <p className="text-lg md:text-xl text-gray-300 leading-relaxed mb-8">
+              {chapter.intro.description}
+            </p>
+          </SlideIn>
         )}
 
-        {/* 第三層：心理文字 - 第一章簡化或省略 */}
-        {currentLayer >= 3 && !isChapter1 && (
+        {/* 第三層：心理文字；無內容時不顯示區塊 */}
+        {currentLayer >= 3 && chapter.intro.moodText?.trim() && (
           <SlideIn direction="up" delay={0.5} duration={1}>
             <p className="text-base md:text-lg text-orange-200/70 leading-relaxed whitespace-pre-line mb-12">
               {chapter.intro.moodText}
@@ -416,27 +379,17 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
           </SlideIn>
         )}
 
-        {/* 繼續按鈕 - 第一章快速顯示 */}
+        {/* 繼續按鈕 */}
         {isReady && (
-          isChapter1 ? (
+          <FadeIn delay={0.3} duration={0.5}>
             <button
               onClick={handleContinue}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-lg transition-all duration-200 text-base font-semibold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-xl transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
             >
-              <Play size={20} />
-              {introVideo && !videoEnded ? '觀看影片' : '開始探索'}
+              <Play size={24} />
+              {introVideo && !showVideo && !videoEnded ? '觀看影片' : '開始探索'}
             </button>
-          ) : (
-            <FadeIn delay={0.3} duration={0.5}>
-              <button
-                onClick={handleContinue}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-xl transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
-              >
-                <Play size={24} />
-                開始探索
-              </button>
-            </FadeIn>
-          )
+          </FadeIn>
         )}
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { GameEngine } from '@/lib/gameEngine';
-import { Dialog, Hotspot } from '@/types/game';
+import { Dialog, Hotspot, ConversationTurn } from '@/types/game';
 import SceneView, { SceneViewRef } from '@/components/SceneView';
 import DialogBox from '@/components/DialogBox';
 import CharacterConversation from '@/components/CharacterConversation';
@@ -45,7 +45,9 @@ import NpcRightStrip from '@/components/NpcRightStrip';
 import ReasoningPanel from '@/components/ReasoningPanel';
 import { reasoningByChapter } from '@/data/reasoningByChapter';
 import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
+import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { motion, AnimatePresence } from 'framer-motion';
+import SensitiveGateOverlay from '@/components/SensitiveGateOverlay';
 
 // 獲取當前章節的所有場景
 const getCurrentChapterScenes = (chapterId: string): string[] => {
@@ -161,7 +163,21 @@ export default function PlayPage() {
   const [showDeveloperPanel, setShowDeveloperPanel] = useState(false);
   // 新的角色對話系統
   const [currentConversation, setCurrentConversation] = useState<any>(null);
+  /** 方案 B：當前對話 turn，供場景上立繪層使用 */
+  const [currentConversationTurn, setCurrentConversationTurn] = useState<ConversationTurn | null>(null);
+  /** 方案一：問敏感問題前的獨立抉擇（不共用 NPC 對話框） */
+  const [sensitiveGate, setSensitiveGate] = useState<{
+    step: 'ask_or_skip' | 'pick_one';
+    npcId: string;
+    text: string;
+    choices: DialogChoice[];
+  } | null>(null);
   const sceneViewRef = useRef<SceneViewRef>(null);
+
+  // 方案 B：對話關閉時清掉 turn；開啟時由 setCurrentConversationTurn(turns[0]) 與 onTurnChange 設入
+  useEffect(() => {
+    if (!currentConversation) setCurrentConversationTurn(null);
+  }, [currentConversation]);
   const isDescendPuzzleCompleteRef = useRef(false);
   // 使用 useState 的函數形式確保服務器和客戶端初始狀態一致
   const [isSceneTransitioning, setIsSceneTransitioning] = useState(() => false);
@@ -393,6 +409,7 @@ export default function PlayPage() {
           
           // 顯示角色對話
           setCurrentConversation(conversation);
+          setCurrentConversationTurn(conversation.turns[0] ?? null);
           setRefreshKey(prev => prev + 1);
           return true;
         }
@@ -456,248 +473,112 @@ export default function PlayPage() {
     };
   }, []);
 
+  // 敏感抉擇專用 handler（方案一：獨立 overlay，不經 DialogBox）
+  const handleSensitiveGateChoice = useCallback((choice: DialogChoice) => {
+    if (!engineRef.current || !sensitiveGate) return;
+    const engine = engineRef.current;
+    const scene = engine.getCurrentScene();
+
+    const closeAndRandom = (npcId: string) => {
+      setSensitiveGate(null);
+      setTimeout(() => {
+        if (!engineRef.current) return;
+        const d = engineRef.current.triggerRandomNpcDialog(npcId);
+        if (d) {
+          engineRef.current.incrementNpcCasualTalk(npcId);
+          setCurrentDialog(d);
+        }
+        setRefreshKey((prev) => prev + 1);
+      }, 0);
+    };
+
+    const closeAndStartBranch = (npcId: string, nodeId: string) => {
+      setSensitiveGate(null);
+      const npc = scene?.npcs?.find((n: { id: string }) => n.id === npcId);
+      if (!npc) return;
+      if (npcId === 'npc_lin_ruitang') engine.applyEffect({ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true });
+      if (npcId === 'npc_ashun') engine.applyEffect({ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true });
+      if (npcId === 'npc_xiaozhang') engine.applyEffect({ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true });
+      if (npcId === 'npc_zhou_jie') engine.applyEffect({ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true });
+      engine.startNpcDialog(npcId, nodeId);
+      const node = engine.getCurrentNpcDialogNode();
+      if (node) {
+        setTimeout(() => {
+          setCurrentDialog(buildDialogFromNpcNode(node, npc));
+          setRefreshKey((prev) => prev + 1);
+        }, 0);
+      }
+    };
+
+    // 問敏感 / 再聊聊
+    if (choice.id === 'lin_sensitive_skip') { closeAndRandom('npc_lin_ruitang'); return; }
+    if (choice.id === 'ashun_sensitive_skip') { closeAndRandom('npc_ashun'); return; }
+    if (choice.id === 'xiaozhang_sensitive_skip') { closeAndRandom('npc_xiaozhang'); return; }
+    if (choice.id === 'zhou_sensitive_skip') { closeAndRandom('npc_zhou_jie'); return; }
+
+    // 問敏感 → 第二層：選哪一條
+    if (choice.id === 'lin_sensitive_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_lin_ruitang', text: '你只能問一個方向。問了，另一個就不能再提。', choices: [
+        { id: 'lin_branch_light', text: '我想問：散場的燈為什麼晚亮？誰能改這個表、誰在流程上游？' },
+        { id: 'lin_branch_fear', text: '我想問：你是不是害怕兇手，還是害怕你上面的長官？' },
+      ]});
+      return;
+    }
+    if (choice.id === 'ashun_sensitive_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_ashun', text: '你只能問一個方向。問了，另一個就不能再提。', choices: [
+        { id: 'ashun_branch_window', text: '我想問：散場後那一兩分鐘，誰在看？空窗有多大？' },
+        { id: 'ashun_branch_deadzone', text: '我想問：監視器死角在哪？你真的確定嗎？' },
+      ]});
+      return;
+    }
+    if (choice.id === 'xiaozhang_sensitive_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_xiaozhang', text: '你只能問一個方向。問了，另一個就不能再提。', choices: [
+        { id: 'xiaozhang_branch_table', text: '我想問：燈延後三分鐘是誰改的？表格誰能改、誰在流程上游？' },
+        { id: 'xiaozhang_branch_oral', text: '我想問：有人跟你說過什麼嗎？口頭指示、像背 SOP 的那個人。' },
+      ]});
+      return;
+    }
+    if (choice.id === 'zhou_sensitive_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_zhou_jie', text: '你只能問一個方向。問了，另一個就不能再提。', choices: [
+        { id: 'zhou_branch_clean', text: '我想問：你說「太乾淨」，哪裡太乾淨？誰在急著擦？' },
+        { id: 'zhou_branch_fragment', text: '我想問：你找到什麼？燈晚亮你怎麼確定？' },
+      ]});
+      return;
+    }
+
+    // 選定敏感題目 → 進入 NPC 對話樹
+    if (choice.id === 'lin_branch_light') { closeAndStartBranch('npc_lin_ruitang', 'node_lin_light_1'); return; }
+    if (choice.id === 'lin_branch_fear') { closeAndStartBranch('npc_lin_ruitang', 'node_lin_fear_1'); return; }
+    if (choice.id === 'ashun_branch_window') { closeAndStartBranch('npc_ashun', 'node_ashun_window_1'); return; }
+    if (choice.id === 'ashun_branch_deadzone') { closeAndStartBranch('npc_ashun', 'node_ashun_deadzone_1'); return; }
+    if (choice.id === 'xiaozhang_branch_table') { closeAndStartBranch('npc_xiaozhang', 'node_xiaozhang_table_1'); return; }
+    if (choice.id === 'xiaozhang_branch_oral') { closeAndStartBranch('npc_xiaozhang', 'node_xiaozhang_oral_1'); return; }
+    if (choice.id === 'zhou_branch_clean') { closeAndStartBranch('npc_zhou_jie', 'node_zhou_clean_1'); return; }
+    if (choice.id === 'zhou_branch_fragment') {
+      setSensitiveGate(null);
+      const npc = scene?.npcs?.find((n: { id: string }) => n.id === 'npc_zhou_jie');
+      if (!npc) return;
+      engine.applyEffect({ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true });
+      const state = engine.getState();
+      const alreadyHaveFragment = !!state?.flags?.black_fragment_found;
+      engine.startNpcDialog('npc_zhou_jie', alreadyHaveFragment ? 'node_zhou_fragment_1_already_have' : 'node_zhou_fragment_1');
+      const node = engine.getCurrentNpcDialogNode();
+      if (node) {
+        setTimeout(() => {
+          setCurrentDialog(buildDialogFromNpcNode(node, npc));
+          setRefreshKey((prev) => prev + 1);
+        }, 0);
+      }
+      return;
+    }
+  }, [sensitiveGate, buildDialogFromNpcNode]);
+
   // 處理對話選擇
   const handleDialogChoice = useCallback((choice: DialogChoice) => {
     if (!engineRef.current) return;
     const engine = engineRef.current;
     const scene = engine.getCurrentScene();
     const currentState = engine.getState();
-
-    // 林瑞堂：選擇後 DialogBox 會呼叫 onClose()，需延遲設定下一個對話以免被清掉
-    if (choice.id === 'lin_sensitive_skip') {
-      setTimeout(() => {
-        if (!engineRef.current) return;
-        const d = engineRef.current.triggerRandomNpcDialog('npc_lin_ruitang');
-        if (d) {
-          engineRef.current.incrementNpcCasualTalk('npc_lin_ruitang');
-          setCurrentDialog(d);
-        }
-        setRefreshKey((prev) => prev + 1);
-      }, 0);
-      return;
-    }
-    if (choice.id === 'lin_sensitive_ask') {
-      setTimeout(() => {
-        setCurrentDialog({
-          text: '你只能問一個方向。問了，另一個就不能再提。',
-          type: 'narrator',
-          choices: [
-            { id: 'lin_branch_light', text: '我想問：散場的燈為什麼晚亮？誰能改這個表、誰在流程上游？' },
-            { id: 'lin_branch_fear', text: '我想問：你是不是害怕兇手，還是害怕你上面的長官？' },
-          ],
-        });
-        setRefreshKey((prev) => prev + 1);
-      }, 0);
-      return;
-    }
-    if (choice.id === 'lin_branch_light' && scene?.npcs) {
-      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_lin_ruitang');
-      if (npc) {
-        engine.applyEffect({ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true });
-        engine.startNpcDialog('npc_lin_ruitang', 'node_lin_light_1');
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          setTimeout(() => {
-            setCurrentDialog(buildDialogFromNpcNode(node, npc));
-            setRefreshKey((prev) => prev + 1);
-          }, 0);
-        }
-      }
-      return;
-    }
-    if (choice.id === 'lin_branch_fear' && scene?.npcs) {
-      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_lin_ruitang');
-      if (npc) {
-        engine.applyEffect({ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true });
-        engine.startNpcDialog('npc_lin_ruitang', 'node_lin_fear_1');
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          setTimeout(() => {
-            setCurrentDialog(buildDialogFromNpcNode(node, npc));
-            setRefreshKey((prev) => prev + 1);
-          }, 0);
-        }
-      }
-      return;
-    }
-
-    // 阿順：再聊聊 / 問敏感 → 兩選一（散場空窗 / 監視器死角）
-    if (choice.id === 'ashun_sensitive_skip') {
-      setTimeout(() => {
-        if (!engineRef.current) return;
-        const d = engineRef.current.triggerRandomNpcDialog('npc_ashun');
-        if (d) {
-          engineRef.current.incrementNpcCasualTalk('npc_ashun');
-          setCurrentDialog(d);
-        }
-        setRefreshKey((prev) => prev + 1);
-      }, 0);
-      return;
-    }
-    if (choice.id === 'ashun_sensitive_ask') {
-      setTimeout(() => {
-        setCurrentDialog({
-          text: '你只能問一個方向。問了，另一個就不能再提。',
-          type: 'narrator',
-          choices: [
-            { id: 'ashun_branch_window', text: '我想問：散場後那一兩分鐘，誰在看？空窗有多大？' },
-            { id: 'ashun_branch_deadzone', text: '我想問：監視器死角在哪？你真的確定嗎？' },
-          ],
-        });
-        setRefreshKey((prev) => prev + 1);
-      }, 0);
-      return;
-    }
-    if (choice.id === 'ashun_branch_window' && scene?.npcs) {
-      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_ashun');
-      if (npc) {
-        engine.applyEffect({ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true });
-        engine.startNpcDialog('npc_ashun', 'node_ashun_window_1');
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          setTimeout(() => {
-            setCurrentDialog(buildDialogFromNpcNode(node, npc));
-            setRefreshKey((prev) => prev + 1);
-          }, 0);
-        }
-      }
-      return;
-    }
-    if (choice.id === 'ashun_branch_deadzone' && scene?.npcs) {
-      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_ashun');
-      if (npc) {
-        engine.applyEffect({ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true });
-        engine.startNpcDialog('npc_ashun', 'node_ashun_deadzone_1');
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          setTimeout(() => {
-            setCurrentDialog(buildDialogFromNpcNode(node, npc));
-            setRefreshKey((prev) => prev + 1);
-          }, 0);
-        }
-      }
-      return;
-    }
-
-    // 小張：再聊聊 / 問敏感 → 兩選一（表格與權限 / 口頭指示）
-    if (choice.id === 'xiaozhang_sensitive_skip') {
-      setTimeout(() => {
-        if (!engineRef.current) return;
-        const d = engineRef.current.triggerRandomNpcDialog('npc_xiaozhang');
-        if (d) {
-          engineRef.current.incrementNpcCasualTalk('npc_xiaozhang');
-          setCurrentDialog(d);
-        }
-        setRefreshKey((prev) => prev + 1);
-      }, 0);
-      return;
-    }
-    if (choice.id === 'xiaozhang_sensitive_ask') {
-      setTimeout(() => {
-        setCurrentDialog({
-          text: '你只能問一個方向。問了，另一個就不能再提。',
-          type: 'narrator',
-          choices: [
-            { id: 'xiaozhang_branch_table', text: '我想問：燈延後三分鐘是誰改的？表格誰能改、誰在流程上游？' },
-            { id: 'xiaozhang_branch_oral', text: '我想問：有人跟你說過什麼嗎？口頭指示、像背 SOP 的那個人。' },
-          ],
-        });
-        setRefreshKey((prev) => prev + 1);
-      }, 0);
-      return;
-    }
-    if (choice.id === 'xiaozhang_branch_table' && scene?.npcs) {
-      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_xiaozhang');
-      if (npc) {
-        engine.applyEffect({ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true });
-        engine.startNpcDialog('npc_xiaozhang', 'node_xiaozhang_table_1');
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          setTimeout(() => {
-            setCurrentDialog(buildDialogFromNpcNode(node, npc));
-            setRefreshKey((prev) => prev + 1);
-          }, 0);
-        }
-      }
-      return;
-    }
-    if (choice.id === 'xiaozhang_branch_oral' && scene?.npcs) {
-      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_xiaozhang');
-      if (npc) {
-        engine.applyEffect({ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true });
-        engine.startNpcDialog('npc_xiaozhang', 'node_xiaozhang_oral_1');
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          setTimeout(() => {
-            setCurrentDialog(buildDialogFromNpcNode(node, npc));
-            setRefreshKey((prev) => prev + 1);
-          }, 0);
-        }
-      }
-      return;
-    }
-
-    // 周姊：再聊聊 / 問敏感 → 兩選一（哪裡太乾淨 / 你找到什麼）
-    if (choice.id === 'zhou_sensitive_skip') {
-      setTimeout(() => {
-        if (!engineRef.current) return;
-        const d = engineRef.current.triggerRandomNpcDialog('npc_zhou_jie');
-        if (d) {
-          engineRef.current.incrementNpcCasualTalk('npc_zhou_jie');
-          setCurrentDialog(d);
-        }
-        setRefreshKey((prev) => prev + 1);
-      }, 0);
-      return;
-    }
-    if (choice.id === 'zhou_sensitive_ask') {
-      setTimeout(() => {
-        setCurrentDialog({
-          text: '你只能問一個方向。問了，另一個就不能再提。',
-          type: 'narrator',
-          choices: [
-            { id: 'zhou_branch_clean', text: '我想問：你說「太乾淨」，哪裡太乾淨？誰在急著擦？' },
-            { id: 'zhou_branch_fragment', text: '我想問：你找到什麼？燈晚亮你怎麼確定？' },
-          ],
-        });
-        setRefreshKey((prev) => prev + 1);
-      }, 0);
-      return;
-    }
-    if (choice.id === 'zhou_branch_clean' && scene?.npcs) {
-      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_zhou_jie');
-      if (npc) {
-        engine.applyEffect({ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true });
-        engine.startNpcDialog('npc_zhou_jie', 'node_zhou_clean_1');
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          setTimeout(() => {
-            setCurrentDialog(buildDialogFromNpcNode(node, npc));
-            setRefreshKey((prev) => prev + 1);
-          }, 0);
-        }
-      }
-      return;
-    }
-    if (choice.id === 'zhou_branch_fragment' && scene?.npcs) {
-      const npc = scene.npcs.find((n: { id: string }) => n.id === 'npc_zhou_jie');
-      if (npc) {
-        engine.applyEffect({ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true });
-        const alreadyHaveFragment = !!currentState.flags?.black_fragment_found;
-        engine.startNpcDialog(
-          'npc_zhou_jie',
-          alreadyHaveFragment ? 'node_zhou_fragment_1_already_have' : 'node_zhou_fragment_1'
-        );
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          setTimeout(() => {
-            setCurrentDialog(buildDialogFromNpcNode(node, npc));
-            setRefreshKey((prev) => prev + 1);
-          }, 0);
-        }
-      }
-      return;
-    }
 
     // NPC 關鍵對話模式：使用 handleNpcDialogChoice，並顯示下一節點或結束
     if (currentState.activeNpcDialogId) {
@@ -2016,6 +1897,7 @@ export default function PlayPage() {
               
               // 顯示角色對話
               setCurrentConversation(conversation);
+              setCurrentConversationTurn(conversation.turns[0] ?? null);
               setRefreshKey(prev => prev + 1);
               return; // 已處理
             }
@@ -2619,9 +2501,30 @@ export default function PlayPage() {
           </div>
         )}
         
-        <div className={`h-full w-full flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 gpu-accelerated ${
+        <div className={`h-full w-full flex flex-col items-center justify-center p-4 md:p-8 transition-opacity duration-500 gpu-accelerated ${
           isSceneTransitioning ? 'opacity-0' : 'opacity-100'
         }`}>
+          {/* 場景圖外上方左右箭頭（縮小 90%） */}
+          <div className="w-full max-w-[min(90vw,960px)] flex justify-between items-center mb-1 shrink-0">
+            {adjacentScenes.prev ? (
+              <button
+                onClick={() => handleSceneNavigation(adjacentScenes.prev!)}
+                className="scale-90 origin-center group flex items-center justify-center w-6 h-6 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-100"
+                title={prevScene ? `前往：${prevScene.name}` : '上一場景'}
+              >
+                <ChevronLeft size={12} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+              </button>
+            ) : <div className="w-6 h-6" />}
+            {adjacentScenes.next ? (
+              <button
+                onClick={() => handleSceneNavigation(adjacentScenes.next!)}
+                className="scale-90 origin-center group flex items-center justify-center w-6 h-6 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-100"
+                title={nextScene ? `前往：${nextScene.name}` : '下一場景'}
+              >
+                <ChevronRight size={12} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+              </button>
+            ) : <div className="w-6 h-6" />}
+          </div>
           <div className={`relative w-full max-w-[min(90vw,960px)] aspect-square bg-dark-surface/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-dark-border/50 shadow-2xl transform transition-all duration-500 gpu-accelerated ${
             isSceneTransitioning ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
           }`}>
@@ -2633,6 +2536,42 @@ export default function PlayPage() {
               interactionCount={interactionCount}
             />
 
+            {/* 方案 B / 做法 A：立繪落在場景上，圖層高於對話框（z-20） */}
+            {(() => {
+              const fromConversation = currentConversation && currentConversationTurn && currentConversationTurn.speaker === 'character' && currentConversationTurn.characterId;
+              const fromDialog = currentDialog?.characterId;
+              const characterId = fromConversation ? currentConversationTurn!.characterId : fromDialog ? currentDialog!.characterId : null;
+              if (!characterId) return null;
+              const expression = fromConversation ? (currentConversationTurn!.characterExpression ?? 1) : (currentDialog?.characterExpression ?? 1);
+              const position = fromConversation ? (currentConversationTurn!.characterPosition ?? 'left') : (currentDialog?.characterPosition ?? 'left');
+              const name = fromConversation ? currentConversationTurn!.characterName : currentDialog?.characterName;
+              return (
+              <div
+                className={`absolute inset-0 pointer-events-none z-20 flex items-end ${position === 'right' ? 'justify-end' : 'justify-start'}`}
+              >
+                <img
+                  src={getNpcPortraitUrl(characterId, expression)}
+                  alt={name ?? ''}
+                  className={`h-[40%] w-auto max-w-[50%] object-contain object-bottom drop-shadow-2xl ${position === 'left' ? 'ml-0' : 'mr-0'}`}
+                />
+              </div>
+              );
+            })()}
+
+            {/* 對話框 - 手機 75%×50%，桌面 70%×40%；z-10 低於立繪 */}
+            {currentDialog && !showItemNotification && !showSceneName && (
+              <div className="absolute bottom-0 right-0 w-[75%] h-[50%] min-h-[140px] min-w-[200px] z-10 flex items-stretch md:w-[70%] md:h-[40%] md:min-h-[160px] md:min-w-[220px]">
+                <DialogBox
+                  dialog={currentDialog}
+                  onClose={handleDialogClose}
+                  autoClose={false}
+                  onChoiceSelect={handleDialogChoice}
+                  portraitOnScene={!!currentDialog.characterId}
+                  embedInParent
+                />
+              </div>
+            )}
+
             {/* 第一章互動框 Zoom 特寫覆蓋層 */}
             {zoomOverlay?.active && scene && (
               <HotspotZoomOverlay
@@ -2643,28 +2582,6 @@ export default function PlayPage() {
                 interactionName={zoomOverlay.interactionName}
                 onClose={() => setZoomOverlay(null)}
               />
-            )}
-            
-            {/* 左側箭頭 - 切換到上一個場景（依章節場景列表顯示，不依賴 scenes 鍵值） */}
-            {adjacentScenes.prev && (
-              <button
-                onClick={() => handleSceneNavigation(adjacentScenes.prev!)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-6 h-6 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
-                title={prevScene ? `前往：${prevScene.name}` : '上一場景'}
-              >
-                <ChevronLeft size={12} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
-              </button>
-            )}
-            
-            {/* 右側箭頭 - 切換到下一個場景 */}
-            {adjacentScenes.next && (
-              <button
-                onClick={() => handleSceneNavigation(adjacentScenes.next!)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 group flex items-center justify-center w-6 h-6 bg-dark-surface/90 backdrop-blur-md border border-dark-border/50 rounded-full text-gray-300 hover:text-white hover:bg-dark-surface hover:border-dark-border transition-all duration-200 shadow-lg hover:scale-110"
-                title={nextScene ? `前往：${nextScene.name}` : '下一場景'}
-              >
-                <ChevronRight size={12} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
-              </button>
             )}
           </div>
         </div>
@@ -2696,9 +2613,10 @@ export default function PlayPage() {
                 return;
               }
               if (observed && casualCount >= 3) {
-                setCurrentDialog({
+                setSensitiveGate({
+                  step: 'ask_or_skip',
+                  npcId: 'npc_lin_ruitang',
                   text: '你覺得時機差不多了，可以試著往深一點問。',
-                  type: 'narrator',
                   choices: [
                     { id: 'lin_sensitive_ask', text: '我想問一些比較敏感的問題。' },
                     { id: 'lin_sensitive_skip', text: '先不用，再聊聊就好。' },
@@ -2728,9 +2646,10 @@ export default function PlayPage() {
                 return;
               }
               if (observed && casualCount >= 3) {
-                setCurrentDialog({
+                setSensitiveGate({
+                  step: 'ask_or_skip',
+                  npcId: 'npc_ashun',
                   text: '你覺得時機差不多了，可以試著往深一點問。',
-                  type: 'narrator',
                   choices: [
                     { id: 'ashun_sensitive_ask', text: '我想問一些比較敏感的問題。' },
                     { id: 'ashun_sensitive_skip', text: '先不用，再聊聊就好。' },
@@ -2760,9 +2679,10 @@ export default function PlayPage() {
                 return;
               }
               if (observed && casualCount >= 3) {
-                setCurrentDialog({
+                setSensitiveGate({
+                  step: 'ask_or_skip',
+                  npcId: 'npc_xiaozhang',
                   text: '你覺得時機差不多了，可以試著往深一點問。',
-                  type: 'narrator',
                   choices: [
                     { id: 'xiaozhang_sensitive_ask', text: '我想問一些比較敏感的問題。' },
                     { id: 'xiaozhang_sensitive_skip', text: '先不用，再聊聊就好。' },
@@ -2792,9 +2712,10 @@ export default function PlayPage() {
                 return;
               }
               if (observed && casualCount >= 3) {
-                setCurrentDialog({
+                setSensitiveGate({
+                  step: 'ask_or_skip',
+                  npcId: 'npc_zhou_jie',
                   text: '你覺得時機差不多了，可以試著往深一點問。',
-                  type: 'narrator',
                   choices: [
                     { id: 'zhou_sensitive_ask', text: '我想問一些比較敏感的問題。' },
                     { id: 'zhou_sensitive_skip', text: '先不用，再聊聊就好。' },
@@ -3232,6 +3153,19 @@ export default function PlayPage() {
         </>
       )}
 
+      {/* 敏感抉擇 overlay（方案一：獨立於 NPC 對話框） */}
+      <AnimatePresence>
+        {sensitiveGate && (
+          <SensitiveGateOverlay
+            key={`${sensitiveGate.step}-${sensitiveGate.npcId}`}
+            text={sensitiveGate.text}
+            choices={sensitiveGate.choices}
+            onChoiceSelect={handleSensitiveGateChoice}
+            onClose={() => setSensitiveGate(null)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* 道具獲得提示 - 優先顯示 */}
       {showItemNotification && obtainedItem && (
         <ItemObtainedNotification
@@ -3250,21 +3184,12 @@ export default function PlayPage() {
         />
       )}
 
-      {/* 對話框 - 底部浮動（道具提示和場景名稱未顯示時才顯示） */}
-      {currentDialog && !showItemNotification && !showSceneName && (
-        <DialogBox
-          dialog={currentDialog}
-          onClose={handleDialogClose}
-          autoClose={false}
-          onChoiceSelect={handleDialogChoice}
-        />
-      )}
-
       {/* 角色對話系統（優先顯示） */}
       {currentConversation && (
         <CharacterConversation
           conversation={currentConversation.turns}
           finalChoices={currentConversation.finalChoices}
+          onTurnChange={(_, turn) => setCurrentConversationTurn(turn)}
           onComplete={() => {
             // 對話完成後的處理
             if (currentConversation.onComplete?.setFlag) {
@@ -3277,6 +3202,7 @@ export default function PlayPage() {
             if (currentConversation.onComplete?.triggerEvent) {
               engine.triggerEvent(currentConversation.onComplete.triggerEvent);
             }
+            setCurrentConversationTurn(null);
             setCurrentConversation(null);
             setRefreshKey(prev => prev + 1);
           }}
@@ -3291,6 +3217,7 @@ export default function PlayPage() {
                 value: true 
               });
             }
+            setCurrentConversationTurn(null);
             setCurrentConversation(null);
             setRefreshKey(prev => prev + 1);
           }}

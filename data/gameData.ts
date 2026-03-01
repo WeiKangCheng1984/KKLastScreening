@@ -3487,14 +3487,6 @@ export const chapters: Record<string, Chapter> = {
       // backgroundImage: '/images/intro_ch1_bg.webp', // 需要放置圖片
       // 第一章導讀 BGM：置於 public/audio/bgm/kk_bgm_intro_ch1.mp3
       ambientAudio: '/audio/bgm/kk_bgm_intro_ch1.mp3',
-      // 導讀影片：文字說明後播放的動畫影片
-      // 建議格式：MP4 (H.264編碼，兼容性最好)
-      // 建議尺寸：1920x1080 或 1280x720
-      // 建議時長：30-60秒
-      // 檔案大小：建議 < 10MB（可壓縮）
-      // 檔名建議：intro_ch1_animation_v1.mp4
-      // 放置位置：/public/videos/intro_ch1_animation_v1.mp4
-      introVideo: '/videos/intro_ch1_animation_v1.mp4',
     },
   },
   ch2: {

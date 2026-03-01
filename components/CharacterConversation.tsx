@@ -2,13 +2,14 @@
 
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { DialogChoice, ConversationTurn } from '@/types/game';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react';
 import CharacterConversationCard from './CharacterConversationCard';
 
 export interface CharacterConversationProps {
   conversation: ConversationTurn[];
   onComplete?: () => void;
   onChoiceSelect?: (choice: DialogChoice) => void;
+  onTurnChange?: (currentIndex: number, currentTurn: ConversationTurn) => void;
   finalChoices?: DialogChoice[]; // 最後的選擇題
   typewriterSpeed?: number;
   className?: string;
@@ -18,6 +19,7 @@ export default function CharacterConversation({
   conversation,
   onComplete,
   onChoiceSelect,
+  onTurnChange,
   finalChoices,
   typewriterSpeed = 30,
   className = '',
@@ -80,6 +82,13 @@ export default function CharacterConversation({
     };
   }, [currentTurn, typewriterSpeed, conversation.length]);
 
+  // 通知父層當前 turn（供 play 頁在場景上繪製立繪）；用 useLayoutEffect 在繪製前更新，避免閃爍
+  useLayoutEffect(() => {
+    if (currentTurn && onTurnChange) {
+      onTurnChange(currentIndex, currentTurn);
+    }
+  }, [currentIndex, currentTurn, onTurnChange]);
+
   // 處理下一段對話
   const handleNext = useCallback(() => {
     setCurrentIndex(prev => {
@@ -115,15 +124,16 @@ export default function CharacterConversation({
   // 繼續按鈕顯示條件：對話完成 + 不是最後一段 + 沒有選擇題
   const showContinue = isComplete && !isLastTurn && !showChoices;
 
-  // 固定人像框尺寸；優先使用 WEBP（characterId + characterExpression），其次 characterPortrait（SVG）
+  // 優先使用 WEBP（characterId + characterExpression），其次 characterPortrait（SVG）
   const portraitWebpUrl = currentTurn.characterId
     ? getNpcPortraitUrl(currentTurn.characterId, currentTurn.characterExpression ?? 1)
     : null;
-  const portraitSize = 'w-24 h-[7.5rem] md:w-[7.5rem] md:h-[9rem]'; // 縮小 25%：原 128×160 / 160×192 → 96×120 / 120×144
+  // 方案四：胸上立繪放大區（約 1.75x）、object-bottom 對齊
+  const portraitSize = 'w-32 h-[11rem] md:w-[10rem] md:h-[13rem]'; // 約 128×176 / 160×208
 
-  // 方案 C：整張卡片固定總高度，上方內容區 + 下方固定按鈕區，避免「繼續」出現時跳動
+  // 整張卡片固定總高度，配合放大立繪略增
   const cardWidth = 'min(360px, calc(100vw - 2rem))';
-  const cardHeight = '19rem'; // 304px，固定總高
+  const cardHeight = '21rem'; // 配合立繪區增高
   const textAreaHeight = '7rem'; // 112px，約 4～5 行
   const buttonAreaHeight = '3.5rem'; // 56px，固定按鈕區
 

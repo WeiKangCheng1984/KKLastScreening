@@ -29,7 +29,6 @@ export const chapters: Record<string, Chapter> = {
       description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
       moodText: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，就是在正常裡動手。',
       ambientAudio: '/audio/bgm/kk_bgm_intro_ch1.mp3',
-      introVideo: '/videos/intro_ch1_animation_v1.mp4',
     },
   },
   ch2: {

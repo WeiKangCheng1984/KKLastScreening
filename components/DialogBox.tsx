@@ -2,7 +2,7 @@
 
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { Dialog, DialogChoice, NpcDialogChoice } from '@/types/game';
-import { X, ChevronRight, SkipForward } from 'lucide-react';
+import { X, SkipForward } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import SVGImage from './SVGImage';
 import DialogChoiceComponent from './DialogChoice';
@@ -18,6 +18,10 @@ interface DialogBoxProps {
   onNpcChoiceSelect?: (choiceId: string) => void; // 新增：NPC 選擇回調
   /** 是否預留底部空間（如序章頁的略過按鈕），手機版對話框會上移 */
   reserveBottomSpace?: boolean;
+  /** 立繪由場景顯示（玩法 A）：為 true 時對話框內不渲染角色立繪 */
+  portraitOnScene?: boolean;
+  /** 嵌在父層右下角（場景內 50% x 30%）：不佔滿全螢幕，由父層控制位置與大小 */
+  embedInParent?: boolean;
 }
 
 export default function DialogBox({ 
@@ -30,6 +34,8 @@ export default function DialogBox({
   npcChoices,
   onNpcChoiceSelect,
   reserveBottomSpace = false,
+  portraitOnScene = false,
+  embedInParent = false,
 }: DialogBoxProps) {
   const [displayText, setDisplayText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
@@ -102,6 +108,21 @@ export default function DialogBox({
     setDisplayText('');
     setIsComplete(false);
     setShowContinue(false);
+  };
+
+  // 點擊內文繼續（取代「繼續」按鈕）：多段時下一段、僅「繼續」選項時等同點擊繼續、否則關閉
+  const isSingleChoiceNext =
+    dialog.choices?.length === 1 && dialog.choices[0].id === 'choice_next' && isComplete && isLastSegment;
+  const canClickToContinue =
+    showSegmentContinue ||
+    isSingleChoiceNext ||
+    (showContinue && mode !== 'npc' && !(dialog.choices?.length && isComplete && isLastSegment) && !(npcChoices?.length && isComplete && isLastSegment));
+  const handleContentClick = () => {
+    if (showSegmentContinue) handleSegmentContinue();
+    else if (isSingleChoiceNext && onChoiceSelect) {
+      onChoiceSelect(dialog.choices![0]);
+      onClose();
+    } else if (showContinue && mode !== 'npc') onClose();
   };
 
   // 快速跳過功能（按住跳過）：完成當前段
@@ -177,22 +198,36 @@ export default function DialogBox({
 
   const styles = getTypeStyles();
 
+  const isEmbedded = embedInParent;
+
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8 md:pb-8 transition-opacity duration-500 ${
-        reserveBottomSpace
-          ? 'pb-[calc(3.5rem+max(1rem,env(safe-area-inset-bottom)))] md:pb-8'
-          : 'pb-[max(1rem,env(safe-area-inset-bottom))]'
+      className={`transition-opacity duration-500 ${
+        isEmbedded
+          ? 'absolute inset-0 flex items-end justify-end p-2 md:p-3 pointer-events-none'
+          : `fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8 md:pb-8 ${
+              reserveBottomSpace
+                ? 'pb-[calc(3.5rem+max(1rem,env(safe-area-inset-bottom)))] md:pb-8'
+                : 'pb-[max(1rem,env(safe-area-inset-bottom))]'
+            }`
       } ${isVisible ? 'opacity-100' : 'opacity-0'}`}
     >
       <div
-      className={`w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] flex flex-col p-4 rounded-lg border-2 backdrop-blur-xl ${styles.container} pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${
+      className={`flex flex-col rounded-lg border-2 backdrop-blur-xl pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${
+        isEmbedded
+          ? 'bg-gradient-to-br from-gray-950/50 via-gray-900/50 to-gray-950/50 border-orange-700/30 text-gray-100 w-full h-full min-h-0 max-w-full max-h-full rounded-tl-xl rounded-br-none p-2 md:p-4'
+          : `${styles.container} w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4`
+      } ${
         isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'
       }`}
       >
-        {/* 標題欄 - 添加圖示動畫 */}
-        <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/10 flex-shrink-0 gap-2">
-          <div className={`text-ui-title text-xs uppercase tracking-widest ${styles.icon} flex items-center gap-2 min-w-0 break-words flex-1`}>
+        {/* 標題欄 - 嵌在場景時縮小；手機 0.6em + 更小 padding/gap */}
+        <div className={`flex justify-between items-center border-b border-white/10 flex-shrink-0 gap-2 ${
+          isEmbedded ? 'pb-1 mb-1 gap-1.5 text-[0.6em] md:pb-1.5 md:mb-1.5 md:gap-2' : 'mb-4 pb-3'
+        }`}>
+          <div className={`text-ui-title uppercase tracking-widest ${styles.icon} flex items-center gap-2 min-w-0 flex-1 ${
+            isEmbedded ? 'whitespace-nowrap overflow-hidden text-ellipsis' : 'text-xs break-words'
+          }`}>
             {dialog.type === 'broadcast' && (
               <span className={`w-2 h-2 bg-red-400 rounded-full ${styles.pulse}`}></span>
             )}
@@ -202,7 +237,7 @@ export default function DialogBox({
             {mode !== 'npc' && dialog.type === 'system' && '系統'}
             {mode !== 'npc' && dialog.type === 'choice' && '選擇'}
             {mode !== 'npc' && dialog.type === 'character' && (
-              <span className="whitespace-pre-line min-w-[6em]">{(dialog.characterName || '角色').replace(/（/g, '\n（')}</span>
+              <span>{isEmbedded ? (dialog.characterName || '角色') : (dialog.characterName || '角色').replace(/（/g, '\n（')}</span>
             )}
             {mode !== 'npc' && !dialog.type && '旁白'}
           </div>
@@ -231,20 +266,30 @@ export default function DialogBox({
         </div>
 
         {dialog.title && (
-          <div className="text-ui-caption text-white/70 mb-2 flex-shrink-0">
+          <div className={`text-ui-caption text-white/70 flex-shrink-0 ${isEmbedded ? 'mb-0.5 md:mb-1 text-[0.65em]' : 'mb-2'}`}>
             {dialog.title}
           </div>
         )}
 
-        {/* 對話內容容器 - 可捲動、最大高度，支持 SVG 和角色立繪佈局 */}
+        {/* 對話內容容器 - 嵌在場景時手機略縮 gap */}
         {(() => {
           const portraitWebpUrl = dialog.characterId
             ? getNpcPortraitUrl(dialog.characterId, dialog.characterExpression ?? 1)
             : null;
           const hasCharacterPortrait = Boolean(portraitWebpUrl || dialog.characterPortrait);
+          // 做法 A：有 characterId 時預設立繪在場景上，不畫在對話框內（除非明確 portraitOnScene=false）
+          const portraitShownInline = hasCharacterPortrait && (
+            dialog.characterId ? portraitOnScene === false : !portraitOnScene
+          );
           return (
-        <div className={`flex gap-3 mb-3 min-h-0 flex-1 overflow-y-auto ${
-          hasCharacterPortrait ? (
+        <div
+          role={canClickToContinue ? 'button' : undefined}
+          tabIndex={canClickToContinue ? 0 : undefined}
+          title={canClickToContinue ? '點擊繼續' : undefined}
+          onClick={canClickToContinue ? handleContentClick : undefined}
+          onKeyDown={canClickToContinue ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleContentClick(); } } : undefined}
+          className={`flex gap-3 min-h-0 flex-1 overflow-y-auto ${isEmbedded ? 'gap-1.5 mb-0.5 md:gap-2 md:mb-1' : 'mb-3'} ${canClickToContinue ? 'cursor-pointer' : ''} ${
+          portraitShownInline ? (
             dialog.characterPosition === 'right' ? 'flex-row-reverse' : 'flex-row'
           ) : (
             dialog.svgImage && dialog.svgPosition === 'left' ? 'flex-row' :
@@ -252,34 +297,36 @@ export default function DialogBox({
             'flex-col'
           )
         }`}>
-          {/* 角色立繪：優先 WEBP（characterId + characterExpression），其次 characterPortrait（SVG） */}
-          {portraitWebpUrl && (
+          {/* 角色立繪（方案四）：立繪由場景顯示時不渲染 */}
+          {portraitShownInline && portraitWebpUrl && (
             <div className="flex-shrink-0 flex items-end">
-              <div className="w-24 h-[7.5rem] md:w-[7.5rem] md:h-[9rem] relative">
+              <div className="relative w-32 h-[11rem] md:w-[10rem] md:h-[13rem] min-w-[8rem] min-h-[11rem] overflow-hidden rounded-xl bg-dark-surface/60 border border-orange-400/40 shadow-xl shadow-orange-500/10 ring-2 ring-orange-400/20">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-orange-950/20 to-transparent pointer-events-none" aria-hidden />
                 <img
                   src={portraitWebpUrl}
                   alt={dialog.characterName || '角色'}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain object-bottom relative"
                 />
               </div>
             </div>
           )}
-          {!portraitWebpUrl && dialog.characterPortrait && (
+          {portraitShownInline && !portraitWebpUrl && dialog.characterPortrait && (
             <div className="flex-shrink-0 flex items-end">
-              <div className="w-24 h-[7.5rem] md:w-[7.5rem] md:h-[9rem] relative">
+              <div className="relative w-32 h-[11rem] md:w-[10rem] md:h-[13rem] min-w-[8rem] min-h-[11rem] overflow-hidden rounded-xl bg-dark-surface/60 border border-orange-400/40 shadow-xl shadow-orange-500/10 ring-2 ring-orange-400/20">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-orange-950/20 to-transparent pointer-events-none" aria-hidden />
                 <SVGImage
                   src={dialog.characterPortrait}
                   alt={dialog.characterName || '角色'}
                   size="large"
                   lazy={false}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain object-bottom relative"
                 />
               </div>
             </div>
           )}
           
           {/* SVG 圖片（根據位置顯示，如果沒有角色立繪） */}
-          {!hasCharacterPortrait && dialog.svgImage && (dialog.svgPosition === 'left' || dialog.svgPosition === 'right') && (
+          {!portraitShownInline && dialog.svgImage && (dialog.svgPosition === 'left' || dialog.svgPosition === 'right') && (
             <div className="flex-shrink-0">
               <SVGImage
                 src={dialog.svgImage}
@@ -302,10 +349,10 @@ export default function DialogBox({
             </div>
           )}
 
-          {/* 對話文字內容 - 手機字體加大方便閱讀 */}
-          <div className={`flex-1 text-lg sm:text-base leading-relaxed min-h-[3rem] whitespace-pre-line overflow-y-auto max-h-[50vh] sm:max-h-none ${
-            dialog.svgImage && (dialog.svgPosition === 'top' || dialog.svgPosition === 'bottom') ? 'order-2' : ''
-          }`}>
+          {/* 對話文字內容 - 嵌在場景時手機 0.82em、桌面 0.9em */}
+          <div className={`flex-1 leading-relaxed min-h-[3rem] whitespace-pre-line overflow-y-auto ${
+            isEmbedded ? 'min-h-0 max-h-none text-[0.82em] md:text-[0.9em]' : 'text-lg sm:text-base max-h-[50vh] sm:max-h-none'
+          } ${dialog.svgImage && (dialog.svgPosition === 'top' || dialog.svgPosition === 'bottom') ? 'order-2' : ''}`}>
           {displayText.split('').map((char, index) => {
             // 高亮顯示當前字符（打字機效果增強）
             const isCurrentChar = index === displayText.length - 1 && !isComplete;
@@ -338,18 +385,9 @@ export default function DialogBox({
           );
         })()}
 
-        {/* 選擇題或繼續提示 - 固定於底部 */}
-        <div className="flex-shrink-0 mt-auto pt-2">
-        {showSegmentContinue ? (
-          <button
-            type="button"
-            onClick={handleSegmentContinue}
-            className="flex items-center justify-end gap-2 text-sm opacity-70 hover:opacity-100 transition-all duration-200 cursor-pointer ml-auto group mt-3"
-          >
-            <span className="group-hover:translate-x-1 transition-transform">繼續</span>
-            <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-          </button>
-        ) : (mode === 'npc' && npcChoices && npcChoices.length > 0 && isComplete && isLastSegment) ? (
+        {/* 選擇題區（無「繼續」按鈕：改為點擊內文繼續） */}
+        <div className={`flex-shrink-0 mt-auto ${isEmbedded ? 'pt-0.5 md:pt-1' : 'pt-2'}`}>
+        {showSegmentContinue ? null : (mode === 'npc' && npcChoices && npcChoices.length > 0 && isComplete && isLastSegment) ? (
           <div className="mt-3 space-y-2">
             {npcChoices.map((choice) => (
               <button
@@ -371,6 +409,8 @@ export default function DialogBox({
             ))}
           </div>
         ) : dialog.choices && dialog.choices.length > 0 && isComplete && isLastSegment ? (
+          // 僅單一「繼續」選項時不顯示按鈕，改為點擊內文繼續（見 canClickToContinue）
+          isSingleChoiceNext ? null : (
           <DialogChoiceComponent
             choices={dialog.choices}
             onSelect={(choice) => {
@@ -381,15 +421,8 @@ export default function DialogBox({
             }}
             className="mt-3"
           />
-        ) : showContinue && mode !== 'npc' ? (
-          <button
-            onClick={onClose}
-            className="flex items-center justify-end gap-2 text-sm opacity-70 hover:opacity-100 transition-all duration-200 cursor-pointer ml-auto group"
-          >
-            <span className="group-hover:translate-x-1 transition-transform">繼續</span>
-            <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-          </button>
-        ) : null}
+          )
+        ) : showContinue && mode !== 'npc' ? null : null}
         </div>
       </div>
     </div>

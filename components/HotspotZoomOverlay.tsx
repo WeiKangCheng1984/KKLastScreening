@@ -15,10 +15,11 @@ export interface HotspotZoomOverlayProps {
   onClose: () => void;
 }
 
-const ZOOM_IN_DURATION = 0.36;
-const ZOOM_OUT_DURATION = 0.31;
-/** 最終放大倍率（原 1.38，再增加 40% ≈ 1.93） */
-const ZOOM_MAX_SCALE = 1.38 * 1.4;
+const ZOOM_IN_DURATION = 0.48;
+const ZOOM_OUT_DURATION = 0.38;
+/** 兩段放大：第一段中繼倍率、第二段最終倍率 */
+const ZOOM_MID_SCALE = 1.4;
+const ZOOM_MAX_SCALE = 2.6;
 
 export default function HotspotZoomOverlay({
   visible,
@@ -93,11 +94,11 @@ export default function HotspotZoomOverlay({
             animate={{
               scale:
                 phase === 'zooming-in'
-                  ? [1, 1.12, ZOOM_MAX_SCALE]
+                  ? [1, ZOOM_MID_SCALE, ZOOM_MAX_SCALE]
                   : phase === 'dialog'
                     ? ZOOM_MAX_SCALE
                     : phase === 'zooming-out'
-                      ? [ZOOM_MAX_SCALE, 1.12, 1]
+                      ? [ZOOM_MAX_SCALE, ZOOM_MID_SCALE, 1]
                       : 1,
             }}
             transition={{
@@ -105,13 +106,13 @@ export default function HotspotZoomOverlay({
                 phase === 'zooming-in'
                   ? {
                       duration: ZOOM_IN_DURATION,
-                      times: [0, 0.12 / ZOOM_IN_DURATION, 1],
+                      times: [0, 0.4, 1],
                       ease: ['easeOut', 'easeOut', 'easeOut'],
                     }
                   : phase === 'zooming-out'
                     ? {
                         duration: ZOOM_OUT_DURATION,
-                        times: [0, 0.14 / ZOOM_OUT_DURATION, 1],
+                        times: [0, 0.45, 1],
                         ease: ['easeIn', 'easeIn', 'easeIn'],
                       }
                     : { duration: 0 },
@@ -140,9 +141,9 @@ export default function HotspotZoomOverlay({
             transition={{
               opacity:
                 phase === 'zooming-in'
-                  ? { delay: 0.14, duration: 0.2 }
+                  ? { delay: 0.2, duration: 0.25 }
                   : phase === 'zooming-out'
-                    ? { duration: 0.15 }
+                    ? { duration: 0.18 }
                     : { duration: 0 },
             }}
           />

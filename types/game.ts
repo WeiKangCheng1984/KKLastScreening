@@ -339,7 +339,6 @@ export interface GameState {
 export type FlowStepType =
   | 'main_menu'
   | 'prologue_text'
-  | 'animation'
   | 'chapter_intro'
   | 'scene_explore'
   | 'chapter_hub'
