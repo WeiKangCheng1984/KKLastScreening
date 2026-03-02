@@ -84,7 +84,9 @@ export default function PlayPage() {
   const router = useRouter();
   const chapterId = params.chapterId as string;
   const sceneId = params.sceneId as string;
-  const debug = searchParams.get('debug') === '1';
+  // 第一章、第二章預設開啟 hotspot debug，其他章節仍可透過 ?debug=1 顯示
+  const debugParam = searchParams.get('debug');
+  const debug = debugParam === '1' || chapterId === 'ch1' || chapterId === 'ch2';
   // 開發者模式：由選單開關，並存入 localStorage（不再使用網址 ?dev=1）
   const [devMode, setDevMode] = useState(false);
   useEffect(() => {
@@ -288,11 +290,36 @@ export default function PlayPage() {
       .filter((itemId: string) => state.inventory.includes(itemId));
     
     if (collectedItems.length > 0) {
-      // 已經收集了部分或全部道具，顯示友好提示
-      const itemNames = collectedItems.map((itemId: string) => {
-        const item = items[itemId];
-        return item?.name || itemId;
-      }).join('、');
+      // 已經收集了部分或全部道具
+      // 第二章車內場景：改為觸發對應的「重播」事件，讓阿蘇重新說明線索
+      if (scene.id === 'scene_ch2_asu_car') {
+        // 例如 eventId: examine_car_phone_main -> replay_car_phone_main
+        const replayEventId = `replay_${eventId.replace(/^examine_/, '')}`;
+        const replayEvent = scene.events.find(e => e.id === replayEventId);
+        if (replayEvent && engine.checkEventRequirements(replayEvent)) {
+          const replayResult = engine.triggerEvent(replayEventId);
+          if (replayResult) {
+            const dialogEffects = replayResult.effects.filter((e: any) => e.type === 'showDialog');
+            const dialogs: Dialog[] = [];
+            dialogEffects.forEach((effect: any) => {
+              if (effect.dialog) dialogs.push(effect.dialog);
+            });
+            if (dialogs.length > 0) {
+              addDialogsToQueue(dialogs);
+            }
+            setRefreshKey(prev => prev + 1);
+            return true; // 已處理，不需要繼續
+          }
+        }
+      }
+
+      // 其他場景：維持原本友好提示行為
+      const itemNames = collectedItems
+        .map((itemId: string) => {
+          const item = items[itemId];
+          return item?.name || itemId;
+        })
+        .join('、');
       setCurrentDialog({
         text: `你已經收集了${itemNames}。`,
         type: 'system',
@@ -344,8 +371,8 @@ export default function PlayPage() {
       audioManager.playSFX('/audio/sfx/kk_sfx_rust_remover.mp3', 0.6);
     }
     
-    // 步驟8：觸發事件並處理道具獲得提示
-    // 先觸發事件以獲取道具
+    // 步驟8：觸發事件並處理道具獲得提示與對話
+    // 先觸發事件以獲取道具與對話
     const result = engine.triggerEvent(eventId);
     
     if (!result) {
@@ -353,34 +380,45 @@ export default function PlayPage() {
       return false;
     }
     
-    // 檢查是否有道具被添加
+    // 檢查是否有道具被添加與對話
     const addItemEffects = result.effects.filter((e: any) => e.type === 'addItem');
-    
+    const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
+
     if (addItemEffects.length > 0) {
-      // 如果有道具被添加，先顯示道具獲得提示
-        const firstItemEffect = addItemEffects[0];
-        const itemId = firstItemEffect?.itemId;
-        const item = itemId != null ? items[itemId] : undefined;
-        if (item) {
-          // 播放收集音效
-          audioManager.playInteractionSFX('collect');
-          
-          // 顯示道具獲得提示
-          setObtainedItem({
-            id: item.id,
-            name: item.name,
-            image: item.image,
-            svgImage: item.svgImage,
-            description: item.description,
-          });
-          setShowItemNotification(true);
-          setRefreshKey(prev => prev + 1);
-          return true; // 已處理（方案 C：點擊浮動提示後關閉）
+      // 如果有道具被添加，先顯示道具獲得提示（浮動卡片）
+      const firstItemEffect = addItemEffects[0];
+      const itemId = firstItemEffect?.itemId;
+      const item = itemId != null ? items[itemId] : undefined;
+      if (item) {
+        // 播放收集音效
+        audioManager.playInteractionSFX('collect');
+
+        // 顯示道具獲得提示
+        setObtainedItem({
+          id: item.id,
+          name: item.name,
+          image: item.image,
+          svgImage: item.svgImage,
+          description: item.description,
+        });
+        setShowItemNotification(true);
+
+        // 將同一事件中的對話效果排入對話佇列（阿蘇說明會在道具提示後出現）
+        const dialogs: Dialog[] = [];
+        dialogEffects.forEach((effect: any) => {
+          if (effect.dialog) dialogs.push(effect.dialog);
+        });
+        if (dialogs.length > 0) {
+          addDialogsToQueue(dialogs);
         }
+
+        setRefreshKey(prev => prev + 1);
+        return true; // 已處理（點擊浮動提示後，對話依序顯示）
       }
-      
-      // 沒有道具，正常處理對話
-      // 檢查是否為角色對話事件
+    }
+
+    // 沒有道具，正常處理對話
+    // 檢查是否為角色對話事件
       const isCharacterDialog = /^(character_\d_|person_)(first|second|third|fourth|fifth)_talk$/.test(eventId) || 
                                 /^talk_to_(character_|person)/.test(eventId);
       
@@ -2811,7 +2849,7 @@ export default function PlayPage() {
         <button
           type="button"
           onClick={() => setShowReasoningPanel(true)}
-          className="fixed bottom-20 right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-orange-500/90 hover:bg-orange-500 border-2 border-orange-400/80 text-white text-sm font-medium shadow-lg hover:scale-105 transition-all"
+          className="fixed bottom-6 right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-orange-500/90 hover:bg-orange-500 border-2 border-orange-400/80 text-white text-sm font-medium shadow-lg hover:scale-105 transition-all"
           title="推理分析"
         >
           <Brain size={20} />

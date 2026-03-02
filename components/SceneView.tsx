@@ -275,6 +275,7 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
       {/* Hotspots - 方案一：完全隱藏，僅點擊/觸控當下有回饋（無 hover 提示、無游標變化） */}
       {scene.hotspots.map(hotspot => {
         const isClicked = clickedHotspot === hotspot.id;
+        const isHovered = hoveredHotspot === hotspot.id;
         
         return (
           <div
@@ -285,14 +286,20 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
             onMouseLeave={() => setHoveredHotspot(null)}
             className={`
               transition-all duration-200 gpu-accelerated rounded-full
-              ${debug ? 'border-4 border-orange-500 bg-orange-500/40 cursor-pointer' : 'border-transparent bg-transparent cursor-default'}
-              ${isClicked && debug ? 'bg-white/15 border-white/60 scale-95' : ''}
+              ${
+                debug
+                  ? `cursor-pointer border border-orange-400/25 bg-orange-400/10 ${
+                      isHovered ? 'border-orange-400/70 bg-orange-400/20' : ''
+                    }`
+                  : 'border-transparent bg-transparent cursor-default'
+              }
+              ${isClicked && debug ? 'scale-95' : ''}
             `}
             title={debug ? `${hotspot.id}: ${hotspot.description || ''}` : ''}
           >
             {/* Debug 標籤 */}
-            {debug && (
-              <div className="absolute top-0 left-0 bg-orange-600 text-white text-xs px-1.5 py-0.5 rounded-br">
+            {debug && isHovered && (
+              <div className="absolute top-0 left-0 bg-orange-600/80 text-white text-xs px-1.5 py-0.5 rounded-br">
                 {hotspot.id}
               </div>
             )}
