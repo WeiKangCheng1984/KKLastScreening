@@ -8,7 +8,6 @@ import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import { getChapterIntroContinuePath } from '@/data/flowConfig';
 import { scenes as scenesMap } from '@/data/gameData';
 import FadeIn from './animations/FadeIn';
-import SlideIn from './animations/SlideIn';
 import ParticleEffect from './animations/ParticleEffect';
 
 interface ChapterIntroProps {
@@ -151,7 +150,7 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg relative overflow-hidden py-[5vh] md:py-[8vh]">
       {/* 過場遮罩 */}
       {isTransitioning && (
         <div className="fixed inset-0 z-50 bg-black transition-opacity duration-500 flex items-center justify-center">
@@ -345,52 +344,63 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
         </div>
       )}
 
-      {/* 內容層 */}
-      <div className={`relative z-10 text-center max-w-4xl px-6 transition-opacity duration-500 ${
+      {/* 內容層：安全區內垂直置中，四槽位比例與間距重新平衡 */}
+      <div className={`relative z-10 flex-1 flex flex-col justify-center w-full max-w-4xl px-4 sm:px-6 transition-opacity duration-500 ${
         isTransitioning ? 'opacity-0' : 'opacity-100'
       }`}>
-        {/* 第一層：標題 */}
-        {currentLayer >= 1 && (
-          <SlideIn direction="up" delay={0.5} duration={1}>
-            <h1 className="text-[2.7rem] md:text-[4.05rem] font-bold mb-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent text-center whitespace-pre-line">
-              {chapter.intro.title.replace(/：/g, '\n')}
-            </h1>
-            <p className="text-xl md:text-2xl text-orange-300/80 mb-8">
-              {chapter.intro.subtitle}
-            </p>
-          </SlideIn>
-        )}
+        {/* 四槽位區塊：固定總高、桌面／手機皆不裁切，視覺平衡 */}
+        <div className="h-[66vh] max-h-[590px] flex flex-col text-center gap-0">
+          {/* 槽位一：標題 + 副標題（高度再加 15% 以完整顯示） */}
+          <div className="flex-none h-[20vh] min-h-[6rem] max-h-[161px] flex flex-col justify-center overflow-hidden">
+            {currentLayer >= 1 && (
+              <FadeIn delay={0} duration={0.6}>
+                <h1 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] font-bold mb-0.5 md:mb-1 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent whitespace-pre-line leading-tight">
+                  {chapter.intro.title.replace(/：/g, '\n')}
+                </h1>
+                <p className="text-[0.95rem] md:text-[1.15rem] text-orange-300/80">
+                  {chapter.intro.subtitle}
+                </p>
+              </FadeIn>
+            )}
+          </div>
 
-        {/* 第二層：描述 */}
-        {currentLayer >= 2 && (
-          <SlideIn direction="up" delay={0.3} duration={1}>
-            <p className="text-lg md:text-xl text-gray-300 leading-relaxed mb-8">
-              {chapter.intro.description}
-            </p>
-          </SlideIn>
-        )}
+          {/* 槽位二：描述（主體區，閱讀優先） */}
+          <div className="flex-none h-[20vh] min-h-0 max-h-[180px] overflow-y-auto flex flex-col justify-center">
+            {currentLayer >= 2 && (
+              <FadeIn delay={0} duration={0.5}>
+                <p className="text-base md:text-lg text-gray-300 leading-relaxed px-0">
+                  {chapter.intro.description}
+                </p>
+              </FadeIn>
+            )}
+          </div>
 
-        {/* 第三層：心理文字；無內容時不顯示區塊 */}
-        {currentLayer >= 3 && chapter.intro.moodText?.trim() && (
-          <SlideIn direction="up" delay={0.5} duration={1}>
-            <p className="text-base md:text-lg text-orange-200/70 leading-relaxed whitespace-pre-line mb-12">
-              {chapter.intro.moodText}
-            </p>
-          </SlideIn>
-        )}
+          {/* 槽位三：心理文字（氛圍區） */}
+          <div className="flex-none h-[14vh] min-h-0 max-h-[120px] overflow-y-auto flex flex-col justify-center">
+            {currentLayer >= 3 && chapter.intro.moodText?.trim() && (
+              <FadeIn delay={0} duration={0.5}>
+                <p className="text-sm md:text-base text-orange-200/70 leading-relaxed whitespace-pre-line">
+                  {chapter.intro.moodText}
+                </p>
+              </FadeIn>
+            )}
+          </div>
 
-        {/* 繼續按鈕 */}
-        {isReady && (
-          <FadeIn delay={0.3} duration={0.5}>
-            <button
-              onClick={handleContinue}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-xl transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
-            >
-              <Play size={24} />
-              {introVideo && !showVideo && !videoEnded ? '觀看影片' : '開始探索'}
-            </button>
-          </FadeIn>
-        )}
+          {/* 槽位四：開始探索（CTA 留白充足，整體下移 5%） */}
+          <div className="flex-none h-[12vh] min-h-[4rem] max-h-[100px] mt-[5vh] flex flex-col justify-center items-center">
+            {isReady && (
+              <FadeIn delay={0} duration={0.5}>
+                <button
+                  onClick={handleContinue}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-xl transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
+                >
+                  <Play size={24} />
+                  {introVideo && !showVideo && !videoEnded ? '觀看影片' : '開始探索'}
+                </button>
+              </FadeIn>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
