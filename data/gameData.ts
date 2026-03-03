@@ -3723,6 +3723,9 @@ export const scenes: Record<string, Scene> = {
   },
 };
 
+// NPC 對話樹：目前遊戲邏輯不使用，先提供空物件給 getChapterData 匯入與型別使用
+export const npcDialogs: Record<string, Record<string, any>> = {};
+
 /* NPC 對話樹（舊資料備份，暫時停用）
 export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
   // 第一章 林瑞堂（副理）— 敏感問題一：燈與流程 / 敏感問題二：他怕誰（二選一，問完設 npc_lin_sensitive_done）
