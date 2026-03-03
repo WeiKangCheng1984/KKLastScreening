@@ -221,9 +221,7 @@ export default function PlayPage() {
         const firstDialog = toQueue[0];
         // 檢查是否為廣播類型，需要特殊處理
         if (firstDialog.type === 'broadcast') {
-          // 播放廣播音效
-          audioManager.playSFX('/audio/sfx/kk_sfx_broadcast.mp3', 0.7);
-          // 觸發劇烈閃爍
+          // 廣播特殊效果：僅保留閃爍，不再播放音效
           if (sceneViewRef.current) {
             sceneViewRef.current.triggerFlicker('intense');
             setTimeout(() => {
@@ -257,6 +255,59 @@ export default function PlayPage() {
       }
     });
   }, []);
+
+  // 劉隊章節開場：僅在 ch1/ch2 第一個場景、且尚未顯示過時觸發一次
+  useEffect(() => {
+    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    const state = engine.getState();
+
+    if (chapterId === 'ch1') {
+      const flagKey = 'ch1_police_intro_shown';
+      if (!state.flags[flagKey]) {
+        const police = reasoningByChapter['ch1']?.police;
+        if (police?.introLine) {
+          addDialogsToQueue(
+            [
+              {
+                text: police.introLine,
+                type: 'character',
+                characterId: 'npc_liu',
+                characterName: '劉隊',
+                characterExpression: 1,
+                characterPosition: 'right',
+              },
+            ],
+            '警方簡報'
+          );
+          engine.applyEffect({ type: 'setFlag', flag: flagKey, value: true });
+        }
+      }
+    }
+
+    if (chapterId === 'ch2' && sceneId === 'scene_ch2_asu_car') {
+      const flagKey = 'ch2_police_intro_shown';
+      if (!state.flags[flagKey]) {
+        const police = reasoningByChapter['ch2']?.police;
+        if (police?.introLine) {
+          addDialogsToQueue(
+            [
+              {
+                text: police.introLine,
+                type: 'character',
+                characterId: 'npc_liu',
+                characterName: '劉隊',
+                characterExpression: 2,
+                characterPosition: 'right',
+              },
+            ],
+            '警方錄音前言'
+          );
+          engine.applyEffect({ type: 'setFlag', flag: flagKey, value: true });
+        }
+      }
+    }
+  }, [chapterId, sceneId, addDialogsToQueue]);
 
   // 統一道具獲取處理函數
   const handleItemCollection = useCallback((hotspotId: string): boolean => {
@@ -358,17 +409,13 @@ export default function PlayPage() {
         sceneViewRef.current.triggerFlicker('light');
       }
     } else if (hotspotId === 'recorder_spot') {
-      // 錄音筆播放音效
-      audioManager.playSFX('/audio/sfx/kk_sfx_recorder_click.mp3', 0.6);
+      // 錄音筆互動（音效已停用）
     } else if (hotspotId === 'mirror_shard_spot') {
-      // 鏡片碎角玻璃破碎音效
-      audioManager.playSFX('/audio/sfx/kk_sfx_glass_break.mp3', 0.6);
+      // 鏡片碎角玻璃互動（音效已停用）
     } else if (hotspotId === 'duty_schedule') {
-      // 值班表紙張翻動音效
-      audioManager.playSFX('/audio/sfx/kk_sfx_paper_rustle.mp3', 0.5);
+      // 值班表紙張翻動互動（音效已停用）
     } else if (hotspotId === 'plant') {
-      // 除鏽劑音效
-      audioManager.playSFX('/audio/sfx/kk_sfx_rust_remover.mp3', 0.6);
+      // 除鏽劑互動（音效已停用）
     }
     
     // 步驟8：觸發事件並處理道具獲得提示與對話
@@ -390,10 +437,7 @@ export default function PlayPage() {
       const itemId = firstItemEffect?.itemId;
       const item = itemId != null ? items[itemId] : undefined;
       if (item) {
-        // 播放收集音效
-        audioManager.playInteractionSFX('collect');
-
-        // 顯示道具獲得提示
+        // 顯示道具獲得提示（收集音效已停用）
         setObtainedItem({
           id: item.id,
           name: item.name,
@@ -706,11 +750,8 @@ export default function PlayPage() {
         const nextDialog = prev[0];
         // 使用 setTimeout 確保當前對話完全關閉後再顯示下一個
         setTimeout(() => {
-          // 檢查是否為廣播類型，需要特殊處理
+          // 檢查是否為廣播類型，需要特殊處理（僅保留閃爍，不再播放音效）
           if (nextDialog.type === 'broadcast') {
-            // 播放廣播音效
-            audioManager.playSFX('/audio/sfx/kk_sfx_broadcast.mp3', 0.7);
-            // 觸發劇烈閃爍
             if (sceneViewRef.current) {
               sceneViewRef.current.triggerFlicker('intense');
               setTimeout(() => {
@@ -1134,11 +1175,9 @@ export default function PlayPage() {
     }
   }, []);
 
-  // 統一的廣播處理函數（音效+閃光+對話）
+  // 統一的廣播處理函數（目前僅閃光+對話，音效已停用）
   const handleBroadcast = useCallback((dialog: Dialog) => {
-    // 播放廣播音效
-    audioManager.playSFX('/audio/sfx/kk_sfx_broadcast.mp3', 0.7);
-    // 觸發劇烈閃爍
+    // 觸發劇烈閃爍（不再播放音效）
     triggerIntenseFlicker();
     // 顯示廣播對話
     setCurrentDialog(dialog);
@@ -1276,9 +1315,7 @@ export default function PlayPage() {
       const state = engine.getState();
       // 檢查是否有髮夾
       if (state.inventory.includes('rusty_hairpin')) {
-        // 有髮夾，播放打開音效
-        audioManager.playSFX('/audio/sfx/kk_sfx_drawer_open.mp3', 0.7);
-        // 有髮夾，觸發打開事件
+        // 有髮夾，觸發打開事件（音效已停用）
         const result = engine.triggerEvent('open_drawer');
         if (result?.dialog) {
           setCurrentDialog(result.dialog);
@@ -1297,84 +1334,82 @@ export default function PlayPage() {
     }
 
 
-    // 第二空間：病床排列（病床輪子音效）
+    // 第二空間：病床排列（病床輪子音效已停用）
     if (hotspotId === 'beds' && scene?.id === 'ch1_sc2') {
       const state = engine.getState();
       if (state.flags.beds_labels_revealed && state.inventory.includes('mirror_shard')) {
-        audioManager.playSFX('/audio/sfx/kk_sfx_bed_wheel.mp3', 0.5);
+        // 病床輪子音效已停用
       }
     }
 
-    // 第二空間：702門打開（門吱呀聲）
+    // 第二空間：702門打開（門吱呀聲已停用）
     if (hotspotId === 'door_702' && scene?.id === 'ch1_sc2') {
       const state = engine.getState();
       if (state.flags.door_702_open) {
-        audioManager.playSFX('/audio/sfx/kk_sfx_door_creak.mp3', 0.6);
+        // 門吱呀聲音效已停用
       }
     }
 
-    // 第三空間音效觸發（在特殊處理邏輯中整合）
+    // 第三空間音效觸發（在特殊處理邏輯中整合）— 目前已全部停用
 
-    // 第四空間：除鏽劑使用（除鏽劑音效）
+    // 第四空間：除鏽劑使用（除鏽劑音效已停用）
     if (hotspotId === 'plant' && scene?.id === 'ch1_sc4') {
-      audioManager.playSFX('/audio/sfx/kk_sfx_rust_remover.mp3', 0.6);
+      // 除鏽劑音效已停用
     }
 
-    // 第四空間：工具箱打開（工具箱打開音效）
+    // 第四空間：工具箱打開（工具箱打開音效已停用）
     if (hotspotId === 'toolbox' && scene?.id === 'ch1_sc4') {
       const state = engine.getState();
       if (state.inventory.includes('rust_remover')) {
-        audioManager.playSFX('/audio/sfx/kk_sfx_toolbox_open.mp3', 0.7);
+        // 工具箱打開音效已停用
       }
     }
 
-    // 第四空間：固定點選擇（繩索固定音效）
+    // 第四空間：固定點選擇（繩索固定音效已停用）
     if (hotspotId === 'fixed_point_2' && scene?.id === 'ch1_sc4') {
       const state = engine.getState();
       if (state.inventory.includes('blank_nameplate') && state.flags.restraints_collected) {
-        audioManager.playSFX('/audio/sfx/kk_sfx_rope_tension.mp3', 0.5);
+        // 繩索固定音效已停用
       }
     }
 
-    // 第四空間：垂降（垂降音效）
+    // 第四空間：垂降（垂降音效已停用）
     if (hotspotId === 'descend_point' && scene?.id === 'ch1_sc4') {
       const state = engine.getState();
       if (state.flags.fixed_point_selected) {
-        audioManager.playSFX('/audio/sfx/kk_sfx_descend.mp3', 0.6);
+        // 垂降音效已停用
       }
     }
 
-    // 第五空間：箱子排列（箱子拖動音效）
+    // 第五空間：箱子排列（箱子拖動音效已停用）
     if (hotspotId === 'boxes_area' && scene?.id === 'ch1_sc5') {
       const state = engine.getState();
       if (state.flags.label_read && state.flags.pain_patch_found) {
-        audioManager.playSFX('/audio/sfx/kk_sfx_box_drag.mp3', 0.5);
+        // 箱子拖動音效已停用
       }
     }
 
-    // 第五空間：心臟箱打開（箱子打開音效）
+    // 第五空間：心臟箱打開（箱子打開音效已停用）
     if (hotspotId === 'heart_box' && scene?.id === 'ch1_sc5') {
       const state = engine.getState();
       if (state.flags.boxes_arranged) {
-        audioManager.playSFX('/audio/sfx/kk_sfx_box_open.mp3', 0.6);
+        // 箱子打開音效已停用
       }
     }
 
-    // 第五空間：最終出口（門解鎖音效）
+    // 第五空間：最終出口（門解鎖音效已停用）
     if (hotspotId === 'exit' && scene?.id === 'ch1_sc5') {
       const state = engine.getState();
       if (state.flags.final_password_revealed || state.flags.coordinates_revealed) {
-        audioManager.playSFX('/audio/sfx/kk_sfx_door_unlock.mp3', 0.7);
+        // 門解鎖音效已停用
       }
     }
 
-    // 第一空間特殊處理：門的互動
+    // 第一空間特殊處理：門的互動（尖銳金屬聲已停用）
     if (hotspotId === 'door' && scene?.id === 'ch1_sc1') {
       const state = engine.getState();
       if (!state.flags.door_701_open) {
-        // 門未打開，觸發謎題
-        // 點下大門時播放尖銳金屬聲
-        audioManager.playSFX('/audio/sfx/kk_sfx_metal.mp3', 0.6);
+        // 門未打開，觸發謎題（音效已停用）
       } else {
         // 門已打開，顯示確認對話
         setShowDoor701Confirm(true);
@@ -1493,8 +1528,7 @@ export default function PlayPage() {
         setRefreshKey(prev => prev + 1);
         return;
       }
-      // 播放音效和閃爍效果
-      audioManager.playSFX('/audio/sfx/kk_sfx_wardrobe_open.mp3', 0.8);
+      // 觸發閃爍效果（音效已停用）
       if (sceneViewRef.current) {
         sceneViewRef.current.triggerFlicker('intense');
       }
@@ -1539,9 +1573,7 @@ export default function PlayPage() {
         setRefreshKey(prev => prev + 1);
         return;
       }
-      // 播放音效
-      audioManager.playSFX('/audio/sfx/kk_sfx_monitor_on.mp3', 0.5);
-      // 記錄互動，然後觸發激活事件
+      // 記錄互動，然後觸發激活事件（音效已停用）
       engine.addInteraction('monitor');
       const result = engine.triggerEvent('monitor_activation');
       if (result) {
@@ -1604,10 +1636,7 @@ export default function PlayPage() {
           const itemId = firstItemEffect?.itemId;
           const item = itemId != null ? items[itemId] : undefined;
           if (item) {
-            // 播放收集音效
-            audioManager.playInteractionSFX('collect');
-            
-            // 顯示道具獲得提示
+            // 顯示道具獲得提示（收集音效已停用）
             setObtainedItem({
               id: item.id,
               name: item.name,
@@ -1655,9 +1684,7 @@ export default function PlayPage() {
         setRefreshKey(prev => prev + 1);
         return;
       } else {
-        // 有手把，播放音效並顯示文案
-        audioManager.playSFX('/audio/sfx/kk_sfx_window_open.mp3', 0.6);
-        // 顯示文案
+        // 有手把，顯示文案（音效已停用）
         setCurrentDialog({
           text: '你把手把插入落地窗的鎖孔，轉動。窗戶緩緩打開，外面的風吹進來，帶著鐵鏽和消毒水的味道。\n\n你終於可以離開這個「展示用的」房間了。',
           type: 'narrator',
@@ -1768,10 +1795,7 @@ export default function PlayPage() {
           const itemId = firstItemEffect?.itemId;
           const item = itemId != null ? items[itemId] : undefined;
           if (item) {
-            // 播放收集音效
-            audioManager.playInteractionSFX('collect');
-            
-            // 顯示道具獲得提示
+            // 顯示道具獲得提示（收集音效已停用）
             setObtainedItem({
               id: item.id,
               name: item.name,
@@ -1831,9 +1855,7 @@ export default function PlayPage() {
         setRefreshKey(prev => prev + 1);
         return;
       }
-      // 播放音效
-      audioManager.playSFX('/audio/sfx/kk_sfx_toolbox_open.mp3', 0.7);
-      // 記錄互動，然後觸發打開事件
+      // 記錄互動，然後觸發打開事件（音效已停用）
       engine.addInteraction('toolbox');
       const result = engine.triggerEvent('open_toolbox');
       if (result) {
@@ -1847,10 +1869,7 @@ export default function PlayPage() {
           const itemId = firstItemEffect?.itemId;
           const item = itemId != null ? items[itemId] : undefined;
           if (item) {
-            // 播放收集音效
-            audioManager.playInteractionSFX('collect');
-            
-            // 顯示道具獲得提示
+            // 顯示道具獲得提示（收集音效已停用）
             setObtainedItem({
               id: item.id,
               name: item.name,
@@ -2235,10 +2254,7 @@ export default function PlayPage() {
                   const itemId = firstItemEffect?.itemId;
                   const item = itemId != null ? items[itemId] : undefined;
                   if (item) {
-                    // 播放收集音效
-                    audioManager.playInteractionSFX('collect');
-                    
-                    // 顯示道具獲得提示
+                    // 顯示道具獲得提示（收集音效已停用）
                     setObtainedItem({
                       id: item.id,
                       name: item.name,
@@ -2455,7 +2471,6 @@ export default function PlayPage() {
     if (!targetScene) return;
 
     lastDisplayedSceneRef.current = targetSceneId;
-    audioManager.playSFX('/audio/sfx/kk_sfx_scene_change.mp3', 0.3);
 
     // 步驟 1：只顯示大字（不改 engine、不 router），此時仍為舊場景，不會觸發「場景不存在」或 chapterData 重算
     showSceneNameWithTimer(targetScene.name, 4000);
@@ -2857,15 +2872,26 @@ export default function PlayPage() {
         </button>
       )}
 
-      {/* 推理分析面板（三題：選擇／字詞／道具連連看） */}
+      {/* 推理分析面板（三題：選擇／字詞／道具連連看，結尾可帶出劉隊結語） */}
       {showReasoningPanel && engineRef.current && (
         <ReasoningPanel
           chapterId={chapterId}
           onSaveAnswer={(chId, q, value) => {
             if (engineRef.current) engineRef.current.setReasoningAnswer(chId, q, value);
           }}
-          onComplete={() => {
+          onComplete={(extra) => {
             if (!engineRef.current) return;
+
+            // 若玩家在劉隊結語中選了要加進紀錄的一句，寫入 flags 供後續章節使用
+            if (extra?.policeNoteId) {
+              const noteFlagKey = `${chapterId}_police_note`;
+              engineRef.current.applyEffect({
+                type: 'setFlag',
+                flag: noteFlagKey,
+                value: extra.policeNoteId,
+              });
+            }
+
             engineRef.current.setReasoningComplete(chapterId);
             setShowReasoningPanel(false);
             setRefreshKey((k) => k + 1);

@@ -28,7 +28,6 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '死在散場之後的人',
       description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
       moodText: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，就是在正常裡動手。',
-      ambientAudio: '/audio/bgm/kk_bgm_intro_ch1.mp3',
     },
   },
   ch2: {
@@ -41,7 +40,6 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '城市影城外的風',
       description: '影城外的公園安靜得過頭。外牆上的廣告螢幕看板已經熄滅，只剩霓虹在半亮半滅地閃，像卡住的時間。\n\n垃圾桶裡塞著半杯沒喝完的飲料，杯壁凝著水珠，冷掉的甜味混在潮濕土味裡。長椅上只剩你和一支發著冷光的手機。\n\n警方傳來部分解碼後的內容，要你和工程師阿蘇一起，看懂一個死人的生活。',
       moodText: '你習慣先看現場，再看名字。這一次，名字藏在訊息裡。\n\n手機螢幕一行一行往上捲，像有人在倒帶他活過的每一天。\n\n真正的問題除了「他是誰」，還黏著一個更難甩掉的問題：「他究竟戳到了哪一層，才會被這樣收場？」',
-      ambientAudio: '/audio/ambient/temple_intro.mp3',
     },
   },
   ch3: {
@@ -54,7 +52,6 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '兩個電影院，一次機會',
       description: '你以為第二章是在排除嫌疑，其實只是替第三章鋪路。',
       moodText: '因為現在，世界不會等你慢慢想。\n\n如果你現在不選邊站，下一個人就會死。',
-      ambientAudio: '/audio/ambient/powerplant_intro.mp3',
     },
   },
   ch4: {
@@ -67,7 +64,6 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '每個人都站在正確的位置',
       description: '嫌疑全面攤開、動機與能力同時對齊。',
       moodText: '如果一切都合理，那我到底在抓什麼？',
-      ambientAudio: '/audio/ambient/disaster_intro.mp3',
     },
   },
   ch5: {
@@ -80,7 +76,6 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '抉擇',
       description: '城市沒有警鈴。沒有倒數。只有一場正常播放的電影，和一個你必須自己做出的決定。',
       moodText: '如果你錯了，沒有人會提醒你。\n\n如果你對了，也沒有人會恭喜你。\n\n因為這不是遊戲，這是選擇。',
-      ambientAudio: '/audio/ambient/core_intro.mp3',
     },
   },
   ch6: {
@@ -93,7 +88,6 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '（待補）',
       description: '第六章內容尚未完成。',
       moodText: '',
-      ambientAudio: '/audio/ambient/core_intro.mp3',
     },
   },
 };

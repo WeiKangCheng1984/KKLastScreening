@@ -74,10 +74,6 @@ export default function Inventory({ itemIds, items, onItemClick, currentSceneId 
               key={itemId}
               onClick={() => {
                 onItemClick?.(itemId);
-                // 播放使用音效
-                const audio = new Audio('/audio/sfx/kk_sfx_ui_item_use.mp3');
-                audio.volume = 0.3;
-                audio.play().catch(() => {});
               }}
               className={`group relative p-4 bg-gradient-to-br from-dark-card to-dark-surface border-2 rounded-xl transition-all duration-200 border-dark-border hover:border-gray-600 hover:scale-105 active:scale-95 gpu-accelerated ${
                 isNew ? 'animate-item-fly-in border-orange-400/50 shadow-lg shadow-orange-500/30' : ''

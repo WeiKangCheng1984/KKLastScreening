@@ -44,11 +44,6 @@ export default function PuzzleInput({ puzzle, onSolve, onClose, error: externalE
     setInternalError('');
     if (onErrorClear) onErrorClear();
     
-    // 播放提交音效
-    const audio = new Audio('/audio/sfx/kk_sfx_ui_puzzle_ok.mp3');
-    audio.volume = 0.4;
-    audio.play().catch(() => {});
-    
     if (puzzle.type === 'input') {
       onSolve(input);
     } else if (puzzle.type === 'sequence') {

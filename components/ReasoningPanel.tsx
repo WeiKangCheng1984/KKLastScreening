@@ -8,7 +8,7 @@ import { useState } from 'react';
 interface ReasoningPanelProps {
   chapterId: string;
   onSaveAnswer: (chapterId: string, q: 'q1' | 'q2' | 'q3', value: string | string[]) => void;
-  onComplete: () => void;
+  onComplete: (extra?: { policeNoteId?: string }) => void;
   onClose: () => void;
 }
 
@@ -19,12 +19,13 @@ export default function ReasoningPanel({
   onClose,
 }: ReasoningPanelProps) {
   const config = reasoningByChapter[chapterId] as ChapterReasoning | undefined;
-  const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
   const [q1Selected, setQ1Selected] = useState<string | null>(null);
   const [q2Input, setQ2Input] = useState('');
   const [q3Pairs, setQ3Pairs] = useState<[string, string][]>([]);
   const [q3Selected, setQ3Selected] = useState<string[]>([]);
   const [q3Error, setQ3Error] = useState('');
+  const [selectedPoliceNoteId, setSelectedPoliceNoteId] = useState<string | null>(null);
 
   if (!config) return null;
 
@@ -80,7 +81,12 @@ export default function ReasoningPanel({
     }
     const value: string[] = q3Pairs.map(([l, r]) => `${l},${r}`);
     onSaveAnswer(chapterId, 'q3', value);
-    onComplete();
+    // 若本章沒有 police 設定，直接完成；否則進入劉隊結語步驟
+    if (!config.police) {
+      onComplete();
+    } else {
+      setStep(3);
+    }
   };
 
   const getLabel = (id: string) => {
@@ -294,6 +300,69 @@ export default function ReasoningPanel({
                   className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
                 >
                   送出並完成
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 3 && config.police && (
+            <motion.div
+              key="police"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <p className="text-gray-200 mb-4 whitespace-pre-line">
+                {config.police.outroStandard}
+              </p>
+
+              {config.police.outroPlayerLines && config.police.outroPlayerLines.length > 0 && (
+                <div className="mb-6">
+                  <p className="text-gray-400 text-sm mb-2">
+                    你可以要求劉隊在紀錄裡補上一句話（可選其一，或直接略過）。
+                  </p>
+                  <div className="space-y-2">
+                    {config.police.outroPlayerLines.map((line) => (
+                      <button
+                        key={line.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedPoliceNoteId(
+                            selectedPoliceNoteId === line.id ? null : line.id
+                          )
+                        }
+                        className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm transition-all ${
+                          selectedPoliceNoteId === line.id
+                            ? 'bg-orange-500/30 border-orange-400 text-white'
+                            : 'bg-dark-surface border-orange-500/30 text-gray-200 hover:border-orange-400'
+                        }`}
+                      >
+                        {line.text}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg"
+                >
+                  關閉
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onComplete(
+                      selectedPoliceNoteId ? { policeNoteId: selectedPoliceNoteId } : undefined
+                    )
+                  }
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg"
+                >
+                  結束推理
                 </button>
               </div>
             </motion.div>

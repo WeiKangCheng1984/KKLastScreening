@@ -1,4 +1,4 @@
-import { Chapter, Scene, Item, Hotspot, Event, Puzzle, Dialog, NpcDialogNode, Npc } from '@/types/game';
+import { Chapter, Scene, Item, Hotspot, Event, Puzzle, Dialog, Npc } from '@/types/game';
 
 // 序章文案（KK流程偵探：最後一場放映）
 export const prologueSlides: string[] = [
@@ -284,7 +284,7 @@ export const items: Record<string, Item> = {
     svgImage: '/svg/items/elevator_door_delay.svg',
     svgSize: 'medium',
     collectible: true,
-  },
+  }
 };
 
 // 場景資料
@@ -545,6 +545,20 @@ export const scenes: Record<string, Scene> = {
           },
         ],
         available: true,
+      },
+      {
+        id: 'npc_liu',
+        name: '劉隊（偵查隊）',
+        portraitExpression: 1,
+        randomDialogs: [
+          {
+            id: 'ch1_briefing',
+            text: '「現場我們會先封著，你來看一眼就好。你看到什麼，就照實說。」',
+            type: 'hint',
+            weight: 1,
+          },
+        ],
+        available: false,
       },
       {
         id: 'npc_ashun',
@@ -1554,14 +1568,7 @@ export const scenes: Record<string, Scene> = {
     ],
   },
   
-  // ========== 第二章：死者是誰 ==========
-  // 場景一：城市影城外 公園
-  'scene_ch2_park': {
-    id: 'scene_ch2_park',
-    chapterId: 'ch2',
-    name: '城市影城外 公園',
-    description: '路燈偏黃，照在被踩皺的影城傳單上，紙邊翹起。長椅木板有舊雨痕、鞋底磨白的刮痕，還留著一個被煙頭燙過的小洞，像誰在等人的時候把耐心壓成灰。遠處仍看得到「城市影城」的招牌。風一陣一陣吹，爆米花油味跟冷空氣裡的清潔劑味糾纏，像兩種證詞互相搶話。',
-    background: '/images/bg_ch2_park_v1.webp',
+  /*
     hotspots: [
       { id: 'hotspot_park_bench', shape: 'rect', coords: [0.3, 0.4, 0.5, 0.35], description: '公園長椅', hint: '長椅上有舊雨痕、踩黑的煙頭和刮痕。' },
       { id: 'hotspot_park_flyer', shape: 'rect', coords: [0.15, 0.55, 0.35, 0.25], description: '地上的影城傳單', hint: '傳單被鞋跟踩到紙纖維起毛。' },
@@ -1726,6 +1733,7 @@ export const scenes: Record<string, Scene> = {
       },
     ],
   },
+  */
 
   // 場景二：阿蘇的車裡
   'scene_ch2_asu_car': {
@@ -2274,356 +2282,6 @@ export const scenes: Record<string, Scene> = {
     ],
   },
 
-  // 可探索空間二：辦公大樓（嫌犯 A 現職）— 自 ch2 流程移除，保留供他章使用
-  'scene_ch2_office_building': {
-    id: 'scene_ch2_office_building',
-    chapterId: 'ch2',
-    name: '辦公大樓',
-    description: '這棟大樓沒有情緒，它只記錄進出。每一扇門、每一部電梯、每一個打卡機，都在記錄著時間和位置。',
-    background: '/images/bg_ch2_office_building_v1.webp',
-    hotspots: [
-      {
-        id: 'hotspot_visitor_log',
-        shape: 'rect',
-        coords: [0.2, 0.3, 0.5, 0.5],
-        description: '訪客登記表',
-        hint: '訪客登記表上記錄著所有人的進出時間。',
-      },
-      {
-        id: 'hotspot_elevator_monitor',
-        shape: 'rect',
-        coords: [0.5, 0.3, 0.8, 0.6],
-        description: '電梯監視器',
-        hint: '電梯監視器畫面顯示了案發當晚的情況。',
-      },
-      {
-        id: 'hotspot_breakroom_note',
-        shape: 'rect',
-        coords: [0.1, 0.6, 0.4, 0.8],
-        description: '茶水間便條',
-        hint: '茶水間的佈告欄上貼著一張便條。',
-      },
-      {
-        id: 'hotspot_colleague_conversation',
-        shape: 'rect',
-        coords: [0.5, 0.6, 0.8, 0.8],
-        description: '員工對話',
-        hint: '你無意中聽到兩個同事的對話。',
-      },
-      {
-        id: 'hotspot_bulletin_board',
-        shape: 'rect',
-        coords: [0.7, 0.1, 0.9, 0.3],
-        description: '公告欄',
-        hint: '公告欄上貼著各種通知和活動海報。',
-      },
-    ],
-    items: [
-      items.item_visitor_log,
-    ],
-    hotspotEventMap: {
-      'hotspot_visitor_log': 'examine_visitor_log',
-      'hotspot_elevator_monitor': 'view_elevator_monitor',
-      'hotspot_breakroom_note': 'examine_breakroom_note',
-      'hotspot_colleague_conversation': 'hear_colleague_conversation',
-      'hotspot_bulletin_board': 'examine_bulletin_board',
-    },
-    events: [
-      {
-        id: 'examine_visitor_log',
-        name: '檢查訪客登記表',
-        description: '你檢查訪客登記表。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_visitor_log' },
-        ],
-        effects: [
-          { type: 'addItem', itemId: 'item_visitor_log' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：訪客登記表\n\n訪客登記表上記錄著所有人的進出時間。\n\n案發當晚，嫌犯 A 的記錄清晰可見：\n進入時間：08:30\n離開時間：22:30\n\n這個時間戳無法偽造。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'visitor_log_found', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'view_elevator_monitor',
-        name: '觀看電梯監視器',
-        description: '你觀看電梯監視器畫面。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_elevator_monitor' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '電梯監視器畫面顯示了案發當晚的情況。\n\n時間戳：22:30\n畫面：嫌犯 A 獨自走進電梯\n\n他的動作很從容，沒有急促，沒有緊張。\n就像平常下班一樣。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'clue_suspect_a_calm_behavior', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'examine_breakroom_note',
-        name: '檢查茶水間便條',
-        description: '你檢查茶水間便條。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_breakroom_note' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '茶水間的佈告欄上貼著一張便條。\n\n字跡工整，內容簡單：\n「他總是最後一個走。」\n\n沒有署名，但大家都知道指的是誰。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'clue_suspect_a_work_habit', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'hear_colleague_conversation',
-        name: '旁聽員工對話',
-        description: '你無意中聽到兩個同事的對話。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_colleague_conversation' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你無意中聽到兩個同事的對話。\n\n「他很安靜，\n但不像會失控的人。」\n\n「我跟他共事半年，從來沒看他發過脾氣。」\n「他只是...很安靜。」',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'clue_colleague_impression', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'examine_bulletin_board',
-        name: '檢查公告欄',
-        description: '你檢查公告欄。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_bulletin_board' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '公告欄上貼著各種通知和活動海報。\n\n其中一張電影海報特別顯眼：\n正是城市影城 播映的那部電影。\n\n海報已經有些破舊，像是貼了很久。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'clue_movie_poster_coincidence', value: true },
-        ],
-        oneTime: true,
-      },
-    ],
-    puzzles: [],
-    initialDialog: {
-      text: '這棟大樓沒有情緒，\n它只記錄進出。\n\n每一扇門、每一部電梯、每一個打卡機，\n都在記錄著時間和位置。\n在這裡，沒有人可以隱藏。',
-      type: 'narrator',
-    },
-  },
-  
-  // 可探索空間三：嫌犯 A 住所
-  'scene_ch2_suspect_a_residence': {
-    id: 'scene_ch2_suspect_a_residence',
-    chapterId: 'ch2',
-    name: '嫌犯 A 住所',
-    description: '他的房間很乾淨，乾淨得像是隨時準備被檢查。每一樣東西都放在固定的位置，每一本書都按照某種邏輯排列。',
-    background: '/images/bg_ch2_suspect_a_residence_v1.webp',
-    hotspots: [
-      {
-        id: 'hotspot_desk',
-        shape: 'rect',
-        coords: [0.3, 0.3, 0.6, 0.6],
-        description: '書桌',
-        hint: '書桌上放著一本筆記本。封面寫著：「觀眾心理分析」。',
-      },
-      {
-        id: 'hotspot_wall_clock',
-        shape: 'rect',
-        coords: [0.7, 0.1, 0.9, 0.3],
-        description: '牆上的時鐘',
-        hint: '牆上的時鐘停在 00:10。不是電池沒電，而是被人刻意停止。',
-      },
-      {
-        id: 'hotspot_drawer',
-        shape: 'rect',
-        coords: [0.1, 0.4, 0.3, 0.7],
-        description: '抽屜',
-        hint: '抽屜裡放著一雙手套。黑色的，完整、未使用。',
-      },
-      {
-        id: 'hotspot_trash_bag',
-        shape: 'rect',
-        coords: [0.6, 0.7, 0.9, 0.9],
-        description: '垃圾袋',
-        hint: '垃圾袋裡很乾淨，分類整齊。',
-      },
-      {
-        id: 'hotspot_bookshelf',
-        shape: 'rect',
-        coords: [0.1, 0.1, 0.3, 0.4],
-        description: '書架',
-        hint: '書架上的書都按照某種邏輯排列。',
-      },
-    ],
-    items: [
-      items.item_audience_psychology_notebook,
-      items.item_gloves_clean,
-    ],
-    hotspotEventMap: {
-      'hotspot_desk': 'examine_desk',
-      'hotspot_wall_clock': 'examine_wall_clock',
-      'hotspot_drawer': 'examine_drawer',
-      'hotspot_trash_bag': 'examine_trash_bag',
-      'hotspot_bookshelf': 'examine_bookshelf',
-    },
-    events: [
-      {
-        id: 'examine_desk',
-        name: '檢查書桌',
-        description: '你檢查書桌，發現筆記本。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_desk' },
-        ],
-        effects: [
-          { type: 'addItem', itemId: 'item_audience_psychology_notebook' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：觀眾心理筆記本\n\n書桌上放著一本筆記本。\n\n封面寫著：「觀眾心理分析」\n裡面記錄著他對電影、觀眾、散場的觀察。\n\n字跡工整，邏輯清晰，像是一份研究報告。',
-              type: 'item',
-            },
-          },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '重點段落：\n「真正的高潮，\n不在片中，\n而在散場。\n\n當燈亮起，當人群開始移動，\n那一刻，所有人都最脆弱。\n因為他們剛剛經歷了什麼，\n卻還沒有回到現實。」',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'notebook_found', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'examine_wall_clock',
-        name: '檢查牆上的時鐘',
-        description: '你檢查牆上的時鐘。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_wall_clock' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '牆上的時鐘停在 00:10。\n\n不是電池沒電，而是被人刻意停止。\n這個時間，正好是城市影城 案發的時間。\n\n他對「時間」有意識。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'clue_time_awareness', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'examine_drawer',
-        name: '檢查抽屜',
-        description: '你檢查抽屜，發現手套。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_drawer' },
-        ],
-        effects: [
-          { type: 'addItem', itemId: 'item_gloves_clean' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：手套（完整、未使用）\n\n抽屜裡放著一雙手套。\n\n黑色的，完整、未使用。\n沒有任何血跡，沒有任何使用痕跡。\n\n這雙手套很新，像是剛買的，但從未用過。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'gloves_found', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'examine_trash_bag',
-        name: '檢查垃圾袋',
-        description: '你檢查垃圾袋。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_trash_bag' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '垃圾袋裡很乾淨，分類整齊。\n\n沒有可疑物，沒有血跡，沒有任何異常。\n一切都按照回收分類標準整理。\n\n這種「乾淨」本身就很可疑，但也可能只是他的習慣。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'clue_clean_trash', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'examine_bookshelf',
-        name: '檢查書架',
-        description: '你檢查書架。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_bookshelf' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '書架上的書都按照某種邏輯排列。\n\n每一本書都放在固定的位置，\n每一本書都按照某種邏輯排列。\n這裡沒有情緒，只有秩序。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'bookshelf_examined', value: true },
-        ],
-        oneTime: true,
-      },
-    ],
-    puzzles: [
-      {
-        id: 'puzzle_ch2_suspect_a_alibi',
-        type: 'input',
-        solution: '不可能',
-        hint: '時間計算：\n1. 22:30 離開辦公大樓\n2. 最快到達城市影城：23:10（需要40分鐘）\n3. 但案發時間是 00:10-00:15\n\n結論：時間上幾乎不可能',
-        requirements: [
-          { type: 'hasItem', itemId: 'item_visitor_log' },
-          { type: 'hasFlag', flag: 'clue_time_awareness', value: true },
-          { type: 'hasFlag', flag: 'gloves_found', value: true },
-        ],
-        onSolve: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你理解了：嫌犯 A 在時間上幾乎不可能完成犯案。\n\n他理解「脆弱」，但沒有跨過那條線。\n這是一個「紅鯡魚」（Red Herring）。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'puzzle_ch2_alibi_solved', value: true },
-          { type: 'setFlag', flag: 'chapter3_unlocked', value: true },
-        ],
-      },
-    ],
-    initialDialog: {
-      text: '他的房間很乾淨，\n乾淨得像是隨時準備被檢查。\n\n每一樣東西都放在固定的位置，\n每一本書都按照某種邏輯排列。\n這裡沒有情緒，只有秩序。',
-      type: 'narrator',
-    },
-  },
-  
   // ========== 第三章：預測（電影院 B 和 C） ==========
   // 可探索空間一：電影院 B（推測地點）
   'scene_ch3_cinema_b': {
@@ -4063,110 +3721,9 @@ export const scenes: Record<string, Scene> = {
       type: 'narrator',
     },
   },
-
-  // ========== 第六章（占位，待補） ==========
-  scene_ch6_start: {
-    id: 'scene_ch6_start',
-    chapterId: 'ch6',
-    name: '第六章',
-    description: '第六章場景（待補內容）',
-    background: '/images/bg_ch1_cinema_a_hall_v1.webp',
-    hotspots: [],
-    items: [],
-    events: [],
-    puzzles: [],
-  },
 };
 
-// 章節定義
-export const chapters: Record<string, Chapter> = {
-  ch1: {
-    id: 'ch1',
-    name: '第一章：城市影城',
-    description: '死在散場之後的人',
-    scenes: ['scene_ch1_cinema_a_hall', 'scene_ch1_projection_room', 'scene_ch1_restroom'],
-    intro: {
-      title: '第一章：城市影城',
-      subtitle: '死在散場之後的人',
-      description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
-      moodText: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，就是在正常裡動手。',
-      // backgroundImage: '/images/intro_ch1_bg.webp', // 需要放置圖片
-      // 第一章導讀 BGM：置於 public/audio/bgm/kk_bgm_intro_ch1.mp3
-      ambientAudio: '/audio/bgm/kk_bgm_intro_ch1.mp3',
-    },
-  },
-  ch2: {
-    id: 'ch2',
-    name: '第二章：城市碎片',
-    description: '第一個嫌犯 A',
-    scenes: ['scene_ch2_park', 'scene_ch2_office_building', 'scene_ch2_suspect_a_residence'],
-    intro: {
-      title: '第二章：城市碎片',
-      subtitle: '第一個嫌犯 A',
-      description: '一個「看起來很像兇手的人」。\n\n嫌犯 A 幾乎完美符合「動機想像」，卻在時間與行為上完全對不上。',
-      moodText: '當一個人符合你想像中的「動機」，\n你會不會反而忽略「他根本來不及」？',
-      // backgroundImage: '/images/intro_ch2_bg.webp', // 需要放置圖片
-      ambientAudio: '/audio/ambient/temple_intro.mp3',
-    },
-  },
-  ch3: {
-    id: 'ch3',
-    name: '第三章：預測',
-    description: '電影院 B 和 C',
-    scenes: ['scene_ch3_cinema_b', 'scene_ch3_cinema_c', 'scene_ch3_shopping_mall_bridge'],
-    intro: {
-      title: '第三章：預測',
-      subtitle: '兩個電影院，一次機會',
-      description: '你以為第二章是在排除嫌疑，其實只是替第三章鋪路。',
-      moodText: '因為現在，世界不會等你慢慢想。\n\n如果你現在不選邊站，下一個人就會死。',
-      // backgroundImage: '/images/intro_ch3_bg.webp', // 需要放置圖片
-      ambientAudio: '/audio/ambient/powerplant_intro.mp3',
-    },
-  },
-  ch4: {
-    id: 'ch4',
-    name: '第四章：逼近',
-    description: '嫌犯 C',
-    scenes: ['scene_ch4_ticket_counter', 'scene_ch4_food_court', 'scene_ch4_rooftop'],
-    intro: {
-      title: '第四章：逼近',
-      subtitle: '每個人都站在正確的位置',
-      description: '嫌疑全面攤開、動機與能力同時對齊。',
-      moodText: '如果一切都合理，那我到底在抓什麼？',
-      // backgroundImage: '/images/intro_ch4_bg.webp', // 需要放置圖片
-      ambientAudio: '/audio/ambient/disaster_intro.mp3',
-    },
-  },
-  ch5: {
-    id: 'ch5',
-    name: '第五章：最後一場放映',
-    description: '抉擇',
-    scenes: ['scene_ch5_cinema_b_hall', 'scene_ch5_cinema_b_exit', 'scene_ch5_cinema_c_hall', 'scene_ch5_elevator'],
-    intro: {
-      title: '第五章：最後一場放映',
-      subtitle: '抉擇',
-      description: '城市沒有警鈴。沒有倒數。只有一場正常播放的電影，和一個你必須自己做出的決定。',
-      moodText: '如果你錯了，沒有人會提醒你。\n\n如果你對了，也沒有人會恭喜你。\n\n因為這不是遊戲，這是選擇。',
-      // backgroundImage: '/images/intro_ch5_bg.webp', // 需要放置圖片
-      ambientAudio: '/audio/ambient/core_intro.mp3',
-    },
-  },
-  ch6: {
-    id: 'ch6',
-    name: '第六章',
-    description: '（待補）',
-    scenes: ['scene_ch6_start'],
-    intro: {
-      title: '第六章',
-      subtitle: '（待補）',
-      description: '第六章內容尚未完成。',
-      moodText: '',
-      ambientAudio: '/audio/ambient/core_intro.mp3',
-    },
-  },
-};
-
-// NPC 對話樹定義（第一章林瑞堂：兩條敏感問題二選一，問完即鎖；其餘 NPC 暫維持原結構）
+/* NPC 對話樹（舊資料備份，暫時停用）
 export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
   // 第一章 林瑞堂（副理）— 敏感問題一：燈與流程 / 敏感問題二：他怕誰（二選一，問完設 npc_lin_sensitive_done）
   npc_lin_ruitang: {
@@ -4408,110 +3965,6 @@ export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       ],
     },
   },
-  // 保留舊 key 以相容（若 play 頁未改為 npc_zhou_jie 時仍可載入）
-  npc_zhou_yawen: {
-    'node_01_surface': {
-      id: 'node_01_surface',
-      npcId: 'npc_zhou_yawen',
-      text: '「那天我記得很清楚，\n因為燈比平常晚亮。\n\n我通常會在散場後5分鐘開始清潔，\n但那天，燈一直沒亮。\n我等了很久，才有人來開燈。」',
-      choices: [
-        {
-          id: 'choice_ask_details',
-          label: '詢問細節',
-          description: '深入詢問更多細節',
-          preferenceEffects: [
-            { target: 'preference_observation_wait', delta: 1 },
-          ],
-        },
-        {
-          id: 'choice_ask_anomaly',
-          label: '詢問異常',
-          description: '了解燈光延後的具體時間',
-          effects: [
-            {
-              type: 'showDialog',
-              dialog: {
-                text: '「異常？\n就是燈比平常晚亮。\n具體時間...大概是散場後8分鐘才亮。\n\n獲得線索：燈光延後的具體時間',
-                type: 'narrator',
-              },
-            },
-            { type: 'setFlag', flag: 'clue_light_delay_time', value: true },
-            { type: 'setFlag', flag: 'clue_light_delay_confirmed', value: true },
-          ],
-          preferenceEffects: [
-            { target: 'preference_system_intervention', delta: 1 },
-          ],
-        },
-        {
-          id: 'choice_end',
-          label: '結束對話',
-          description: '暫時結束對話',
-        },
-      ],
-      next: (state) => {
-        // 根據選擇決定下一個節點
-        // 如果選擇了「詢問細節」，進入第二層
-        if (state.flags['npc_npc_zhou_yawen_choice_choice_ask_details']) {
-          return 'node_02_deep';
-        }
-        // 如果選擇了其他選項（詢問異常或結束對話），對話結束
-        return null;
-      },
-    },
-    'node_02_deep': {
-      id: 'node_02_deep',
-      npcId: 'npc_zhou_yawen',
-      text: '「有時候，\n不亮燈，反而比較不會被注意。\n\n在黑暗中，很多事情都可以發生。\n沒有人會看到，沒有人會記得。\n\n我只是...覺得那天有點奇怪。」',
-      choices: [
-        {
-          id: 'choice_ask_what_saw',
-          label: '詢問她看到了什麼',
-          description: '了解清潔人員的觀察',
-          effects: [
-            {
-              type: 'showDialog',
-              dialog: {
-                text: '「我...我沒有看到什麼。\n只是覺得那天有點奇怪。\n\n獲得線索：清潔人員的觀察',
-                type: 'narrator',
-              },
-            },
-            { type: 'setFlag', flag: 'clue_cleaner_observation', value: true },
-          ],
-          preferenceEffects: [
-            { target: 'weight_behavior_evidence', delta: 1 },
-          ],
-        },
-        {
-          id: 'choice_ask_suspect',
-          label: '詢問她是否懷疑誰',
-          description: '了解內部人員關係',
-          effects: [
-            {
-              type: 'showDialog',
-              dialog: {
-                text: '「我...我不敢說。\n但這裡的人，都互相認識。\n\n獲得線索：內部人員關係',
-                type: 'narrator',
-              },
-            },
-            { type: 'setFlag', flag: 'clue_internal_relations', value: true },
-          ],
-          preferenceEffects: [
-            { target: 'question_system', delta: 1 },
-          ],
-        },
-        {
-          id: 'choice_end_deep',
-          label: '結束對話',
-          description: '結束對話',
-          effects: [
-            { type: 'setFlag', flag: 'clue_light_delay_confirmed', value: true },
-          ],
-        },
-      ],
- // 對話結束
-    },
-  },
-
   // 第二章 阿蘇（工程師）— 敏感一：為什麼來／受害者資料怎麼看；敏感二：三起事故誰在放風聲（二選一）
   npc_asu: {
     'node_asu_sensitive1_1': {
@@ -4590,4 +4043,4 @@ export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       ],
     },
   },
-};
+};*/

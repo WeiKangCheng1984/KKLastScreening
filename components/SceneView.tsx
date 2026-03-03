@@ -128,10 +128,7 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
         intensity: 1.5,
       });
       
-      // 播放閃電音效
-      audioManager.playSFX('/audio/sfx/kk_sfx_lightning.mp3', 0.6);
-      
-      // 觸發強烈閃爍
+      // 觸發強烈閃爍（不再播放音效）
       setFlickerType('white');
       setLightFlicker(true);
       setFlickerKey(prev => prev + 1);
@@ -204,10 +201,10 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
     onHotspotClick(hotspot.id);
   };
 
-  // 播放點擊音效
+  // 播放點擊音效（目前停用，僅保留 BGM）
   useEffect(() => {
     if (clickedHotspot) {
-      audioManager.playInteractionSFX('click');
+      // 音效已全局關閉，不再播放
     }
   }, [clickedHotspot]);
 

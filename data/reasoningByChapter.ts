@@ -21,10 +21,31 @@ export interface ReasoningQ3 {
   correctPairs: [string, string][]; // [leftId, rightId]
 }
 
+export interface ChapterPoliceConfig {
+  /**
+   * 劉隊在章節開始時給 KK 的簡短交代／任務說明（不劇透結論）。
+   */
+  introLine: string;
+  /**
+   * 在玩家完成推理後，劉隊給出的「可寫進報告」的標準結論。
+   */
+  outroStandard: string;
+  /**
+   * 玩家可以要求劉隊加進紀錄／報告裡的句子（例如流程、人性、證據三種角度）。
+   * 尚未在 UI 中實作選項時，可先當作文案庫使用。
+   */
+  outroPlayerLines?: { id: string; text: string }[];
+}
+
 export interface ChapterReasoning {
   q1: ReasoningQ1;
   q2: ReasoningQ2;
   q3: ReasoningQ3;
+  /**
+   * 每章與警方角色（劉隊）相關的互動文案與邏輯設定。
+   * 目前僅用於存文案，實際顯示由 ReasoningPanel 或場景流程決定。
+   */
+  police?: ChapterPoliceConfig;
 }
 
 export const reasoningByChapter: Record<string, ChapterReasoning> = {
@@ -60,6 +81,26 @@ export const reasoningByChapter: Record<string, ChapterReasoning> = {
         ['fragment', 'glove'],
       ],
     },
+    police: {
+      introLine:
+        '現場我們會先封著，你來看一眼就好。你看到什麼，就照實說。我們再決定要不要往下挖。',
+      outroStandard:
+        '我的工作是寫得出一份交得出去的報告。就目前資料，我可以寫：流程上有疏漏，現場處理不當。至於是不是「有人故意這樣設計」——那種句子，寫進去要很多證據。',
+      outroPlayerLines: [
+        {
+          id: 'ch1_summary_flow',
+          text: '燈不是自然晚，是被人改過。表格、手動模式、口頭指示……流程這次站在兇手那邊。',
+        },
+        {
+          id: 'ch1_summary_scene',
+          text: '現場乾淨得太刻意。有人花力氣把痕跡擦掉，卻忘了碎片比血跡難處理。',
+        },
+        {
+          id: 'ch1_extra_report',
+          text: '至少寫進去：這樣的燈光調整與清場節奏，未來若不被檢討，仍可能致人於死。',
+        },
+      ],
+    },
   },
   ch2: {
     q1: {
@@ -91,6 +132,26 @@ export const reasoningByChapter: Record<string, ChapterReasoning> = {
         ['victim_info', 'identity'],
         ['encrypted', 'threat'],
         ['column_draft', 'unpublished'],
+      ],
+    },
+    police: {
+      introLine:
+        '這是技術組解完密的那份。你不用幫我寫報告，只要告訴我——哪一段值得我們怕。',
+      outroStandard:
+        '通訊紀錄中多次出現「三起事故」等字眼，目前可視為內部說法或比喻，尚不足以構成具體預告。未完成錄音提到「結案報告有兩個版本」，經比對現有文件，暫時無法證實有正式報告遭到篡改。受害人長期書寫公共安全與外包議題，其焦慮可視為在高壓工作與輿論環境下的主觀反應。',
+      outroPlayerLines: [
+        {
+          id: 'ch2_extra_procedure',
+          text: '補一句：相關系統可重複調整散場節奏，未來仍有致人於危險之虞。',
+        },
+        {
+          id: 'ch2_extra_human',
+          text: '補一句：受害人的焦慮來源中，包含真實事故記憶與內部說法，不全屬臆測。',
+        },
+        {
+          id: 'ch2_extra_evidence',
+          text: '至少寫進去：目前資料不足以排除系統性問題，只是尚未取得完整證據。',
+        },
       ],
     },
   },

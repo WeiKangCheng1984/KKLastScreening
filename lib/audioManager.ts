@@ -118,41 +118,14 @@ export class AudioManager {
     }, stepTime);
   }
 
-  // 播放音效（一次性）
-  playSFX(audioPath: string, volume?: number): void {
-    if (!audioPath || this.isMuted) return;
-    
-    try {
-      // 使用快取避免重複載入
-      let audio = this.sfxCache.get(audioPath);
-      if (!audio) {
-        audio = new Audio(audioPath);
-        this.sfxCache.set(audioPath, audio);
-      }
-      audio.volume = (volume !== undefined ? volume : this.sfxVolume) * this.masterVolume;
-      audio.currentTime = 0; // 重置播放位置
-      audio.play().catch((err) => {
-        console.warn('無法播放音效:', err);
-      });
-    } catch (error) {
-      console.warn('載入音效失敗:', error);
-    }
+  // 播放音效（一次性）— 目前全遊戲僅保留 BGM，此函式暫不執行任何行為
+  playSFX(_audioPath: string, _volume?: number): void {
+    return;
   }
 
-  // 播放互動音效（根據類型）— 路徑統一為 /audio/sfx/kk_sfx_*.mp3
-  playInteractionSFX(type: 'click' | 'hover' | 'collect' | 'puzzle' | 'error'): void {
-    const sfxMap: Record<string, string> = {
-      click: '/audio/sfx/kk_sfx_ui_click.mp3',
-      hover: '/audio/sfx/kk_sfx_ui_hover.mp3',
-      collect: '/audio/sfx/kk_sfx_ui_collect.mp3',
-      puzzle: '/audio/sfx/kk_sfx_ui_puzzle_ok.mp3',
-      error: '/audio/sfx/kk_sfx_ui_error.mp3',
-    };
-    
-    const path = sfxMap[type];
-    if (path) {
-      this.playSFX(path, 0.3);
-    }
+  // 播放互動音效（目前停用，僅保留 BGM）
+  playInteractionSFX(_type: 'click' | 'hover' | 'collect' | 'puzzle' | 'error'): void {
+    return;
   }
 
   // 停止環境音
