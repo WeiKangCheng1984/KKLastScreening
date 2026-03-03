@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
-import { audioManager } from '@/lib/audioManager';
+import { audioManager, GAME_BGM } from '@/lib/audioManager';
 
 /** 正上方一鍵靜音／取消靜音，簡單呈現，三頁共用 */
 export default function MuteAllButton() {
@@ -15,8 +15,21 @@ export default function MuteAllButton() {
   }, []);
 
   const handleToggle = () => {
+    const wasMuted = audioManager.getMuted();
     audioManager.toggleMute();
-    setIsMuted(audioManager.getMuted());
+    const nowMuted = audioManager.getMuted();
+    setIsMuted(nowMuted);
+
+    // 從「靜音 → 有聲音」時，主動嘗試恢復或啟動 BGM
+    if (wasMuted && !nowMuted) {
+      // 若有被瀏覽器擋下的待播 BGM，先重試一次
+      audioManager.tryPlayPendingAmbient();
+
+      // 若此時仍沒有正在播放的環境音，就重新播放預設 BGM
+      if (!audioManager.getCurrentAmbientPath()) {
+        audioManager.playAmbient(GAME_BGM, 0.4);
+      }
+    }
   };
 
   return (

@@ -1,18 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
-  <title>> á„F</title>
-  <defs>
-    <linearGradient id="noteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f0e8d8;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#d8c8b0;stop-opacity:0.95" />
-    </linearGradient>
-  </defs>
-  <!-- ¿ -->
-  <rect x="44" y="60" width="296" height="264" rx="2" fill="url(#noteGrad)" stroke="#9a8a7a" stroke-width="1.5"/>
-  <!-- Ï¼pq -->
-  <rect x="48" y="64" width="288" height="256" rx="1" fill="none" stroke="#c4b4a4" stroke-width="1" opacity="0.4"/>
-  <!-- KëWá:£)	ºªÈ(%W‹ -->
-  <text x="192" y="140" text-anchor="middle" font-size="16" fill="#5a4a3a" font-family="sans-serif">£)	ºª</text>
-  <text x="192" y="172" text-anchor="middle" font-size="16" fill="#5a4a3a" font-family="sans-serif">È(%W‹</text>
-  <!-- !r!B“ -->
-  <path d="M 80 220 Q 160 215 240 220" fill="none" stroke="#8a7a6a" stroke-width="0.8" opacity="0.5" stroke-dasharray="2 4"/>
-</svg>
