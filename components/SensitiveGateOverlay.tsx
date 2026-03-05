@@ -34,7 +34,6 @@ export default function SensitiveGateOverlay({
         tone="decision"
         size="sm"
         className="w-full max-h-[65vh] flex flex-col relative"
-        onClick={(e) => e.stopPropagation()}
       >
         {onClose && (
           <button
