@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- card shadow -->
+  <rect x="14" y="18" width="34" height="24" rx="6" fill="#E6F5FF" opacity="0.7"/>
+  <!-- card body -->
+  <rect x="12" y="16" width="34" height="24" rx="6" fill="#FFFFFF" stroke="#333333" stroke-width="2.5"/>
+  <!-- chip -->
+  <rect x="16" y="22" width="8" height="6" rx="2" fill="#FFD166" stroke="#333333" stroke-width="1.4"/>
+  <path d="M18 24 H22" stroke="#333333" stroke-width="0.9"/>
+  <!-- stripes -->
+  <rect x="26" y="22" width="16" height="3" rx="1.5" fill="#E2E2F9"/>
+  <rect x="26" y="27" width="12" height="3" rx="1.5" fill="#D9F2FF"/>
+  <!-- tiny lock -->
+  <rect x="32" y="30.5" width="7" height="5" rx="2" fill="#FFE6F0" stroke="#333333" stroke-width="1"/>
+  <path d="M33 30.5 V29.5 C33 28.2, 34 27.3, 35.5 27.3 C37 27.3, 38 28.2, 38 29.5 V30.5"
+        stroke="#333333" stroke-width="1" fill="none"/>
+</svg>
+

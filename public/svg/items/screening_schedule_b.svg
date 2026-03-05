@@ -1,0 +1,16 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- playful screening schedule, variant of form -->
+  <rect x="11" y="15" width="38" height="32" rx="8" fill="#E6F5FF" opacity="0.7"/>
+  <rect x="9" y="13" width="38" height="32" rx="8" fill="#FFFFFF" stroke="#333333" stroke-width="2.5"/>
+  <!-- header band -->
+  <rect x="11" y="15" width="34" height="6" rx="3" fill="#BEE3F8"/>
+  <!-- time rows -->
+  <rect x="13" y="23" width="26" height="3" rx="1.5" fill="#FDE2B8"/>
+  <rect x="13" y="28" width="22" height="3" rx="1.5" fill="#E2E2F9"/>
+  <rect x="13" y="33" width="18" height="3" rx="1.5" fill="#D9F2FF"/>
+  <!-- cute clock -->
+  <circle cx="39" cy="30" r="5" fill="#FFE6F0" stroke="#333333" stroke-width="1.5"/>
+  <line x1="39" y1="30" x2="39" y2="27.5" stroke="#333333" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="39" y1="30" x2="41" y2="31.5" stroke="#333333" stroke-width="1.3" stroke-linecap="round"/>
+</svg>
+

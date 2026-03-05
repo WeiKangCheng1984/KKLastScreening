@@ -45,7 +45,7 @@ export default function CharacterConversationCard({
   displayText,
 }: CharacterConversationCardProps) {
   return (
-    <div className={`${wrapperClassName} flex items-end justify-center pb-4 md:pb-6`} data-scheme="b-dialog-only">
+    <div className={`${wrapperClassName} flex items-end justify-end md:justify-center pb-4 md:pb-6`} data-scheme="b-dialog-only">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -53,7 +53,7 @@ export default function CharacterConversationCard({
         className="pointer-events-auto relative z-10 bg-dark-card/95 backdrop-blur-md border border-dark-border rounded-lg shadow-2xl p-6 flex flex-col min-h-0"
         style={{
           width: cardWidth,
-          maxWidth: 'calc(100vw - 2rem)',
+          maxWidth: 'calc(100vw - 1rem)',
           height: cardHeight,
         }}
       >

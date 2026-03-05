@@ -1,0 +1,16 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- map background -->
+  <rect x="13" y="14" width="34" height="32" rx="7" fill="#E6FFF8" opacity="0.7"/>
+  <rect x="11" y="12" width="34" height="32" rx="7" fill="#FFFFFF" stroke="#333333" stroke-width="2.5"/>
+  <!-- simple map lines -->
+  <path d="M16 24 H38" stroke="#9EC5FE" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M16 30 H34" stroke="#9EC5FE" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M22 20 V36" stroke="#9EC5FE" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- deadzone area -->
+  <rect x="26" y="26" width="10" height="6" rx="2" fill="#FFCAD4" stroke="#FF4B6E" stroke-width="1.4"/>
+  <!-- marker -->
+  <path d="M31 23 C32.5 23, 34 24.2, 34 26 C34 28.2, 31 31 31 31 C31 31, 28 28.2, 28 26 C28 24.2, 29.5 23, 31 23 Z"
+        fill="#FF8AAE" stroke="#333333" stroke-width="1.2"/>
+  <circle cx="31" cy="25.5" r="0.9" fill="#FFFFFF"/>
+</svg>
+

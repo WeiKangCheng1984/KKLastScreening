@@ -131,10 +131,10 @@ export default function CharacterConversation({
   // 方案四：胸上立繪放大區（約 1.75x）、object-bottom 對齊
   const portraitSize = 'w-32 h-[11rem] md:w-[10rem] md:h-[13rem]'; // 約 128×176 / 160×208
 
-  // 整張卡片固定總高度，配合放大立繪略增（高度 +10%）
-  const cardWidth = 'min(360px, calc(100vw - 2rem))';
-  const cardHeight = '23rem'; // 原 21rem，上調約 10%
-  const textAreaHeight = '8rem'; // 原 7rem，略增一行高度
+  // 整張卡片固定總高度，手機上略加寬、加高以提升可讀性
+  const cardWidth = 'min(380px, calc(100vw - 1rem))';
+  const cardHeight = '29rem'; // 再略微加高，確保長句在手機上更完整
+  const textAreaHeight = '11rem'; // 對應提高文字區高度
   const buttonAreaHeight = '3.5rem'; // 56px，固定按鈕區
 
   return React.createElement(CharacterConversationCard, {

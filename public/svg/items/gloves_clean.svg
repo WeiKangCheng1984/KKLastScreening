@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- background circle -->
+  <circle cx="32" cy="32" r="18" fill="#F0FFF5"/>
+  <!-- cute clean gloves (simplified pair) -->
+  <path d="M23 38 C22 33, 22.5 27, 24.5 24 C26 22, 28 22, 29.5 23.5 C31 25, 31.5 27.5, 31.5 30 L31.5 38 Z"
+        fill="#BEE3DB" stroke="#333333" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M31.5 38 C31 33, 31.5 27, 33.5 24.5 C35 23, 37 23, 38.5 24.5 C40 26, 40.5 28.5, 40.5 31 L40.5 38 Z"
+        fill="#BEE3DB" stroke="#333333" stroke-width="2" stroke-linejoin="round"/>
+  <!-- cuffs -->
+  <rect x="22" y="38" width="11" height="4" rx="2" fill="#8BD4C2" stroke="#333333" stroke-width="1.4"/>
+  <rect x="31" y="38" width="11" height="4" rx="2" fill="#8BD4C2" stroke="#333333" stroke-width="1.4"/>
+  <!-- sparkles -->
+  <path d="M20 24 L21 26 L23 27 L21 28 L20 30 L19 28 L17 27 L19 26 Z" fill="#FFE6A7"/>
+  <path d="M42 20 L42.8 21.6 L44.5 22.1 L43.2 23.3 L43.4 25.1 L42 24.2 L40.6 25.1 L40.8 23.3 L39.5 22.1 L41.2 21.6 Z"
+        fill="#FFB3C6"/>
+</svg>
+
