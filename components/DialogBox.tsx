@@ -204,7 +204,7 @@ export default function DialogBox({
     <div 
       className={`transition-opacity duration-500 ${
         isEmbedded
-          ? 'absolute inset-0 flex items-end justify-end p-2 md:p-3 pointer-events-none'
+          ? 'w-full h-full flex items-end justify-end p-2 md:p-3 pointer-events-none'
           : `fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8 md:pb-8 ${
               reserveBottomSpace
                 ? 'pb-[calc(3.5rem+max(1rem,env(safe-area-inset-bottom)))] md:pb-8'

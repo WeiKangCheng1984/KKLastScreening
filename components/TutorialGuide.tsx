@@ -36,20 +36,21 @@ export default function TutorialGuide({ onComplete }: TutorialGuideProps) {
     setIsVisible(false);
     onComplete();
   };
-
   if (!isVisible) return null;
 
   const step = tutorialSteps[currentStep];
   if (!step) return null;
 
   return (
-    <TutorialCard
-      step={step}
-      currentIndex={currentStep}
-      totalSteps={tutorialSteps.length}
-      isLastStep={currentStep === tutorialSteps.length - 1}
-      onNext={handleNext}
-      onClose={handleComplete}
-    />
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 pointer-events-auto">
+      <TutorialCard
+        step={step}
+        currentIndex={currentStep}
+        totalSteps={tutorialSteps.length}
+        isLastStep={currentStep === tutorialSteps.length - 1}
+        onNext={handleNext}
+        onClose={handleComplete}
+      />
+    </div>
   );
 }

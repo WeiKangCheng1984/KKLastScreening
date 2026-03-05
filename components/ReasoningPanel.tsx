@@ -4,6 +4,7 @@ import { reasoningByChapter, ChapterReasoning } from '@/data/reasoningByChapter'
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link2, X } from 'lucide-react';
 import { useState } from 'react';
+import OverlayCard from './OverlayCard';
 
 interface ReasoningPanelProps {
   chapterId: string;
@@ -94,23 +95,26 @@ export default function ReasoningPanel({
     const R = config.q3.rightItems.find((i) => i.id === id);
     return L?.label ?? R?.label ?? id;
   };
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative max-w-2xl w-full bg-gradient-to-br from-dark-card to-dark-surface border-2 border-orange-500/50 rounded-2xl p-6 md:p-8 shadow-2xl">
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-orange-500/30">
-          <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-            推理分析
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded"
-          >
-            <X size={24} />
-          </button>
-        </div>
+    <OverlayCard
+      tone="system"
+      size="lg"
+      className="w-full max-w-4xl max-h-[90vh] min-h-[70vh] p-6 md:p-8 flex flex-col"
+    >
+      <div className="flex justify-between items-center mb-6 pb-4 border-b border-orange-500/30">
+        <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+          推理分析
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded"
+        >
+          <X size={24} />
+        </button>
+      </div>
 
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1">
         <AnimatePresence mode="wait">
           {step === 0 && (
             <motion.div
@@ -137,16 +141,6 @@ export default function ReasoningPanel({
                   </button>
                 ))}
               </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleQ1Next}
-                  disabled={!q1Selected}
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
-                >
-                  下一題
-                </button>
-              </div>
             </motion.div>
           )}
 
@@ -166,15 +160,6 @@ export default function ReasoningPanel({
                 placeholder={config.q2.placeholder}
                 className="w-full px-4 py-3 bg-dark-surface border-2 border-orange-500/30 rounded-xl text-gray-200 placeholder-gray-500 focus:border-orange-400 focus:outline-none mb-6"
               />
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleQ2Next}
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg"
-                >
-                  下一題
-                </button>
-              </div>
             </motion.div>
           )}
 
@@ -228,7 +213,7 @@ export default function ReasoningPanel({
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-gray-400 text-sm mb-2">左：道具/線索</p>
                   <div className="space-y-2">
@@ -284,24 +269,6 @@ export default function ReasoningPanel({
               </div>
 
               {q3Error && <p className="text-red-400 text-sm mb-4">{q3Error}</p>}
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg"
-                >
-                  關閉
-                </button>
-                <button
-                  type="button"
-                  onClick={handleQ3Submit}
-                  disabled={q3Pairs.length !== 3}
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
-                >
-                  送出並完成
-                </button>
-              </div>
             </motion.div>
           )}
 
@@ -344,31 +311,43 @@ export default function ReasoningPanel({
                   </div>
                 </div>
               )}
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg"
-                >
-                  關閉
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onComplete(
-                      selectedPoliceNoteId ? { policeNoteId: selectedPoliceNoteId } : undefined
-                    )
-                  }
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg"
-                >
-                  結束推理
-                </button>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-    </div>
+
+      <div className="mt-4 flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg"
+        >
+          關閉
+        </button>
+        {step === 2 && (
+          <button
+            type="button"
+            onClick={handleQ3Submit}
+            disabled={q3Pairs.length !== 3}
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
+          >
+            送出並完成
+          </button>
+        )}
+        {step === 3 && (
+          <button
+            type="button"
+            onClick={() =>
+              onComplete(
+                selectedPoliceNoteId ? { policeNoteId: selectedPoliceNoteId } : undefined
+              )
+            }
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg"
+          >
+            結束推理
+          </button>
+        )}
+      </div>
+    </OverlayCard>
   );
 }

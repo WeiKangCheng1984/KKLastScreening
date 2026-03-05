@@ -131,14 +131,15 @@ export default function CharacterConversation({
   // 方案四：胸上立繪放大區（約 1.75x）、object-bottom 對齊
   const portraitSize = 'w-32 h-[11rem] md:w-[10rem] md:h-[13rem]'; // 約 128×176 / 160×208
 
-  // 整張卡片固定總高度，配合放大立繪略增
+  // 整張卡片固定總高度，配合放大立繪略增（高度 +10%）
   const cardWidth = 'min(360px, calc(100vw - 2rem))';
-  const cardHeight = '21rem'; // 配合立繪區增高
-  const textAreaHeight = '7rem'; // 112px，約 4～5 行
+  const cardHeight = '23rem'; // 原 21rem，上調約 10%
+  const textAreaHeight = '8rem'; // 原 7rem，略增一行高度
   const buttonAreaHeight = '3.5rem'; // 56px，固定按鈕區
 
   return React.createElement(CharacterConversationCard, {
-    wrapperClassName: `fixed inset-0 z-50 flex items-center justify-center pointer-events-none ${className}`,
+    // 由父層（play page 全域互動層）負責決定定位與對齊，這裡只提供基礎寬度與 pointer-events 行為
+    wrapperClassName: `w-full pointer-events-none ${className}`,
     cardWidth,
     cardHeight,
     textAreaHeight,

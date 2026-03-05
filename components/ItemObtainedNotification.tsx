@@ -60,22 +60,22 @@ export default function ItemObtainedNotification({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 80, scale: 0.8 }}
+          initial={{ opacity: 0, y: 24, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.9 }}
+          exit={{ opacity: 0, y: 8, scale: 0.95 }}
           transition={{
             type: 'spring',
             stiffness: 400,
             damping: 25,
           }}
-          className={`fixed inset-0 z-[55] flex items-center justify-center ${dismissOnTap ? 'pointer-events-auto' : 'pointer-events-none'}`}
+          className={`w-full h-full flex items-end justify-center ${dismissOnTap ? 'pointer-events-auto' : 'pointer-events-none'}`}
         >
           <div
             role={dismissOnTap ? 'button' : undefined}
             tabIndex={dismissOnTap ? 0 : undefined}
             onClick={dismissOnTap ? handleDismiss : undefined}
             onKeyDown={dismissOnTap ? (e) => e.key === 'Enter' && handleDismiss() : undefined}
-            className={`bg-dark-card/95 backdrop-blur-md border-2 border-orange-500/50 rounded-xl px-6 py-5 md:px-8 md:py-6 shadow-2xl max-w-sm mx-4 ${dismissOnTap ? 'cursor-pointer' : ''}`}
+            className={`bg-dark-card/95 backdrop-blur-md border-2 border-orange-500/50 rounded-xl px-6 py-5 md:px-8 md:py-6 shadow-2xl max-w-sm w-full mx-4 mb-4 ${dismissOnTap ? 'cursor-pointer' : ''}`}
           >
             <div className="flex items-start gap-4">
               {/* 道具圖示 */}
