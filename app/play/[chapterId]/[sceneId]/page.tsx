@@ -39,11 +39,10 @@ import AudioControl from '@/components/AudioControl';
 import MuteAllButton from '@/components/MuteAllButton';
 import { preloadSVGBatch } from '@/lib/svgLoader';
 import { DialogChoice } from '@/types/game';
-import PairMatchingPuzzle from '@/components/PairMatchingPuzzle';
-import PickThreePuzzle from '@/components/PickThreePuzzle';
 import ScoreDisplay from '@/components/ScoreDisplay';
 import NpcRightStrip from '@/components/NpcRightStrip';
 import ReasoningPanel from '@/components/ReasoningPanel';
+import Ch1ReportEditor from '@/components/Ch1ReportEditor';
 import { reasoningByChapter } from '@/data/reasoningByChapter';
 import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
@@ -188,11 +187,9 @@ export default function PlayPage() {
   const preloadedImagesRef = useRef<Set<string>>(new Set());
   const [chapterProgress, setChapterProgress] = useState(0);
   const [showChapterPuzzle, setShowChapterPuzzle] = useState(false);
-  // 第一章章末：解謎（6 道具配對）與推理（3 題字詞排序）
-  const [showCh1PairPuzzle, setShowCh1PairPuzzle] = useState(false);
-  const [showCh1ReasoningPuzzle, setShowCh1ReasoningPuzzle] = useState(false);
+  // 第一章章末：報告編輯器（取代解謎／推理舊路徑）
   const [showReasoningPanel, setShowReasoningPanel] = useState(false);
-  const [ch1ReasoningStep, setCh1ReasoningStep] = useState(0);
+  const [showCh1ReportEditor, setShowCh1ReportEditor] = useState(false);
   // 場景切換相關狀態
   // 使用 useState 的函數形式確保服務器和客戶端初始狀態一致
   const [showSceneName, setShowSceneName] = useState(() => false);
@@ -737,68 +734,15 @@ export default function PlayPage() {
     const scene = engine.getCurrentScene();
 
     // 第一章：劉隊頭像互動（階段二+／三）
-    if (choice.id === 'ch1_liu_keep_exploring') {
+    if (choice.id === 'ch1_liu_keep_exploring' || choice.id === 'ch1_liu_try_reasoning') {
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
-      return;
-    }
-    if (choice.id === 'ch1_liu_try_reasoning') {
-      setCurrentDialog(null);
-      setRefreshKey((prev) => prev + 1);
-      setShowCh1ReasoningPuzzle(true);
       return;
     }
     if (choice.id === 'ch1_liu_report_now') {
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
-      const stateAfter = engine.getState();
-      const flags = stateAfter.flags || {};
-      const puzzleDone = !!flags.ch1_puzzle_done;
-      const reasoningDone = !!flags.ch1_reasoning_done;
-
-      if (!puzzleDone) {
-        setShowCh1PairPuzzle(true);
-        return;
-      }
-      if (!reasoningDone) {
-        setShowCh1ReasoningPuzzle(true);
-        return;
-      }
-
-      const ch1AttitudeDialog: Dialog = {
-        text: '你的態度宣言——',
-        type: 'narrator',
-        choices: [
-          {
-            id: 'ch1_attitude_procedure',
-            text: '「我會要求官方做全面稽核。」',
-            insightEffects: [{ target: 'procedure_insight', delta: 1 }],
-            effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }],
-          },
-          {
-            id: 'ch1_attitude_evidence',
-            text: '「我先不驚動體系，先把動線與權限畫出來。」',
-            insightEffects: [{ target: 'evidence_insight', delta: 1 }],
-            effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }],
-          },
-          {
-            id: 'ch1_attitude_human',
-            text: '「我想知道誰在遮蔽，遮蔽的原因。」',
-            insightEffects: [{ target: 'human_insight', delta: 1 }],
-            effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }],
-          },
-          {
-            id: 'ch1_attitude_both',
-            text: '「我兩邊都要：上報，但先留底。」',
-            insightEffects: [
-              { target: 'procedure_insight', delta: 1 },
-              { target: 'evidence_insight', delta: 1 },
-            ],
-            effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }],
-          },
-        ],
-      };
-      setCurrentDialog(ch1AttitudeDialog);
+      setShowCh1ReportEditor(true);
       return;
     }
     const currentState = engine.getState();
@@ -2581,6 +2525,7 @@ export default function PlayPage() {
     (ch1Flags.black_fragment_found || ch1Flags.cleaning_note_found || ch1Flags.clue_clean_trash);
   const showReasoningButton =
     hasReasoningForChapter &&
+    chapterId !== 'ch1' &&
     allScenesVisited &&
     !reasoningDone &&
     !showSceneName &&
@@ -2948,9 +2893,7 @@ export default function PlayPage() {
 
                 if (npcId === 'npc_liu') {
                   if (chapterId === 'ch1') {
-                    const puzzleDone = !!flags.ch1_puzzle_done;
-                    const reasoningDone = !!flags.ch1_reasoning_done;
-                    const readyToReport = puzzleDone && reasoningDone;
+                    const readyToReport = hasCh1CoreClues && allScenesVisited;
 
                     const dialog: Dialog = readyToReport
                       ? {
@@ -3220,9 +3163,41 @@ export default function PlayPage() {
           )}
         </AnimatePresence>
 
+        {/* 第一章報告編輯器：向劉隊報告完成後導向 ch2 intro */}
+        <AnimatePresence>
+          {showCh1ReportEditor && engineRef.current && (
+            <motion.div
+              key="ch1-report-editor"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-blur-md px-4 pointer-events-auto"
+            >
+              <Ch1ReportEditor
+                engine={{
+                  getState: () => engineRef.current!.getState(),
+                  applyEffect: (e) => engineRef.current!.applyEffect(e),
+                  handleDialogChoice: (c) => engineRef.current!.handleDialogChoice(c),
+                  setReasoningComplete: (ch) => engineRef.current!.setReasoningComplete(ch),
+                }}
+                onComplete={() => {
+                  setShowCh1ReportEditor(false);
+                  setRefreshKey((k) => k + 1);
+                  if (engineRef.current?.getState().flags?.navigate_to_ch2_intro) {
+                    engineRef.current.applyEffect({ type: 'setFlag', flag: 'navigate_to_ch2_intro', value: false });
+                    setTimeout(() => router.push('/play/ch2/intro'), 300);
+                  }
+                }}
+                onClose={() => setShowCh1ReportEditor(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* 敏感抉擇：次優先，中央對話框 */}
         <AnimatePresence>
-          {!showReasoningPanel && sensitiveGate && (
+          {!showReasoningPanel && !showCh1ReportEditor && sensitiveGate && (
             <motion.div
               key="sensitive-gate"
               initial={{ opacity: 0 }}
@@ -3243,7 +3218,7 @@ export default function PlayPage() {
 
         {/* 背包道具詳解：中央詳解卡，優先於 toast */}
         <AnimatePresence>
-          {!showReasoningPanel && !sensitiveGate && activeItemDetail && (
+          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && activeItemDetail && (
             <motion.div
               key="item-detail"
               initial={{ opacity: 0 }}
@@ -3271,7 +3246,7 @@ export default function PlayPage() {
 
         {/* 道具獲得提示：最低優先，小型 bottom toast，可與場景共存 */}
         <AnimatePresence>
-          {!showReasoningPanel && !sensitiveGate && !activeItemDetail && showItemNotification && obtainedItem && (
+          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && !activeItemDetail && showItemNotification && obtainedItem && (
             <motion.div
               key="item-toast"
               initial={{ opacity: 0 }}
@@ -3359,51 +3334,6 @@ export default function PlayPage() {
                     )}
                   </button>
 
-                  {/* 解謎、推理：暫時隱藏 */}
-                  {false && chapterId === 'ch1' && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          const inv = engineRef.current?.getState().inventory ?? [];
-                          const required = ['item_ticket_stub', 'item_schedule_modified', 'item_projector_notes', 'item_light_control_note', 'item_black_plastic_fragment', 'item_cleaning_note'];
-                          const hasAll = required.every((id) => inv.includes(id));
-                          if (!hasAll) {
-                            setCurrentDialog({
-                              text: '請先收集齊第一章的六個道具：電影票根、播映時間表（塗改）、放映員的筆記、燈控紀錄、黑色塑膠碎片、清潔備忘。',
-                              type: 'narrator',
-                              choices: [{ id: 'close_only', text: '知道了' }],
-                            });
-                          } else {
-                            setShowCh1PairPuzzle(true);
-                          }
-                          setRefreshKey((prev) => prev + 1);
-                        }}
-                        className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
-                      >
-                        <span className="flex items-center gap-3">
-                          <Puzzle size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
-                          <span>解謎</span>
-                        </span>
-                        {state.flags?.ch1_puzzle_done && <span className="text-xs text-green-400">已完成</span>}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowMenu(false);
-                          setCh1ReasoningStep(0);
-                          setShowCh1ReasoningPuzzle(true);
-                          setRefreshKey((prev) => prev + 1);
-                        }}
-                        className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-sm font-medium group"
-                      >
-                        <span className="flex items-center gap-3">
-                          <ListOrdered size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
-                          <span>推理</span>
-                        </span>
-                        {state.flags?.ch1_reasoning_done && <span className="text-xs text-green-400">已完成</span>}
-                      </button>
-                    </>
-                  )}
                 </section>
 
                 {/* 區塊二：設定 */}
@@ -3637,177 +3567,6 @@ export default function PlayPage() {
       )}
 
       {/* 進度條 - 已隱藏（不顯示給玩家） */}
-
-      {/* 第一章章末：解謎（6 道具選 3 集滿三條線索 或 舊版 3 組配對）- 關閉時 exit 動畫 */}
-      <AnimatePresence>
-      {showCh1PairPuzzle && engineRef.current && (() => {
-        const ch1Hall = scenes['scene_ch1_cinema_a_hall'];
-        const pairPuzzle = ch1Hall?.puzzles?.find((p: { id: string }) => p.id === 'ch1_pair_matching');
-        if (!pairPuzzle) return null;
-        const ch1AttitudeDialog: Dialog = {
-          text: '你的態度宣言——',
-          type: 'narrator',
-          choices: [
-            { id: 'ch1_attitude_procedure', text: '「我會要求官方做全面稽核。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-            { id: 'ch1_attitude_evidence', text: '「我先不驚動體系，先把動線與權限畫出來。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-            { id: 'ch1_attitude_human', text: '「我想知道誰在遮蔽，遮蔽的原因。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-            { id: 'ch1_attitude_both', text: '「我兩邊都要：上報，但先留底。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }, { target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-          ],
-        };
-        const state = engineRef.current.getState();
-        const unlockedClues: [boolean, boolean, boolean] = [
-          !!state?.flags?.ch1_clue_1_unlocked,
-          !!state?.flags?.ch1_clue_2_unlocked,
-          !!state?.flags?.ch1_clue_3_unlocked,
-        ];
-        if (pairPuzzle.type === 'pick_three') {
-          return (
-            <motion.div
-              key="ch1-pair-puzzle"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
-            >
-            <PickThreePuzzle
-              puzzle={pairPuzzle}
-              items={items}
-              unlockedClues={unlockedClues}
-              onSolve={(selectedIds) => {
-                if (!engineRef.current) return;
-                const solved = engineRef.current.solvePuzzle('ch1_pair_matching', selectedIds);
-                if (solved) {
-                  setPuzzleError('');
-                  setRefreshKey((prev) => prev + 1);
-                  const nextState = engineRef.current.getState();
-                  const puzzleDone = nextState?.flags?.ch1_puzzle_done === true;
-                  const lastCombo = (nextState?.flags?.ch1_last_unlocked_combo as number) ?? 0;
-                  const clues = (pairPuzzle.config?.clues as string[] | undefined) ?? [];
-                  const clueText = lastCombo >= 1 && lastCombo <= 3 ? clues[lastCombo - 1] : '';
-                  if (puzzleDone) {
-                    setShowCh1PairPuzzle(false);
-                    const reasoningDone = nextState?.flags?.ch1_reasoning_done === true;
-                    setCurrentDialog(
-                      reasoningDone
-                        ? ch1AttitudeDialog
-                        : { text: '解謎完成。可從選單進行推理。', type: 'narrator', choices: [{ id: 'close_only', text: '知道了' }] }
-                    );
-                  } else if (clueText) {
-                    setCurrentDialog({ text: clueText, type: 'narrator', choices: [{ id: 'close_only', text: '知道了' }] });
-                  }
-                } else {
-                  setPuzzleError('此組合不正確，請再試一次。');
-                }
-              }}
-              onClose={() => {
-                setShowCh1PairPuzzle(false);
-                setPuzzleError('');
-              }}
-              error={puzzleError}
-              onErrorClear={() => setPuzzleError('')}
-            />
-            </motion.div>
-          );
-        }
-        return (
-          <motion.div key="ch1-pair-puzzle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <PairMatchingPuzzle
-            puzzle={pairPuzzle}
-            items={items}
-            onSolve={(input) => {
-              if (!engineRef.current) return;
-              const solved = engineRef.current.solvePuzzle('ch1_pair_matching', input);
-              if (solved) {
-                setShowCh1PairPuzzle(false);
-                setPuzzleError('');
-                setRefreshKey((prev) => prev + 1);
-                const reasoningDone = engineRef.current.getState().flags?.ch1_reasoning_done === true;
-                setCurrentDialog(
-                  reasoningDone
-                    ? ch1AttitudeDialog
-                    : { text: '解謎完成。可從選單進行推理。', type: 'narrator', choices: [{ id: 'close_only', text: '知道了' }] }
-                );
-              } else {
-                setPuzzleError('配對不正確，請再試一次。');
-              }
-            }}
-            onClose={() => {
-              setShowCh1PairPuzzle(false);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-            inventory={engineRef.current.getState().inventory}
-          />
-          </motion.div>
-        );
-      })()}
-      </AnimatePresence>
-
-      {/* 第一章章末：推理（3 題字詞排序）- 關閉時 exit 動畫 */}
-      <AnimatePresence>
-      {showCh1ReasoningPuzzle && (() => {
-        const ch1Hall = scenes['scene_ch1_cinema_a_hall'];
-        const reasoningPuzzle = ch1Hall?.puzzles?.find((p: { id: string }) => p.id === `ch1_reasoning_${ch1ReasoningStep + 1}`);
-        if (!reasoningPuzzle) return null;
-        return (
-          <motion.div
-            key="ch1-reasoning-puzzle"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
-          >
-          <ArrangementPuzzle
-            puzzle={reasoningPuzzle}
-            onSolve={(input) => {
-              if (!engineRef.current) return;
-              const puzzleId = `ch1_reasoning_${ch1ReasoningStep + 1}`;
-              const solved = engineRef.current.solvePuzzle(puzzleId, input);
-              if (solved) {
-                setPuzzleError('');
-                setRefreshKey((prev) => prev + 1);
-                if (ch1ReasoningStep < 2) {
-                  setCh1ReasoningStep((prev) => prev + 1);
-                } else {
-                  // 第三題完成：確保推理過關條件 ch1_reasoning_done 已設定
-                  engineRef.current.applyEffect({ type: 'setFlag', flag: 'ch1_reasoning_done', value: true });
-                  setShowCh1ReasoningPuzzle(false);
-                  setCh1ReasoningStep(0);
-                  const puzzleDone = engineRef.current.getState().flags?.ch1_puzzle_done === true;
-                  if (puzzleDone) {
-                    setCurrentDialog({
-                      text: '你的態度宣言——',
-                      type: 'narrator',
-                      choices: [
-                        { id: 'ch1_attitude_procedure', text: '「我會要求官方做全面稽核。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-                        { id: 'ch1_attitude_evidence', text: '「我先不驚動體系，先把動線與權限畫出來。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-                        { id: 'ch1_attitude_human', text: '「我想知道誰在遮蔽，遮蔽的原因。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-                        { id: 'ch1_attitude_both', text: '「我兩邊都要：上報，但先留底。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }, { target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'ch1_attitude_declared', value: true }] },
-                      ],
-                    });
-                  } else {
-                    setCurrentDialog({ text: '推理完成。可從選單進行解謎。', type: 'narrator', choices: [{ id: 'close_only', text: '知道了' }] });
-                  }
-                }
-              } else {
-                setPuzzleError('順序不正確，請再試一次。');
-              }
-            }}
-            onClose={() => {
-              setShowCh1ReasoningPuzzle(false);
-              setCh1ReasoningStep(0);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-          </motion.div>
-        );
-      })()}
-      </AnimatePresence>
 
       {/* 謎題輸入 */}
       {currentPuzzle && (
