@@ -27,15 +27,19 @@ export interface Ch1ReportEvidenceConfig {
   evidenceCards: Ch1EvidenceCard[];
   /** 選錯類別時的提示（不說「錯」，只說缺哪種支點） */
   missingCategoryHints: Record<Ch1EvidenceCategory, string>;
+  /** 報告用證據槽位數（預設 3） */
+  evidenceSlots?: { count: number };
 }
 
 export interface Ch1ReportTimelineConfig {
-  /** 5 張事件卡，依正確順序排列 */
+  /** 5 張事件卡，依正確順序排列（保留供參考） */
   events: Ch1TimelineEvent[];
   /** 正確順序的 event id 陣列 */
   correctOrder: string[];
   /** 錯誤回饋 2～3 種（KK 吐槽） */
   errorMessages: string[];
+  /** 案發時間區間（通過條件：撥鈕選中時間落在此區間內，單位：當日 00:00 起算分鐘） */
+  crimeTimeRange: { startMinutes: number; endMinutes: number };
 }
 
 /** 版本深度：標準版 + 可補一句選項（含 none） */
@@ -53,8 +57,21 @@ export interface Ch1AttitudeChoice {
   insightDelta2?: number;
 }
 
+/** 態度宣言：可拖入的容器（報告封套 / KK 備忘） */
+export interface Ch1AttitudeContainer {
+  id: string;
+  label: string;
+}
+
 export interface Ch1ReportAttitudeConfig {
+  /** 雙容器（警用報告封套、KK 私人備忘錄） */
+  attitudeContainers: Ch1AttitudeContainer[];
+  /** 4 張可拖曳內容卡（結構同 Ch1AttitudeChoice） */
+  attitudeContentCards: Ch1AttitudeChoice[];
+  /** @deprecated 沿用 choices 供元件相容，與 attitudeContentCards 同源 */
   choices: Ch1AttitudeChoice[];
+  /** 必須放進 KK 私人備忘錄的內容卡 id（例如留底那句） */
+  requireInMemoCardId?: string;
   closingInferenceByDimension: {
     procedure_insight: string;
     human_insight: string;
@@ -130,6 +147,7 @@ export const ch1ReportConfig: Ch1ReportConfig = {
       ProcessAnchor: '你還缺一種能寫進報告的支點：權限或流程。',
       PhysicalTrace: '你還缺一種能寫進報告的支點：殘留或現場痕跡。',
     },
+    evidenceSlots: { count: 3 },
   },
   timeline: {
     events: [
@@ -151,6 +169,7 @@ export const ch1ReportConfig: Ch1ReportConfig = {
       '順序錯了——先想誰能控制燈、誰在黑暗裡。',
       '首尾可以固定：開演、報案。中間三張再想想。',
     ],
+    crimeTimeRange: { startMinutes: 14, endMinutes: 17 },
   },
   version: {
     playerLineOptions: [
@@ -174,34 +193,67 @@ export const ch1ReportConfig: Ch1ReportConfig = {
     ],
   },
   attitude: {
-    choices: [
+    attitudeContainers: [
+      { id: 'ch1_report_envelope', label: '警用報告封套' },
+      { id: 'ch1_kk_memo', label: 'KK 私人備忘錄' },
+    ],
+    attitudeContentCards: [
       {
         id: 'ch1_attitude_procedure',
-        text: '「我會要求官方做全面稽核。」',
+        text: '「體制要查就查到底。別讓他們用『疏失』兩個字收工。」',
         insightTarget: 'procedure_insight',
         insightDelta: 1,
       },
       {
         id: 'ch1_attitude_evidence',
-        text: '「我先不驚動體系，先把動線與權限畫出來。」',
+        text: '「先別打草驚蛇。誰能碰燈、誰在黑暗裡，我先畫出來再說。」',
         insightTarget: 'evidence_insight',
         insightDelta: 1,
       },
       {
         id: 'ch1_attitude_human',
-        text: '「我想知道誰在遮蔽，遮蔽的原因。」',
+        text: '「我想知道是誰在幫兇手擦地板。恐懼比刀子還好使。」',
         insightTarget: 'human_insight',
         insightDelta: 1,
       },
       {
         id: 'ch1_attitude_both',
-        text: '「我兩邊都要：上報，但先留底。」',
+        text: '「上報歸上報，我自己的備忘可不會只寫『疏失』。兩邊都留。」',
         insightTarget: 'procedure_insight',
         insightDelta: 1,
         insightTarget2: 'evidence_insight',
         insightDelta2: 1,
       },
     ],
+    choices: [
+      {
+        id: 'ch1_attitude_procedure',
+        text: '「體制要查就查到底。別讓他們用『疏失』兩個字收工。」',
+        insightTarget: 'procedure_insight',
+        insightDelta: 1,
+      },
+      {
+        id: 'ch1_attitude_evidence',
+        text: '「先別打草驚蛇。誰能碰燈、誰在黑暗裡，我先畫出來再說。」',
+        insightTarget: 'evidence_insight',
+        insightDelta: 1,
+      },
+      {
+        id: 'ch1_attitude_human',
+        text: '「我想知道是誰在幫兇手擦地板。恐懼比刀子還好使。」',
+        insightTarget: 'human_insight',
+        insightDelta: 1,
+      },
+      {
+        id: 'ch1_attitude_both',
+        text: '「上報歸上報，我自己的備忘可不會只寫『疏失』。兩邊都留。」',
+        insightTarget: 'procedure_insight',
+        insightDelta: 1,
+        insightTarget2: 'evidence_insight',
+        insightDelta2: 1,
+      },
+    ],
+    requireInMemoCardId: 'ch1_attitude_both',
     closingInferenceByDimension: {
       procedure_insight:
         '兇手不是在黑暗裡殺人，他是在規定的黑暗裡殺人。',

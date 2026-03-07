@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { isMobileDevice } from '@/lib/performanceUtils';
 
@@ -54,7 +54,7 @@ export default function RippleEffect({
           }}
         >
           {/* 主波紋 */}
-          <motion.div
+          <m.div
             initial={{ scale: 0, opacity: 0.6 }}
             animate={{ scale: 2, opacity: 0 }}
             exit={{ opacity: 0 }}
@@ -72,7 +72,7 @@ export default function RippleEffect({
           />
           
           {/* 第二層波紋（延遲） */}
-          <motion.div
+          <m.div
             initial={{ scale: 0, opacity: 0.4 }}
             animate={{ scale: 2.5, opacity: 0 }}
             exit={{ opacity: 0 }}
@@ -91,7 +91,7 @@ export default function RippleEffect({
           />
           
           {/* 第三層波紋（最外層，更淡） */}
-          <motion.div
+          <m.div
             initial={{ scale: 0, opacity: 0.3 }}
             animate={{ scale: 3, opacity: 0 }}
             exit={{ opacity: 0 }}
@@ -109,7 +109,7 @@ export default function RippleEffect({
           />
           
           {/* 中心點 */}
-          <motion.div
+          <m.div
             initial={{ scale: 1, opacity: 0.8 }}
             animate={{ scale: 0, opacity: 0 }}
             exit={{ opacity: 0 }}

@@ -1,7 +1,7 @@
 'use client';
 
 import { Npc } from '@/types/game';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { User } from 'lucide-react';
 import { useState } from 'react';
 import SVGImage from './SVGImage';
@@ -40,7 +40,7 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
   }
 
   return (
-    <motion.div
+    <m.div
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
@@ -50,7 +50,7 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
       <div className="bg-black/60 backdrop-blur-sm rounded-t-lg px-2 py-2 flex gap-2 pointer-events-auto border-t border-white/20">
         <AnimatePresence>
           {availableNpcs.map((npc) => (
-            <motion.button
+            <m.button
               key={npc.id}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -82,7 +82,7 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
                 )}
                 {/* Hover 時的脈衝效果 */}
                 {hoveredNpc === npc.id && (
-                  <motion.div
+                  <m.div
                     className="absolute inset-0 rounded-full border-2 border-white/50"
                     animate={{
                       scale: [1, 1.2, 1],
@@ -104,7 +104,7 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
               
               {/* Hover 顯示名稱與提示 */}
               {hoveredNpc === npc.id && (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 pointer-events-none z-10"
@@ -116,12 +116,12 @@ export default function NpcBar({ npcs, onNpcClick, checkAvailability, activeNpcI
                     點擊對話
                   </div>
                   <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-black/90" />
-                </motion.div>
+                </m.div>
               )}
-            </motion.button>
+            </m.button>
           ))}
         </AnimatePresence>
       </div>
-    </motion.div>
+    </m.div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import SVGImage from './SVGImage';
 import { Package, X } from 'lucide-react';
@@ -59,7 +59,7 @@ export default function ItemObtainedNotification({
   return (
     <AnimatePresence>
       {isVisible && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 24, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.95 }}
@@ -139,7 +139,7 @@ export default function ItemObtainedNotification({
             </div>
 
             {!dismissOnTap && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: [0, 0.3, 0] }}
                 transition={{ duration: 0.6, repeat: 1 }}
@@ -147,7 +147,7 @@ export default function ItemObtainedNotification({
               />
             )}
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

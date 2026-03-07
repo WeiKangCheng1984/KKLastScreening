@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { isMobileDevice } from '@/lib/performanceUtils';
 
 interface BeamEffectProps {
@@ -83,7 +83,7 @@ export default function BeamEffect({
   return (
     <AnimatePresence>
       {show && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: adjustedIntensity }}
           exit={{ opacity: 0 }}
@@ -92,7 +92,7 @@ export default function BeamEffect({
           style={{ zIndex: 1 }}
         >
           {/* 主光束 */}
-          <motion.div
+          <m.div
             initial={beamPosition.initial}
             animate={beamPosition.animate}
             transition={{
@@ -110,7 +110,7 @@ export default function BeamEffect({
           />
           
           {/* 輔助光束（更寬但更淡） */}
-          <motion.div
+          <m.div
             initial={beamPosition.initial}
             animate={beamPosition.animate}
             transition={{
@@ -127,7 +127,7 @@ export default function BeamEffect({
               filter: 'blur(30px)',
             }}
           />
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

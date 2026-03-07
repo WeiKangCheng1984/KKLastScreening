@@ -39,11 +39,15 @@ export default function Home() {
     }, 800);
   };
 
-  const handlePasswordSuccess = (chapterId: string) => {
+  const handlePasswordSuccess = (chapterId: string, sceneId?: string) => {
     setShowPasswordModal(false);
     setIsTransitioning(true);
     setTimeout(() => {
-      router.push(`/play/${chapterId}/intro`);
+      if (sceneId) {
+        router.push(`/play/${chapterId}/${sceneId}`);
+      } else {
+        router.push(`/play/${chapterId}/intro`);
+      }
     }, 500);
   };
 
@@ -57,17 +61,17 @@ export default function Home() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
           style={{ backgroundImage: 'url(/images/main_bg_placeholder.webp)' }}
         />
-        {/* 背景粒子效果 */}
+        {/* 背景粒子效果：用 index 產生固定數值，避免 SSR 與 client 的 Math.random() 不一致造成 hydration 錯誤 */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-orange-400 rounded-full animate-float"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 2}s`,
+              left: `${((i * 7 + 13) % 97) + 1}%`,
+              top: `${((i * 11 + 31) % 97) + 1}%`,
+              animationDelay: `${(i * 0.17) % 3}s`,
+              animationDuration: `${3 + (i % 20) / 10}s`,
             }}
           />
         ))}

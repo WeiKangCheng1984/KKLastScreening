@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 interface Particle {
@@ -43,7 +43,7 @@ export default function ParticleEffect({
   return (
     <div className={`absolute inset-0 pointer-events-none ${className}`}>
       {particles.map((particle) => (
-        <motion.div
+        <m.div
           key={particle.id}
           className="absolute rounded-full"
           style={{

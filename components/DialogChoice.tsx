@@ -1,7 +1,7 @@
 'use client';
 
 import { DialogChoice as DialogChoiceType } from '@/types/game';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 interface DialogChoiceProps {
@@ -14,7 +14,7 @@ export default function DialogChoice({ choices, onSelect, className = '' }: Dial
   return (
     <div className={`space-y-2 ${className}`}>
       {choices.map((choice, index) => (
-        <motion.button
+        <m.button
           key={choice.id}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -37,13 +37,13 @@ export default function DialogChoice({ choices, onSelect, className = '' }: Dial
           </div>
           
           {/* 點擊波紋效果 */}
-          <motion.div
+          <m.div
             className="absolute inset-0 bg-orange-500/20 rounded-lg"
             initial={{ scale: 0, opacity: 0.5 }}
             whileTap={{ scale: 1, opacity: 0 }}
             transition={{ duration: 0.3 }}
           />
-        </motion.button>
+        </m.button>
       ))}
     </div>
   );

@@ -176,6 +176,15 @@ export class GameEngine {
           }
         }
         break;
+      case 'markScenesVisited':
+        if (effect.sceneIds?.length) {
+          effect.sceneIds.forEach((id) => {
+            if (!this.state.visitedScenes.includes(id)) {
+              this.state.visitedScenes.push(id);
+            }
+          });
+        }
+        break;
       case 'triggerEvent':
         if (effect.eventId) {
           this.triggerEvent(effect.eventId);
@@ -471,6 +480,17 @@ export class GameEngine {
     if (!this.state.interactions.includes(id)) {
       this.state.interactions.push(id);
     }
+  }
+
+  /** 移除單一互動記錄（測試用） */
+  removeInteraction(id: string): void {
+    this.state.interactions = this.state.interactions.filter((x) => x !== id);
+  }
+
+  /** 設定某 NPC 的閒聊次數（測試用，用於解鎖敏感話題門檻） */
+  setNpcCasualTalkCount(npcId: string, count: number): void {
+    if (!this.state.npcCasualTalkCount) this.state.npcCasualTalkCount = {};
+    this.state.npcCasualTalkCount[npcId] = Math.max(0, count);
   }
 
   // 計算場景探索進度

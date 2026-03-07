@@ -2,12 +2,13 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import PasswordWheelInput from './PasswordWheelInput';
-import { parsePassword, getCanonicalStateForChapter } from '@/lib/chapterPassword';
+import { parsePassword, getCanonicalStateForChapter, getCh1StateForPassword } from '@/lib/chapterPassword';
 
 interface PasswordLoadModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: (chapterId: string) => void;
+  /** chapterId；若為 ch1 且帶 sceneId 則直接進入該場景，否則進入章節 intro */
+  onSuccess: (chapterId: string, sceneId?: string) => void;
 }
 
 export default function PasswordLoadModal({ open, onClose, onSuccess }: PasswordLoadModalProps) {
@@ -29,11 +30,23 @@ export default function PasswordLoadModal({ open, onClose, onSuccess }: Password
       return;
     }
     try {
-      const state = getCanonicalStateForChapter(parsed.chapter);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('gameState', JSON.stringify(state));
+      if (parsed.type === 'ch1') {
+        const state = getCh1StateForPassword(parsed.password);
+        if (!state) {
+          setError('密碼錯誤');
+          return;
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('gameState', JSON.stringify(state));
+        }
+        onSuccess('ch1', state.currentScene);
+      } else {
+        const state = getCanonicalStateForChapter(parsed.chapter);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('gameState', JSON.stringify(state));
+        }
+        onSuccess(parsed.chapterId);
       }
-      onSuccess(parsed.chapterId);
       onClose();
     } catch (e) {
       console.warn('載入存檔失敗:', e);
@@ -60,7 +73,7 @@ export default function PasswordLoadModal({ open, onClose, onSuccess }: Password
         <h2 id="password-modal-title" className="text-xl font-semibold text-gray-200 mb-2 text-center">
           從章節繼續
         </h2>
-        <p className="text-sm text-gray-400 mb-4 text-center">輸入 6 位章節密碼（第 1 位 2～6 為章節）</p>
+        <p className="text-sm text-gray-400 mb-4 text-center">輸入 6 位密碼（第一章 20 階段：101042 等；章節跳轉：200000～600000）</p>
 
         <div className="mb-4">
           <PasswordWheelInput value={passwordValue} onChange={setPasswordValue} />

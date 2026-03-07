@@ -2,7 +2,7 @@
 
 import { Puzzle } from '@/types/game';
 import { X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import FadeIn from './animations/FadeIn';
 import SlideIn from './animations/SlideIn';
 import PuzzleInput from './PuzzleInput';
@@ -39,7 +39,7 @@ export default function ChapterPuzzle({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
       <FadeIn delay={0} duration={0.3}>
-        <motion.div
+        <m.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
@@ -190,7 +190,7 @@ export default function ChapterPuzzle({
               )}
             </div>
           </SlideIn>
-        </motion.div>
+        </m.div>
       </FadeIn>
     </div>
   );

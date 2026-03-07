@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 interface ProgressBarProps {
   progress: number; // 0-100
@@ -30,7 +30,7 @@ export default function ProgressBar({
         </div>
       )}
       <div className="w-full h-2 bg-dark-surface/50 rounded-full overflow-hidden border border-dark-border/50">
-        <motion.div
+        <m.div
           className="h-full bg-gradient-to-r from-orange-500 to-red-600"
           initial={{ width: 0 }}
           animate={{ width: `${clampedProgress}%` }}

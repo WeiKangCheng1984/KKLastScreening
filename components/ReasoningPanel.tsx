@@ -1,7 +1,7 @@
 'use client';
 
 import { reasoningByChapter, ChapterReasoning } from '@/data/reasoningByChapter';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { Link2, X } from 'lucide-react';
 import { useState } from 'react';
 import OverlayCard from './OverlayCard';
@@ -117,7 +117,7 @@ export default function ReasoningPanel({
       <div className="flex-1 min-h-0 overflow-y-auto pr-1">
         <AnimatePresence mode="wait">
           {step === 0 && (
-            <motion.div
+            <m.div
               key="q1"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -141,11 +141,11 @@ export default function ReasoningPanel({
                   </button>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
           )}
 
           {step === 1 && (
-            <motion.div
+            <m.div
               key="q2"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -160,11 +160,11 @@ export default function ReasoningPanel({
                 placeholder={config.q2.placeholder}
                 className="w-full px-4 py-3 bg-dark-surface border-2 border-orange-500/30 rounded-xl text-gray-200 placeholder-gray-500 focus:border-orange-400 focus:outline-none mb-6"
               />
-            </motion.div>
+            </m.div>
           )}
 
           {step === 2 && (
-            <motion.div
+            <m.div
               key="q3"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -269,11 +269,11 @@ export default function ReasoningPanel({
               </div>
 
               {q3Error && <p className="text-red-400 text-sm mb-4">{q3Error}</p>}
-            </motion.div>
+            </m.div>
           )}
 
           {step === 3 && config.police && (
-            <motion.div
+            <m.div
               key="police"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -311,7 +311,7 @@ export default function ReasoningPanel({
                   </div>
                 </div>
               )}
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

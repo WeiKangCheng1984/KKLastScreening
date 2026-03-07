@@ -36,7 +36,7 @@ export interface Requirement {
 }
 
 export interface Effect {
-  type: 'addItem' | 'removeItem' | 'setFlag' | 'showDialog' | 'playAudio' | 'triggerEvent' | 'changeScene' | 'startNpcDialog' | 'addInsight';
+  type: 'addItem' | 'removeItem' | 'setFlag' | 'showDialog' | 'playAudio' | 'triggerEvent' | 'changeScene' | 'startNpcDialog' | 'addInsight' | 'markScenesVisited';
   itemId?: string;
   flag?: string;
   value?: any;
@@ -48,6 +48,7 @@ export interface Effect {
   dialogId?: string; // 用於 startNpcDialog
   insightTarget?: keyof InsightsState; // 用於 addInsight
   insightDelta?: number; // 用於 addInsight
+  sceneIds?: string[]; // 用於 markScenesVisited：標記多個場景已拜訪（不切換當前場景）
 }
 
 export interface Event {

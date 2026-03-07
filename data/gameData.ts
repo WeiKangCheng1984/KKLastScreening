@@ -781,376 +781,6 @@ export const scenes: Record<string, Scene> = {
       { id: 'fun_remote', name: '冷氣遙控器', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_remote' }], effects: [{ type: 'showDialog', dialog: { text: '冷氣遙控器。上面貼著「遺失賠償五百」。你放下了。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_magazine', name: '舊雜誌', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_magazine' }], effects: [{ type: 'showDialog', dialog: { text: '一本過期的電影雜誌。封面是半年前的強片。時光飛逝。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_whiteboard', name: '白板', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_whiteboard' }], effects: [{ type: 'showDialog', dialog: { text: '白板上畫著一個笑臉和「今天也要加油」。你沒有笑。但你有點想笑。', type: 'narrator' } }], oneTime: false },
-      {
-        id: 'get_wrench',
-        name: '獲得扳手',
-        description: '你從工具箱裡找到扳手。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'wrench_spot' },
-        ],
-        effects: [
-          { type: 'addItem', itemId: 'rusty_wrench' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：生鏽的扳手\n\n扳手生鏽了，但還能用。你需要它來關閉瓦斯爐。',
-              type: 'item',
-              svgImage: '/svg/exploration/stove_detail.svg',
-              svgPosition: 'right',
-            },
-          },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'try_close_stove_with_wrench',
-        name: '嘗試用扳手關閉瓦斯爐',
-        description: '直接用扳手會失敗。',
-        requirements: [
-          { type: 'hasItem', itemId: 'rusty_wrench' },
-          { type: 'hasInteracted', hotspotId: 'gas_stove' },
-          {
-            type: 'custom',
-            customCheck: (state) => !state.inventory.includes('water_stop_tape'),
-          },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你越用力，越像想把某件事抹掉。\n\n扳手無法轉動，開關卡死了。你需要先補上破口。',
-              type: 'narrator',
-            },
-          },
-        ],
-        oneTime: false,
-      },
-      {
-        id: 'close_stove',
-        name: '關閉瓦斯爐',
-        description: '用扳手和止水膠帶關閉瓦斯爐。',
-        requirements: [
-          { type: 'hasItem', itemId: 'rusty_wrench' },
-          { type: 'hasItem', itemId: 'water_stop_tape' },
-          { type: 'hasInteracted', hotspotId: 'gas_stove' },
-          { type: 'hasFlag', flag: 'stove_tape_applied', value: true },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你先把止水膠帶貼在爐頭旁，補上破口。\n\n然後轉動扳手——逆時針。\n\n「卡——」一聲，瓦斯爐關閉了。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'stove_closed', value: true },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '瓦斯關閉後，廚房水聲會變得清楚。',
-              type: 'narrator',
-            },
-          },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'apply_tape_to_stove',
-        name: '在瓦斯爐上貼止水膠帶',
-        description: '在爐頭旁貼上止水膠帶。',
-        requirements: [
-          { type: 'hasItem', itemId: 'water_stop_tape' },
-          { type: 'hasInteracted', hotspotId: 'gas_stove' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你在爐頭旁貼上止水膠帶，代表補上破口。\n\n現在可以用扳手了。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'stove_tape_applied', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'check_fridge',
-        name: '檢查冰箱',
-        description: '你檢查冰箱，發現過期食物。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'fridge' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '冰箱裡有過期食物，散發著不好的氣味。\n\n你應該要處理這些。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'fridge_checked', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'get_milk',
-        name: '獲得過期牛奶',
-        description: '你從冰箱裡拿出過期牛奶盒。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'milk_spot' },
-        ],
-        effects: [
-          { type: 'addItem', itemId: 'expired_milk' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：過期牛奶盒\n\n牛奶已經過期了。你翻轉盒子，背面有一張字條。',
-              type: 'item',
-            },
-          },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '字條上寫著：「如果你看到這張字條，請幫我照顧這裡。」\n\n你開始覺得這裡需要你。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'milk_found', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'notice_leak',
-        name: '注意到漏水',
-        description: '你注意到水龍頭在漏水。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'leaky_faucet' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '水龍頭在漏水，滴答滴答的聲音在空蕩的廚房裡迴響。\n\n你應該要處理這個。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'leak_noticed', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'unlock_bedroom',
-        name: '解鎖臥室',
-        description: '嘗試處理問題後，臥室門打開了。',
-        requirements: [
-          { type: 'hasFlag', flag: 'stove_closed', value: true },
-          { type: 'hasFlag', flag: 'fridge_checked', value: true },
-          { type: 'hasFlag', flag: 'leak_noticed', value: true },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你開始覺得這裡需要你。\n\n臥室的方向傳來微弱的聲響，你走過去。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'bedroom_unlocked', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'talk_to_character_2',
-        name: '聽到聲音',
-        description: '你聽到一個聲音，但看不到人。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'character_voice_2' },
-          {
-            type: 'custom',
-            customCheck: (state) => !state.flags.character_2_complete,
-          },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '「你來了。」',
-              type: 'character',
-              characterId: 'kitchen_voice',
-              characterName: '聲音',
-              characterPortrait: '/svg/characters/kitchen_voice.svg',
-              characterPosition: 'right',
-            },
-          },
-        ],
-        oneTime: false,
-      },
-      {
-        id: 'character_2_second_talk',
-        name: '繼續與聲音對話',
-        description: '繼續與聲音對話。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'character_voice_2' },
-          { type: 'hasFlag', flag: 'character_2_first_talk', value: true },
-          {
-            type: 'custom',
-            customCheck: (state) => !state.flags.character_2_complete,
-          },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '「這裡需要你。瓦斯爐、冰箱、漏水...都需要處理。」',
-              type: 'character',
-              characterId: 'kitchen_voice',
-              characterName: '聲音',
-              characterPortrait: '/svg/characters/kitchen_voice.svg',
-              characterPosition: 'right',
-            },
-          },
-        ],
-        oneTime: false,
-      },
-      {
-        id: 'character_2_third_talk',
-        name: '第三次對話',
-        description: '繼續與聲音對話。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'character_voice_2' },
-          { type: 'hasFlag', flag: 'character_2_second_talk', value: true },
-          {
-            type: 'custom',
-            customCheck: (state) => !state.flags.character_2_complete,
-          },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '「為什麼是我？」',
-              type: 'character',
-              characterId: 'kitchen_voice',
-              characterName: '聲音',
-              characterPortrait: '/svg/characters/kitchen_voice.svg',
-              characterPosition: 'right',
-            },
-          },
-        ],
-        oneTime: false,
-      },
-      {
-        id: 'character_2_fourth_talk',
-        name: '第四次對話',
-        description: '繼續與聲音對話。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'character_voice_2' },
-          { type: 'hasFlag', flag: 'character_2_third_talk', value: true },
-          {
-            type: 'custom',
-            customCheck: (state) => !state.flags.character_2_complete,
-          },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '「因為你來了。因為你看到了。這就是責任感的開始。」',
-              type: 'character',
-              characterId: 'kitchen_voice',
-              characterName: '聲音',
-              characterPortrait: '/svg/characters/kitchen_voice.svg',
-              characterPosition: 'right',
-            },
-          },
-        ],
-        oneTime: false,
-      },
-      {
-        id: 'character_2_fifth_talk',
-        name: '第五次對話（選擇題）',
-        description: '最後一次與聲音對話，需要做出選擇。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'character_voice_2' },
-          { type: 'hasFlag', flag: 'character_2_fourth_talk', value: true },
-          {
-            type: 'custom',
-            customCheck: (state) => !state.flags.character_2_complete,
-          },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '「你會處理這些問題嗎？」',
-              type: 'character',
-              characterId: 'kitchen_voice',
-              characterName: '聲音',
-              characterPortrait: '/svg/characters/kitchen_voice.svg',
-              characterPosition: 'right',
-              choices: [
-                {
-                  id: 'choice_handle_responsibility',
-                  text: '我會處理',
-                  weight: 10,
-                  effects: [
-                    {
-                      type: 'showDialog',
-                      dialog: {
-                        text: '「很好。開始吧。」',
-                        type: 'character',
-                        characterId: 'kitchen_voice',
-                        characterName: '聲音',
-                        characterPortrait: '/svg/characters/kitchen_voice.svg',
-                        characterPosition: 'right',
-                      },
-                    },
-                  ],
-                },
-                {
-                  id: 'choice_handle_partial',
-                  text: '我會試試看',
-                  weight: 5,
-                  effects: [
-                    {
-                      type: 'showDialog',
-                      dialog: {
-                        text: '「試試看就夠了。」',
-                        type: 'character',
-                        characterId: 'kitchen_voice',
-                        characterName: '聲音',
-                        characterPortrait: '/svg/characters/kitchen_voice.svg',
-                        characterPosition: 'right',
-                      },
-                    },
-                  ],
-                },
-                {
-                  id: 'choice_refuse',
-                  text: '這不是我的責任',
-                  weight: -10,
-                  effects: [
-                    {
-                      type: 'showDialog',
-                      dialog: {
-                        text: '「但你在這裡。你看到了這些問題。」',
-                        type: 'character',
-                        characterId: 'kitchen_voice',
-                        characterName: '聲音',
-                        characterPortrait: '/svg/characters/kitchen_voice.svg',
-                        characterPosition: 'right',
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-          { type: 'setFlag', flag: 'character_2_complete', value: true },
-        ],
-        oneTime: false,
-      },
     ],
     puzzles: [],
     initialDialog: {
@@ -1337,179 +967,7 @@ export const scenes: Record<string, Scene> = {
       { id: 'fun_faucet', name: '水龍頭', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_faucet' }], effects: [{ type: 'showDialog', dialog: { text: '水龍頭。你轉開又關上。省水。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_floor', name: '地板反光', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_floor' }], effects: [{ type: 'showDialog', dialog: { text: '地板擦得很亮。你看到自己的倒影。你今天氣色還行。', type: 'narrator' } }], oneTime: false },
     ],
-    puzzles: [
-      {
-        id: 'test_restroom_input',
-        type: 'input',
-        solution: 'TEST',
-        hint: '測試用。答案：TEST',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_input' }],
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_input_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_sequence',
-        type: 'sequence',
-        solution: ['A', 'B', 'C'],
-        hint: '測試用。答案順序：A,B,C',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_sequence' }],
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_sequence_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_arrangement',
-        type: 'arrangement',
-        solution: ['item1', 'item2', 'item3'],
-        hint: '測試用。答案順序：item1,item2,item3',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_arrangement' }],
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_arrangement_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_combination',
-        type: 'combination',
-        solution: ['id_a', 'id_b'],
-        hint: '測試用。答案：id_a,id_b',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_combination' }],
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_combination_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_visual_selection',
-        type: 'visual_selection',
-        solution: ['correct_id'],
-        hint: '測試用。答案：選「正確」',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_visual_selection' }],
-        options: [
-          { id: 'correct_id', label: '正確' },
-          { id: 'wrong_id', label: '錯誤' },
-        ],
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_visual_selection_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_combination_lock',
-        type: 'combination_lock',
-        solution: '12345',
-        hint: '測試用。答案：12345',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_combination_lock' }],
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_combination_lock_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_word_scramble',
-        type: 'word_scramble',
-        solution: 'PUZZLE',
-        hint: '測試用。答案：PUZZLE',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_word_scramble' }],
-        config: { scrambledWord: 'ZUPZLE', originalWord: 'PUZZLE' },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_word_scramble_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_wire_connection',
-        type: 'wire_connection',
-        solution: 'connected',
-        hint: '測試用。接對四條線即過',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_wire_connection' }],
-        config: {
-          wires: [
-            { id: 'w1', color: 'red', start: 0, end: 2 },
-            { id: 'w2', color: 'blue', start: 1, end: 3 },
-            { id: 'w3', color: 'green', start: 2, end: 0 },
-            { id: 'w4', color: 'yellow', start: 3, end: 1 },
-          ],
-        },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_wire_connection_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_jigsaw',
-        type: 'jigsaw',
-        solution: 'solved',
-        hint: '測試用。完成拼圖即過',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_jigsaw' }],
-        config: { gridSize: [3, 3] },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_jigsaw_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_rotating_dial',
-        type: 'rotating_dial',
-        solution: [0, 2, 1, 3],
-        hint: '測試用。答案：[0,2,1,3] 四盤依序',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_rotating_dial' }],
-        config: {
-          dials: [
-            { id: 'd1', segments: 4, target: 0 },
-            { id: 'd2', segments: 4, target: 2 },
-            { id: 'd3', segments: 4, target: 1 },
-            { id: 'd4', segments: 4, target: 3 },
-          ],
-        },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_rotating_dial_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_sequence_memory',
-        type: 'sequence_memory',
-        solution: ['A', 'B', 'C', 'D'],
-        hint: '測試用。答案：A,B,C,D',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_sequence_memory' }],
-        config: { sequenceLength: 4, symbols: ['A', 'B', 'C', 'D', 'E', 'F'] },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_sequence_memory_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_sliding_puzzle',
-        type: 'sliding_puzzle',
-        solution: 'solved',
-        hint: '測試用。排好即過',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_sliding_puzzle' }],
-        config: { gridSize: [3, 3] },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_sliding_puzzle_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_symbol_matching',
-        type: 'symbol_matching',
-        solution: 'matched',
-        hint: '測試用。配對完即過',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_symbol_matching' }],
-        config: {
-          pairs: [
-            { id: 'p1', symbol: '★' },
-            { id: 'p2', symbol: '●' },
-            { id: 'p3', symbol: '▲' },
-            { id: 'p4', symbol: '■' },
-          ],
-        },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_symbol_matching_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_maze_path',
-        type: 'maze_path',
-        solution: 'path',
-        hint: '測試用。從起點走到終點即過',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_maze_path' }],
-        config: {
-          maze: [
-            [0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0],
-          ],
-          start: [1, 1],
-          end: [3, 4],
-        },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_maze_path_solved', value: true }],
-      },
-      {
-        id: 'test_restroom_logic_switches',
-        type: 'logic_switches',
-        solution: { s1: true, s2: false, s3: true },
-        hint: '測試用。答案：s1開 s2關 s3開',
-        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_test_logic_switches' }],
-        config: {
-          switches: [
-            { id: 's1', initialState: false },
-            { id: 's2', initialState: false },
-            { id: 's3', initialState: false },
-          ],
-          logicRules: 's1 AND NOT s2 AND s3',
-        },
-        onSolve: [{ type: 'setFlag', flag: 'puzzle_test_restroom_logic_switches_solved', value: true }],
-      },
-    ],
+    puzzles: [],
     initialDialog: {
       text: '廁所裡很乾淨，幾乎是空的。\n\n但在這片乾淨中，你感覺到一種刻意。',
       type: 'narrator',
@@ -3757,19 +3215,19 @@ export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'choice_procedure',
           label: '「他不是在說謊，他是在把事情塞回流程裡，讓流程替人背鍋。」',
           insightEffects: [{ target: 'procedure_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'note_lin_procedure', value: true }, { type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
+          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
         },
         {
           id: 'choice_human',
           label: '「他怕的應該不是兇手，是上面那張看不見的臉，可是這些恐懼會替兇手擦地板。」',
           insightEffects: [{ target: 'human_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'note_lin_human', value: true }, { type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
+          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
         },
         {
           id: 'choice_evidence',
           label: '「官腔很滑，油槍滑掉，但官腔擋不住痕跡。」',
           insightEffects: [{ target: 'evidence_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'note_lin_evidence', value: true }, { type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
+          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
         },
       ],
     },
@@ -3797,19 +3255,19 @@ export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'choice_procedure',
           label: '「他不是在說謊，他是在把事情塞回流程裡，讓流程替人背鍋。」',
           insightEffects: [{ target: 'procedure_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'note_lin_procedure', value: true }, { type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
+          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
         },
         {
           id: 'choice_human',
           label: '「他怕的不是兇手，是上面那張看不見的臉。恐懼會替兇手擦地板。」',
           insightEffects: [{ target: 'human_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'note_lin_human', value: true }, { type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
+          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
         },
         {
           id: 'choice_evidence',
           label: '「官腔擋不住痕跡。」',
           insightEffects: [{ target: 'evidence_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'note_lin_evidence', value: true }, { type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
+          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
         },
       ],
     },
@@ -3947,9 +3405,9 @@ export const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       npcId: 'npc_zhou_jie',
       text: '周姊（拿出夾子）：「黑色碎片。像手套的一角。你拿走吧，我不想它被丟掉。」\n\nKK：「你怎麼沒直接丟？」\n\n周姊：「因為丟掉會讓我晚上睡不著。」',
       choices: [
-        { id: 'choice_seal', label: '「我現在就封袋。」', effects: [{ type: 'addItem', itemId: 'item_black_plastic_fragment' }, { type: 'setFlag', flag: 'black_fragment_found', value: true }, { type: 'setFlag', flag: 'fragment_choice_evidence', value: true }] },
-        { id: 'choice_secret', label: '「先別讓任何人知道你有看見它。」', effects: [{ type: 'addItem', itemId: 'item_black_plastic_fragment' }, { type: 'setFlag', flag: 'black_fragment_found', value: true }, { type: 'setFlag', flag: 'fragment_choice_human', value: true }] },
-        { id: 'choice_report', label: '「我會回報，讓它進正式流程。」', effects: [{ type: 'addItem', itemId: 'item_black_plastic_fragment' }, { type: 'setFlag', flag: 'black_fragment_found', value: true }, { type: 'setFlag', flag: 'fragment_choice_procedure', value: true }] },
+        { id: 'choice_seal', label: '「我現在就封袋。」', effects: [{ type: 'addItem', itemId: 'item_black_plastic_fragment' }, { type: 'setFlag', flag: 'black_fragment_found', value: true }] },
+        { id: 'choice_secret', label: '「先別讓任何人知道你有看見它。」', effects: [{ type: 'addItem', itemId: 'item_black_plastic_fragment' }, { type: 'setFlag', flag: 'black_fragment_found', value: true }] },
+        { id: 'choice_report', label: '「我會回報，讓它進正式流程。」', effects: [{ type: 'addItem', itemId: 'item_black_plastic_fragment' }, { type: 'setFlag', flag: 'black_fragment_found', value: true }] },
       ],
       next: 'node_zhou_fragment_2',
     },

@@ -46,9 +46,10 @@ import Ch1ReportEditor from '@/components/Ch1ReportEditor';
 import { reasoningByChapter } from '@/data/reasoningByChapter';
 import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import SensitiveGateOverlay from '@/components/SensitiveGateOverlay';
 import { CH1_MONOLOGUE_TEXT, CH1_MONOLOGUE_CHOICES } from '@/data/ch1Monologue';
+import { flagTestGroups, ch1ReportCoreFlagIds, ch1ReportEvidenceItemIds, npcTestByChapter, sensitiveChoiceGroups, flagToItemIds } from '@/data/flagTestConfig';
 
 // 獲取當前章節的所有場景
 const getCurrentChapterScenes = (chapterId: string): string[] => {
@@ -191,6 +192,10 @@ export default function PlayPage() {
   // 第一章章末：報告編輯器（取代解謎／推理舊路徑）
   const [showReasoningPanel, setShowReasoningPanel] = useState(false);
   const [showCh1ReportEditor, setShowCh1ReportEditor] = useState(false);
+  /** 旗標測試面板：設定區點「旗標測試」後開啟，可逐一開關所有旗標 */
+  const [showFlagTestPanel, setShowFlagTestPanel] = useState(false);
+  /** 旗標測試面板目前分頁 */
+  const [flagTestTab, setFlagTestTab] = useState<'flags' | 'interactions' | 'npc' | 'sensitive'>('flags');
   /** 第一章內心獨白 overlay：完成 4 位 NPC 敏感對話後由按鈕觸發，全章一次 */
   const [showCh1MonologueOverlay, setShowCh1MonologueOverlay] = useState(false);
   // 場景切換相關狀態
@@ -3162,7 +3167,7 @@ export default function PlayPage() {
         {/* 推理面板：最高優先，全螢幕模態 */}
         <AnimatePresence>
           {showReasoningPanel && engineRef.current && (
-            <motion.div
+            <m.div
               key="reasoning-panel"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -3207,14 +3212,14 @@ export default function PlayPage() {
                 }}
                 onClose={() => setShowReasoningPanel(false)}
               />
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
         {/* 第一章報告編輯器：向劉隊報告完成後導向 ch2 intro */}
         <AnimatePresence>
           {showCh1ReportEditor && engineRef.current && (
-            <motion.div
+            <m.div
               key="ch1-report-editor"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -3239,14 +3244,293 @@ export default function PlayPage() {
                 }}
                 onClose={() => setShowCh1ReportEditor(false)}
               />
-            </motion.div>
+            </m.div>
+          )}
+        </AnimatePresence>
+
+        {/* 旗標測試面板：設定 → 旗標測試 開啟；分頁：旗標 / 互動點 / NPC閒聊 / 敏感選擇 */}
+        <AnimatePresence>
+          {showFlagTestPanel && engineRef.current && (
+            <m.div
+              key="flag-test-panel"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 pointer-events-auto"
+            >
+              <div className="w-full max-w-lg max-h-[85vh] flex flex-col bg-dark-surface border border-dark-border rounded-xl shadow-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-dark-border shrink-0">
+                  <h2 className="text-lg font-bold text-orange-400">旗標測試</h2>
+                  <button
+                    type="button"
+                    onClick={() => setShowFlagTestPanel(false)}
+                    className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/10"
+                  >
+                    <X size={22} />
+                  </button>
+                </div>
+                <div className="flex border-b border-dark-border shrink-0">
+                  {(['flags', 'interactions', 'npc', 'sensitive'] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setFlagTestTab(tab)}
+                      className={`px-3 py-2 text-sm font-medium transition-colors ${
+                        flagTestTab === tab
+                          ? 'text-orange-400 border-b-2 border-orange-400 bg-white/5'
+                          : 'text-gray-400 hover:text-orange-200'
+                      }`}
+                    >
+                      {tab === 'flags' && '旗標'}
+                      {tab === 'interactions' && '互動點'}
+                      {tab === 'npc' && 'NPC閒聊'}
+                      {tab === 'sensitive' && '敏感選擇'}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+                  {flagTestTab === 'flags' && (
+                    <>
+                      <p className="text-xs text-gray-500 mb-2">
+                        以下開關直接寫入遊戲 state（旗標、背包）。開＝程式視為已探索／已互動；有對應道具的旗標會一併增減背包。
+                      </p>
+                      {chapterId === 'ch1' && (
+                        <div className="space-y-2 pb-3 border-b border-dark-border">
+                          <div className="text-ui-caption text-orange-400/90 mb-2">第一章報告快捷</div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!engineRef.current) return;
+                              const ch1Scenes = getCurrentChapterScenes('ch1');
+                              engineRef.current.applyEffect({ type: 'markScenesVisited', sceneIds: ch1Scenes });
+                              setRefreshKey((k) => k + 1);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 bg-dark-card/50 hover:bg-dark-card border border-dark-border rounded-lg text-gray-300 hover:text-orange-200 text-sm font-medium"
+                          >
+                            <MapPin size={14} />
+                            標記三場景已拜訪
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!engineRef.current) return;
+                              const engine = engineRef.current;
+                              const ch1Scenes = getCurrentChapterScenes('ch1');
+                              ch1ReportCoreFlagIds.forEach((f) => engine.applyEffect({ type: 'setFlag', flag: f, value: true }));
+                              engine.applyEffect({ type: 'markScenesVisited', sceneIds: ch1Scenes });
+                              ch1ReportEvidenceItemIds.forEach((id) => engine.applyEffect({ type: 'addItem', itemId: id }));
+                              setRefreshKey((k) => k + 1);
+                              setShowFlagTestPanel(false);
+                              setCurrentDialog({
+                                text: '已開啟第一章報告條件：五個旗標、三場景已拜訪、報告用六樣道具已加入背包。可點劉隊選「我想向你報告」。',
+                                type: 'narrator',
+                                choices: [{ id: 'close_only', text: '知道了' }],
+                              });
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 bg-orange-900/30 hover:bg-orange-900/50 border border-orange-500/50 rounded-lg text-orange-200 text-sm font-medium"
+                          >
+                            <FlaskConical size={14} />
+                            一鍵全開（含報告用道具）
+                          </button>
+                        </div>
+                      )}
+                      {flagTestGroups.map((group) => (
+                        <div key={group.chapterId} className="space-y-2">
+                          <div className="text-ui-caption uppercase text-gray-500 sticky top-0 bg-dark-surface/95 py-1">
+                            {group.chapterName}
+                          </div>
+                          <div className="grid grid-cols-1 gap-1.5">
+                            {group.flags.map(({ id: flag, label }) => {
+                              const on = !!(state.flags || {})[flag];
+                              return (
+                                <button
+                                  key={flag}
+                                  type="button"
+                                  onClick={() => {
+                                    if (!engineRef.current) return;
+                                    const engine = engineRef.current;
+                                    const nextOn = !on;
+                                    engine.applyEffect({ type: 'setFlag', flag, value: nextOn });
+                                    const itemIds = flagToItemIds[flag];
+                                    if (itemIds?.length) {
+                                      if (nextOn) itemIds.forEach((itemId) => engine.applyEffect({ type: 'addItem', itemId }));
+                                      else itemIds.forEach((itemId) => engine.applyEffect({ type: 'removeItem', itemId }));
+                                    }
+                                    setRefreshKey((k) => k + 1);
+                                  }}
+                                  className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left text-sm font-medium transition-all ${
+                                    on
+                                      ? 'bg-green-900/30 border-green-500/50 text-green-200'
+                                      : 'bg-dark-card/50 border-dark-border text-gray-400 hover:border-orange-500/50 hover:text-orange-200'
+                                  }`}
+                                >
+                                  <span className="truncate">{label}</span>
+                                  <span className="text-xs shrink-0">{on ? '✓ 開' : '關'}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {flagTestTab === 'interactions' && (() => {
+                    const engine = engineRef.current!;
+                    const scenes = engine.getScenes();
+                    const sceneIds = getCurrentChapterScenes(chapterId);
+                    const interactions = state.interactions ?? [];
+                    const hotspotList: { id: string; label: string; sceneName: string }[] = [];
+                    sceneIds.forEach((sid) => {
+                      const sc = scenes[sid];
+                      if (!sc?.hotspots) return;
+                      sc.hotspots.forEach((h: { id: string; description?: string }) => {
+                        hotspotList.push({
+                          id: h.id,
+                          label: h.description || h.id,
+                          sceneName: sc.name || sid,
+                        });
+                      });
+                    });
+                    return (
+                      <div className="space-y-3">
+                        <div className="text-ui-caption text-orange-400/90 mb-2">
+                          互動點（線索／好笑）：點擊切換「已點過」狀態，與 hasInteracted 一致
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!engineRef.current) return;
+                            hotspotList.forEach((h) => engineRef.current!.addInteraction(h.id));
+                            setRefreshKey((k) => k + 1);
+                          }}
+                          className="w-full px-3 py-2 bg-dark-card/50 hover:bg-dark-card border border-dark-border rounded-lg text-gray-300 hover:text-orange-200 text-sm font-medium"
+                        >
+                          本章全部標記已互動
+                        </button>
+                        <div className="space-y-1.5">
+                          {hotspotList.map(({ id, label, sceneName }) => {
+                            const on = interactions.includes(id);
+                            return (
+                              <button
+                                key={id}
+                                type="button"
+                                onClick={() => {
+                                  if (!engineRef.current) return;
+                                  if (on) engineRef.current.removeInteraction(id);
+                                  else engineRef.current.addInteraction(id);
+                                  setRefreshKey((k) => k + 1);
+                                }}
+                                className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left text-sm transition-all ${
+                                  on
+                                    ? 'bg-green-900/30 border-green-500/50 text-green-200'
+                                    : 'bg-dark-card/50 border-dark-border text-gray-400 hover:border-orange-500/50 hover:text-orange-200'
+                                }`}
+                              >
+                                <span className="truncate" title={id}>{label}</span>
+                                <span className="text-xs shrink-0 text-gray-500">{sceneName}</span>
+                                <span className="text-xs shrink-0">{on ? '✓' : '－'}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {flagTestTab === 'npc' && (() => {
+                    const npcList = npcTestByChapter[chapterId] ?? [];
+                    const counts = state.npcCasualTalkCount ?? {};
+                    return (
+                      <div className="space-y-3">
+                        <div className="text-ui-caption text-orange-400/90 mb-2">
+                          NPC 閒聊次數：≥3 次通常解鎖敏感話題入口
+                        </div>
+                        {npcList.length === 0 ? (
+                          <p className="text-gray-500 text-sm">本章尚無設定 NPC 閒聊測試。</p>
+                        ) : (
+                          npcList.map(({ id: npcId, label }) => {
+                            const count = counts[npcId] ?? 0;
+                            return (
+                              <div key={npcId} className="flex items-center justify-between gap-2 p-3 rounded-lg bg-dark-card/50 border border-dark-border">
+                                <span className="text-sm font-medium text-gray-200 truncate">{label}</span>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  {[0, 1, 2, 3, 5].map((n) => (
+                                    <button
+                                      key={n}
+                                      type="button"
+                                      onClick={() => {
+                                        if (!engineRef.current) return;
+                                        engineRef.current.setNpcCasualTalkCount(npcId, n);
+                                        setRefreshKey((k) => k + 1);
+                                      }}
+                                      className={`w-8 h-8 rounded text-xs font-medium ${
+                                        count === n
+                                          ? 'bg-orange-500 text-white'
+                                          : 'bg-dark-surface border border-dark-border text-gray-400 hover:text-orange-200'
+                                      }`}
+                                    >
+                                      {n}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {flagTestTab === 'sensitive' && (
+                    <div className="space-y-4">
+                      <div className="text-ui-caption text-orange-400/90 mb-2">
+                        敏感話題選擇：已問敏感（依章節顯示該章 NPC）
+                      </div>
+                      {sensitiveChoiceGroups
+                        .filter((group) => group.chapterId === chapterId)
+                        .map((group) => (
+                        <div key={group.npcId} className="space-y-2">
+                          <div className="text-ui-caption text-gray-500">{group.npcLabel}</div>
+                          <div className="grid grid-cols-1 gap-1.5">
+                            {group.entries.map(({ flagId, label }) => {
+                              const on = !!(state.flags || {})[flagId];
+                              return (
+                                <button
+                                  key={flagId}
+                                  type="button"
+                                  onClick={() => {
+                                    if (!engineRef.current) return;
+                                    engineRef.current.applyEffect({ type: 'setFlag', flag: flagId, value: !on });
+                                    setRefreshKey((k) => k + 1);
+                                  }}
+                                  className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left text-sm font-medium transition-all ${
+                                    on
+                                      ? 'bg-green-900/30 border-green-500/50 text-green-200'
+                                      : 'bg-dark-card/50 border-dark-border text-gray-400 hover:border-orange-500/50 hover:text-orange-200'
+                                  }`}
+                                >
+                                  <span className="truncate">{label}</span>
+                                  <span className="text-xs shrink-0">{on ? '✓ 開' : '關'}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </m.div>
           )}
         </AnimatePresence>
 
         {/* 敏感抉擇：次優先，中央對話框 */}
         <AnimatePresence>
           {!showReasoningPanel && !showCh1ReportEditor && sensitiveGate && (
-            <motion.div
+            <m.div
               key="sensitive-gate"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -3260,14 +3544,14 @@ export default function PlayPage() {
                 onChoiceSelect={handleSensitiveGateChoice}
                 onClose={() => setSensitiveGate(null)}
               />
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
         {/* 第一章內心獨白：完成 4 位 NPC 敏感對話後由按鈕觸發，全章一次 */}
         <AnimatePresence>
           {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && showCh1MonologueOverlay && (
-            <motion.div
+            <m.div
               key="ch1-monologue"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -3281,14 +3565,14 @@ export default function PlayPage() {
                 onChoiceSelect={handleCh1MonologueChoice}
                 onClose={() => setShowCh1MonologueOverlay(false)}
               />
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
         {/* 背包道具詳解：中央詳解卡，優先於 toast */}
         <AnimatePresence>
           {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && !showCh1MonologueOverlay && activeItemDetail && (
-            <motion.div
+            <m.div
               key="item-detail"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -3309,14 +3593,14 @@ export default function PlayPage() {
                   onComplete={() => setActiveItemDetail(null)}
                 />
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
         {/* 道具獲得提示：最低優先，小型 bottom toast，可與場景共存 */}
         <AnimatePresence>
           {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && !showCh1MonologueOverlay && !activeItemDetail && showItemNotification && obtainedItem && (
-            <motion.div
+            <m.div
               key="item-toast"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -3338,7 +3622,7 @@ export default function PlayPage() {
                   setRefreshKey((prev) => prev + 1);
                 }}
               />
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>
@@ -3367,7 +3651,7 @@ export default function PlayPage() {
           {showMenu && (
             <>
               {/* 背景遮罩 - 淡入淡出 */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -3376,7 +3660,7 @@ export default function PlayPage() {
                 className="fixed inset-0 bg-black/40 z-40"
               />
               {/* 選單面板 - 從右緣滑入 */}
-              <motion.div
+              <m.div
                 initial={{ x: '100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
@@ -3414,6 +3698,16 @@ export default function PlayPage() {
                     </div>
                     <AudioControl />
                   </div>
+                  <button
+                    onClick={() => {
+                      setShowFlagTestPanel(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-dark-card/50 hover:bg-dark-card border border-dark-border/50 hover:border-orange-500/50 rounded-lg text-gray-300 hover:text-orange-200 transition-all duration-200 text-sm font-medium"
+                  >
+                    <FlaskConical size={18} className="text-orange-400" />
+                    <span>旗標測試</span>
+                  </button>
                   {/* KK 洞察（計分）：暫時隱藏 */}
                   {false && (
                     <div className="px-4 py-3 bg-dark-card/50 border border-dark-border/50 rounded-lg">
@@ -3491,7 +3785,7 @@ export default function PlayPage() {
                   </button>
                 </div>
               </div>
-              </motion.div>
+              </m.div>
             </>
           )}
         </AnimatePresence>

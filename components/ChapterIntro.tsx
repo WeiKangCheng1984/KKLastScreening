@@ -6,7 +6,6 @@ import { Play, ChevronLeft, ChevronRight, RotateCcw, Pause } from 'lucide-react'
 import { ChapterIntro as ChapterIntroType } from '@/types/game';
 import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import { getChapterIntroContinuePath } from '@/data/flowConfig';
-import { scenes as scenesMap } from '@/data/gameData';
 import FadeIn from './animations/FadeIn';
 import ParticleEffect from './animations/ParticleEffect';
 
@@ -17,9 +16,11 @@ interface ChapterIntroProps {
     intro: ChapterIntroType;
     scenes: string[];
   };
+  /** 該章第一個場景背景圖 URL，由 intro 頁經 getChapterData 取得後傳入，用於預載 */
+  firstSceneBackground?: string | null;
 }
 
-export default function ChapterIntro({ chapter }: ChapterIntroProps) {
+export default function ChapterIntro({ chapter, firstSceneBackground }: ChapterIntroProps) {
   const router = useRouter();
   const [currentLayer, setCurrentLayer] = useState(0);
   const [isReady, setIsReady] = useState(false);
@@ -37,28 +38,20 @@ export default function ChapterIntro({ chapter }: ChapterIntroProps) {
   const hasSlides = slides.length > 0;
   const introVideo = chapter.intro.introVideo;
 
-  // 方案二：導讀頁預載該章第一個場景背景圖，點「開始探索」時已進快取
+  // 方案二：導讀頁預載該章第一個場景背景圖（由 intro 頁傳入 firstSceneBackground）
   useEffect(() => {
-    const firstSceneId = chapter.scenes?.[0];
-    if (!firstSceneId) return;
-    const firstScene = scenesMap[firstSceneId];
-    const bg = firstScene?.background;
-    if (!bg) return;
-
+    if (!firstSceneBackground) return;
+    const bg = firstSceneBackground;
     const link = document.createElement('link');
     link.rel = 'preload';
     link.as = 'image';
     link.href = bg;
     document.head.appendChild(link);
     const img = new Image();
-    img.onload = () => {
-      if (link.parentNode) document.head.removeChild(link);
-    };
-    img.onerror = () => {
-      if (link.parentNode) document.head.removeChild(link);
-    };
+    img.onload = () => { if (link.parentNode) document.head.removeChild(link); };
+    img.onerror = () => { if (link.parentNode) document.head.removeChild(link); };
     img.src = bg;
-  }, [chapter.scenes]);
+  }, [firstSceneBackground]);
 
   // 分層顯示動畫 - 各章節一致
   useEffect(() => {

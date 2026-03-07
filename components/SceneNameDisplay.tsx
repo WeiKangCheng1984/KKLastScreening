@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import BeamEffect from './effects/BeamEffect';
 import GlitchText from './effects/GlitchText';
@@ -53,7 +53,7 @@ export default function SceneNameDisplay({
   return (
     <AnimatePresence>
       {isVisible && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -80,7 +80,7 @@ export default function SceneNameDisplay({
             
             {/* 大文字：手機用較大字、桌面限在 428px 內不超出，長名稱可換行 */}
             <div className="text-center w-full min-w-0">
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, scale: 0.5, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: -30 }}
@@ -111,10 +111,10 @@ export default function SceneNameDisplay({
                     className="block"
                   />
                 </div>
-              </motion.div>
+              </m.div>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

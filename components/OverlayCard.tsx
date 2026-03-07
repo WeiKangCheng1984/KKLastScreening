@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { motion, MotionProps } from 'framer-motion';
+import { m, MotionProps } from 'framer-motion';
 
 type OverlayTone = 'narrative' | 'system' | 'decision' | 'warning' | 'success';
 type OverlaySize = 'sm' | 'md' | 'lg';
@@ -62,7 +62,7 @@ export default function OverlayCard({
   const sizeClasses = getSizeClasses(size);
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, scale: 0.95, y: 8 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: 8 }}
@@ -71,7 +71,7 @@ export default function OverlayCard({
       {...motionProps}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 

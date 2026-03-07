@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 interface GlitchTextProps {
@@ -39,7 +39,7 @@ export default function GlitchText({
   const { offset, blur } = intensityMap[intensity];
 
   return (
-    <motion.div
+    <m.div
       className={`relative inline-block ${className}`}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -53,7 +53,7 @@ export default function GlitchText({
       {isGlitching && (
         <>
           {/* 紅色陰影層 */}
-          <motion.span
+          <m.span
             className="absolute inset-0 z-0 block"
             style={{
               color: '#ef4444',
@@ -73,10 +73,10 @@ export default function GlitchText({
             }}
           >
             {text}
-          </motion.span>
+          </m.span>
 
           {/* 青色陰影層 */}
-          <motion.span
+          <m.span
             className="absolute inset-0 z-0 block"
             style={{
               color: '#00ffff',
@@ -97,9 +97,9 @@ export default function GlitchText({
             }}
           >
             {text}
-          </motion.span>
+          </m.span>
         </>
       )}
-    </motion.div>
+    </m.div>
   );
 }

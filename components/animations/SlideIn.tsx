@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { ReactNode } from 'react';
 
 interface SlideInProps {
@@ -26,13 +26,13 @@ export default function SlideIn({
   };
 
   return (
-    <motion.div
+    <m.div
       initial={variants[direction]}
       animate={{ x: 0, y: 0, opacity: 1 }}
       transition={{ duration, delay }}
       className={className}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

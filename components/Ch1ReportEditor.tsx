@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, FileText, Clock, Layers, MessageSquare } from 'lucide-react';
+import { m, AnimatePresence } from 'framer-motion';
+import { X, ChevronRight, FileText, Clock, Layers, MessageSquare, Lock } from 'lucide-react';
 import OverlayCard from '@/components/OverlayCard';
 import {
   ch1ReportConfig,
@@ -43,20 +43,32 @@ function getMissingCategory(
   return null;
 }
 
+/** 固定種子打亂陣列，同 session 內順序穩定 */
+function shuffleStable<T extends { itemId: string }>(arr: T[]): T[] {
+  const hash = (s: string) => s.split('').reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) | 0, 0);
+  return [...arr].sort((a, b) => (hash(a.itemId) % 1000) - (hash(b.itemId) % 1000));
+}
+
 export default function Ch1ReportEditor({
   engine,
   onComplete,
   onClose,
 }: Ch1ReportEditorProps) {
   const [step, setStep] = useState(0);
-  const [selectedEvidenceIds, setSelectedEvidenceIds] = useState<string[]>([]);
+  const [slotEvidenceIds, setSlotEvidenceIds] = useState<(string | null)[]>(() => [null, null, null]);
+  const [slotUnlocked, setSlotUnlocked] = useState<boolean[]>([false, false, false]);
+  const [pendingEvidenceId, setPendingEvidenceId] = useState<string | null>(null);
   const [timelineSequence, setTimelineSequence] = useState<string[]>([]);
+  const [timeMinutes, setTimeMinutes] = useState(14);
   const [selectedPoliceNoteId, setSelectedPoliceNoteId] = useState<string | null>(null);
+  const [reportContainerIds, setReportContainerIds] = useState<string[]>([]);
+  const [memoContainerIds, setMemoContainerIds] = useState<string[]>([]);
   const [selectedAttitudeId, setSelectedAttitudeId] = useState<string | null>(null);
   const [showClosing, setShowClosing] = useState(false);
   const [evidenceError, setEvidenceError] = useState('');
   const [timelineError, setTimelineError] = useState('');
   const [timelineErrorIndex, setTimelineErrorIndex] = useState(0);
+  const [attitudeError, setAttitudeError] = useState('');
 
   const state = engine.getState();
   const inventory = state.inventory ?? [];
@@ -64,54 +76,97 @@ export default function Ch1ReportEditor({
   const policeConfig = reasoningByChapter.ch1?.police;
 
   const evidenceCards = config.evidence.evidenceCards;
+  const shuffledEvidenceCards = useMemo(() => shuffleStable(evidenceCards), [evidenceCards]);
+  const slotCount = config.evidence.evidenceSlots?.count ?? 3;
   const hasItem = (itemId: string) => inventory.includes(itemId);
+  const usedEvidenceIds = slotEvidenceIds.filter((id): id is string => id != null);
 
-  const toggleEvidence = (itemId: string) => {
-    if (!CH1_EVIDENCE_CATEGORIES[itemId]) return;
+  const unlockSlot = (index: number) => {
+    if (slotUnlocked[index]) return;
     setEvidenceError('');
-    setSelectedEvidenceIds((prev) =>
-      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : prev.length >= 3 ? prev : [...prev, itemId]
-    );
+    setSlotUnlocked((prev) => {
+      const next = [...prev];
+      next[index] = true;
+      return next;
+    });
+  };
+
+  const putEvidenceInSlot = (itemId: string, slotIndex: number) => {
+    if (!CH1_EVIDENCE_CATEGORIES[itemId] || slotEvidenceIds[slotIndex] != null || !slotUnlocked[slotIndex]) return;
+    setEvidenceError('');
+    setSlotEvidenceIds((prev) => {
+      const next = [...prev];
+      next[slotIndex] = itemId;
+      return next;
+    });
+    setPendingEvidenceId(null);
+  };
+
+  const removeEvidenceFromSlot = (slotIndex: number) => {
+    if (slotEvidenceIds[slotIndex] == null) return;
+    setEvidenceError('');
+    setSlotEvidenceIds((prev) => {
+      const next = [...prev];
+      next[slotIndex] = null;
+      return next;
+    });
+  };
+
+  const handleEvidenceCardClick = (itemId: string) => {
+    if (!hasItem(itemId) || usedEvidenceIds.includes(itemId)) return;
+    if (pendingEvidenceId === itemId) {
+      setPendingEvidenceId(null);
+      return;
+    }
+    setPendingEvidenceId(itemId);
+    setEvidenceError('');
+  };
+
+  const handleSlotClick = (slotIndex: number) => {
+    if (!slotUnlocked[slotIndex]) {
+      unlockSlot(slotIndex);
+      return;
+    }
+    if (slotEvidenceIds[slotIndex] != null) {
+      removeEvidenceFromSlot(slotIndex);
+      return;
+    }
+    if (pendingEvidenceId != null) {
+      putEvidenceInSlot(pendingEvidenceId, slotIndex);
+    }
   };
 
   const handleEvidenceNext = () => {
-    if (selectedEvidenceIds.length !== 3) {
-      setEvidenceError('請選滿 3 張證據。');
+    const filled = slotEvidenceIds.filter((id): id is string => id != null);
+    if (filled.length !== slotCount) {
+      setEvidenceError('請在三個槽位各放入一張證據。');
       return;
     }
-    const missing = getMissingCategory(selectedEvidenceIds, CH1_EVIDENCE_CATEGORIES);
+    const missing = getMissingCategory(filled, CH1_EVIDENCE_CATEGORIES);
     if (missing) {
       setEvidenceError(config.evidence.missingCategoryHints[missing]);
       return;
     }
-    engine.applyEffect({ type: 'setFlag', flag: 'ch1_report_evidence', value: selectedEvidenceIds });
+    engine.applyEffect({ type: 'setFlag', flag: 'ch1_report_evidence', value: filled });
     setStep(1);
-    setTimelineSequence([]);
     setTimelineError('');
-  };
-
-  const toggleTimelineEvent = (eventId: string) => {
-    setTimelineError('');
-    setTimelineSequence((prev) =>
-      prev.includes(eventId) ? prev.filter((id) => id !== eventId) : prev.length >= 5 ? prev : [...prev, eventId]
-    );
   };
 
   const handleTimelineNext = () => {
-    if (timelineSequence.length !== 5) {
-      setTimelineError('請依序點選 5 張事件卡。');
-      return;
-    }
-    const correct = config.timeline.correctOrder;
-    const ok = correct.every((id, i) => timelineSequence[i] === id);
-    if (!ok) {
+    const range = config.timeline.crimeTimeRange;
+    if (timeMinutes < range.startMinutes || timeMinutes > range.endMinutes) {
       const msg = config.timeline.errorMessages[timelineErrorIndex % config.timeline.errorMessages.length];
       setTimelineError(msg);
       setTimelineErrorIndex((i) => i + 1);
       return;
     }
-    engine.applyEffect({ type: 'setFlag', flag: 'ch1_report_timeline', value: timelineSequence });
+    engine.applyEffect({
+      type: 'setFlag',
+      flag: 'ch1_report_timeline',
+      value: { type: 'crime_time', minutes: timeMinutes },
+    });
     setStep(2);
+    setTimelineError('');
   };
 
   const handleVersionNext = () => {
@@ -123,8 +178,23 @@ export default function Ch1ReportEditor({
     setStep(3);
   };
 
-  const handleAttitudeSelect = (choiceId: string) => {
-    const att = config.attitude.choices.find((c) => c.id === choiceId);
+  const handleAttitudeConfirm = () => {
+    setAttitudeError('');
+    if (reportContainerIds.length < 1) {
+      setAttitudeError('請在警用報告封套中至少放入一項。');
+      return;
+    }
+    if (memoContainerIds.length < 1) {
+      setAttitudeError('請在 KK 私人備忘錄中至少放入一項。');
+      return;
+    }
+    const requireInMemo = config.attitude.requireInMemoCardId;
+    if (requireInMemo != null && !memoContainerIds.includes(requireInMemo)) {
+      setAttitudeError('有一項內容必須放進 KK 的備忘裡（留底的那句）。');
+      return;
+    }
+    const choiceId = reportContainerIds.length > 0 ? reportContainerIds[0] : memoContainerIds[0];
+    const att = config.attitude.attitudeContentCards.find((c) => c.id === choiceId) ?? config.attitude.choices.find((c) => c.id === choiceId);
     if (!att) return;
     const choice: DialogChoice = {
       id: att.id,
@@ -141,6 +211,35 @@ export default function Ch1ReportEditor({
     setSelectedAttitudeId(choiceId);
     setShowClosing(true);
   };
+
+  const handleAttitudeDragStart = (e: React.DragEvent, cardId: string) => {
+    e.dataTransfer.setData('text/plain', cardId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleAttitudeDrop = (e: React.DragEvent, container: 'report' | 'memo') => {
+    e.preventDefault();
+    const cardId = e.dataTransfer.getData('text/plain');
+    if (!cardId || !config.attitude.attitudeContentCards.some((c) => c.id === cardId)) return;
+    if (container === 'report') {
+      setReportContainerIds((prev) => (prev.includes(cardId) ? prev : [...prev.filter((id) => id !== cardId), cardId]));
+      setMemoContainerIds((prev) => prev.filter((id) => id !== cardId));
+    } else {
+      setMemoContainerIds((prev) => (prev.includes(cardId) ? prev : [...prev.filter((id) => id !== cardId), cardId]));
+      setReportContainerIds((prev) => prev.filter((id) => id !== cardId));
+    }
+    setAttitudeError('');
+  };
+
+  const handleAttitudeDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const attitudeCards = config.attitude.attitudeContentCards ?? config.attitude.choices;
+  const pooledCardIds = attitudeCards
+    .map((c) => c.id)
+    .filter((id) => !reportContainerIds.includes(id) && !memoContainerIds.includes(id));
 
   const handleEnterCh2 = () => {
     engine.setReasoningComplete('ch1');
@@ -200,91 +299,119 @@ export default function Ch1ReportEditor({
       <div className="flex-1 min-h-0 overflow-y-auto pr-1">
         <AnimatePresence mode="wait">
           {step === 0 && (
-            <motion.div
+            <m.div
               key="step0"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="text-gray-200 mb-2">選 3 張證據作為報告核心（須涵蓋：時間、流程／權限、殘留／痕跡各至少一）。</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                {evidenceCards.map((card) => {
-                  const owned = hasItem(card.itemId);
-                  const selected = selectedEvidenceIds.includes(card.itemId);
-                  return (
-                    <button
-                      key={card.itemId}
-                      type="button"
-                      onClick={() => owned && toggleEvidence(card.itemId)}
-                      disabled={!owned}
-                      className={`text-left p-3 rounded-xl border-2 transition-all ${
-                        !owned
-                          ? 'bg-gray-800/50 border-gray-600 text-gray-500 cursor-not-allowed'
-                          : selected
-                            ? 'bg-orange-500/30 border-orange-400 text-white'
-                            : 'bg-dark-surface border-orange-500/30 text-gray-200 hover:border-orange-400'
-                      }`}
-                    >
-                      <div className="font-medium text-sm">{card.titleShort}</div>
-                      {owned ? (
-                        <div className="text-xs mt-1 text-gray-400">{card.reportLine}</div>
-                      ) : (
-                        <div className="text-xs mt-1">尚未取得</div>
-                      )}
-                    </button>
-                  );
-                })}
+              <p className="text-gray-200 mb-3">報告用證據桌：先解鎖槽位，再從證據庫選一張放入各槽。須涵蓋三類各至少一：<strong>時間</strong>、<strong>流程／權限</strong>、<strong>殘留／痕跡</strong>。每類有兩張可選，擇一即可。</p>
+              <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                <div className="flex-1">
+                  <p className="text-gray-400 text-sm mb-2">證據庫（點選一張後再點空槽放入）</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {shuffledEvidenceCards.map((card) => {
+                      const owned = hasItem(card.itemId);
+                      const used = usedEvidenceIds.includes(card.itemId);
+                      const pending = pendingEvidenceId === card.itemId;
+                      return (
+                        <button
+                          key={card.itemId}
+                          type="button"
+                          onClick={() => handleEvidenceCardClick(card.itemId)}
+                          disabled={!owned || used}
+                          className={`text-left p-3 rounded-xl border-2 transition-all ${
+                            !owned || used
+                              ? 'bg-gray-800/50 border-gray-600 text-gray-500 cursor-not-allowed'
+                              : pending
+                                ? 'bg-orange-500/40 border-orange-400 text-white ring-2 ring-orange-300'
+                                : 'bg-dark-surface border-orange-500/30 text-gray-200 hover:border-orange-400'
+                          }`}
+                        >
+                          <div className="font-medium text-sm">{card.titleShort}</div>
+                          {owned && !used && (
+                            <div className="text-xs mt-1 text-gray-400">{card.reportLine}</div>
+                          )}
+                          {used && <div className="text-xs mt-1 text-gray-500">已放入槽位</div>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-gray-400 text-sm mb-2">報告用證據桌（3 槽）</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {Array.from({ length: slotCount }, (_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSlotClick(i)}
+                        className={`min-h-[80px] p-3 rounded-xl border-2 transition-all text-left ${
+                          !slotUnlocked[i]
+                            ? 'bg-gray-800/60 border-gray-600 text-gray-400 hover:border-orange-500/50'
+                            : slotEvidenceIds[i] != null
+                              ? 'bg-orange-500/20 border-orange-400 text-white'
+                              : 'bg-dark-surface border-orange-500/30 text-gray-400 border-dashed'
+                        }`}
+                      >
+                        {!slotUnlocked[i] ? (
+                          <span className="flex items-center gap-2">
+                            <Lock size={18} />
+                            點擊解鎖
+                          </span>
+                        ) : slotEvidenceIds[i] != null ? (
+                          <span className="font-medium text-sm">
+                            {evidenceCards.find((c) => c.itemId === slotEvidenceIds[i])?.titleShort}
+                          </span>
+                        ) : (
+                          <span className="text-sm">點選左側證據放入</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  {pendingEvidenceId && (
+                    <p className="text-orange-300 text-sm mt-2">已選：{evidenceCards.find((c) => c.itemId === pendingEvidenceId)?.titleShort} → 點擊空槽放入</p>
+                  )}
+                </div>
               </div>
-              {selectedEvidenceIds.length === 3 && (
-                <p className="text-gray-400 text-sm mb-2">
-                  已選：{selectedEvidenceIds.map((id) => evidenceCards.find((c) => c.itemId === id)?.titleShort).join('、')}
-                </p>
-              )}
               {evidenceError && <p className="text-red-400 text-sm mb-2">{evidenceError}</p>}
-            </motion.div>
+            </m.div>
           )}
 
           {step === 1 && (
-            <motion.div
+            <m.div
               key="step1"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="text-gray-200 mb-2">依時間順序點選 5 張事件卡。</p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {config.timeline.events.map((ev) => {
-                  const used = timelineSequence.includes(ev.id);
-                  const idx = timelineSequence.indexOf(ev.id);
-                  return (
-                    <button
-                      key={ev.id}
-                      type="button"
-                      onClick={() => toggleTimelineEvent(ev.id)}
-                      className={`px-3 py-2 rounded-lg border-2 text-sm transition-all ${
-                        used
-                          ? 'bg-orange-500/30 border-orange-400 text-white'
-                          : 'bg-dark-surface border-orange-500/30 text-gray-200 hover:border-orange-400'
-                      }`}
-                    >
-                      {used ? `${idx + 1}. ${ev.label}` : ev.label}
-                    </button>
-                  );
-                })}
+              <p className="text-gray-200 mb-3">根據線索，推測兇手動手的大致時間。調整撥鈕到你所推測的時刻。</p>
+              <div className="flex flex-wrap items-center gap-4 mb-4">
+                <div className="flex-1 min-w-[200px]">
+                  <input
+                    type="range"
+                    min={0}
+                    max={45}
+                    value={timeMinutes}
+                    onChange={(e) => {
+                      setTimeMinutes(Number(e.target.value));
+                      setTimelineError('');
+                    }}
+                    className="w-full h-3 rounded-full appearance-none bg-dark-surface accent-orange-500"
+                  />
+                </div>
+                <span className="text-xl font-mono text-orange-300 tabular-nums">
+                  00:{String(timeMinutes).padStart(2, '0')}
+                </span>
               </div>
-              {timelineSequence.length > 0 && (
-                <p className="text-gray-400 text-sm mb-2">
-                  目前順序：{timelineSequence.map((id, i) => `${i + 1}. ${config.timeline.events.find((e) => e.id === id)?.label}`).join(' → ')}
-                </p>
-              )}
               {timelineError && <p className="text-red-400 text-sm mb-2">{timelineError}</p>}
-            </motion.div>
+            </m.div>
           )}
 
           {step === 2 && (
-            <motion.div
+            <m.div
               key="step2"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -314,39 +441,79 @@ export default function Ch1ReportEditor({
                   </button>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
           )}
 
           {step === 3 && !showClosing && (
-            <motion.div
+            <m.div
               key="step3"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="text-gray-200 mb-4">你的態度宣言——</p>
-              <div className="space-y-2">
-                {config.attitude.choices.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => handleAttitudeSelect(c.id)}
-                    className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm transition-all ${
-                      selectedAttitudeId === c.id
-                        ? 'bg-orange-500/30 border-orange-400 text-white'
-                        : 'bg-dark-surface border-orange-500/30 text-gray-200 hover:border-orange-400'
-                    }`}
-                  >
-                    {c.text}
-                  </button>
-                ))}
+              <p className="text-gray-200 mb-3">報告要交出去，備忘留給自己。哪些內容放進哪一邊？拖曳內容卡到對應區域，至少放入一項後可確認。</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {config.attitude.attitudeContainers.map((cont, idx) => {
+                  const isReport = cont.id === 'ch1_report_envelope';
+                  const ids = isReport ? reportContainerIds : memoContainerIds;
+                  return (
+                    <div
+                      key={cont.id}
+                      onDragOver={handleAttitudeDragOver}
+                      onDrop={(e) => handleAttitudeDrop(e, isReport ? 'report' : 'memo')}
+                      className="min-h-[120px] p-4 rounded-xl border-2 border-dashed border-orange-500/40 bg-dark-surface/60"
+                    >
+                      <p className="text-gray-400 text-sm mb-2 font-medium">{cont.label}</p>
+                      <div className="space-y-2">
+                        {ids.map((cardId) => {
+                          const card = attitudeCards.find((c) => c.id === cardId);
+                          if (!card) return null;
+                          return (
+                            <div
+                              key={cardId}
+                              draggable
+                              onDragStart={(e) => handleAttitudeDragStart(e, cardId)}
+                              className="px-3 py-2 rounded-lg bg-orange-500/20 border border-orange-500/50 text-gray-200 text-sm cursor-grab active:cursor-grabbing"
+                            >
+                              {card.text}
+                            </div>
+                          );
+                        })}
+                        {ids.length === 0 && (
+                          <p className="text-gray-500 text-sm">拖曳內容卡到這裡</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </motion.div>
+              <p className="text-gray-400 text-sm mb-2">內容卡（拖曳到上方區域）</p>
+              <div className="flex flex-wrap gap-2">
+                {pooledCardIds.map((cardId) => {
+                  const card = attitudeCards.find((c) => c.id === cardId);
+                  if (!card) return null;
+                  return (
+                    <div
+                      key={cardId}
+                      draggable
+                      onDragStart={(e) => handleAttitudeDragStart(e, cardId)}
+                      className="px-4 py-3 rounded-xl border-2 border-orange-500/30 bg-dark-surface text-gray-200 text-sm cursor-grab active:cursor-grabbing hover:border-orange-400"
+                    >
+                      {card.text}
+                    </div>
+                  );
+                })}
+                {pooledCardIds.length === 0 && (
+                  <p className="text-gray-500 text-sm">所有內容卡已放入報告或備忘</p>
+                )}
+              </div>
+              {attitudeError && <p className="text-red-400 text-sm mt-2">{attitudeError}</p>}
+            </m.div>
           )}
 
           {step === 3 && showClosing && (
-            <motion.div
+            <m.div
               key="closing"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -362,7 +529,7 @@ export default function Ch1ReportEditor({
                 進入第二章
                 <ChevronRight size={20} />
               </button>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>
@@ -379,7 +546,7 @@ export default function Ch1ReportEditor({
           <button
             type="button"
             onClick={handleEvidenceNext}
-            disabled={selectedEvidenceIds.length !== 3}
+            disabled={usedEvidenceIds.length !== slotCount}
             className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
           >
             下一頁
@@ -389,8 +556,7 @@ export default function Ch1ReportEditor({
           <button
             type="button"
             onClick={handleTimelineNext}
-            disabled={timelineSequence.length !== 5}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg"
           >
             下一頁
           </button>
@@ -402,6 +568,21 @@ export default function Ch1ReportEditor({
             className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg"
           >
             下一頁
+          </button>
+        )}
+        {step === 3 && !showClosing && (
+          <button
+            type="button"
+            onClick={handleAttitudeConfirm}
+            disabled={
+              reportContainerIds.length < 1 ||
+              memoContainerIds.length < 1 ||
+              (config.attitude.requireInMemoCardId != null &&
+                !memoContainerIds.includes(config.attitude.requireInMemoCardId))
+            }
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
+          >
+            確認
           </button>
         )}
       </div>

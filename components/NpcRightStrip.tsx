@@ -2,7 +2,7 @@
 
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { Npc } from '@/types/game';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -77,7 +77,7 @@ export default function NpcRightStrip({
     <div className="flex flex-row gap-2 flex-wrap justify-center flex-1 min-w-0 overflow-x-auto overflow-y-hidden py-1 pointer-events-auto">
       <AnimatePresence mode="popLayout">
         {npcsToShow.map((npc) => (
-          <motion.button
+          <m.button
             key={npc.id}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -115,7 +115,7 @@ export default function NpcRightStrip({
                 </div>
               )}
               {hoveredNpc === npc.id && (
-                <motion.div
+                <m.div
                   className="absolute inset-0 rounded-full border-2 border-white/50"
                   animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -126,7 +126,7 @@ export default function NpcRightStrip({
               {formatNpcNameWithBreak(npc.name)}
             </span>
             {hoveredNpc === npc.id && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 flex flex-col items-center pointer-events-none z-10"
@@ -137,9 +137,9 @@ export default function NpcRightStrip({
                 <div className="text-[10px] text-white/80 px-1.5 py-0.5 rounded bg-black/70 whitespace-nowrap">
                   點擊對話
                 </div>
-              </motion.div>
+              </m.div>
             )}
-          </motion.button>
+          </m.button>
         ))}
       </AnimatePresence>
     </div>
@@ -187,7 +187,7 @@ export default function NpcRightStrip({
         ? 'fixed left-1/2 -translate-x-1/2 bottom-24 z-30 flex flex-row gap-2 pointer-events-none w-full max-w-[min(90vw,960px)] justify-center'
         : 'w-full max-w-[min(90vw,960px)] flex justify-center py-2 shrink-0';
     return (
-      <motion.div
+      <m.div
         initial={{ y: -10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -10, opacity: 0 }}
@@ -195,12 +195,12 @@ export default function NpcRightStrip({
         className={wrapperClass}
       >
         {stripWithArrows}
-      </motion.div>
+      </m.div>
     );
   }
 
   const content = (
-    <motion.div
+    <m.div
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -10, opacity: 0 }}
@@ -208,7 +208,7 @@ export default function NpcRightStrip({
       className="fixed left-1/2 -translate-x-1/2 top-16 z-30 flex flex-row gap-2 pointer-events-none"
     >
       {stripWithArrows}
-    </motion.div>
+    </m.div>
   );
 
   if (!mounted || typeof document === 'undefined' || !document.body) return null;

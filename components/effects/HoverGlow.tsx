@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { isMobileDevice } from '@/lib/performanceUtils';
 
 interface HoverGlowProps {
@@ -36,7 +36,7 @@ export default function HoverGlow({
   return (
     <AnimatePresence>
       {isActive && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, scale: 1 }}
           animate={{ 
             opacity: adjustedOpacity,
@@ -59,7 +59,7 @@ export default function HoverGlow({
           }}
         >
           {/* 外層光暈脈動 */}
-          <motion.div
+          <m.div
             animate={{
               opacity: [adjustedOpacity * 0.5, adjustedOpacity * 0.8, adjustedOpacity * 0.5],
               scale: [1, 1.2, 1],
@@ -75,7 +75,7 @@ export default function HoverGlow({
               boxShadow: `0 0 ${size * 0.5}px ${color}${Math.floor(adjustedOpacity * 0.5 * 255).toString(16).padStart(2, '0')}`,
             }}
           />
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

@@ -8,7 +8,7 @@ interface PasswordWheelInputProps {
   onChange: (value: string) => void;
 }
 
-const DEFAULT_DIGITS: [number, number, number, number, number, number] = [2, 0, 0, 0, 0, 0];
+const DEFAULT_DIGITS: [number, number, number, number, number, number] = [1, 0, 1, 0, 4, 2];
 
 export default function PasswordWheelInput({ value, onChange }: PasswordWheelInputProps) {
   const [digits, setDigits] = useState<[number, number, number, number, number, number]>(() => {
@@ -71,9 +71,9 @@ export default function PasswordWheelInput({ value, onChange }: PasswordWheelInp
         <DigitWheel
           value={digits[0]}
           onChange={(n) => setDigit(0, n)}
-          min={2}
+          min={1}
           max={6}
-          ariaLabel="章節（2～6）"
+          ariaLabel="第 1 位（1～6：第一章階段或章節）"
           accent
         />
         {[1, 2, 3, 4, 5].map((i) => (

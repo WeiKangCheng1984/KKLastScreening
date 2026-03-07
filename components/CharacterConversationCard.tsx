@@ -1,7 +1,7 @@
 'use client';
 
 import { DialogChoice, ConversationTurn } from '@/types/game';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
 
 export interface CharacterConversationCardProps {
@@ -46,7 +46,7 @@ export default function CharacterConversationCard({
 }: CharacterConversationCardProps) {
   return (
     <div className={`${wrapperClassName} flex items-end justify-end md:justify-center pb-4 md:pb-6`} data-scheme="b-dialog-only">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
@@ -148,7 +148,7 @@ export default function CharacterConversationCard({
             </div>
           )}
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }
