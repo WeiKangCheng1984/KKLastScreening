@@ -295,47 +295,49 @@ export const ch1ReportConfig: Ch1ReportConfig = {
       structures: [
         {
           id: 'att_s2',
-          template: '誰能__0__、誰在__1__，我先畫出來再說。',
+          template: '誰能__0__、誰在__1__，我先把__2__理出來。',
           slots: [
-            { slotId: 's2_0', correctWordIds: ['att_pengdeng'] },
+            { slotId: 's2_0', correctWordIds: ['att_kongdeng'] },
             { slotId: 's2_1', correctWordIds: ['att_heianli'], acceptableWordIds: ['att_mangqu'] },
+            { slotId: 's2_2', correctWordIds: ['att_dongxian'] },
           ],
           candidateWordIds: [
-            'att_pengdeng', 'att_heianli', 'att_guandeng', 'att_mangqu',
+            'att_kongdeng', 'att_heianli', 'att_dongxian', 'att_pengdeng', 'att_guandeng', 'att_mangqu',
             'att_chixiaoye', 'att_maixiaoye', 'att_cesuoli', 'att_jianshiqi', 'att_paichengbao',
             'att_yigeyanshen', 'att_caodiban', 'att_baomihuaji', 'att_piaogen', 'att_koutouzhishi',
-            'att_liucheng', 'att_biandangxie', 'att_liangdengshijian',
+            'att_liucheng', 'att_biandangxie', 'att_liangdengshijian', 'att_kongdang',
           ],
         },
         {
           id: 'att_s3',
           template: '我想知道是誰在__0__。__1__。',
           slots: [
-            { slotId: 's3_0', correctWordIds: ['att_banxiongshou_caodiban'], acceptableWordIds: ['att_caodiban', 'att_tixiongshou_shouwei'] },
+            { slotId: 's3_0', correctWordIds: ['att_tixiongshou_shouwei'], acceptableWordIds: ['att_banxiongshou_caodiban', 'att_caodiban'] },
             { slotId: 's3_1', correctWordIds: ['att_kongju_bidao'] },
           ],
           candidateWordIds: [
-            'att_banxiongshou_caodiban', 'att_kongju_bidao', 'att_caodiban', 'att_tixiongshou_shouwei', 'att_chenmo_bidao',
+            'att_tixiongshou_shouwei', 'att_kongju_bidao', 'att_banxiongshou_caodiban', 'att_caodiban', 'att_chenmo_bidao',
             'att_baomihua', 'att_biandangxie', 'att_chixiaoye', 'att_maixiaoye', 'att_yigeyanshen', 'att_biandang',
             'att_xiaodongxi', 'att_guanqiang', 'att_henji', 'att_shushi', 'att_liucheng', 'att_piaogen', 'att_jianshiqi',
           ],
         },
         {
           id: 'att_s5',
-          template: '__0__被塗改，__1__站在兇手那邊。',
+          template: '__0__遭塗改，__1__反而替兇手留出了__2__。',
           slots: [
             { slotId: 's5_0', correctWordIds: ['att_liangdengshijian'], acceptableWordIds: ['att_paichengbao'] },
             { slotId: 's5_1', correctWordIds: ['att_liucheng'], acceptableWordIds: ['att_shoudongmoshi'] },
+            { slotId: 's5_2', correctWordIds: ['att_kongdang'] },
           ],
           candidateWordIds: [
-            'att_liangdengshijian', 'att_liucheng', 'att_paichengbao', 'att_shoudongmoshi', 'att_boyingshijian', 'att_shushi',
+            'att_liangdengshijian', 'att_liucheng', 'att_kongdang', 'att_paichengbao', 'att_shoudongmoshi', 'att_boyingshijian', 'att_shushi',
             'att_pengdeng', 'att_koutouzhishi', 'att_jianshiqi', 'att_baomihuaji', 'att_piaogen', 'att_heianli',
             'att_biandangxie', 'att_guanqiang', 'att_henji', 'att_xiaodongxi',
           ],
         },
         {
           id: 'att_s6',
-          template: '現場__0__，有人把__1__擦掉卻忘了__2__。',
+          template: '現場__0__，有人把__1__擦掉，但__2__卻沒有帶走。',
           slots: [
             { slotId: 's6_0', correctWordIds: ['att_ganjing_tayikeyi'], acceptableWordIds: ['att_ganjing_defaliang'] },
             { slotId: 's6_1', correctWordIds: ['att_henji'], acceptableWordIds: ['att_jizheng', 'att_zhiwen'] },
@@ -349,7 +351,7 @@ export const ch1ReportConfig: Ch1ReportConfig = {
         },
         {
           id: 'att_s7',
-          template: '燈不是自然晚，是被人改過，__0__與__1__就能決定亮燈時點。',
+          template: '亮燈不是自然延後，而是人為調整，__0__與__1__都可能影響亮燈時點。',
           slots: [
             { slotId: 's7_0', correctWordIds: ['att_shoudongmoshi'], acceptableWordIds: ['att_liucheng'] },
             { slotId: 's7_1', correctWordIds: ['att_koutouzhishi'] },
@@ -362,14 +364,14 @@ export const ch1ReportConfig: Ch1ReportConfig = {
         },
         {
           id: 'att_s8',
-          template: '__0__很滑，但__1__會留下來，找一個他沒想到的__2__他就會破。',
+          template: '__0__的官腔很滑，但__1__會留下來，找一個他沒想到的__2__他就會破。',
           slots: [
-            { slotId: 's8_0', correctWordIds: ['att_guanqiang'], acceptableWordIds: ['att_jiekou'] },
+            { slotId: 's8_0', correctWordIds: ['att_linfuli'] },
             { slotId: 's8_1', correctWordIds: ['att_henji'], acceptableWordIds: ['att_jizheng'] },
             { slotId: 's8_2', correctWordIds: ['att_xiaodongxi'], acceptableWordIds: ['att_babing'] },
           ],
           candidateWordIds: [
-            'att_guanqiang', 'att_henji', 'att_xiaodongxi', 'att_jiekou', 'att_jizheng', 'att_pozhan', 'att_suipian', 'att_babing',
+            'att_linfuli', 'att_guanqiang', 'att_henji', 'att_xiaodongxi', 'att_jiekou', 'att_jizheng', 'att_pozhan', 'att_suipian', 'att_babing',
             'att_shushi', 'att_yijuhua', 'att_jianshiqi', 'att_piaogen', 'att_biandangxie', 'att_baomihua', 'att_liucheng',
             'att_koutouzhishi', 'att_yigeyanshen',
           ],
@@ -377,6 +379,8 @@ export const ch1ReportConfig: Ch1ReportConfig = {
       ],
       wordBank: [
         { id: 'att_pengdeng', text: '碰燈', category: 'procedure' },
+        { id: 'att_kongdeng', text: '控燈', category: 'procedure' },
+        { id: 'att_dongxian', text: '動線', category: 'procedure' },
         { id: 'att_liangdengshijian', text: '亮燈時間', category: 'procedure' },
         { id: 'att_liucheng', text: '流程', category: 'procedure' },
         { id: 'att_shoudongmoshi', text: '手動模式', category: 'procedure' },
@@ -387,6 +391,7 @@ export const ch1ReportConfig: Ch1ReportConfig = {
         { id: 'att_boyingshijian', text: '播映時間', category: 'procedure' },
         { id: 'att_shushi', text: '疏失', category: 'procedure' },
         { id: 'att_yigebanniu', text: '一個按鈕', category: 'procedure' },
+        { id: 'att_kongdang', text: '空檔', category: 'procedure' },
         { id: 'att_heianli', text: '黑暗裡', category: 'evidence' },
         { id: 'att_ganjing_tayikeyi', text: '乾淨得太刻意', category: 'evidence' },
         { id: 'att_henji', text: '痕跡', category: 'evidence' },
@@ -403,7 +408,7 @@ export const ch1ReportConfig: Ch1ReportConfig = {
         { id: 'att_jiekou', text: '藉口', category: 'evidence' },
         { id: 'att_pozhan', text: '破綻', category: 'evidence' },
         { id: 'att_banxiongshou_caodiban', text: '幫兇手擦地板', category: 'human' },
-        { id: 'att_kongju_bidao', text: '恐懼比刀子還好使', category: 'human' },
+        { id: 'att_kongju_bidao', text: '恐懼比刀子還管用', category: 'human' },
         { id: 'att_baomihua', text: '爆米花', category: 'human' },
         { id: 'att_biandangxie', text: '便當屑', category: 'human' },
         { id: 'att_caodiban', text: '擦地板', category: 'human' },
@@ -416,6 +421,7 @@ export const ch1ReportConfig: Ch1ReportConfig = {
         { id: 'att_chenmo_bidao', text: '沉默比刀子還可怕', category: 'human' },
         { id: 'att_yijuhua', text: '一句話', category: 'human' },
         { id: 'att_babing', text: '把柄', category: 'human' },
+        { id: 'att_linfuli', text: '林副理', category: 'human' },
       ],
     },
     closingInferenceByDimension: {
