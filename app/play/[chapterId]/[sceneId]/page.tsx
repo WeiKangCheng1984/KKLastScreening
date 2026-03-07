@@ -28,7 +28,7 @@ import MazePath from '@/components/MazePath';
 import LogicSwitches from '@/components/LogicSwitches';
 import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
-import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, ListOrdered, FlaskConical, Brain } from 'lucide-react';
+import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, ListOrdered, FlaskConical, Brain, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import { chapters } from '@/data/chapters';
@@ -48,6 +48,7 @@ import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { motion, AnimatePresence } from 'framer-motion';
 import SensitiveGateOverlay from '@/components/SensitiveGateOverlay';
+import { CH1_MONOLOGUE_TEXT, CH1_MONOLOGUE_CHOICES } from '@/data/ch1Monologue';
 
 // 獲取當前章節的所有場景
 const getCurrentChapterScenes = (chapterId: string): string[] => {
@@ -190,6 +191,8 @@ export default function PlayPage() {
   // 第一章章末：報告編輯器（取代解謎／推理舊路徑）
   const [showReasoningPanel, setShowReasoningPanel] = useState(false);
   const [showCh1ReportEditor, setShowCh1ReportEditor] = useState(false);
+  /** 第一章內心獨白 overlay：完成 4 位 NPC 敏感對話後由按鈕觸發，全章一次 */
+  const [showCh1MonologueOverlay, setShowCh1MonologueOverlay] = useState(false);
   // 場景切換相關狀態
   // 使用 useState 的函數形式確保服務器和客戶端初始狀態一致
   const [showSceneName, setShowSceneName] = useState(() => false);
@@ -726,6 +729,14 @@ export default function PlayPage() {
     if (choice.id === 'asu_branch_1') { closeAndStartBranch('npc_asu', 'node_asu_sensitive1_1'); return; }
     if (choice.id === 'asu_branch_2') { closeAndStartBranch('npc_asu', 'node_asu_sensitive2_1'); return; }
   }, [sensitiveGate, buildDialogFromNpcNode, addDialogsToQueue]);
+
+  // 第一章內心獨白 overlay 選擇：套用洞察與 ch1_monologue_done，關閉 overlay
+  const handleCh1MonologueChoice = useCallback((choice: DialogChoice) => {
+    if (!engineRef.current) return;
+    engineRef.current.handleDialogChoice(choice);
+    setShowCh1MonologueOverlay(false);
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   // 處理對話選擇
   const handleDialogChoice = useCallback((choice: DialogChoice) => {
@@ -2521,8 +2532,10 @@ export default function PlayPage() {
   const ch1Flags = state.flags || {};
   const hasCh1CoreClues =
     ch1Flags.ticket_stub_collected &&
-    (ch1Flags.clue_light_delay_confirmed || ch1Flags.security_monitor_viewed) &&
-    (ch1Flags.black_fragment_found || ch1Flags.cleaning_note_found || ch1Flags.clue_clean_trash);
+    (ch1Flags.security_monitor_viewed ||
+      ch1Flags.clue_manual_light_control ||
+      ch1Flags.black_fragment_found ||
+      ch1Flags.clue_clean_trash);
   const showReasoningButton =
     hasReasoningForChapter &&
     chapterId !== 'ch1' &&
@@ -2530,6 +2543,15 @@ export default function PlayPage() {
     !reasoningDone &&
     !showSceneName &&
     (chapterId !== 'ch1' || hasCh1CoreClues);
+
+  // 第一章內心獨白按鈕：完成全部 4 位 NPC 敏感對話後顯示，全章一次
+  const allCh1SensitiveDone =
+    !!ch1Flags.npc_lin_sensitive_done &&
+    !!ch1Flags.npc_ashun_sensitive_done &&
+    !!ch1Flags.npc_xiaozhang_sensitive_done &&
+    !!ch1Flags.npc_zhou_jie_sensitive_done;
+  const showCh1MonologueButton =
+    chapterId === 'ch1' && allCh1SensitiveDone && !ch1Flags.ch1_monologue_done && !showSceneName;
 
   // 獲取相鄰場景（必須在條件返回之前定義）
   const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
@@ -2893,7 +2915,20 @@ export default function PlayPage() {
 
                 if (npcId === 'npc_liu') {
                   if (chapterId === 'ch1') {
-                    const readyToReport = hasCh1CoreClues && allScenesVisited;
+                    // 點擊當下從 engine 重算，避免閉包使用到舊的 hasCh1CoreClues / allScenesVisited
+                    const st = engine.getState();
+                    const flags = st.flags || {};
+                    const ch1Scenes = getCurrentChapterScenes('ch1');
+                    const allVisited =
+                      ch1Scenes.length > 0 &&
+                      ch1Scenes.every((s) => (st.visitedScenes || []).includes(s));
+                    const hasClues =
+                      !!flags.ticket_stub_collected &&
+                      (!!flags.security_monitor_viewed ||
+                        !!flags.clue_manual_light_control ||
+                        !!flags.black_fragment_found ||
+                        !!flags.clue_clean_trash);
+                    const readyToReport = hasClues && allVisited;
 
                     const dialog: Dialog = readyToReport
                       ? {
@@ -3109,6 +3144,19 @@ export default function PlayPage() {
         </button>
       )}
 
+      {/* 第一章內心獨白按鈕：完成全部 4 位 NPC 敏感對話後顯示，全章一次 */}
+      {showCh1MonologueButton && (
+        <button
+          type="button"
+          onClick={() => setShowCh1MonologueOverlay(true)}
+          className="fixed bottom-6 right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-indigo-500/90 hover:bg-indigo-500 border-2 border-indigo-400/80 text-white text-sm font-medium shadow-lg hover:scale-105 transition-all"
+          title="內心獨白"
+        >
+          <MessageSquare size={20} />
+          <span>內心獨白</span>
+        </button>
+      )}
+
       {/* 全域互動層：模態優先權與中心/底部佈局 */}
       <div className="fixed inset-0 z-[60] pointer-events-none">
         {/* 推理面板：最高優先，全螢幕模態 */}
@@ -3216,9 +3264,30 @@ export default function PlayPage() {
           )}
         </AnimatePresence>
 
+        {/* 第一章內心獨白：完成 4 位 NPC 敏感對話後由按鈕觸發，全章一次 */}
+        <AnimatePresence>
+          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && showCh1MonologueOverlay && (
+            <motion.div
+              key="ch1-monologue"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 pointer-events-auto"
+            >
+              <SensitiveGateOverlay
+                text={CH1_MONOLOGUE_TEXT}
+                choices={CH1_MONOLOGUE_CHOICES}
+                onChoiceSelect={handleCh1MonologueChoice}
+                onClose={() => setShowCh1MonologueOverlay(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* 背包道具詳解：中央詳解卡，優先於 toast */}
         <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && activeItemDetail && (
+          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && !showCh1MonologueOverlay && activeItemDetail && (
             <motion.div
               key="item-detail"
               initial={{ opacity: 0 }}
@@ -3246,7 +3315,7 @@ export default function PlayPage() {
 
         {/* 道具獲得提示：最低優先，小型 bottom toast，可與場景共存 */}
         <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && !activeItemDetail && showItemNotification && obtainedItem && (
+          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && !showCh1MonologueOverlay && !activeItemDetail && showItemNotification && obtainedItem && (
             <motion.div
               key="item-toast"
               initial={{ opacity: 0 }}
