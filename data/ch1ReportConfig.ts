@@ -63,15 +63,52 @@ export interface Ch1AttitudeContainer {
   label: string;
 }
 
+/** 態度宣言：詞組填空用辭庫分類（三色） */
+export type Ch1AttitudeWordCategory = 'procedure' | 'evidence' | 'human';
+
+/** 態度宣言：辭庫單一詞彙 */
+export interface Ch1AttitudeWord {
+  id: string;
+  text: string;
+  category: Ch1AttitudeWordCategory;
+}
+
+/** 態度宣言：語句結構中的一個空格 */
+export interface Ch1AttitudePhraseSlot {
+  slotId: string;
+  /** 正確答案（可多個同義） */
+  correctWordIds: string[];
+  /** 嚴肅但錯的答案，也算過關 */
+  acceptableWordIds?: string[];
+}
+
+/** 態度宣言：一句固定結構（含多個空格） */
+export interface Ch1AttitudePhraseStructure {
+  id: string;
+  /** 顯示用模板，空格以 __0__ __1__ 表示，依序對應 slots */
+  template: string;
+  slots: Ch1AttitudePhraseSlot[];
+  /** 本句候選詞彙 15～18 個（僅顯示這些詞供填空），未填時則顯示全辭庫 */
+  candidateWordIds?: string[];
+}
+
+/** 態度宣言：詞組填空謎題（六句分次呈現、詞庫在下方） */
+export interface Ch1AttitudePhrasePuzzleConfig {
+  structures: Ch1AttitudePhraseStructure[];
+  wordBank: Ch1AttitudeWord[];
+}
+
 export interface Ch1ReportAttitudeConfig {
-  /** 雙容器（警用報告封套、KK 私人備忘錄） */
+  /** 雙容器（警用報告封套、KK 私人備忘錄），詞組填空啟用時不用 */
   attitudeContainers: Ch1AttitudeContainer[];
-  /** 4 張可拖曳內容卡（結構同 Ch1AttitudeChoice） */
+  /** 4 張可拖曳內容卡（詞組填空啟用時不用） */
   attitudeContentCards: Ch1AttitudeChoice[];
-  /** @deprecated 沿用 choices 供元件相容，與 attitudeContentCards 同源 */
+  /** @deprecated 沿用 choices 供元件相容 */
   choices: Ch1AttitudeChoice[];
-  /** 必須放進 KK 私人備忘錄的內容卡 id（例如留底那句） */
+  /** 必須放進 KK 私人備忘錄的內容卡 id（詞組填空啟用時不用） */
   requireInMemoCardId?: string;
+  /** 詞組填空：六句分次呈現，正確或嚴肅但錯皆可過關 */
+  phrasePuzzle?: Ch1AttitudePhrasePuzzleConfig;
   closingInferenceByDimension: {
     procedure_insight: string;
     human_insight: string;
@@ -254,6 +291,133 @@ export const ch1ReportConfig: Ch1ReportConfig = {
       },
     ],
     requireInMemoCardId: 'ch1_attitude_both',
+    phrasePuzzle: {
+      structures: [
+        {
+          id: 'att_s2',
+          template: '誰能__0__、誰在__1__，我先畫出來再說。',
+          slots: [
+            { slotId: 's2_0', correctWordIds: ['att_pengdeng'] },
+            { slotId: 's2_1', correctWordIds: ['att_heianli'], acceptableWordIds: ['att_mangqu'] },
+          ],
+          candidateWordIds: [
+            'att_pengdeng', 'att_heianli', 'att_guandeng', 'att_mangqu',
+            'att_chixiaoye', 'att_maixiaoye', 'att_cesuoli', 'att_jianshiqi', 'att_paichengbao',
+            'att_yigeyanshen', 'att_caodiban', 'att_baomihuaji', 'att_piaogen', 'att_koutouzhishi',
+            'att_liucheng', 'att_biandangxie', 'att_liangdengshijian',
+          ],
+        },
+        {
+          id: 'att_s3',
+          template: '我想知道是誰在__0__。__1__。',
+          slots: [
+            { slotId: 's3_0', correctWordIds: ['att_banxiongshou_caodiban'], acceptableWordIds: ['att_caodiban', 'att_tixiongshou_shouwei'] },
+            { slotId: 's3_1', correctWordIds: ['att_kongju_bidao'] },
+          ],
+          candidateWordIds: [
+            'att_banxiongshou_caodiban', 'att_kongju_bidao', 'att_caodiban', 'att_tixiongshou_shouwei', 'att_chenmo_bidao',
+            'att_baomihua', 'att_biandangxie', 'att_chixiaoye', 'att_maixiaoye', 'att_yigeyanshen', 'att_biandang',
+            'att_xiaodongxi', 'att_guanqiang', 'att_henji', 'att_shushi', 'att_liucheng', 'att_piaogen', 'att_jianshiqi',
+          ],
+        },
+        {
+          id: 'att_s5',
+          template: '__0__被塗改，__1__站在兇手那邊。',
+          slots: [
+            { slotId: 's5_0', correctWordIds: ['att_liangdengshijian'], acceptableWordIds: ['att_paichengbao'] },
+            { slotId: 's5_1', correctWordIds: ['att_liucheng'], acceptableWordIds: ['att_shoudongmoshi'] },
+          ],
+          candidateWordIds: [
+            'att_liangdengshijian', 'att_liucheng', 'att_paichengbao', 'att_shoudongmoshi', 'att_boyingshijian', 'att_shushi',
+            'att_pengdeng', 'att_koutouzhishi', 'att_jianshiqi', 'att_baomihuaji', 'att_piaogen', 'att_heianli',
+            'att_biandangxie', 'att_guanqiang', 'att_henji', 'att_xiaodongxi',
+          ],
+        },
+        {
+          id: 'att_s6',
+          template: '現場__0__，有人把__1__擦掉卻忘了__2__。',
+          slots: [
+            { slotId: 's6_0', correctWordIds: ['att_ganjing_tayikeyi'], acceptableWordIds: ['att_ganjing_defaliang'] },
+            { slotId: 's6_1', correctWordIds: ['att_henji'], acceptableWordIds: ['att_jizheng', 'att_zhiwen'] },
+            { slotId: 's6_2', correctWordIds: ['att_suipian'], acceptableWordIds: ['att_jizheng', 'att_maofa'] },
+          ],
+          candidateWordIds: [
+            'att_ganjing_tayikeyi', 'att_ganjing_defaliang', 'att_henji', 'att_suipian', 'att_jizheng', 'att_zhiwen', 'att_maofa',
+            'att_guanqiang', 'att_xiaodongxi', 'att_jianshiqi', 'att_piaogen', 'att_biandangxie', 'att_baomihua', 'att_caodiban',
+            'att_yigeyanshen', 'att_pozhan', 'att_jiekou',
+          ],
+        },
+        {
+          id: 'att_s7',
+          template: '燈不是自然晚，是被人改過，__0__與__1__就能決定亮燈時點。',
+          slots: [
+            { slotId: 's7_0', correctWordIds: ['att_shoudongmoshi'], acceptableWordIds: ['att_liucheng'] },
+            { slotId: 's7_1', correctWordIds: ['att_koutouzhishi'] },
+          ],
+          candidateWordIds: [
+            'att_shoudongmoshi', 'att_koutouzhishi', 'att_liucheng', 'att_yigebanniu', 'att_yijuhua',
+            'att_paichengbao', 'att_pengdeng', 'att_liangdengshijian', 'att_jianshiqi', 'att_yigeyanshen', 'att_biandang',
+            'att_baomihuaji', 'att_piaogen', 'att_shushi', 'att_guanqiang', 'att_henji', 'att_xiaodongxi',
+          ],
+        },
+        {
+          id: 'att_s8',
+          template: '__0__很滑，但__1__會留下來，找一個他沒想到的__2__他就會破。',
+          slots: [
+            { slotId: 's8_0', correctWordIds: ['att_guanqiang'], acceptableWordIds: ['att_jiekou'] },
+            { slotId: 's8_1', correctWordIds: ['att_henji'], acceptableWordIds: ['att_jizheng'] },
+            { slotId: 's8_2', correctWordIds: ['att_xiaodongxi'], acceptableWordIds: ['att_babing'] },
+          ],
+          candidateWordIds: [
+            'att_guanqiang', 'att_henji', 'att_xiaodongxi', 'att_jiekou', 'att_jizheng', 'att_pozhan', 'att_suipian', 'att_babing',
+            'att_shushi', 'att_yijuhua', 'att_jianshiqi', 'att_piaogen', 'att_biandangxie', 'att_baomihua', 'att_liucheng',
+            'att_koutouzhishi', 'att_yigeyanshen',
+          ],
+        },
+      ],
+      wordBank: [
+        { id: 'att_pengdeng', text: '碰燈', category: 'procedure' },
+        { id: 'att_liangdengshijian', text: '亮燈時間', category: 'procedure' },
+        { id: 'att_liucheng', text: '流程', category: 'procedure' },
+        { id: 'att_shoudongmoshi', text: '手動模式', category: 'procedure' },
+        { id: 'att_koutouzhishi', text: '口頭指示', category: 'procedure' },
+        { id: 'att_paichengbao', text: '排程表', category: 'procedure' },
+        { id: 'att_baomihuaji', text: '爆米花機', category: 'procedure' },
+        { id: 'att_guandeng', text: '關燈', category: 'procedure' },
+        { id: 'att_boyingshijian', text: '播映時間', category: 'procedure' },
+        { id: 'att_shushi', text: '疏失', category: 'procedure' },
+        { id: 'att_yigebanniu', text: '一個按鈕', category: 'procedure' },
+        { id: 'att_heianli', text: '黑暗裡', category: 'evidence' },
+        { id: 'att_ganjing_tayikeyi', text: '乾淨得太刻意', category: 'evidence' },
+        { id: 'att_henji', text: '痕跡', category: 'evidence' },
+        { id: 'att_suipian', text: '碎片', category: 'evidence' },
+        { id: 'att_guanqiang', text: '官腔', category: 'evidence' },
+        { id: 'att_xiaodongxi', text: '小東西', category: 'evidence' },
+        { id: 'att_jianshiqi', text: '監視器', category: 'evidence' },
+        { id: 'att_piaogen', text: '票根', category: 'evidence' },
+        { id: 'att_mangqu', text: '盲區', category: 'evidence' },
+        { id: 'att_ganjing_defaliang', text: '乾淨得發亮', category: 'evidence' },
+        { id: 'att_jizheng', text: '跡證', category: 'evidence' },
+        { id: 'att_zhiwen', text: '指紋', category: 'evidence' },
+        { id: 'att_maofa', text: '毛髮', category: 'evidence' },
+        { id: 'att_jiekou', text: '藉口', category: 'evidence' },
+        { id: 'att_pozhan', text: '破綻', category: 'evidence' },
+        { id: 'att_banxiongshou_caodiban', text: '幫兇手擦地板', category: 'human' },
+        { id: 'att_kongju_bidao', text: '恐懼比刀子還好使', category: 'human' },
+        { id: 'att_baomihua', text: '爆米花', category: 'human' },
+        { id: 'att_biandangxie', text: '便當屑', category: 'human' },
+        { id: 'att_caodiban', text: '擦地板', category: 'human' },
+        { id: 'att_chixiaoye', text: '吃宵夜', category: 'human' },
+        { id: 'att_maixiaoye', text: '買宵夜', category: 'human' },
+        { id: 'att_cesuoli', text: '廁所裡', category: 'human' },
+        { id: 'att_yigeyanshen', text: '一個眼神', category: 'human' },
+        { id: 'att_biandang', text: '便當', category: 'human' },
+        { id: 'att_tixiongshou_shouwei', text: '替兇手收尾', category: 'human' },
+        { id: 'att_chenmo_bidao', text: '沉默比刀子還可怕', category: 'human' },
+        { id: 'att_yijuhua', text: '一句話', category: 'human' },
+        { id: 'att_babing', text: '把柄', category: 'human' },
+      ],
+    },
     closingInferenceByDimension: {
       procedure_insight:
         '兇手不是在黑暗裡殺人，他是在規定的黑暗裡殺人。',
