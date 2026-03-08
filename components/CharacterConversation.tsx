@@ -133,7 +133,8 @@ export default function CharacterConversation({
 
   // 整張卡片固定總高度，手機上略加寬、加高以提升可讀性
   const cardWidth = 'min(380px, calc(100vw - 1rem))';
-  const cardHeight = '29rem'; // 再略微加高，確保長句在手機上更完整
+  const cardHeight = '29rem'; // 桌面
+  const cardHeightMobile = '29.87rem'; // 手機：外框高度 +3%（29 * 1.03）
   const textAreaHeight = '11rem'; // 對應提高文字區高度
   const buttonAreaHeight = '3.5rem'; // 56px，固定按鈕區
 
@@ -142,6 +143,7 @@ export default function CharacterConversation({
     wrapperClassName: `w-full pointer-events-none ${className}`,
     cardWidth,
     cardHeight,
+    cardHeightMobile,
     textAreaHeight,
     buttonAreaHeight,
     showContinue,

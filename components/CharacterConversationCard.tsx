@@ -8,6 +8,8 @@ export interface CharacterConversationCardProps {
   wrapperClassName: string;
   cardWidth: string;
   cardHeight: string;
+  /** 手機版外框高度（例：+3%） */
+  cardHeightMobile?: string;
   textAreaHeight: string;
   buttonAreaHeight: string;
   showContinue: boolean;
@@ -31,6 +33,7 @@ export default function CharacterConversationCard({
   wrapperClassName,
   cardWidth,
   cardHeight,
+  cardHeightMobile,
   textAreaHeight,
   buttonAreaHeight,
   showContinue,
@@ -50,11 +53,12 @@ export default function CharacterConversationCard({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
-        className="pointer-events-auto relative z-10 bg-dark-card/95 backdrop-blur-md border border-dark-border rounded-lg shadow-2xl p-6 flex flex-col min-h-0"
+        className="pointer-events-auto relative z-10 bg-dark-card/95 backdrop-blur-md border border-dark-border rounded-lg shadow-2xl p-6 flex flex-col min-h-0 md:[height:var(--ch)] max-md:[height:var(--ch-mobile)]"
         style={{
           width: cardWidth,
           maxWidth: 'calc(100vw - 1rem)',
-          height: cardHeight,
+          ['--ch' as string]: cardHeight,
+          ['--ch-mobile' as string]: cardHeightMobile ?? cardHeight,
         }}
       >
         {/* 右上角：繼續 + X 關閉 */}
@@ -111,7 +115,7 @@ export default function CharacterConversationCard({
               <div
                 className={`w-2 h-2 rounded-full flex-shrink-0 ${isPlayer ? 'bg-blue-400' : 'bg-orange-400'}`}
               />
-              <span className="text-sm font-medium text-gray-300 break-words min-w-[6em] whitespace-pre-line">
+              <span className="text-[0.849rem] md:text-sm font-medium text-gray-300 break-words min-w-[6em] whitespace-pre-line">
                 {currentTurn.characterName.replace(/（/g, '\n（')}
               </span>
               {isPlayer && (
@@ -119,7 +123,7 @@ export default function CharacterConversationCard({
               )}
             </div>
             <div
-              className="text-sm text-gray-200 leading-relaxed break-words overflow-y-auto overflow-x-hidden pr-1 flex-1 min-h-0"
+              className="text-[0.849rem] md:text-sm text-gray-200 leading-relaxed break-words overflow-y-auto overflow-x-hidden pr-1 flex-1 min-h-0"
               style={{ height: textAreaHeight }}
             >
               {displayText}
@@ -140,7 +144,7 @@ export default function CharacterConversationCard({
                 <button
                   key={choice.id}
                   onClick={() => onChoice(choice)}
-                  className="w-full px-4 py-2.5 text-left bg-dark-surface/50 hover:bg-dark-surface border border-dark-border hover:border-orange-400/50 rounded-lg transition-colors text-sm text-gray-300 hover:text-orange-400"
+                  className="w-full px-4 py-2.5 text-left text-[0.849rem] md:text-sm bg-dark-surface/50 hover:bg-dark-surface border border-dark-border hover:border-orange-400/50 rounded-lg transition-colors text-gray-300 hover:text-orange-400"
                 >
                   {choice.text}
                 </button>

@@ -86,9 +86,9 @@ export default function PlayPage() {
   const router = useRouter();
   const chapterId = params.chapterId as string;
   const sceneId = params.sceneId as string;
-  // 第一章、第二章預設開啟 hotspot debug，其他章節仍可透過 ?debug=1 顯示
+  // 僅在 ?debug=1 時顯示互動框圈圈；預設隱藏以增加探索難度
   const debugParam = searchParams.get('debug');
-  const debug = debugParam === '1' || chapterId === 'ch1' || chapterId === 'ch2';
+  const debug = debugParam === '1';
   // 開發者模式：由選單開關，並存入 localStorage（不再使用網址 ?dev=1）
   const [devMode, setDevMode] = useState(false);
   useEffect(() => {
@@ -210,8 +210,6 @@ export default function PlayPage() {
   const sceneNameTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sceneTransitionTimerRef = useRef<NodeJS.Timeout | null>(null);
   // 道具獲得提示狀態
-  const [showItemNotification, setShowItemNotification] = useState(false);
-  const [obtainedItem, setObtainedItem] = useState<{ id: string; name: string; image?: string; svgImage?: string; description?: string } | null>(null);
   const [activeItemDetail, setActiveItemDetail] = useState<{ id: string; name: string; image?: string; svgImage?: string; description?: string } | null>(null);
 
   // 添加對話到隊列（需要在 handleItemCollection 之前定義）；interactionName 為選填，用於顯示互動點名稱於對話框上方
@@ -273,7 +271,21 @@ export default function PlayPage() {
       const flagKey = 'ch1_police_intro_shown';
       if (!state.flags[flagKey]) {
         const police = reasoningByChapter['ch1']?.police;
-        if (police?.introLine) {
+        const introLines = police?.introLines;
+        if (introLines?.length) {
+          addDialogsToQueue(
+            introLines.map((text) => ({
+              text,
+              type: 'character' as const,
+              characterId: 'npc_liu',
+              characterName: '劉隊',
+              characterExpression: 1 as const,
+              characterPosition: 'left' as const,
+            })),
+            '警方簡報'
+          );
+          engine.applyEffect({ type: 'setFlag', flag: flagKey, value: true });
+        } else if (police?.introLine) {
           addDialogsToQueue(
             [
               {
@@ -330,7 +342,7 @@ export default function PlayPage() {
     addDialogsToQueue(
       [
         {
-          text: '「還行嗎？有需要再跟我說。」\n\n「你慢慢看，我那邊還有事。」',
+          text: '「還行嗎？有需要再跟我說。」\n\n「上面的人快到了，你趁現在多看兩眼。你慢慢看，我那邊還有事。」',
           type: 'character',
           characterId: 'npc_liu',
           characterName: '劉隊',
@@ -466,32 +478,22 @@ export default function PlayPage() {
     const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
 
     if (addItemEffects.length > 0) {
-      // 如果有道具被添加，先顯示道具獲得提示（浮動卡片）
+      // 如果有道具被添加，用與背包相同的詳解卡呈現（activeItemDetail）
       const firstItemEffect = addItemEffects[0];
       const itemId = firstItemEffect?.itemId;
       const item = itemId != null ? items[itemId] : undefined;
       if (item) {
-        // 顯示道具獲得提示（收集音效已停用）
-        setObtainedItem({
+        setActiveItemDetail({
           id: item.id,
           name: item.name,
           image: item.image,
           svgImage: item.svgImage,
           description: item.description,
         });
-        setShowItemNotification(true);
 
-        // 將同一事件中的對話效果排入對話佇列（阿蘇說明會在道具提示後出現）
-        const dialogs: Dialog[] = [];
-        dialogEffects.forEach((effect: any) => {
-          if (effect.dialog) dialogs.push(effect.dialog);
-        });
-        if (dialogs.length > 0) {
-          addDialogsToQueue(dialogs);
-        }
-
+        // 不排入同事件的 showDialog，避免關閉詳解卡後再跳出第二段道具解說
         setRefreshKey(prev => prev + 1);
-        return true; // 已處理（點擊浮動提示後，對話依序顯示）
+        return true;
       }
     }
 
@@ -613,7 +615,7 @@ export default function PlayPage() {
           addDialogsToQueue(
             [
               {
-                text: '「還行嗎？有需要再跟我說。」\n\n「你慢慢看，我那邊還有事。」',
+                text: '「還行嗎？有需要再跟我說。」\n\n「上面的人快到了，你趁現在多看兩眼。你慢慢看，我那邊還有事。」',
                 type: 'character',
                 characterId: 'npc_liu',
                 characterName: '劉隊',
@@ -833,6 +835,16 @@ export default function PlayPage() {
     if (engineRef.current?.getState().activeNpcDialogId) {
       engineRef.current.endNpcDialog();
     }
+    // 若有下一則且與當前同角色，直接換成下一則、不先清空，立繪固定不跳動
+    if (currentDialog?.characterId && dialogQueue.length > 0) {
+      const nextDialog = dialogQueue[0];
+      if (nextDialog.characterId === currentDialog.characterId) {
+        setCurrentDialog(nextDialog);
+        setDialogQueue(prev => prev.slice(1));
+        setRefreshKey((k) => k + 1);
+        return;
+      }
+    }
     setCurrentDialog(null);
     // 檢查是否有待顯示的對話
     setDialogQueue(prev => {
@@ -910,7 +922,7 @@ export default function PlayPage() {
         return prev;
       }
     });
-  }, []);
+  }, [currentDialog, dialogQueue]);
 
   // 開發者模式按鈕（移除快捷鍵，只保留按鈕）
 
@@ -1720,21 +1732,19 @@ export default function PlayPage() {
         const addItemEffects = result.effects.filter((e: any) => e.type === 'addItem');
         const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
         
-        // 如果有道具被添加，先顯示道具獲得提示
+        // 如果有道具被添加，用與背包相同的詳解卡呈現
         if (addItemEffects.length > 0) {
           const firstItemEffect = addItemEffects[0];
           const itemId = firstItemEffect?.itemId;
           const item = itemId != null ? items[itemId] : undefined;
           if (item) {
-            // 顯示道具獲得提示（收集音效已停用）
-            setObtainedItem({
+            setActiveItemDetail({
               id: item.id,
               name: item.name,
               image: item.image,
               svgImage: item.svgImage,
               description: item.description,
             });
-            setShowItemNotification(true);
             setRefreshKey(prev => prev + 1);
             return;
           }
@@ -1879,21 +1889,19 @@ export default function PlayPage() {
         const addItemEffects = result.effects.filter((e: any) => e.type === 'addItem');
         const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
         
-        // 如果有道具被添加，先顯示道具獲得提示
+        // 如果有道具被添加，用與背包相同的詳解卡呈現
         if (addItemEffects.length > 0) {
           const firstItemEffect = addItemEffects[0];
           const itemId = firstItemEffect?.itemId;
           const item = itemId != null ? items[itemId] : undefined;
           if (item) {
-            // 顯示道具獲得提示（收集音效已停用）
-            setObtainedItem({
+            setActiveItemDetail({
               id: item.id,
               name: item.name,
               image: item.image,
               svgImage: item.svgImage,
               description: item.description,
             });
-            setShowItemNotification(true);
             setRefreshKey(prev => prev + 1);
             return;
           }
@@ -1953,21 +1961,19 @@ export default function PlayPage() {
         const dialogEffects = result.effects.filter((e: any) => e.type === 'showDialog');
         const addItemEffects = result.effects.filter((e: any) => e.type === 'addItem');
         
-        // 如果有道具被添加，先顯示道具獲得提示
+        // 如果有道具被添加，用與背包相同的詳解卡呈現
         if (addItemEffects.length > 0) {
           const firstItemEffect = addItemEffects[0];
           const itemId = firstItemEffect?.itemId;
           const item = itemId != null ? items[itemId] : undefined;
           if (item) {
-            // 顯示道具獲得提示（收集音效已停用）
-            setObtainedItem({
+            setActiveItemDetail({
               id: item.id,
               name: item.name,
               image: item.image,
               svgImage: item.svgImage,
               description: item.description,
             });
-            setShowItemNotification(true);
             setRefreshKey(prev => prev + 1);
             return;
           }
@@ -2337,21 +2343,19 @@ export default function PlayPage() {
                 const eventDialogEffects = eventResult.effects.filter((e: any) => e.type === 'showDialog');
                 const eventAddItemEffects = eventResult.effects.filter((e: any) => e.type === 'addItem');
                 
-                // 如果有道具添加，先顯示道具獲得提示
+                // 如果有道具添加，用與背包相同的詳解卡呈現
                 if (eventAddItemEffects.length > 0) {
                   const firstItemEffect = eventAddItemEffects[0];
                   const itemId = firstItemEffect?.itemId;
                   const item = itemId != null ? items[itemId] : undefined;
                   if (item) {
-                    // 顯示道具獲得提示（收集音效已停用）
-                    setObtainedItem({
+                    setActiveItemDetail({
                       id: item.id,
                       name: item.name,
                       image: item.image,
                       svgImage: item.svgImage,
                       description: item.description,
                     });
-                    setShowItemNotification(true);
                     setRefreshKey(prev => prev + 1);
                     return;
                   }
@@ -2620,7 +2624,7 @@ export default function PlayPage() {
   // Dock 版對話／提示／推理面板顯示條件與寬度內縮（立繪預留空間）
   const hasDockDialog =
     !!currentConversation ||
-    (!!currentDialog && !showItemNotification && !showSceneName);
+    (!!currentDialog && !activeItemDetail && !showSceneName);
   const hasDockContent = hasDockDialog;
 
   const hasConversationPortrait =
@@ -3019,32 +3023,34 @@ export default function PlayPage() {
               interactionCount={interactionCount}
             />
 
-            {/* 立繪：落在場景上，圖層高於 Dock 內對話框（z-20） */}
+            {/* 立繪：落在場景上，圖層高於 Dock 內對話框（z-40 押在對話框之上） */}
             {(() => {
               const fromConversation =
                 currentConversation &&
                 currentConversationTurn &&
                 currentConversationTurn.speaker === 'character' &&
                 currentConversationTurn.characterId;
-              const fromDialog = currentDialog?.characterId;
+              // 一般對話時用 currentDialog，若已關閉但佇列有下一則則用佇列第一則，避免切換時立繪短暫消失
+              const effectiveDialog = currentDialog ?? dialogQueue[0] ?? null;
+              const fromDialog = effectiveDialog?.characterId;
               const characterId = fromConversation
                 ? currentConversationTurn!.characterId
                 : fromDialog
-                  ? currentDialog!.characterId
+                  ? effectiveDialog!.characterId
                   : null;
               if (!characterId) return null;
               const expression = fromConversation
                 ? currentConversationTurn!.characterExpression ?? 1
-                : currentDialog?.characterExpression ?? 1;
+                : effectiveDialog?.characterExpression ?? 1;
               const position = fromConversation
                 ? currentConversationTurn!.characterPosition ?? 'left'
-                : currentDialog?.characterPosition ?? 'left';
+                : effectiveDialog?.characterPosition ?? 'left';
               const name = fromConversation
                 ? currentConversationTurn!.characterName
-                : currentDialog?.characterName;
+                : effectiveDialog?.characterName;
               return (
                 <div
-                  className={`absolute inset-0 pointer-events-none z-20 flex items-end ${
+                  className={`absolute inset-0 pointer-events-none z-40 flex items-end ${
                     position === 'right' ? 'justify-end' : 'justify-start'
                   }`}
                 >
@@ -3054,6 +3060,13 @@ export default function PlayPage() {
                     className={`h-[40%] w-auto max-w-[50%] object-contain object-bottom drop-shadow-2xl ${
                       position === 'left' ? 'ml-0' : 'mr-0'
                     }`}
+                    style={
+                      position === 'left'
+                        ? { marginLeft: '-2%' }
+                        : position === 'right'
+                          ? { marginRight: '-2%' }
+                          : undefined
+                    }
                   />
                 </div>
               );
@@ -3104,7 +3117,7 @@ export default function PlayPage() {
                 {/* 一般對話框（僅在無道具提示與無場景名稱疊加且無角色對話時顯示） */}
                 {!currentConversation &&
                   currentDialog &&
-                  !showItemNotification &&
+                  !activeItemDetail &&
                   !showSceneName && (
                     <div className={dialogWrapperClass + ' w-full'} style={dialogStyle}>
                       <DialogBox
@@ -3597,34 +3610,6 @@ export default function PlayPage() {
           )}
         </AnimatePresence>
 
-        {/* 道具獲得提示：最低優先，小型 bottom toast，可與場景共存 */}
-        <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && !showCh1MonologueOverlay && !activeItemDetail && showItemNotification && obtainedItem && (
-            <m.div
-              key="item-toast"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 flex items-end justify-center pointer-events-none"
-            >
-              <ItemObtainedNotification
-                itemId={obtainedItem.id}
-                itemName={obtainedItem.name}
-                itemImage={obtainedItem.image}
-                itemSvgImage={obtainedItem.svgImage}
-                itemDescription={obtainedItem.description}
-                show={showItemNotification}
-                dismissOnTap
-                onComplete={() => {
-                  setShowItemNotification(false);
-                  setObtainedItem(null);
-                  setRefreshKey((prev) => prev + 1);
-                }}
-              />
-            </m.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* 正上方：一鍵關閉／開啟所有聲音 */}

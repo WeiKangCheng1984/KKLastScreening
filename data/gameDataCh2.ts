@@ -114,7 +114,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -140,7 +140,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -172,7 +172,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -197,7 +197,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -228,7 +228,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -260,7 +260,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -286,7 +286,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -319,7 +319,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -345,7 +345,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -378,7 +378,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -404,7 +404,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -437,7 +437,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -464,7 +464,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -496,7 +496,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -528,7 +528,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -560,7 +560,7 @@ const scenes: Record<string, Scene> = {
               text: '',
               type: 'character',
               characterId: 'npc_asu',
-              characterName: '阿蘇（工程師）',
+              characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
               characterPosition: 'left',
               textSegments: [
@@ -576,7 +576,7 @@ const scenes: Record<string, Scene> = {
     ],
     puzzles: [],
     initialDialog: {
-      text: '阿蘇把筆電翻開，線在她指尖繞一圈，插進警方提供的解密終端。\n\n阿蘇：「坐好。」\n她視線沒離開螢幕。\n\n阿蘇：「手機解完密，只是開始。接下來要解讀這個人。」\n阿蘇：「我先說清楚，我不替警方背書。我只替資料負責。」\n她停半秒，又補一句，像在防禦。\n阿蘇：「資料有時候也不值得信任。」',
+      text: '阿蘇把筆電翻開，線在她指尖繞一圈，插進警方提供的解密終端。\n\n阿蘇：「坐好。」\n她視線沒離開螢幕。\n\n阿蘇：「手機解完密，只是開始。接下來要解讀這個人。」\n阿蘇：「我先說清楚，我是技術組支援鑑定的，只負責資料。我不替誰背書。」\n她停半秒，又補一句，像在防禦。\n阿蘇：「資料有時候也不值得信任。」',
       type: 'narrator',
     },
     npcs: [
@@ -591,18 +591,18 @@ const scenes: Record<string, Scene> = {
       },
       {
         id: 'npc_asu',
-        name: '阿蘇（工程師）',
+        name: '阿蘇（警方技術組）',
         portrait: '/svg/characters/asu.svg',
         randomDialogs: [
           { id: 'asu_casual_1', text: '「你看這些訊息，像威脅，又有一點像兩個人在互相拗稿。」', type: 'casual', weight: 3 },
-          { id: 'asu_casual_2', text: '「工程系的人最怕兩種人，一種是什麼都不懂，一種是懂太多還故意裝不知道。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_2', text: '「做技術支援的最怕兩種人，一種是什麼都不懂，一種是懂太多還故意裝不知道。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_3', text: '「他把影城寫進專欄，結果人被留在影城裡。這種對稱，很難說是巧合。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_4', text: '「節能設備本來是好東西啊，省電、省錢，所有簡報都這樣寫。可是一旦有人發現它可以順便省掉責任，就會開始長得怪怪的。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_5', text: '「系統通常比人老實，可是設計系統的人不一定。這點我很有資格抱怨。」', type: 'casual', weight: 2 },
-          { id: 'asu_casual_6', text: '「他給聯絡人取名字的方式很工程師，全部用代碼。其實這種人死掉，調查起來很煩，卻也比較有路徑可以追。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_6', text: '「他給聯絡人取名字的方式全部用代碼。這種人死掉，調查起來很煩，卻也比較有路徑可以追。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_7', text: '「『三起事故』這個說法，很熟。寫技術文件的人才會把東西分成一、二、三這樣。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_8', text: '「如果你把這些聊天紀錄當成八卦，它們就只會變成八卦；你把它們當線路，它們才會開始帶電。」', type: 'casual', weight: 2 },
-          { id: 'asu_casual_9', text: '「有時候我覺得他很像一個沒受過訓練的工程師，把城市當機房亂摸。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_9', text: '「有時候我覺得他很像在做現場鑑定卻沒受過訓練的人，把城市當機房亂摸。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_10', text: '「喔對，我有回過他的信，只是回得很不耐煩。沒想到…」\n她話說到一半停住，手指在方向盤上敲了兩下。', type: 'casual', weight: 2 },
         ],
         available: true,

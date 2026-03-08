@@ -35,7 +35,7 @@ alwaysApply: true
 | `app/play/[chapterId]/[sceneId]/page.tsx` | 場景主頁：SceneView、GameEngine、DialogBox、CharacterConversation、Hotspot、背包、道具取得、NPC 對話 |
 | `components/` | 所有 UI 組件（見下方組件清單） |
 | `lib/` | 遊戲邏輯與工具：`gameEngine.ts`、`characterPortrait.ts`、`audioManager.ts`、`flowController.ts`、`responsiveUtils.ts`、`svgLoader.ts`、`svgPreloader.ts`、`svgDragSystem.ts`、`performanceUtils.ts`、`transitionEffects.ts`、`lightingManager.ts` |
-| `data/` | `gameData.ts`（場景／道具／事件／謎題／章節）、`characterConversations.ts`（角色對話鏈）、`reasoningByChapter.ts`、`flowConfig.ts` |
+| `data/` | gameDataCh1.ts～gameDataCh6.ts（各章場景／道具／事件／npcDialogs）、`characterConversations.ts`、`reasoningByChapter.ts`、`flowConfig.ts` |
 | `types/game.ts` | 所有 TypeScript 型別（GameState, Scene, Event, Dialog, ConversationTurn, DialogChoice, Item, Puzzle, Npc, InsightsState 等） |
 | `public/` | 靜態資產：背景圖、道具圖、`/images/characters/` 角色頭像 WEBP、`/audio/`、`/videos/`、`/svg/` |
 
@@ -134,7 +134,7 @@ alwaysApply: true
 
 ### 實作位置
 - **檔案**：`lib/gameEngine.ts`
-- **資料**：`data/gameData.ts`（scenes, items, chapters, npcDialogs 等）
+- **資料**：`data/gameDataCh1.ts`～`gameDataCh6.ts`（經 getChapterData 按章載入 scenes, items, npcDialogs）
 
 ---
 
@@ -299,7 +299,7 @@ alwaysApply: true
 ## 【17】資料結構
 
 ### 主要資料檔案
-- **data/gameData.ts**：場景、道具、事件、謎題、章節、NPC 等
+- **data/gameDataCh1.ts**～**gameDataCh6.ts**：各章場景、道具、事件、謎題、NPC、npcDialogs；由 getChapterData(chapterId) 動態載入。
 - **data/characterConversations.ts**：角色對話鏈（ConversationTurn[]、finalChoices）
 - **data/reasoningByChapter.ts**：章節推理相關
 - **data/flowConfig.ts**：流程設定
@@ -324,8 +324,7 @@ alwaysApply: true
 ### 18.2 分章資料檔 `data/getChapterData.ts` 與來源
 
 - **取得章節資料**：`getChapterData(chapterId): Promise<ChapterData | null>` 由 `data/getChapterData.ts` 匯出。
-- 內部依 `chapters[chapterId].scenes` 從 **單一完整 gameData**（`data/gameData.ts`）篩選出該章的 `scenes`、`items`、`npcDialogs`（僅 ch1 有 npcDialogs 時可依 chapterId 篩選）。
-- **若改為分檔**（如 `gameDataCh1.ts` … `gameDataCh5.ts`）：每檔 export 該章 `{ scenes, items, npcDialogs }`；`getChapterData` 改為依 `chapterId` 動態 `import('./gameDataChX')` 或 map 對應後回傳。**新增章節時**：新增對應 `gameDataChX.ts` 並在 `getChapterData` 的 map/switch 中加入該章。
+- 內部依 `chapterId` 動態 `import('./gameDataChX')`，回傳該章的 `scenes`、`items`、`npcDialogs`。**新增章節時**：新增對應 `gameDataChX.ts` 並在 `getChapterData` 的 map/switch 中加入該章。
 
 ### 18.3 GameEngine 依賴注入與合併
 
@@ -345,7 +344,7 @@ alwaysApply: true
 
 ### 18.5 依 props 取得資料的組件（不直接 import gameData）
 
-- **Inventory**、**DeveloperPanel**、**PickThreePuzzle**、**PairMatchingPuzzle** 等：由上層（play 頁）傳入 `items`、必要時 `scenes` / `chapters`（來自 engine 合併後或 play 頁 state），**不要**直接從 `@/data/gameData` import。
+- **Inventory**、**DeveloperPanel**、**PickThreePuzzle**、**PairMatchingPuzzle** 等：由上層（play 頁）傳入 `items`、必要時 `scenes` / `chapters`（來自 engine 合併後或 play 頁 state），**不要**直接從 `@/data/gameDataChX` import。
 - **新增章節**：只要 play 頁依 `getChapterData` 載入並合併，這些組件會自動拿到新章資料，無須改組件 import。
 
 ### 18.6 Intro / Prologue 頁
@@ -356,9 +355,9 @@ alwaysApply: true
 ### 18.7 新增章節檢查清單
 
 1. 在 `data/chapters.ts` 的 `chapters` 中新增該章（id、name、scenes 陣列、intro 等）。
-2. 若採分檔：新增 `data/gameDataChX.ts`，export 該章 `scenes`、`items`、`npcDialogs`；並在 `getChapterData` 中對應到該章。
-3. 若仍用單一 gameData：在 gameData 中新增該章場景／道具／事件／npcDialogs，確保 `getChapterData` 的篩選邏輯會包含新章（例如依 `chapter.scenes` 與 `chapterId`）。
-4. 確認 play 頁在 `chapterId` 為新章時能載入並顯示（載入中 → 場景列表與箭頭、背包、開發者面板皆正常）。
+2. 新增 `data/gameDataChX.ts`，export 該章 `scenes`、`items`、`npcDialogs`；並在 `getChapterData` 中對應到該章。
+3. 確認 play 頁在 `chapterId` 為新章時能載入並顯示（載入中 → 場景列表與箭頭、背包、開發者面板皆正常）。
+4. 依 props 取得資料的組件由上層傳入，無須改組件 import。
 5. 跑一次 `npm run build` 與手動測試：進入新章 intro → 場景切換、背包、謎題、NPC 對話（若有）行為正確。
 
 ### 18.8 死碼與關閉功能

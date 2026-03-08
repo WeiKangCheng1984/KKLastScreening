@@ -32,10 +32,10 @@
 
 | 檔案名稱 | 程式路徑 | 實際放置位置 | 說明 |
 |----------|----------|--------------|------|
-| （可選）`intro_ch1_bg.webp` | `/images/intro_ch1_bg.webp` | `public/images/intro_ch1_bg.webp` | 導讀背景圖；目前程式內為註解，若要使用需在 `gameData.ts` / `chapters.ts` 的 ch1.intro 取消註解並設 `backgroundImage` |
+| （可選）`intro_ch1_bg.webp` | `/images/intro_ch1_bg.webp` | `public/images/intro_ch1_bg.webp` | 導讀背景圖；目前程式內為註解，若要使用需在 `chapters.ts` 的 ch1.intro 取消註解並設 `backgroundImage` |
 | `intro_ch1_animation_v1.mp4` | `/videos/intro_ch1_animation_v1.mp4` | `public/videos/intro_ch1_animation_v1.mp4` | 導讀影片（影片非圖片，保留 MP4） |
 
-**引用位置**：`data/gameData.ts`（chapters.ch1.intro）、`data/chapters.ts`
+**引用位置**：`data/chapters.ts`（ch1.intro）、場景背景為 `data/gameDataCh1.ts` 的 scenes
 
 ### 3.2 第一章場景背景（三個場景）
 
@@ -45,7 +45,7 @@
 | `bg_ch1_projection_room_v1.webp` | `/images/bg_ch1_projection_room_v1.webp` | `public/images/bg_ch1_projection_room_v1.webp` | 場景：放映室 |
 | `bg_ch1_restroom_v1.webp` | `/images/bg_ch1_restroom_v1.webp` | `public/images/bg_ch1_restroom_v1.webp` | 場景：洗手間 |
 
-**引用位置**：`data/gameData.ts`（scenes 的 `background`）
+**引用位置**：`data/gameDataCh1.ts`（scenes 的 `background`）
 
 ### 3.3 第一章道具圖（目前為 SVG）
 
@@ -56,7 +56,7 @@
 - `item_projector_notes` → `/svg/items/projector_notes.svg`
 - `item_black_plastic_fragment`、`item_cleaning_note` 等 → 各自對應 `/svg/items/*.svg`
 
-若之後要改成 WebP 道具圖，需在 `data/gameData.ts` 的 items 改用 `image: '/images/item_xxx_v1.webp'` 並放置於 `public/images/`。
+若之後要改成 WebP 道具圖，需在 `data/gameDataCh1.ts`（或該章 gameDataChX）的 items 改用 `image: '/images/item_xxx_v1.webp'` 並放置於 `public/images/`。
 
 ---
 

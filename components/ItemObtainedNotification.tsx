@@ -17,6 +17,8 @@ interface ItemObtainedNotificationProps {
   onComplete?: () => void;
   /** 為 true 時不自動關閉，顯示描述與關閉鈕，點擊卡片或關閉鈕後呼叫 onComplete */
   dismissOnTap?: boolean;
+  /** 為 true 時卡片垂直置中於容器；為 false 時貼底 */
+  center?: boolean;
 }
 
 export default function ItemObtainedNotification({
@@ -29,6 +31,7 @@ export default function ItemObtainedNotification({
   duration = 1500,
   onComplete,
   dismissOnTap = false,
+  center = false,
 }: ItemObtainedNotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -68,14 +71,14 @@ export default function ItemObtainedNotification({
             stiffness: 400,
             damping: 25,
           }}
-          className={`w-full h-full flex items-end justify-center ${dismissOnTap ? 'pointer-events-auto' : 'pointer-events-none'}`}
+          className={`w-full h-full flex ${center ? 'items-center' : 'items-end'} justify-center ${dismissOnTap ? 'pointer-events-auto' : 'pointer-events-none'}`}
         >
           <div
             role={dismissOnTap ? 'button' : undefined}
             tabIndex={dismissOnTap ? 0 : undefined}
             onClick={dismissOnTap ? handleDismiss : undefined}
             onKeyDown={dismissOnTap ? (e) => e.key === 'Enter' && handleDismiss() : undefined}
-            className={`bg-dark-card/95 backdrop-blur-md border-2 border-orange-500/50 rounded-xl px-6 py-5 md:px-8 md:py-6 shadow-2xl max-w-sm w-full mx-4 mb-4 ${dismissOnTap ? 'cursor-pointer' : ''}`}
+            className={`bg-dark-card/95 backdrop-blur-md border-2 border-orange-500/50 rounded-xl px-6 py-5 md:px-8 md:py-6 shadow-2xl max-w-sm w-full mx-4 ${center ? '' : 'mb-4'} ${dismissOnTap ? 'cursor-pointer' : ''}`}
           >
             <div className="flex items-start gap-4">
               {/* 道具圖示 */}

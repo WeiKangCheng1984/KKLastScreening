@@ -27,6 +27,10 @@ export interface ChapterPoliceConfig {
    */
   introLine: string;
   /**
+   * 若提供，第一章開場會拆成兩段顯示（兩則對話依序）；未提供時使用 introLine 單則。
+   */
+  introLines?: string[];
+  /**
    * 在玩家完成推理後，劉隊給出的「可寫進報告」的標準結論。
    */
   outroStandard: string;
@@ -83,7 +87,12 @@ export const reasoningByChapter: Record<string, ChapterReasoning> = {
     },
     police: {
       introLine:
-        '現場我們會先封著，你來看一眼就好。你看到什麼，就照實說。我們再決定要不要往下挖。',
+        '現場我們會先封著，你來看一眼就好。影城那邊我們也通知了，品牌、技術什麼的都在路上，很快就到。你看到什麼，就照實說，我們再決定要不要往下挖。',
+      /** 第一章開場若拆成兩段顯示，優先使用此陣列（兩則對話依序） */
+      introLines: [
+        '現場我們會先封著，你來看一眼就好。影城那邊我們也通知了，品牌、技術什麼的都在路上，很快就到。',
+        '你看到什麼，就照實說，我們再決定要不要往下挖。',
+      ],
       outroStandard:
         '我的工作是寫得出一份交得出去的報告。就目前資料，我可以寫：流程上有疏漏，現場處理不當。至於是不是「有人故意這樣設計」——那種句子，寫進去要很多證據。',
       outroPlayerLines: [

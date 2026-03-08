@@ -226,7 +226,6 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
         height: responsiveSize,
         borderRadius: '50%',
         transform: 'translate(-50%, -50%)',
-        cursor: 'pointer',
       };
     }
     return {};

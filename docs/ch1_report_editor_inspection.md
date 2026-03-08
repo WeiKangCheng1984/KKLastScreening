@@ -8,8 +8,8 @@
 | **劉隊 readyToReport** | `page.tsx` npc_liu 點擊 | `readyToReport = hasCh1CoreClues && allScenesVisited`，其中 `hasCh1CoreClues` 由 `ticket_stub_collected` +（`clue_light_delay_confirmed` 或 `security_monitor_viewed`）+（`black_fragment_found` 或 `cleaning_note_found` 或 `clue_clean_trash`）決定。 |
 | **推理分析按鈕** | `page.tsx` `showReasoningButton` | `showReasoningButton` 僅在 `chapterId !== 'ch1'` 且本章全場景已訪、尚未完成該章推理時顯示；ch1 明確被排除，因此不會透過右下角按鈕進入 ReasoningPanel。 |
 | **ReasoningPanel** | `page.tsx`、`ReasoningPanel.tsx` | 保留作為 ch2/ch3 的一般推理面板（Q1/Q2/Q3 + 劉隊結語）；ch1 不再使用 ReasoningPanel 作為章末入口，而是改用 `Ch1ReportEditor`。 |
-| **ch1_puzzle_done** | `gameData.ts`、`GameEngine.solvePuzzle` | 仍由舊的 `ch1_pair_matching`／PickThree 謎題 onSolve（及 `solvePuzzle` 裡的檢查）寫入，目前主線 UI 已沒有開啟這組謎題的入口，視為保留型旗標。 |
-| **ch1_reasoning_done** | `gameData.ts`、`GameEngine.setReasoningComplete` | 舊版 arrangement 謎題 `ch1_reasoning_3` onSolve 會設為 true；新版流程則在 Ch1ReportEditor 完成態度宣言後，由 `setReasoningComplete('ch1')` 統一寫入，同時設 `navigate_to_ch2_intro` 供頁面導向 ch2 intro。 |
+| **ch1_puzzle_done** | `gameDataCh1.ts`、`GameEngine.solvePuzzle` | 仍由舊的 `ch1_pair_matching`／PickThree 謎題 onSolve 寫入，目前主線 UI 已沒有開啟此謎題的入口，視為保留型旗標。 |
+| **ch1_reasoning_done** | `gameDataCh1.ts`、`GameEngine.setReasoningComplete` | 舊版 arrangement 謎題 `ch1_reasoning_3` onSolve 會設為 true；新版流程則在 Ch1ReportEditor 完成態度宣言後，由 `setReasoningComplete('ch1')` 統一寫入。 |
 
 ## ch1 主要旗標與關係（更新後）
 
@@ -49,7 +49,7 @@
    - **可選**：移除 state `ch1ReasoningStep` / `setCh1ReasoningStep`（僅舊推理謎題使用）。
 
 2. **保留但不再主線使用**
-   - `data/gameData.ts` 的 `ch1_puzzle_done` / `ch1_reasoning_done` 事件 effect、`ch1_pair_matching`、`ch1_reasoning_1~3` 謎題：保留不刪，供日後清理或備用。
+   - `data/gameDataCh1.ts` 的 `ch1_puzzle_done` / `ch1_reasoning_done` 事件 effect、`ch1_pair_matching`、`ch1_reasoning_1~3` 謎題：保留不刪，供日後清理或備用。
 
 ## 需改寫（歷史計畫，已完成）
 

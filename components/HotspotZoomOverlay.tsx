@@ -15,8 +15,8 @@ export interface HotspotZoomOverlayProps {
   onClose: () => void;
 }
 
-const ZOOM_IN_DURATION = 0.48;
-const ZOOM_OUT_DURATION = 0.38;
+const ZOOM_IN_DURATION = 0.24;
+const ZOOM_OUT_DURATION = 0.19;
 /** 兩段放大：第一段中繼倍率、第二段最終倍率 */
 const ZOOM_MID_SCALE = 1.4;
 const ZOOM_MAX_SCALE = 2.6;
@@ -141,9 +141,9 @@ export default function HotspotZoomOverlay({
             transition={{
               opacity:
                 phase === 'zooming-in'
-                  ? { delay: 0.2, duration: 0.25 }
+                  ? { delay: 0.1, duration: 0.12 }
                   : phase === 'zooming-out'
-                    ? { duration: 0.18 }
+                    ? { duration: 0.09 }
                     : { duration: 0 },
             }}
           />

@@ -60,10 +60,10 @@ export default function ChapterIntro({ chapter, firstSceneBackground }: ChapterI
     }
 
     const timers = [
-      setTimeout(() => setCurrentLayer(1), 500),
-      setTimeout(() => setCurrentLayer(2), 2000),
-      setTimeout(() => setCurrentLayer(3), 3500),
-      setTimeout(() => setIsReady(true), 5000),
+      setTimeout(() => setCurrentLayer(1), 200),
+      setTimeout(() => setCurrentLayer(2), 800),
+      setTimeout(() => setCurrentLayer(3), 1600),
+      setTimeout(() => setIsReady(true), 2600),
     ];
 
     return () => {
@@ -379,7 +379,7 @@ export default function ChapterIntro({ chapter, firstSceneBackground }: ChapterI
             )}
           </div>
 
-          {/* 槽位四：開始探索（CTA 留白充足，整體下移 5%） */}
+          {/* 槽位四：開始調查（CTA 留白充足，整體下移 5%） */}
           <div className="flex-none h-[12vh] min-h-[4rem] max-h-[100px] mt-[5vh] flex flex-col justify-center items-center">
             {isReady && (
               <FadeIn delay={0} duration={0.5}>
@@ -388,7 +388,7 @@ export default function ChapterIntro({ chapter, firstSceneBackground }: ChapterI
                   className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-xl transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
                 >
                   <Play size={24} />
-                  {introVideo && !showVideo && !videoEnded ? '觀看影片' : '開始探索'}
+                  {introVideo && !showVideo && !videoEnded ? '觀看影片' : '開始調查'}
                 </button>
               </FadeIn>
             )}

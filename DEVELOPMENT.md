@@ -25,7 +25,7 @@
 
 ### 新增場景
 
-在 `data/gameData.ts` 中的 `scenes` 物件新增場景：
+在 `data/gameDataCh1.ts`（或該章對應的 `gameDataChX.ts`）中的 `scenes` 物件新增場景：
 
 ```typescript
 'ch1_sc6': {
@@ -79,7 +79,7 @@
 
 ### 新增道具
 
-在 `data/gameData.ts` 中的 `items` 物件新增道具：
+在 `data/gameDataCh1.ts`（或該章對應的 `gameDataChX.ts`）中的 `items` 物件新增道具：
 
 ```typescript
 'new_item': {

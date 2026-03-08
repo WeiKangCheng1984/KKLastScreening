@@ -94,7 +94,7 @@ export default function Home() {
           KK流程偵探<br />最後一場放映
         </h1>
         <p className="text-lg text-orange-300/80 mb-8 animate-fade-float" style={{ animationDelay: '0.2s' }}>
-          不要凌晨 00:39，一通沒有顯示來電的電話。城市影城，散場後五分鐘，有人死在 H 排 12 號。散場的燈，延後三分鐘亮起，你不是警察，你只是 KK。
+          凌晨 00:39，一通沒有顯示來電的電話。城市影城，散場後約五分鐘左右，有人死在 H 排 12 號。散場的燈，延後三分鐘亮起，你不是警察，你只是 KK。
         </p>
         <button
           onClick={handleStartGame}

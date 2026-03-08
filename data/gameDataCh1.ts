@@ -6,7 +6,7 @@ const items: Record<string, Item> = {
   'item_ticket_stub': {
     id: 'item_ticket_stub',
     name: '電影票根',
-    description: '一張被撕得很乾淨的票根，靜靜躺在地上。\n\n座位號碼：H排12號\n場次時間：22:30\n\n票根邊緣整齊，像是被人小心處理過。',
+    description: '一張死者遺留的票根，靜靜躺在地上。\n\n座位號碼：H排12號\n場次時間：22:30。',
     svgImage: '/svg/items/ticket_stub.svg',
     svgSize: 'medium',
     collectible: true,
@@ -14,7 +14,7 @@ const items: Record<string, Item> = {
   'item_schedule_modified': {
     id: 'item_schedule_modified',
     name: '播映時間表（塗改）',
-    description: '一張被塗改過的播映時間表。\n\n原本的亮燈時間被劃掉，旁邊用紅筆寫著新的時間。\n延後了3分鐘。\n\n這個改動很細微，如果不是仔細看，根本不會注意到。',
+    description: '一張播映時間表，上面有塗改的痕跡。\n\n原本某一欄被劃掉，旁邊用紅筆寫了新的時間。',
     svgImage: '/svg/items/schedule_modified.svg',
     svgSize: 'medium',
     collectible: true,
@@ -22,7 +22,7 @@ const items: Record<string, Item> = {
   'item_projector_notes': {
     id: 'item_projector_notes',
     name: '放映員的筆記',
-    description: '一張便條紙貼在控制台上。\n\n字跡匆忙，但內容清楚：\n「那天有人說，燈不用急著開。」\n\n沒有署名，沒有時間。',
+    description: '一張便條紙貼在控制台上。\n\n字跡匆忙，內容跟燈有關。',
     svgImage: '/svg/items/projector_notes.svg',
     svgSize: 'medium',
     collectible: true,
@@ -30,7 +30,7 @@ const items: Record<string, Item> = {
   'item_black_plastic_fragment': {
     id: 'item_black_plastic_fragment',
     name: '黑色塑膠碎片',
-    description: '周姊在洗手台下方發現的黑色碎片。\n\n邊緣不規則，像是手套的一角。\n材質：橡膠或塑膠，疑似手套破損留下。\n\n這個位置很隱蔽，正常不會被打掃到。急著乾淨的人，多半有東西不能留。',
+    description: '周姊在洗手台下方發現的一小片黑色塑膠。\n\n邊緣不規則，材質像橡膠或塑膠。',
     svgImage: '/svg/items/black_plastic_fragment.svg',
     svgSize: 'small',
     collectible: true,
@@ -38,7 +38,7 @@ const items: Record<string, Item> = {
   'item_light_control_note': {
     id: 'item_light_control_note',
     name: '燈控紀錄',
-    description: '燈控面板旁的紀錄。\n\n當天為手動模式，需要有人親自操作。\n誰能接觸燈控，誰就能決定亮燈的時間。',
+    description: '燈控面板旁的紀錄。\n\n當天的紀錄顯示開關指在手動那一側。',
     svgImage: '/svg/items/schedule_modified.svg',
     svgSize: 'medium',
     collectible: true,
@@ -46,7 +46,7 @@ const items: Record<string, Item> = {
   'item_cleaning_note': {
     id: 'item_cleaning_note',
     name: '清潔備忘',
-    description: '廁所區域的清潔備忘。\n\n垃圾桶被清得很乾淨，像是有人刻意整理過。\n這種「乾淨」本身就很可疑。',
+    description: '廁所區域的清潔備忘。\n\n上面記了當天的清潔狀況；垃圾桶那欄寫得很簡短，看起來很空。',
     svgImage: '/svg/items/black_plastic_fragment.svg',
     svgSize: 'small',
     collectible: true,
@@ -59,7 +59,7 @@ const scenes: Record<string, Scene> = {
     id: 'scene_ch1_cinema_a_hall',
     chapterId: 'ch1',
     name: '城市影城 放映廳',
-    description: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
+    description: '散場後的人們很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。',
     background: '/images/bg_ch1_cinema_a_hall_v1.webp',
     hotspots: [
       {
@@ -67,7 +67,7 @@ const scenes: Record<string, Scene> = {
         shape: 'rect',
         coords: [1.19, 1.62, 0.15, 0.15],
         description: '地上的電影票根',
-        hint: '一張被撕得很乾淨的票根，靜靜躺在地上。',
+        hint: '一張死者遺留的票根，靜靜躺在地上。',
       },
       // 好笑無意義互動點（放映廳）
       { id: 'hotspot_fun_popcorn', shape: 'rect', coords: [1.55, 1.6, 0.15, 0.15], description: '爆米花殘渣', hint: '地上有幾顆沒吃完的爆米花。' },
@@ -138,7 +138,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：電影票根\n\n一張被撕得很乾淨的票根，靜靜躺在地上。\n\n座位號碼：H排12號\n場次時間：22:30\n\n票根邊緣整齊，像是被人小心處理過。',
+              text: '獲得：電影票根\n\n一張死者遺留的票根，靜靜躺在地上。\n\n座位號碼：H排12號\n場次時間：22:30\n\n票根邊緣整齊，像是被人小心處理過。',
               type: 'item',
             },
           },
@@ -244,7 +244,7 @@ const scenes: Record<string, Scene> = {
       },
     ],
     initialDialog: {
-      text: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。',
+      text: '散場後的世界很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。像有人把「求救」剪掉了。\n\n影城那邊負責品牌、設備與排程的人已在路上，很快就到。',
       type: 'narrator',
     },
     npcs: [
@@ -267,7 +267,7 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_3',
-            text: '「我們都有SOP，清場、巡場、燈光…都照表走。」',
+            text: '「我們都有SOP啦，該做的都有做。清場、巡場什麼的，盡量照規矩來。」',
             type: 'casual',
             weight: 2,
           },
@@ -291,7 +291,7 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_7',
-            text: '「散場時間表都在那邊，你要查什麼都可以。我們真的沒什麼好藏的。」',
+            text: '「你要查什麼跟我說，我們能配合的都會配合。」',
             type: 'casual',
             weight: 2,
           },
@@ -303,7 +303,7 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_9',
-            text: '「流程這種東西，寫在紙上是一回事，現場又是一回事。我們盡量對齊啦。」',
+            text: '「規矩是規矩，現場總有狀況嘛。我們盡量啦。」',
             type: 'casual',
             weight: 2,
           },
@@ -317,7 +317,7 @@ const scenes: Record<string, Scene> = {
         randomDialogs: [
           {
             id: 'ch1_briefing',
-            text: '「現場我們會先封著，你來看一眼就好。你看到什麼，就照實說。」',
+            text: '「現場我們會先封著，影城那邊我們也通知了，品牌、技術什麼的在路上，很快就到。你先看，看到什麼就照實說。」',
             type: 'hint',
             weight: 1,
           },
@@ -342,7 +342,7 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_2',
-            text: '「散場最亂的不是人，是垃圾。人走了，證據才開始出現。」',
+            text: '「散場最亂的不是人，是垃圾。人一走，滿地都是。」',
             type: 'casual',
             weight: 2,
           },
@@ -354,31 +354,31 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_4',
-            text: '「你要找兇手？先找柱子。柱子最會幫人消失。」',
+            text: '「你要找兇手？…那種事我哪知道，我就負責疏導而已。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_5',
-            text: '「散場那幾分鐘人都在動，誰停下來誰就顯眼。反過來說，懂動線的人就知道什麼時候不顯眼。」',
+            text: '「散場那幾分鐘人都在動啊，我們也是跟著人潮走。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_6',
-            text: '「我每天走同一條路。哪裡有洞、哪裡沒拍到，我比監視器還熟。」',
+            text: '「我每天走同一條路，哪裡有問題我大概知道。就這樣。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_7',
-            text: '「清場是 SOP，但 SOP 不會告訴你誰在 SOP 的縫裡多待了一分鐘。」',
+            text: '「清場是 SOP 啊，但總有人慢一點、快一點嘛。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_8',
-            text: '「大家都說『有監視器』，好像有就沒事。其實有跟『看得到』是兩回事。」',
+            text: '「大家都說有監視器就沒事啊…嗯，反正有啦。」',
             type: 'casual',
             weight: 2,
           },
@@ -400,39 +400,39 @@ const scenes: Record<string, Scene> = {
       {
         id: 'hotspot_screening_schedule',
         shape: 'rect',
-        coords: [0.16, 0.22, 0.22, 0.18],
+        coords: [0.11, 0.48, 0.15, 0.15],
         description: '播映時間表',
-        hint: '一張被塗改過的播映時間表。原本的亮燈時間被劃掉，旁邊用紅筆寫著新的時間。',
+        hint: '一張播映時間表，上面有塗改的痕跡；某一欄被劃掉，旁邊用紅筆寫了新的時間。',
       },
       {
         id: 'hotspot_light_control_panel',
         shape: 'rect',
-        coords: [0.44, 0.38, 0.28, 0.24],
+        coords: [1.4, 0.76, 0.15, 0.15],
         description: '燈控面板',
-        hint: '燈控面板上的開關位置顯示：手動模式。這不是自動系統，需要有人親自操作。',
+        hint: '燈控面板旁的紀錄；開關指在手動那一側。',
       },
       {
         id: 'hotspot_projector_notes',
         shape: 'rect',
-        coords: [0.06, 0.52, 0.18, 0.2],
+        coords: [1.10, 0.79, 0.15, 0.15],
         description: '放映員的筆記',
         hint: '一張便條紙貼在控制台上。字跡匆忙，但內容清楚。',
       },
       {
         id: 'hotspot_security_monitor',
         shape: 'rect',
-        coords: [0.68, 0.68, 0.24, 0.22],
+        coords: [0.79, 0.68, 0.15, 0.15],
         description: '監視器畫面',
-        hint: '監視器畫面正在播放案發當晚的錄影。在昏暗的光線中，一個身影快速移動。',
+        hint: '監視器畫面正在播放案發當晚的錄影。昏暗的光線裡，畫面有人影晃動。',
       },
       // 好笑無意義互動（播映室）
-      { id: 'hotspot_fun_coffee', shape: 'rect', coords: [0.03, 0.18, 0.12, 0.14], description: '咖啡杯', hint: '小張的咖啡杯。' },
-      { id: 'hotspot_fun_snack', shape: 'rect', coords: [0.86, 0.16, 0.1, 0.12], description: '零食袋', hint: '一包沒吃完的洋芋片。' },
-      { id: 'hotspot_fun_chair_wheel', shape: 'rect', coords: [0.34, 0.76, 0.14, 0.16], description: '椅子輪子', hint: '控制椅的輪子。' },
-      { id: 'hotspot_fun_sticker', shape: 'rect', coords: [0.74, 0.26, 0.12, 0.1], description: '按鈕上的貼紙', hint: '某個按鈕上貼著「勿按」。' },
-      { id: 'hotspot_fun_remote', shape: 'rect', coords: [0.04, 0.78, 0.1, 0.15], description: '冷氣遙控器', hint: '冷氣遙控器。' },
-      { id: 'hotspot_fun_magazine', shape: 'rect', coords: [0.5, 0.04, 0.16, 0.12], description: '舊雜誌', hint: '一本過期的電影雜誌。' },
-      { id: 'hotspot_fun_whiteboard', shape: 'rect', coords: [0.18, 0.36, 0.14, 0.12], description: '白板', hint: '白板上畫著一個笑臉。' },
+      { id: 'hotspot_fun_coffee', shape: 'rect', coords: [0.53, 0.61, 0.15, 0.15], description: '咖啡杯', hint: '小張的咖啡杯。' },
+      { id: 'hotspot_fun_snack', shape: 'rect', coords: [1.50, 0.62, 0.15, 0.15], description: '零食袋', hint: '一包沒吃完的洋芋片。' },
+      { id: 'hotspot_fun_chair_wheel', shape: 'rect', coords: [0.25, 1.01, 0.15, 0.15], description: '椅子輪子', hint: '控制椅的輪子。' },
+      { id: 'hotspot_fun_sticker', shape: 'rect', coords: [0.34, 0.56, 0.15, 0.15], description: '按鈕上的貼紙', hint: '某個按鈕上貼著「勿按」。' },
+      { id: 'hotspot_fun_remote', shape: 'rect', coords: [0.10, 0.78, 0.15, 0.15], description: '冷氣遙控器', hint: '冷氣遙控器。' },
+      { id: 'hotspot_fun_magazine', shape: 'rect', coords: [1.64, 0.60, 0.15, 0.15], description: '舊雜誌', hint: '一本過期的電影雜誌。' },
+      { id: 'hotspot_fun_whiteboard', shape: 'rect', coords: [0.98, 0.5, 0.15, 0.15], description: '白板', hint: '白板上畫著一個笑臉。' },
     ],
     items: [
       items.item_schedule_modified,
@@ -465,7 +465,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：播映時間表（塗改）\n\n一張被塗改過的播映時間表。\n\n原本的亮燈時間被劃掉，旁邊用紅筆寫著新的時間。\n延後了3分鐘。\n\n這個改動很細微，如果不是仔細看，根本不會注意到。',
+              text: '獲得：播映時間表（塗改）\n\n一張播映時間表，上面有塗改的痕跡。\n\n原本某一欄被劃掉，旁邊用紅筆寫了新的時間。\n\n這個改動很細微，如果不是仔細看，根本不會注意到。',
               type: 'item',
             },
           },
@@ -486,7 +486,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：燈控紀錄\n\n燈控面板上的開關位置顯示：手動模式。\n\n這不是自動系統，需要有人親自操作。\n當天，有人選擇了手動控制。',
+              text: '獲得：燈控紀錄\n\n燈控面板旁的紀錄。\n\n當天的紀錄顯示開關指在手動那一側。',
               type: 'item',
             },
           },
@@ -526,7 +526,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '監視器畫面正在播放案發當晚的錄影。\n\n時間戳：00:12\n畫面：散場後的放映廳\n\n在昏暗的光線中，一個身影快速移動。\n90秒內，從座位區到出口，然後消失。',
+              text: '監視器畫面正在播放案發當晚的錄影。\n\n時間戳：00:12\n畫面：散場後的放映廳\n\n在昏暗的光線中，有一個身影很快離開畫面。',
               type: 'narrator',
             },
           },
@@ -539,7 +539,7 @@ const scenes: Record<string, Scene> = {
       },
       // 好笑無意義互動（播映室）
       { id: 'fun_coffee', name: '咖啡杯', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_coffee' }], effects: [{ type: 'showDialog', dialog: { text: '小張的咖啡杯。上面寫著「放映員專用」。你聞了聞，已經涼了。', type: 'narrator' } }], oneTime: false },
-      { id: 'fun_snack', name: '零食袋', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_snack' }], effects: [{ type: 'showDialog', dialog: { text: '一包沒吃完的洋芋片。誰說放映員不能嘴饞。', type: 'narrator' } }], oneTime: false },
+      { id: 'fun_snack', name: '零食袋', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_snack' }], effects: [{ type: 'showDialog', dialog: { text: '一包沒吃完的零食。誰說放映員不能嘴饞。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_chair_wheel', name: '椅子輪子', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_chair_wheel' }], effects: [{ type: 'showDialog', dialog: { text: '控制椅的輪子。你滾了滾。很順。你立刻停下來，覺得自己很無聊。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_sticker', name: '按鈕上的貼紙', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_sticker' }], effects: [{ type: 'showDialog', dialog: { text: '某個按鈕上貼著「勿按」。你沒有按。你是一個成熟的偵探。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_remote', name: '冷氣遙控器', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_remote' }], effects: [{ type: 'showDialog', dialog: { text: '冷氣遙控器。上面貼著「遺失賠償五百」。你放下了。', type: 'narrator' } }], oneTime: false },
@@ -548,7 +548,7 @@ const scenes: Record<string, Scene> = {
     ],
     puzzles: [],
     initialDialog: {
-      text: '播映室裡，控制台和設備都在正常運作。\n\n但在這片正常中，有什麼被改動過。',
+      text: '播映室裡，控制台和設備都在正常運作。\n\n但在這片正常中，有什麼被改動過。負責設備與排程的人稍後也會到場。',
       type: 'narrator',
     },
     npcs: [
@@ -565,7 +565,7 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_2',
-            text: '「你們覺得燈光是氣氛，我覺得燈光是時間戳。」',
+            text: '「燈光就燈光啊，該亮就亮、該關就關。我只看銀幕跟時間。」',
             type: 'casual',
             weight: 2,
           },
@@ -577,25 +577,25 @@ const scenes: Record<string, Scene> = {
         },
           {
             id: 'casual_4',
-            text: '「改表這種事，不會經過我。我只看得到改完的結果。」',
+            text: '「表怎麼來的我不清楚，我只看表做事。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_5',
-            text: '「燈晚亮那晚，我也有感覺。但感覺不能寫進報告，對吧。」',
+            text: '「那天…好像有哪裡怪怪的，我也說不上來。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_6',
-            text: '「有人會跟你說『照表走』。表是誰做的，他們不會說。」',
+            text: '「反正就是照表走嘛，表從哪來我們也不會問。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_7',
-            text: '「放映員的位子看得到銀幕，看不到觀眾。誰在黑暗裡做什麼，那是別人的事。」',
+            text: '「我們看銀幕啦，觀眾區那邊不是我們管的。」',
             type: 'casual',
             weight: 2,
           },
@@ -610,38 +610,38 @@ const scenes: Record<string, Scene> = {
     id: 'scene_ch1_restroom',
     chapterId: 'ch1',
     name: '廁所',
-    description: '廁所裡很乾淨，幾乎是空的。但在這片乾淨中，你感覺到一種刻意。',
+    description: '廁所裡很乾淨，幾乎是空的。但在這片乾淨中，你感覺到一種說不上來的異樣。',
     background: '/images/bg_ch1_restroom_v1.webp',
     hotspots: [
       {
         id: 'hotspot_sink_below',
         shape: 'rect',
-        coords: [0.36, 0.5, 0.2, 0.18],
+        coords: [1.72, 1.72, 0.15, 0.15],
         description: '洗手台下方',
         hint: '在洗手台下方，你發現了一小片黑色塑膠。',
       },
       {
         id: 'hotspot_trash_bin',
         shape: 'rect',
-        coords: [0.18, 0.62, 0.16, 0.18],
+        coords: [0.95, 0.95, 0.15, 0.15],
         description: '垃圾桶',
-        hint: '垃圾桶裡很乾淨，幾乎是空的。',
+        hint: '垃圾桶裡幾乎是空的。',
       },
       {
         id: 'hotspot_mirror',
         shape: 'rect',
-        coords: [0.7, 0.28, 0.2, 0.24],
+        coords: [1.5, 0.58, 0.15, 0.15],
         description: '鏡子',
         hint: '你在鏡子裡看見自己，和一個沒有留下痕跡的人。',
       },
       // 好笑無意義互動（廁所）
-      { id: 'hotspot_fun_dryer', shape: 'rect', coords: [0.05, 0.26, 0.12, 0.14], description: '烘手機', hint: '烘手機。' },
-      { id: 'hotspot_fun_soap', shape: 'rect', coords: [0.34, 0.36, 0.1, 0.1], description: '洗手乳', hint: '洗手乳是檸檬味。' },
-      { id: 'hotspot_fun_towel', shape: 'rect', coords: [0.76, 0.56, 0.12, 0.14], description: '擦手紙', hint: '擦手紙盒上寫著「一次取用一張」。' },
-      { id: 'hotspot_fun_sign', shape: 'rect', coords: [0.1, 0.58, 0.14, 0.14], description: '標語', hint: '牆上貼著「如廁後請沖水」。' },
-      { id: 'hotspot_fun_air_freshener', shape: 'rect', coords: [0.8, 0.14, 0.1, 0.12], description: '芳香劑', hint: '自動芳香劑。' },
-      { id: 'hotspot_fun_faucet', shape: 'rect', coords: [0.46, 0.76, 0.14, 0.14], description: '水龍頭', hint: '水龍頭。' },
-      { id: 'hotspot_fun_floor', shape: 'rect', coords: [0.54, 0.86, 0.16, 0.12], description: '地板反光', hint: '地板擦得很亮。' },
+      { id: 'hotspot_fun_dryer', shape: 'rect', coords: [1.00, 0.66, 0.15, 0.15], description: '烘手機', hint: '烘手機。' },
+      { id: 'hotspot_fun_soap', shape: 'rect', coords: [1.40, 0.86, 0.15, 0.15], description: '洗手乳', hint: '洗手乳是檸檬味。' },
+      { id: 'hotspot_fun_towel', shape: 'rect', coords: [0.93, 0.54, 0.15, 0.15], description: '擦手紙', hint: '擦手紙盒上寫著「一次取用一張」。' },
+      { id: 'hotspot_fun_sign', shape: 'rect', coords: [0.1, 0.58, 0.15, 0.15], description: '標語', hint: '牆上貼著「如廁後請沖水」。' },
+      { id: 'hotspot_fun_air_freshener', shape: 'rect', coords: [0.22, 0.73, 0.15, 0.15], description: '芳香劑', hint: '自動芳香劑。' },
+      { id: 'hotspot_fun_faucet', shape: 'rect', coords: [1.56, 0.91, 0.15, 0.15], description: '水龍頭', hint: '水龍頭。' },
+      { id: 'hotspot_fun_floor', shape: 'rect', coords: [0.74, 1.56, 0.15, 0.15], description: '地板反光', hint: '地板擦得很亮。' },
     ],
     items: [
       items.item_black_plastic_fragment,
@@ -672,7 +672,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：黑色塑膠碎片\n\n在洗手台下方，你發現了一小片黑色塑膠。\n\n邊緣不規則，像是被撕下來的。\n材質：橡膠或塑膠，可能是手套的一部分。\n\n這個位置很隱蔽，如果不是刻意尋找，根本不會發現。',
+              text: '獲得：黑色塑膠碎片\n\n在洗手台下方，你發現了一小片黑色塑膠。\n\n邊緣不規則，材質像橡膠或塑膠。\n\n這個位置很隱蔽。',
               type: 'item',
             },
           },
@@ -693,7 +693,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：清潔備忘\n\n垃圾桶裡很乾淨，幾乎是空的。\n\n沒有血跡，沒有可疑物品。\n垃圾被清得很乾淨，像是有人刻意整理過。\n\n但這種「乾淨」本身就很可疑。',
+              text: '獲得：清潔備忘\n\n廁所區域的清潔備忘；垃圾桶那欄寫得很簡短，看起來很空。\n\n沒有血跡，沒有可疑物品。\n\n但這種「空」本身就很可疑。',
               type: 'item',
             },
           },
@@ -713,7 +713,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '你在鏡子裡看見自己，和一個沒有留下痕跡的人。\n\n鏡面很乾淨，反射著洗手間的燈光。\n但在這片乾淨中，你感覺到一種刻意。\n\n彷彿有人知道，這裡不該留下任何東西。',
+              text: '你在鏡子裡看見自己，和一個沒有留下痕跡的人。\n\n鏡面很乾淨，反射著洗手間的燈光。\n但在這片乾淨中，你感覺到一種說不上來的異樣。',
               type: 'narrator',
             },
           },
@@ -733,7 +733,7 @@ const scenes: Record<string, Scene> = {
     ],
     puzzles: [],
     initialDialog: {
-      text: '廁所裡很乾淨，幾乎是空的。\n\n但在這片乾淨中，你感覺到一種刻意。',
+      text: '廁所裡很乾淨，幾乎是空的。\n\n但在這片乾淨中，你感覺到一種說不上來的異樣。',
       type: 'narrator',
     },
     npcs: [
@@ -750,13 +750,13 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_2',
-            text: '「我做清潔二十年，最怕的不是髒，是突然太乾淨。」',
+            text: '「做久了，什麼狀況都看過啦。有的時候反而…嗯，沒事。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_3',
-            text: '「有人怕留指紋，就會把世界擦亮。可惜碎片也會掉。」',
+            text: '「有的人很愛乾淨，擦到發亮那種。可是再怎麼擦…總會漏一點啦。」',
             type: 'casual',
             weight: 2,
           },
@@ -768,25 +768,37 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_5',
-            text: '「洗手台下面我每天擦。那天特別乾淨。太乾淨了。」',
+            text: '「有的地方那天特別好擦，我也不知道為什麼。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_6',
-            text: '「燈晚亮我怎麼知道？我手錶快兩分鐘，我還是多等了一陣子。等到心裡發冷。」',
+            text: '「那天我等到很晚才開始收，也不知道在等什麼…就覺得還沒完。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_7',
-            text: '「清潔是流程的最後一段。有人懂流程，就會把不該留的東西留給我們。」',
+            text: '「我們是最後收尾的嘛，人家留什麼我們就清什麼。」',
             type: 'casual',
             weight: 2,
           },
           {
             id: 'casual_8',
-            text: '「我不會跟別人講我撿到什麼。但你可以問。你問，我就說。」',
+            text: '「有的東西…我不會亂講啦。你如果真的想問，再問吧。」',
+            type: 'casual',
+            weight: 2,
+          },
+          {
+            id: 'casual_fear',
+            text: '「這種事…我做二十年了，每次聽到還是會怕。我只要把該擦的地方擦乾淨就好。」',
+            type: 'casual',
+            weight: 2,
+          },
+          {
+            id: 'casual_effort',
+            text: '「能做的我都有做。至少我負責的範圍，我敢說我盡力了。」',
             type: 'casual',
             weight: 2,
           },
@@ -937,24 +949,24 @@ const scenes: Record<string, Scene> = {
     ],
     puzzles: [],
     initialDialog: {
-      text: '警方把一個死人的生活拆成附件，發給你。\n\n標題冷冰冰——「城市影城H12_受害人手機_部分解密」。\n旁邊多了一句：「工程師阿蘇會到場協助判讀。」\n\n你一向先看現場，再看名字。這次順序顛倒。名字藏在訊息裡，像有人把他活過的每一天倒帶，倒到你面前，要求你把那卷帶子看完。\n\n真正黏人的問題，除了「他是誰」，還有：「他究竟戳到了哪一層，才會被這樣收場？」',
+      text: '警方把一個死人的生活拆成附件，發給你。\n\n標題冷冰冰——「城市影城H12_受害人手機_部分解密」。\n旁邊多了一句：「警方技術組阿蘇會到場協助判讀。」\n\n你一向先看現場，再看名字。這次順序顛倒。名字藏在訊息裡，像有人把他活過的每一天倒帶，倒到你面前，要求你把那卷帶子看完。\n\n真正黏人的問題，除了「他是誰」，還有：「他究竟戳到了哪一層，才會被這樣收場？」',
       type: 'narrator',
     },
     npcs: [
       {
         id: 'npc_asu',
-        name: '阿蘇（工程師）',
+        name: '阿蘇（警方技術組）',
         portrait: '/svg/characters/asu.svg',
         randomDialogs: [
           { id: 'asu_casual_1', text: '「你看這些訊息，像威脅，又有一點像兩個人在互相拗稿。」', type: 'casual', weight: 3 },
-          { id: 'asu_casual_2', text: '「工程系的人最怕兩種人，一種是什麼都不懂，一種是懂太多還故意裝不知道。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_2', text: '「做技術支援的最怕兩種人，一種是什麼都不懂，一種是懂太多還故意裝不知道。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_3', text: '「他把影城寫進專欄，結果人被留在影城裡。這種對稱，很難說是巧合。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_4', text: '「節能設備本來是好東西啊，省電、省錢，所有簡報都這樣寫。可是一旦有人發現它可以順便省掉責任，就會開始長得怪怪的。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_5', text: '「系統通常比人老實，可是設計系統的人不一定。這點我很有資格抱怨。」', type: 'casual', weight: 2 },
-          { id: 'asu_casual_6', text: '「他給聯絡人取名字的方式很工程師，全部用代碼。其實這種人死掉，調查起來很煩，卻也比較有路徑可以追。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_6', text: '「他給聯絡人取名字的方式全部用代碼。這種人死掉，調查起來很煩，卻也比較有路徑可以追。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_7', text: '「『三起事故』這個說法，很熟。寫技術文件的人才會把東西分成一、二、三這樣。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_8', text: '「如果你把這些聊天紀錄當成八卦，它們就只會變成八卦；你把它們當線路，它們才會開始帶電。」', type: 'casual', weight: 2 },
-          { id: 'asu_casual_9', text: '「有時候我覺得他很像一個沒受過訓練的工程師，把城市當機房亂摸。」', type: 'casual', weight: 2 },
+          { id: 'asu_casual_9', text: '「有時候我覺得他很像在做現場鑑定卻沒受過訓練的人，把城市當機房亂摸。」', type: 'casual', weight: 2 },
           { id: 'asu_casual_10', text: '「喔對，我有回過他的信，只是回得很不耐煩。沒想到…」\n她話說到一半停住，手指在方向盤上敲了兩下。', type: 'casual', weight: 2 },
         ],
         available: true,
@@ -980,7 +992,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_lin_light_2': {
       id: 'node_lin_light_2',
       npcId: 'npc_lin_ruitang',
-      text: 'KK：「你說流程正常，但流程正常的人不會死得這麼安靜。」\n\n林瑞堂：「改表不代表犯罪，可能只是服務調整。」\n\nKK：「你急著把它叫成服務。」\n\n林瑞堂（真遺憾）：「我真的很遺憾…可我也不想看到這裡被毀掉。」\n\nKK：「被毀掉的不是影城，是那個人。」\n\n林瑞堂沉默。',
+      text: 'KK：「你說流程正常，但流程正常的人不會死得這麼安靜。」\n\n林瑞堂：「那種調整…上面有上面的考量啦。可能只是服務調整。」\n\nKK：「你急著把它叫成服務。」\n\n林瑞堂（真遺憾）：「我真的很遺憾…可我也不想看到這裡被毀掉。」\n\nKK：「被毀掉的不是影城，是那個人。」\n\n林瑞堂沉默。',
       choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
       next: 'node_lin_light_insight',
     },
@@ -1056,7 +1068,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_ashun_window_1': {
       id: 'node_ashun_window_1',
       npcId: 'npc_ashun',
-      text: 'KK：「散場後，你們巡場有空窗嗎？」\n\n阿順（先笑）：「有啊，散場後一分鐘到兩分鐘。要先引導人潮出去。」\n\nKK：「那段誰看？」\n\n阿順：「誰都看，又誰都沒看。走道像水流，沒人會停。」\n\nKK（旁白）：90 秒，足夠一個熟練的人做很多事。',
+      text: 'KK：「散場後，你們巡場有空窗嗎？」\n\n阿順（先笑）：「有啊，散場後一分鐘到兩分鐘。要先引導人潮出去。」\n\nKK：「那段誰看？」\n\n阿順：「誰都看，又誰都沒看。走道像水流，沒人會停。」\n\nKK（旁白）：大概一兩分鐘，足夠一個熟練的人做很多事。',
       choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
       next: 'node_ashun_window_insight',
     },
@@ -1074,7 +1086,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_ashun_deadzone_1': {
       id: 'node_ashun_deadzone_1',
       npcId: 'npc_ashun',
-      text: 'KK：「監視器死角在哪？」\n\n阿順：「H 排那邊的側走道，被柱子切掉一角。看得到人群，看不到貼著椅子走的人。」\n\nKK：「你確定？」\n\n阿順：「我每天走那條路。死角是老朋友。」\n\nKK（旁白）：死角不是空白，是被允許的盲。',
+      text: 'KK：「監視器死角在哪？」\n\n阿順：「靠邊的地方總有擋到的啦，柱子、轉角什麼的。你要我一個一個講我也講不完。」\n\nKK：「你確定？」\n\n阿順：「我每天走那條路。哪裡有問題…心裡有數啦。」\n\nKK（旁白）：死角不是空白，是被允許的盲。',
       choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
       next: 'node_ashun_deadzone_insight',
     },
@@ -1102,7 +1114,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_xiaozhang_table_2': {
       id: 'node_xiaozhang_table_2',
       npcId: 'npc_xiaozhang',
-      text: 'KK：「那表格誰能改？」\n\n小張（吞口水）：「要有管理權限…通常是主管層。保全那邊也有人能提申請。」\n\nKK：「提申請？所以燈不是『自然延後』，是『被允許延後』。」\n\n小張沉默。\n\nKK（旁白）：允許，才是這城市最重的鎖。',
+      text: 'KK：「那表格誰能改？」\n\n小張（吞口水）：「那種事要問上面啦…我們只負責照表按。」\n\nKK：「所以燈不是『自然延後』，是『被允許延後』。」\n\n小張沉默。\n\nKK（旁白）：允許，才是這城市最重的鎖。',
       choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
       next: 'node_xiaozhang_table_insight',
     },
@@ -1148,14 +1160,14 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_zhou_clean_1': {
       id: 'node_zhou_clean_1',
       npcId: 'npc_zhou_jie',
-      text: 'KK：「你說『太乾淨』，哪裡太乾淨？」\n\n周姊：「洗手台下面。正常那裡會卡灰卡毛，今天像被擦過一遍。」\n\nKK：「擦得很急？」\n\n周姊：「嗯。像怕你看見。」\n\nKK（旁白）：急著乾淨的人，多半有東西不能留。',
+      text: 'KK：「你說『太乾淨』，哪裡太乾淨？」\n\n周姊：「洗手台下面。正常那裡會卡灰卡毛，今天像被擦過一遍。」\n\nKK：「擦得很急？」\n\n周姊：「嗯。像怕你看見。我也不敢多想…就專心做我的事。」\n\nKK（旁白）：急著乾淨的人，多半有東西不能留。',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_zhou_clean_2',
     },
     'node_zhou_clean_2': {
       id: 'node_zhou_clean_2',
       npcId: 'npc_zhou_jie',
-      text: 'KK：「燈晚亮，你怎麼知道？」\n\n周姊（敲手錶）：「我手錶快兩分鐘，但那晚…我還是等了。等到心裡發冷才亮。」\n\nKK（旁白）：體感的時間，比任何表格都殘酷。',
+      text: 'KK：「燈晚亮，你怎麼知道？」\n\n周姊（敲手錶）：「那天就是等得特別久…久到有點毛。才亮。」\n\nKK（旁白）：體感的時間，比任何表格都殘酷。',
       choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
       next: 'node_zhou_clean_insight',
     },
@@ -1181,7 +1193,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_zhou_fragment_1': {
       id: 'node_zhou_fragment_1',
       npcId: 'npc_zhou_jie',
-      text: '周姊（拿出夾子）：「黑色碎片。像手套的一角。你拿走吧，我不想它被丟掉。」\n\nKK：「你怎麼沒直接丟？」\n\n周姊：「因為丟掉會讓我晚上睡不著。」',
+      text: '周姊（拿出夾子）：「一小片黑色塑膠。你拿走吧，我不想它被丟掉。」\n\nKK：「你怎麼沒直接丟？」\n\n周姊：「因為丟掉會讓我晚上睡不著。」',
       choices: [
         { id: 'choice_seal', label: '「我現在就封袋。」', effects: [{ type: 'addItem', itemId: 'item_black_plastic_fragment' }, { type: 'setFlag', flag: 'black_fragment_found', value: true }] },
         { id: 'choice_secret', label: '「先別讓任何人知道你有看見它。」', effects: [{ type: 'addItem', itemId: 'item_black_plastic_fragment' }, { type: 'setFlag', flag: 'black_fragment_found', value: true }] },
@@ -1192,7 +1204,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_zhou_fragment_2': {
       id: 'node_zhou_fragment_2',
       npcId: 'npc_zhou_jie',
-      text: 'KK：「燈晚亮，你怎麼知道？」\n\n周姊（敲手錶）：「我手錶快兩分鐘，但那晚…我還是等了。等到心裡發冷才亮。」\n\nKK（旁白）：體感的時間，比任何表格都殘酷。',
+      text: 'KK：「燈晚亮，你怎麼知道？」\n\n周姊（敲手錶）：「那天就是等得特別久…久到有點毛。才亮。」\n\nKK（旁白）：體感的時間，比任何表格都殘酷。',
       choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
       next: 'node_zhou_fragment_insight',
     },
@@ -1207,7 +1219,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       ],
     },
   },
-  // 第二章 阿蘇（工程師）— 敏感一：為什麼來／受害者資料怎麼看；敏感二：三起事故誰在放風聲（二選一）
+  // 第二章 阿蘇（警方技術組）— 敏感一：為什麼來／受害者資料怎麼看；敏感二：三起事故誰在放風聲（二選一）
   npc_asu: {
     'node_asu_sensitive1_1': {
       id: 'node_asu_sensitive1_1',
@@ -1219,7 +1231,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_asu_sensitive1_2': {
       id: 'node_asu_sensitive1_2',
       npcId: 'npc_asu',
-      text: 'KK：「很多人死在流程裡。」\n\n阿蘇把筆電合起來又打開，像需要一個動作冷靜一下。\n阿蘇：「兩年前那起樓梯間事故，我是技術顧問之一。」',
+      text: 'KK：「很多人死在流程裡。」\n\n阿蘇把筆電合起來又打開，像需要一個動作冷靜一下。\n阿蘇：「兩年前那起樓梯間事故，我是偵查隊技術支援之一。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive1_3',
     },
