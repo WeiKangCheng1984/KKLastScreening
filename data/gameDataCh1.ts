@@ -1224,35 +1224,35 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_asu_sensitive1_1': {
       id: 'node_asu_sensitive1_1',
       npcId: 'npc_asu',
-      text: 'KK：「妳可以把資料丟回警方，洗個澡睡覺。為什麼要坐在這裡陪我熬夜？」\n\n阿蘇盯著螢幕，笑了一下，但那不是愉快的笑。\n阿蘇：「因為他死在流程裡。」',
+      text: 'KK：「你可以把資料丟回警方，回家睡覺。為什麼坐在這裡？」\n\n阿蘇笑一下，不愉快：\n阿蘇：「因為他死在流程裡。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive1_2',
     },
     'node_asu_sensitive1_2': {
       id: 'node_asu_sensitive1_2',
       npcId: 'npc_asu',
-      text: 'KK：「很多人死在流程裡。」\n\n阿蘇把筆電合起來又打開，像需要一個動作冷靜一下。\n阿蘇：「兩年前那起樓梯間事故，我是偵查隊技術支援之一。」',
+      text: 'KK：「妳怎麼會牽扯進兩年前的樓梯間？」\n\n阿蘇把筆電合起來又打開，像需要一個動作冷靜一下。\n阿蘇：「兩年前那起樓梯間事故，我是技術顧問之一。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive1_3',
     },
     'node_asu_sensitive1_3': {
       id: 'node_asu_sensitive1_3',
       npcId: 'npc_asu',
-      text: 'KK：「妳覺得自己有責任？」\n\n阿蘇：「我覺得那份報告有兩個版本。」\n她說這句時，聲音壓得比剛剛低，指節在觸控板上停住。',
+      text: 'KK：「妳覺得自己有責任？」\n\n阿蘇：「我以為我交的是報告，後來才發現我交的是『某一種版本』。」\n阿蘇：「版本聽起來很中性，實際上像刀。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive1_4',
     },
     'node_asu_sensitive1_4': {
       id: 'node_asu_sensitive1_4',
       npcId: 'npc_asu',
-      text: 'KK：「妳認識他？」\n\n阿蘇：「看過名字，收過一封很長很長的信，全是抱怨和猜測。」\n她勾了一下嘴角：「他問過我一些系統問題，我回了兩句，叫他不要拿事故當寫作素材。」',
+      text: 'KK：「妳認識他？」\n\n阿蘇：「看過名字，收過一封很長很長的信，全是抱怨和猜測。」\n阿蘇：「他寄過信給我，長得像在吵架。」\n阿蘇：「我回得很不耐煩，叫他別把事故當素材。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive1_5',
     },
     'node_asu_sensitive1_5': {
       id: 'node_asu_sensitive1_5',
       npcId: 'npc_asu',
-      text: 'KK：「他沒聽？」\n\n阿蘇：「他有停手一陣子。只是寫得慢一點，不代表放棄。」\n她把那封信的寄件人頁面打開又關掉，「我那時候只覺得他煩，沒有想到會變命案。」',
+      text: 'KK：「他沒聽？」\n\n阿蘇：「他停手一陣子。寫慢一點不代表放棄。」\n她把那封信的寄件人頁面打開又關掉，像在避免讓你看見某個地址。',
       choices: [
         {
           id: 'choice_asu_s1_done',
@@ -1265,28 +1265,28 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
     'node_asu_sensitive2_1': {
       id: 'node_asu_sensitive2_1',
       npcId: 'npc_asu',
-      text: 'KK：「這句：『用三起事故來揭……』妳覺得是誰寫的？」\n\n阿蘇：「看格式，很像他。可是那個『你為什麼不把資訊完……』比較像對話另一頭的人。」',
+      text: 'KK：「這句：『用三起事故來揭……』，妳覺得誰寫的？」\n\n阿蘇：「格式像他，語氣又像另一個人。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive2_2',
     },
     'node_asu_sensitive2_2': {
       id: 'node_asu_sensitive2_2',
       npcId: 'npc_asu',
-      text: 'KK：「兩邊都像？」\n\n阿蘇聳了一下肩：「一邊很想把真話全部講出來，一邊很清楚什麼可以講、什麼不行。這兩種人聊天，句子就會長這樣。」',
+      text: 'KK：「兩邊都像？」\n\n阿蘇聳了一下肩：「一邊想把話講完，一邊很清楚什麼不能講。」\n阿蘇：「兩種人湊在一起，句子會碎得像這樣。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive2_3',
     },
     'node_asu_sensitive2_3': {
       id: 'node_asu_sensitive2_3',
       npcId: 'npc_asu',
-      text: 'KK：「如果這不是單純威脅，而是某種計畫，妳覺得它在講『三件接下來要發生的事』，還是在唸一份目錄？」\n\n阿蘇沉默幾秒，視線從螢幕上移開，盯著前擋風玻璃上那一圈沒擦乾淨的雨痕。\n\n阿蘇：「平常寫技術文件的時候，我們說『三起』，多半是在分類，不是在許願。」',
+      text: 'KK：「誰在放『三起事故』這種說法？」\n\n阿蘇：「還有一種可能——有人刻意用他熟悉的格式寫給他看。」\n阿蘇：「讓他以為自己踩到一個大案，逼他把手伸更深。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive2_4',
     },
     'node_asu_sensitive2_4': {
       id: 'node_asu_sensitive2_4',
       npcId: 'npc_asu',
-      text: 'KK：「分類什麼？」\n\n阿蘇：「同一種 bug、同一種偷懶、同一批人的習慣。如果是他寫的，他很可能是在幫對方整理他們犯過幾次一樣的錯。」\n\n她伸手把音量調小：「不過也有可能是對面故意這樣寫給他看，讓他以為自己踩到的是大案。」',
+      text: 'KK：「伸深了？」\n\n阿蘇：「伸深了，就比較容易被抓住。」\n阿蘇：「你看，連『她也在場』都像釘書釘。」\n阿蘇：「釘在你腦子裡，讓你一直回頭。」',
       choices: [
         {
           id: 'choice_asu_s2_done',

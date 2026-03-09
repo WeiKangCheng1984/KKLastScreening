@@ -182,6 +182,45 @@ const scenes: Record<string, Scene> = {
               ],
             },
           },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '阿蘇把那句殘破訊息放大，讓它像一根刺卡在螢幕正中央。\n「……用三起事故來揭……」\n\n你覺得氣氛已經沉到一個程度，可以開始問那種問完就收不回去的問題。\n你只能挑一個方向追，今晚另外那條就留在心裡，長成噪音。',
+              type: 'narrator',
+              choices: [
+                {
+                  id: 'three_future',
+                  text: '把它當成威脅／預告來看（「三起」還沒發生完）',
+                  effects: [
+                    { type: 'setFlag', flag: 'ch2_three_future', value: true },
+                    {
+                      type: 'showDialog',
+                      dialog: {
+                        text:
+                          '你試著把那句話當成一種倒數：「三起」不是整理過去，而是還沒發生完的數量。\n\n阿蘇盯著螢幕，指甲在觸控板邊緣敲了兩下：「如果是倒數，那他在逼自己寫快一點。」\n她頓了一下，又補一句：「也可能有人逼他。」\n\n她把時間戳叫出來，訊息越靠近案發越密，像有人在催稿，催到用命。\n\n你在「未發出的訊息」裡找到一行草稿，只有一句：\n「下一場，別在亮的地方談。」\n沒有地點，沒有名字，只留一種不祥的節奏感。',
+                        type: 'narrator',
+                      },
+                    },
+                  ],
+                },
+                {
+                  id: 'three_index',
+                  text: '把它當成分類／目錄來看（「三起」是同一種錯誤的三格）',
+                  effects: [
+                    { type: 'setFlag', flag: 'ch2_three_index', value: true },
+                    {
+                      type: 'showDialog',
+                      dialog: {
+                        text:
+                          '你改成把那句話當成目錄，而不是預告：「三起」像是在幫人把同一類東西分成三格。\n\n阿蘇吐一口氣，像把某段記憶放回抽屜：「寫技術文件的人會這樣講。」\n「三格，代表同一種錯誤出現了三次。」\n「錯誤會重複，習慣也會重複。」\n「他可能在替對方整理『你們做過幾次』。」\n\n你回頭看那幾個代號聯絡人的備註，突然注意到它們的格式一致，末尾都藏著同一種符號——像是內部用的版本標記。\n它不說明什麼，卻讓人很難不去追問：誰喜歡把事情整理成『版本』？',
+                        type: 'narrator',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
         ],
         oneTime: true,
       },
@@ -208,6 +247,23 @@ const scenes: Record<string, Scene> = {
             },
           },
         ],
+      },
+      {
+        id: 'asu_q2_from_unknown',
+        name: '阿蘇問答 Q2：她也在場',
+        description: '',
+        requirements: [
+          { type: 'hasInteracted', hotspotId: 'hotspot_car_unknown_chat' },
+          { type: 'hasItem', itemId: 'item_encrypted_messages' },
+          { type: 'hasFlag', flag: 'ch2_q1_done' },
+        ],
+        effects: [
+          {
+            type: 'startNpcDialog',
+            dialogId: 'npc_asu_q2',
+          },
+        ],
+        oneTime: true,
       },
       {
         id: 'examine_car_an_chat',
@@ -300,6 +356,22 @@ const scenes: Record<string, Scene> = {
         ],
       },
       {
+        id: 'asu_q1_from_notepad',
+        name: '阿蘇問答 Q1：省掉了什麼',
+        description: '',
+        requirements: [
+          { type: 'hasInteracted', hotspotId: 'hotspot_car_notepad' },
+          { type: 'hasItem', itemId: 'item_column_draft' },
+        ],
+        effects: [
+          {
+            type: 'startNpcDialog',
+            dialogId: 'npc_asu_q1',
+          },
+        ],
+        oneTime: true,
+      },
+      {
         id: 'examine_car_recording',
         name: '錄音備忘_事故',
         description: '',
@@ -357,6 +429,23 @@ const scenes: Record<string, Scene> = {
             },
           },
         ],
+      },
+      {
+        id: 'asu_q5_from_recording',
+        name: '阿蘇問答 Q5：大家會怎麼做',
+        description: '',
+        requirements: [
+          { type: 'hasInteracted', hotspotId: 'hotspot_car_recording' },
+          { type: 'hasItem', itemId: 'item_unfinished_recording' },
+          { type: 'hasFlag', flag: 'ch2_q4_done' },
+        ],
+        effects: [
+          {
+            type: 'startNpcDialog',
+            dialogId: 'npc_asu_q5',
+          },
+        ],
+        oneTime: true,
       },
       {
         id: 'examine_car_contacts',
@@ -418,6 +507,23 @@ const scenes: Record<string, Scene> = {
         ],
       },
       {
+        id: 'asu_q3_from_contacts',
+        name: '阿蘇問答 Q3：三起事故',
+        description: '',
+        requirements: [
+          { type: 'hasInteracted', hotspotId: 'hotspot_car_contacts' },
+          { type: 'hasItem', itemId: 'item_coded_contacts' },
+          { type: 'hasFlag', flag: 'ch2_q2_done' },
+        ],
+        effects: [
+          {
+            type: 'startNpcDialog',
+            dialogId: 'npc_asu_q3',
+          },
+        ],
+        oneTime: true,
+      },
+      {
         id: 'examine_car_location',
         name: '系統定位紀錄',
         description: '',
@@ -476,6 +582,23 @@ const scenes: Record<string, Scene> = {
             },
           },
         ],
+      },
+      {
+        id: 'asu_q4_from_location',
+        name: '阿蘇問答 Q4：提早到場',
+        description: '',
+        requirements: [
+          { type: 'hasInteracted', hotspotId: 'hotspot_car_location' },
+          { type: 'hasItem', itemId: 'item_location_record' },
+          { type: 'hasFlag', flag: 'ch2_q3_done' },
+        ],
+        effects: [
+          {
+            type: 'startNpcDialog',
+            dialogId: 'npc_asu_q4',
+          },
+        ],
+        oneTime: true,
       },
       {
         id: 'examine_car_toolbox',
@@ -614,6 +737,613 @@ const scenes: Record<string, Scene> = {
   // 可探索空間一：電影院 B（推測地點）
 };
 
-const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {};
+const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
+  // 第二章 阿蘇問答 Q1：「省掉了什麼」
+  npc_asu_q1: {
+    node_asu_q1_start: {
+      id: 'node_asu_q1_start',
+      npcId: 'npc_asu',
+      text:
+        '阿蘇把記事本裡那段草稿拉到螢幕正中央。\n\n' +
+        '「……不是設備本身。\n也不是那種簡報裡會先講的好處。\n問題一直都在後面那半句。\n省電、省時，最後連______都一起省掉。\n他們很熟這種寫法。」\n\n' +
+        'KK 心裡補起那個空格：他到底覺得，最後被省掉的是什麼？',
+      choices: [
+        {
+          id: 'q1_A',
+          label: 'A. 爆米花補鹽流程',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q1_answer', value: 'A' },
+            { type: 'setFlag', flag: 'ch2_q1_done', value: true },
+          ],
+        },
+        {
+          id: 'q1_B',
+          label: 'B. 午夜場的浪漫氣氛',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q1_answer', value: 'B' },
+            { type: 'setFlag', flag: 'ch2_q1_done', value: true },
+          ],
+        },
+        {
+          id: 'q1_C',
+          label: 'C. 連帶責任',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q1_answer', value: 'C' },
+            { type: 'setFlag', flag: 'ch2_q1_main_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q1_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'q1_D',
+          label: 'D. 維修工時',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q1_answer', value: 'D' },
+            { type: 'setFlag', flag: 'ch2_q1_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q1_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'q1_E',
+          label: 'E. 觀眾耐心',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q1_answer', value: 'E' },
+            { type: 'setFlag', flag: 'ch2_q1_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+        {
+          id: 'q1_F',
+          label: 'F. 片尾字幕',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q1_answer', value: 'F' },
+            { type: 'setFlag', flag: 'ch2_q1_done', value: true },
+          ],
+        },
+        {
+          id: 'q1_G',
+          label: 'G. 可以說清楚的那一段',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q1_answer', value: 'G' },
+            { type: 'setFlag', flag: 'ch2_q1_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q1_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+    },
+    node_asu_q1_reply_C: {
+      id: 'node_asu_q1_reply_C',
+      npcId: 'npc_asu',
+      text: '阿蘇點點頭：「嗯。這就像他寫給自己看的版本。懶得修飾，所以比較真。」',
+      choices: [
+        {
+          id: 'q1_C_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q1_reply_D: {
+      id: 'node_asu_q1_reply_D',
+      npcId: 'npc_asu',
+      text: '阿蘇看了一眼你選的字：「工時也會被省。但這句不是在替現場抱不平，是在指有人把後果往外推。」',
+      choices: [
+        {
+          id: 'q1_D_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q1_reply_G: {
+      id: 'node_asu_q1_reply_G',
+      npcId: 'npc_asu',
+      text: '阿蘇笑了一下：「很好聽。像是他會說的話。」\n她又補了一句：「好聽的那一段，通常是用來蓋過真正該寫進報告的那一段。」',
+      choices: [
+        {
+          id: 'q1_G_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q1_reply_other: {
+      id: 'node_asu_q1_reply_other',
+      npcId: 'npc_asu',
+      text:
+        '阿蘇歪頭看你一眼：「可以這樣想，但他寫的不是觀眾的心情，也不是影城的裝潢。」\n' +
+        '她把那行句子圈起來：「他在算的是，誰有辦法把責任拆小、拆散，拆到最後沒有人要負。」',
+      choices: [
+        {
+          id: 'q1_other_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+  },
+  // 第二章 阿蘇問答 Q2：「她也在場」
+  npc_asu_q2: {
+    node_asu_q2_start: {
+      id: 'node_asu_q2_start',
+      npcId: 'npc_asu',
+      text:
+        '螢幕上的對話框停在那句：「……她也在______，會開始不安靜。」\n\n' +
+        '阿蘇把游標停在那個空格上：「兩年前那次，她也在——哪裡？」',
+      choices: [
+        {
+          id: 'q2_A',
+          label: 'A. 停車繳費名單裡',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q2_answer', value: 'A' },
+            { type: 'setFlag', flag: 'ch2_q2_done', value: true },
+          ],
+        },
+        {
+          id: 'q2_B',
+          label: 'B. 員工慶生合照裡',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q2_answer', value: 'B' },
+            { type: 'setFlag', flag: 'ch2_q2_done', value: true },
+          ],
+        },
+        {
+          id: 'q2_C',
+          label: 'C. 那次事故裡',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q2_answer', value: 'C' },
+            { type: 'setFlag', flag: 'ch2_q2_main_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q2_done', value: true },
+          ],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+        {
+          id: 'q2_D',
+          label: 'D. 他的私人關係裡',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q2_answer', value: 'D' },
+            { type: 'setFlag', flag: 'ch2_q2_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+        {
+          id: 'q2_E',
+          label: 'E. 早期驗收流程裡',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q2_answer', value: 'E' },
+            { type: 'setFlag', flag: 'ch2_q2_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q2_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'q2_F',
+          label: 'F. 影評留言串裡',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q2_answer', value: 'F' },
+            { type: 'setFlag', flag: 'ch2_q2_done', value: true },
+          ],
+        },
+        {
+          id: 'q2_G',
+          label: 'G. 那個不該再被叫出名字的地方',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q2_answer', value: 'G' },
+            { type: 'setFlag', flag: 'ch2_q2_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q2_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+    },
+    node_asu_q2_reply_C: {
+      id: 'node_asu_q2_reply_C',
+      npcId: 'npc_asu',
+      text: '阿蘇點了一下：「對。這裡的『在』比較像紀錄語言。不是感情，不是單位分工，是事故位置。」',
+      choices: [
+        {
+          id: 'q2_C_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q2_reply_E: {
+      id: 'node_asu_q2_reply_E',
+      npcId: 'npc_asu',
+      text: '阿蘇說：「有抓到方向，把人洗成文件。」',
+      choices: [
+        {
+          id: 'q2_E_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q2_reply_G: {
+      id: 'node_asu_q2_reply_G',
+      npcId: 'npc_asu',
+      text: '阿蘇看了一眼：「他偶爾會這樣寫專欄，都不知道在寫什麼。」',
+      choices: [
+        {
+          id: 'q2_G_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q2_reply_other: {
+      id: 'node_asu_q2_reply_other',
+      npcId: 'npc_asu',
+      text:
+        '她搖搖頭：「如果只是照片或留言，他不會用這種講法。」\n' +
+        '「他在講的是事件本身，哪裡開始讓它『不安靜』。」',
+      choices: [
+        {
+          id: 'q2_other_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+  },
+  // 第二章 阿蘇問答 Q3：「三起事故」
+  npc_asu_q3: {
+    node_asu_q3_start: {
+      id: 'node_asu_q3_start',
+      npcId: 'npc_asu',
+      text:
+        '你把三家影城的代號和時間列在一起，看起來像一張還沒命名的表。\n\n' +
+        '螢幕上的殘句寫著：「比較像先做成三個______，之後才知道是不是同一套東西留下來的。」',
+      choices: [
+        {
+          id: 'q3_A',
+          label: 'A. 平行時空入口',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q3_answer', value: 'A' },
+            { type: 'setFlag', flag: 'ch2_q3_done', value: true },
+          ],
+        },
+        {
+          id: 'q3_B',
+          label: 'B. 深夜優惠方案',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q3_answer', value: 'B' },
+            { type: 'setFlag', flag: 'ch2_q3_done', value: true },
+          ],
+        },
+        {
+          id: 'q3_C',
+          label: 'C. 獨立節點',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q3_answer', value: 'C' },
+            { type: 'setFlag', flag: 'ch2_q3_main_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q3_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'q3_D',
+          label: 'D. 系列專欄題綱',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q3_answer', value: 'D' },
+            { type: 'setFlag', flag: 'ch2_q3_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+        {
+          id: 'q3_E',
+          label: 'E. 事故樣本',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q3_answer', value: 'E' },
+            { type: 'setFlag', flag: 'ch2_q3_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q3_done', value: true },
+          ],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+        {
+          id: 'q3_F',
+          label: 'F. 媒體炒作方向',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q3_answer', value: 'F' },
+            { type: 'setFlag', flag: 'ch2_q3_done', value: true },
+          ],
+        },
+        {
+          id: 'q3_G',
+          label: 'G. 能暫時放住懷疑的抽屜',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q3_answer', value: 'G' },
+            { type: 'setFlag', flag: 'ch2_q3_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q3_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+    },
+    node_asu_q3_reply_C: {
+      id: 'node_asu_q3_reply_C',
+      npcId: 'npc_asu',
+      text: '阿蘇點頭：「對。節點這個字很不近人情，所以很有用。它不先幫誰洗白，也不先把誰寫成兇手。」',
+      choices: [
+        {
+          id: 'q3_C_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q3_reply_E: {
+      id: 'node_asu_q3_reply_E',
+      npcId: 'npc_asu',
+      text: '「『樣本』像做完統計的人會用的字。」阿蘇說，「事後把東西排好看一點的時候會出現。」',
+      choices: [
+        {
+          id: 'q3_E_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q3_reply_G: {
+      id: 'node_asu_q3_reply_G',
+      npcId: 'npc_asu',
+      text: '「誰都可以說它有道理，也誰都不用負責。」她把那行話縮小關掉。',
+      choices: [
+        {
+          id: 'q3_G_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q3_reply_other: {
+      id: 'node_asu_q3_reply_other',
+      npcId: 'npc_asu',
+      text:
+        '她瞥你一眼：「如果只是專欄題綱或宣傳方案，他不會這樣記。」\n' +
+        '「他在試著把同一種東西拆成三格，看會不會露出同樣的錯。」',
+      choices: [
+        {
+          id: 'q3_other_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+  },
+  // 第二章 阿蘇問答 Q4：「提早到場」
+  npc_asu_q4: {
+    node_asu_q4_start: {
+      id: 'node_asu_q4_start',
+      npcId: 'npc_asu',
+      text:
+        '定位紀錄被你拉成一條時間線，那晚他在影城附近繞圈的部分被螢光筆畫得特別重。\n\n' +
+        '殘訊寫著：「我知道不是人在遲到。我等的不是人，是______。」',
+      choices: [
+        {
+          id: 'q4_A',
+          label: 'A. 自動販賣機補貨時間',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q4_answer', value: 'A' },
+            { type: 'setFlag', flag: 'ch2_q4_done', value: true },
+          ],
+        },
+        {
+          id: 'q4_B',
+          label: 'B. 散場後的幽靈觀眾',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q4_answer', value: 'B' },
+            { type: 'setFlag', flag: 'ch2_q4_done', value: true },
+          ],
+        },
+        {
+          id: 'q4_C',
+          label: 'C. 甜蜜時點',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q4_answer', value: 'C' },
+            { type: 'setFlag', flag: 'ch2_q4_main_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q4_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+        {
+          id: 'q4_D',
+          label: 'D. 門禁切換',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q4_answer', value: 'D' },
+            { type: 'setFlag', flag: 'ch2_q4_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'q4_E',
+          label: 'E. 燈控排程',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q4_answer', value: 'E' },
+            { type: 'setFlag', flag: 'ch2_q4_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q4_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'q4_F',
+          label: 'F. 停車位空出來',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q4_answer', value: 'F' },
+            { type: 'setFlag', flag: 'ch2_q4_done', value: true },
+          ],
+        },
+        {
+          id: 'q4_G',
+          label: 'G. 那個會讓所有人看起來都合理的瞬間',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q4_answer', value: 'G' },
+            { type: 'setFlag', flag: 'ch2_q4_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q4_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+    },
+    node_asu_q4_reply_C: {
+      id: 'node_asu_q4_reply_C',
+      npcId: 'npc_asu',
+      text: '阿蘇嗯了一聲：「嗯。這就不是赴約，是觀測。那種人很煩，也很容易死。」',
+      choices: [
+        {
+          id: 'q4_C_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q4_reply_E: {
+      id: 'node_asu_q4_reply_E',
+      npcId: 'npc_asu',
+      text: '「燈控是裡面的一部分。」她說，「是最大的那層，他等的是那個東西開始咬合。」',
+      choices: [
+        {
+          id: 'q4_E_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q4_reply_G: {
+      id: 'node_asu_q4_reply_G',
+      npcId: 'npc_asu',
+      text: '阿蘇皺了一下眉：「這真的是專欄作家嗎？」\n她又補一句：「很適合寫在文案上，完全不適合寫在事故報告裡。」',
+      choices: [
+        {
+          id: 'q4_G_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q4_reply_other: {
+      id: 'node_asu_q4_reply_other',
+      npcId: 'npc_asu',
+      text:
+        '她搖頭：「如果只是補貨時間或門禁，他不用繞那麼多圈。」\n' +
+        '「他在等的是一個『條件都對上』的瞬間，不是某個人出現。」',
+      choices: [
+        {
+          id: 'q4_other_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+  },
+  // 第二章 阿蘇問答 Q5：「大家會怎麼做」
+  npc_asu_q5: {
+    node_asu_q5_start: {
+      id: 'node_asu_q5_start',
+      npcId: 'npc_asu',
+      text:
+        '你們一起看著那句殘訊：「一出事，他們就知道怎麼______。太熟了。熟到像不是第一次。」\n\n' +
+        '阿蘇說：「他寫的不是第一個動手的人，是後面那群很會收尾的人。」',
+      choices: [
+        {
+          id: 'q5_A',
+          label: 'A. 集體改賣熱狗',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q5_answer', value: 'A' },
+            { type: 'setFlag', flag: 'ch2_q5_done', value: true },
+          ],
+        },
+        {
+          id: 'q5_B',
+          label: 'B. 假裝是首映會來賓',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q5_answer', value: 'B' },
+            { type: 'setFlag', flag: 'ch2_q5_done', value: true },
+          ],
+        },
+        {
+          id: 'q5_C',
+          label: 'C. 亂講',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q5_answer', value: 'C' },
+            { type: 'setFlag', flag: 'ch2_q5_main_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q5_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+        {
+          id: 'q5_D',
+          label: 'D. 切割',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q5_answer', value: 'D' },
+            { type: 'setFlag', flag: 'ch2_q5_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q5_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'q5_E',
+          label: 'E. 補紀錄',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q5_answer', value: 'E' },
+            { type: 'setFlag', flag: 'ch2_q5_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch2_q5_done', value: true },
+          ],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+        {
+          id: 'q5_F',
+          label: 'F. 逃跑',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q5_answer', value: 'F' },
+            { type: 'setFlag', flag: 'ch2_q5_done', value: true },
+          ],
+        },
+        {
+          id: 'q5_G',
+          label: 'G. 把真正的那句留到最後才說',
+          effects: [
+            { type: 'setFlag', flag: 'ch2_q5_answer', value: 'G' },
+            { type: 'setFlag', flag: 'ch2_q5_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+    },
+    node_asu_q5_reply_C: {
+      id: 'node_asu_q5_reply_C',
+      npcId: 'npc_asu',
+      text: '阿蘇點頭：「對，是怎麼亂講。跑掉的是人，講出來的是版本。」',
+      choices: [
+        {
+          id: 'q5_C_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q5_reply_D: {
+      id: 'node_asu_q5_reply_D',
+      npcId: 'npc_asu',
+      text: '「切割是後面會長出來的東西。」她說，「前面有人已經先決定要怎麼講。」',
+      choices: [
+        {
+          id: 'q5_D_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q5_reply_E: {
+      id: 'node_asu_q5_reply_E',
+      npcId: 'npc_asu',
+      text: '「那還是太晚了。」她說，「有人更早就在決定哪一句先活下來。」',
+      choices: [
+        {
+          id: 'q5_E_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+    node_asu_q5_reply_other: {
+      id: 'node_asu_q5_reply_other',
+      npcId: 'npc_asu',
+      text:
+        '她聳肩：「如果只是逃跑或裝沒事，那不需要這麼熟練。」\n' +
+        '「他在講的是：一出事，大家各自只拿出自己那一小塊說法。」',
+      choices: [
+        {
+          id: 'q5_other_end',
+          label: '（結束對話）',
+        },
+      ],
+    },
+  },
+};
 
 export { scenes, items, npcDialogs };

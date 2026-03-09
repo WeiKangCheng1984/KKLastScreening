@@ -34,8 +34,8 @@ alwaysApply: true
 | `app/` | 頁面與 layout（`layout.tsx`, `page.tsx`, `globals.css`） |
 | `app/play/[chapterId]/[sceneId]/page.tsx` | 場景主頁：SceneView、GameEngine、DialogBox、CharacterConversation、Hotspot、背包、道具取得、NPC 對話 |
 | `components/` | 所有 UI 組件（見下方組件清單） |
-| `lib/` | 遊戲邏輯與工具：`gameEngine.ts`、`characterPortrait.ts`、`audioManager.ts`、`flowController.ts`、`responsiveUtils.ts`、`svgLoader.ts`、`svgPreloader.ts`、`svgDragSystem.ts`、`performanceUtils.ts`、`transitionEffects.ts`、`lightingManager.ts` |
-| `data/` | gameDataCh1.ts～gameDataCh6.ts（各章場景／道具／事件／npcDialogs）、`characterConversations.ts`、`reasoningByChapter.ts`、`flowConfig.ts` |
+| `lib/` | 遊戲邏輯與工具：`gameEngine.ts`、`characterPortrait.ts`、`audioManager.ts`、`flowController.ts`、`chapterPassword.ts`、`responsiveUtils.ts`、`svgLoader.ts`、`svgPreloader.ts`、`svgDragSystem.ts`、`performanceUtils.ts`、`transitionEffects.ts`、`lightingManager.ts` |
+| `data/` | `gameDataCh1.ts`～`gameDataCh6.ts`（各章場景／道具／事件／npcDialogs）、`getChapterData.ts`、`chapters.ts`、`characterConversations.ts`、`reasoningByChapter.ts`、`flowConfig.ts`；另有 `flagTestConfig.ts`、`ch1PasswordPresets.ts`、`ch1Monologue.ts`、`ch1ReportConfig.ts` 等章節或流程用設定 |
 | `types/game.ts` | 所有 TypeScript 型別（GameState, Scene, Event, Dialog, ConversationTurn, DialogChoice, Item, Puzzle, Npc, InsightsState 等） |
 | `public/` | 靜態資產：背景圖、道具圖、`/images/characters/` 角色頭像 WEBP、`/audio/`、`/videos/`、`/svg/` |
 
@@ -49,7 +49,7 @@ alwaysApply: true
 | 取得道具浮動提示 | `ItemObtainedNotification.tsx` |
 | 背包 | `Inventory.tsx`、`ItemIcon.tsx` |
 | 場景內 NPC 頭像條 | `NpcRightStrip.tsx` |
-| 章節介紹、導讀影片 | `ChapterIntro.tsx` |
+| 章節介紹、導讀影片 | `ChapterIntro.tsx`（分層顯示 200/800/1600/2600ms，CTA 按鈕「開始調查」或「觀看影片」） |
 | 謎題 | `ChapterPuzzle.tsx`、各謎題組件（PuzzleInput, CombinationLock, JigsawPuzzle, SlidingPuzzle, WordScramble, WireConnection, RotatingDial, SymbolMatching, MazePath, SequenceMemory, LogicSwitches, VisualSelectionPuzzle, ArrangementPuzzle, PairMatchingPuzzle, PickThreePuzzle 等） |
 | 分數與選擇 | `ScoreDisplay.tsx` |
 | 開發者／Debug | `DeveloperPanel.tsx`（`?dev=1`）、場景 debug（`?debug=1` 顯示 Hotspot） |
@@ -134,7 +134,7 @@ alwaysApply: true
 
 ### 實作位置
 - **檔案**：`lib/gameEngine.ts`
-- **資料**：`data/gameDataCh1.ts`～`gameDataCh6.ts`（經 getChapterData 按章載入 scenes, items, npcDialogs）
+- **資料**：不直接 import gameData；由 play 頁呼叫 `getChapterData(chapterId)` 取得該章 `scenes`、`items`、`npcDialogs` 後呼叫 `engine.loadChapterData(data)` 合併（ch1～ch6 對應 `data/gameDataCh1.ts`～`gameDataCh6.ts`）。
 
 ---
 
@@ -147,6 +147,7 @@ alwaysApply: true
 - **類型**：`narrator` | `broadcast` | `item` | `system` | `choice` | `character`
 - **功能**：打字機效果（可配置速度）、對話歷史、選擇題（2選1或3選1）、SVG 圖片、**標題**（`Dialog.title`）
 - **觸發方式**：通過 `Event` 的 `showDialog` 效果；或由 `addDialogsToQueue(interactionName)` 等排隊顯示
+- **立繪不跳動**：同角色連續兩則時，`handleDialogClose` 不先 `setCurrentDialog(null)`，改為直接 `setCurrentDialog(nextDialog)` 並 `setDialogQueue(prev => prev.slice(1))`；立繪區塊使用 `effectiveDialog = currentDialog ?? dialogQueue[0]` 作為顯示來源，過渡期立繪不卸載。
 
 #### 7.2 角色對話系統（CharacterConversation + CharacterConversationCard）
 - **用途**：角色互動對話，有來有往的多段對話流程
@@ -267,7 +268,7 @@ alwaysApply: true
 - **角色對話框**：固定卡片寬高（CharacterConversationCard），右上角繼續＋X，下方固定高度按鈕區（選擇題）
 - **場景 NPC 頭像**：NpcRightStrip，顯示當前場景 NPC，頭像尺寸約 +15% 適配
 - **開發者面板**：`?dev=1` 啟用（DeveloperPanel）
-- **章節介紹**：ChapterIntro（文字、圖片、影片、輪播、導讀影片）
+- **章節介紹**：ChapterIntro — 分層顯示（Layer1 200ms、Layer2 800ms、Layer3 1600ms、按鈕 2600ms）；CTA 按鈕文字：無導讀影片或影片已播完為「開始調查」，有導讀影片且未播放為「觀看影片」；支援背景圖/影片/輪播、導讀影片、預載該章第一景背景圖
 
 ### 響應式設計
 - `clamp()` 實現響應式尺寸；HOTSPOT 使用 `clamp(40px, 4vw, 64px)`；手機與桌面統一考量
@@ -283,8 +284,8 @@ alwaysApply: true
 
 ## 【15】章節與場景系統
 
-- **章節結構**：5 個 ROOM，每 ROOM 含 3 個 SPACE（場景）
-- **章節介紹**：標題、副標題、描述、心理文字、背景圖/影片、導讀影片（`/play/[chapterId]/intro`）
+- **章節結構**：ch1～ch6（見 `data/chapters.ts`），每章含若干場景（scenes 陣列）；敘事上可有 ROOM/SPACE 概念。
+- **章節介紹**：標題、副標題、描述、心理文字、背景圖/影片、導讀影片（`/play/[chapterId]/intro`），分層顯示後顯示「開始調查」或「觀看影片」按鈕。
 - **場景切換**：左右箭頭、場景選擇器、自動保存
 
 ---
@@ -299,10 +300,13 @@ alwaysApply: true
 ## 【17】資料結構
 
 ### 主要資料檔案
-- **data/gameDataCh1.ts**～**gameDataCh6.ts**：各章場景、道具、事件、謎題、NPC、npcDialogs；由 getChapterData(chapterId) 動態載入。
+- **data/gameDataCh1.ts**～**gameDataCh6.ts**：各章場景、道具、事件、謎題、NPC、npcDialogs；由 `getChapterData(chapterId)` 動態 import 載入（ch1～ch6）。
+- **data/getChapterData.ts**：依 `chapterId` 動態 `import('./gameDataChX')` 回傳 `{ scenes, items, npcDialogs }`。
+- **data/chapters.ts**：輕量章節定義（`chapters`、`prologueSlides`），供 intro / prologue / play 共用。
 - **data/characterConversations.ts**：角色對話鏈（ConversationTurn[]、finalChoices）
 - **data/reasoningByChapter.ts**：章節推理相關
-- **data/flowConfig.ts**：流程設定
+- **data/flowConfig.ts**：流程設定（含 getChapterIntroContinuePath 等）
+- **data/flagTestConfig.ts**、**ch1PasswordPresets.ts**、**ch1Monologue.ts**、**ch1ReportConfig.ts** 等：章節或流程用設定
 - **types/game.ts**：所有 TypeScript 型別（GameState, Scene, Event, Dialog, DialogChoice, ConversationTurn, CharacterConversation, Item, Puzzle, Npc, InsightsState, PreferencesState 等）
 
 ### 狀態持久化
@@ -324,7 +328,8 @@ alwaysApply: true
 ### 18.2 分章資料檔 `data/getChapterData.ts` 與來源
 
 - **取得章節資料**：`getChapterData(chapterId): Promise<ChapterData | null>` 由 `data/getChapterData.ts` 匯出。
-- 內部依 `chapterId` 動態 `import('./gameDataChX')`，回傳該章的 `scenes`、`items`、`npcDialogs`。**新增章節時**：新增對應 `gameDataChX.ts` 並在 `getChapterData` 的 map/switch 中加入該章。
+- 內部依 `chapterId`（ch1～ch6）分別 `import('./gameDataCh1')` … `import('./gameDataCh6')`，回傳該章的 `scenes`、`items`、`npcDialogs`。
+- **新增章節時**：新增對應 `data/gameDataChX.ts`，並在 `getChapterData` 的 if 分支中加入該章。
 
 ### 18.3 GameEngine 依賴注入與合併
 
@@ -401,3 +406,4 @@ alwaysApply: true
 6. **無跳過機制**：角色對話須完整觀看，繼續在右上角、選擇題在下方固定區
 7. **視覺穩定**：淡入淡出動畫、固定卡片高度，避免「繼續」出現時跳動
 8. **編譯相容**：CharacterConversation 主檔不以 JSX 回傳，改以 React.createElement(CharacterConversationCard) 避免部分環境下「Expected jsx identifier」錯誤
+9. **一般對話立繪穩定**：同角色連續一般對話時不先清空 currentDialog，直接換下一則並用 effectiveDialog = currentDialog ?? dialogQueue[0] 驅動立繪，避免立繪先消失再出現
