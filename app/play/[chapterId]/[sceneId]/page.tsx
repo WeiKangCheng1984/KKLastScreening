@@ -800,6 +800,10 @@ export default function PlayPage() {
           setCurrentDialog(null);
         }
       } else {
+        // 專門處理阿蘇敏感對話：只要這棵對話樹走到結束，就視為完成敏感 QTE
+        if (currentState.activeNpcDialogId === 'npc_asu') {
+          engine.applyEffect({ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true });
+        }
         engine.endNpcDialog();
         setCurrentDialog(null);
       }
@@ -2915,7 +2919,9 @@ export default function PlayPage() {
                     'item_location_record',
                   ];
                   const coreCollectedCount = ch2CoreItems.filter((id) => inv.includes(id)).length;
-                  const readyToDiscussCase = coreCollectedCount >= 4 && sensitiveDone;
+                  // 1B：核心六件線索 ≥4；若玩家真的把第二章場景都看完，也視為達標，避免卡關
+                  const readyToDiscussCase =
+                    sensitiveDone && (coreCollectedCount >= 4 || allScenesVisited);
 
                   if (sensitiveDone) {
                     if (readyToDiscussCase) {
