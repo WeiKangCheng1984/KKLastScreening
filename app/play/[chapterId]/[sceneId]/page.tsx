@@ -51,6 +51,7 @@ import { m, AnimatePresence } from 'framer-motion';
 import SensitiveGateOverlay from '@/components/SensitiveGateOverlay';
 import { CH1_MONOLOGUE_TEXT, CH1_MONOLOGUE_CHOICES } from '@/data/ch1Monologue';
 import { flagTestGroups, ch1ReportCoreFlagIds, ch1ReportEvidenceItemIds, npcTestByChapter, sensitiveChoiceGroups, flagToItemIds } from '@/data/flagTestConfig';
+import { ch2QuestionConfigs, type Ch2QuestionKey, npcDialogs as ch2NpcDialogs } from '@/data/gameDataCh2';
 
 // 獲取當前章節的所有場景
 const getCurrentChapterScenes = (chapterId: string): string[] => {
@@ -80,6 +81,25 @@ function getHotspotCenter(hotspot: Hotspot): { x: number; y: number } {
   }
   return { x: 0.5, y: 0.5 };
 }
+
+// 第二章：阿蘇五題 QA 對應的 NpcDialogChoice（用於寫入旗標與洞察）
+const CH2_Q_META: Record<Ch2QuestionKey, { choices: DialogChoice[] }> = {
+  q1: {
+    choices: ch2NpcDialogs.npc_asu_q1.node_asu_q1_start.choices as DialogChoice[],
+  },
+  q2: {
+    choices: ch2NpcDialogs.npc_asu_q2.node_asu_q2_start.choices as DialogChoice[],
+  },
+  q3: {
+    choices: ch2NpcDialogs.npc_asu_q3.node_asu_q3_start.choices as DialogChoice[],
+  },
+  q4: {
+    choices: ch2NpcDialogs.npc_asu_q4.node_asu_q4_start.choices as DialogChoice[],
+  },
+  q5: {
+    choices: ch2NpcDialogs.npc_asu_q5.node_asu_q5_start.choices as DialogChoice[],
+  },
+};
 
 export default function PlayPage() {
   const params = useParams();
@@ -120,7 +140,16 @@ export default function PlayPage() {
     }
     engineRef.current = new GameEngine(savedState || undefined);
   }
-  const engine = engineRef.current;
+
+  // 第二章：阿蘇五題 QA（浮動答案卡）
+  const [ch2QaActive, setCh2QaActive] = useState(false);
+  const [ch2QaQuestionIndex, setCh2QaQuestionIndex] = useState(0);
+  const ch2QaKeys: Ch2QuestionKey[] = ['q1', 'q2', 'q3', 'q4', 'q5'];
+  const ch2CurrentQaKey = ch2QaKeys[Math.min(Math.max(ch2QaQuestionIndex, 0), ch2QaKeys.length - 1)];
+  const [ch2QaSelectedId, setCh2QaSelectedId] = useState<string | null>(null);
+  const [ch2QaPhase, setCh2QaPhase] = useState<'idle' | 'prompt' | 'choices' | 'feedback'>('idle');
+  const [ch2QaLastCorrect, setCh2QaLastCorrect] = useState<boolean | null>(null);
+  const engine = engineRef.current!;
 
   // 章節資料按需載入：載入後 engine 才有 scenes/items，供下方 scenes/items 使用
   const [chapterDataReady, setChapterDataReady] = useState(false);
@@ -178,6 +207,28 @@ export default function PlayPage() {
     choices: DialogChoice[];
   } | null>(null);
   const sceneViewRef = useRef<SceneViewRef>(null);
+
+  // 第二章 QA：當前題目提示對話（阿蘇講殘句）
+  const showCh2QaPrompt = useCallback(
+    (questionIndex: number) => {
+      const key = ch2QaKeys[Math.min(Math.max(questionIndex, 0), ch2QaKeys.length - 1)];
+      const cfg = ch2QuestionConfigs[key];
+      const promptText = `${cfg.sentencePrefix}______${cfg.sentenceSuffix}`;
+      setCurrentDialog({
+        text: promptText,
+        type: 'character',
+        characterId: 'npc_asu',
+        characterName: '阿蘇（警方技術組）',
+        characterExpression: 1,
+        characterPosition: 'left',
+      });
+      setCh2QaPhase('prompt');
+      setCh2QaSelectedId(null);
+      setCh2QaLastCorrect(null);
+      setRefreshKey((k) => k + 1);
+    },
+    [ch2QaKeys],
+  );
 
   // 方案 B：對話關閉時清掉 turn；開啟時由 setCurrentConversationTurn(turns[0]) 與 onTurnChange 設入
   useEffect(() => {
@@ -319,7 +370,7 @@ export default function PlayPage() {
                 type: 'character',
                 characterId: 'npc_liu',
                 characterName: '劉隊',
-                characterExpression: 2,
+                characterExpression: 1,
                 characterPosition: 'left',
               },
             ],
@@ -754,11 +805,14 @@ export default function PlayPage() {
     const engine = engineRef.current;
     const scene = engine.getCurrentScene();
 
-    // 第二章：阿蘇收束入口（先談不談案情 → 再進殘句整理）
+    // 第二章：阿蘇收束入口（談案情 → 啟動五題 QA 流程）
     if (choice.id === 'ch2_asu_discuss_case') {
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
-      setShowCh2SentenceCompletion(true);
+      setShowCh2SentenceCompletion(false);
+      setCh2QaActive(true);
+      setCh2QaQuestionIndex(0);
+      showCh2QaPrompt(0);
       return;
     }
     if (choice.id === 'ch2_asu_not_now') {
@@ -898,6 +952,42 @@ export default function PlayPage() {
         return prev.slice(1);
       } else {
         // 對話隊列為空，檢查是否需要顯示確認對話框或遊戲結束畫面
+        // 第二章 QA：依階段決定是否顯示浮動答案或進入下一題
+        if (ch2QaActive) {
+          if (ch2QaPhase === 'prompt') {
+            // 阿蘇殘句說完，開始顯示浮動答案卡
+            setCh2QaPhase('choices');
+          } else if (ch2QaPhase === 'feedback') {
+            if (ch2QaLastCorrect) {
+              const nextIndex = ch2QaQuestionIndex + 1;
+              if (nextIndex < ch2QaKeys.length) {
+                setCh2QaQuestionIndex(nextIndex);
+                showCh2QaPrompt(nextIndex);
+              } else {
+                // 五題全部完成：收束對話，結束 QA
+                setCh2QaActive(false);
+                setCh2QaPhase('idle');
+                setCh2QaSelectedId(null);
+                setCh2QaLastCorrect(null);
+                setCurrentDialog({
+                  text: '好。\n\n至少你不是在背答案。\n你是在選一種說法。\n\n走吧。',
+                  type: 'character',
+                  characterId: 'npc_asu',
+                  characterName: '阿蘇（警方技術組）',
+                  characterExpression: 1,
+                  characterPosition: 'left',
+                  choices: [{ id: 'ch2_asu_to_ch3', text: '走吧。' }],
+                });
+                setRefreshKey((k) => k + 1);
+                return prev;
+              }
+            } else {
+              // 答錯：再次顯示同一題的浮動答案卡
+              setCh2QaPhase('choices');
+            }
+          }
+        }
+
         // 檢查是否需要導航到下一個章節的導讀頁
         if (engineRef.current) {
           const state = engineRef.current.getState();
@@ -2919,35 +3009,26 @@ export default function PlayPage() {
                     'item_location_record',
                   ];
                   const coreCollectedCount = ch2CoreItems.filter((id) => inv.includes(id)).length;
-                  // 1B：核心六件線索 ≥4；若玩家真的把第二章場景都看完，也視為達標，避免卡關
-                  const readyToDiscussCase =
-                    sensitiveDone && (coreCollectedCount >= 4 || allScenesVisited);
 
-                  if (sensitiveDone) {
-                    if (readyToDiscussCase) {
-                      setCurrentDialog({
-                        text: '妳都看過了。\n\n現在要不要把話說清楚？',
-                        type: 'character',
-                        characterId: 'npc_asu',
-                        characterName: '阿蘇（警方技術組）',
-                        characterExpression: 1,
-                        characterPosition: 'left',
-                        choices: [
-                          { id: 'ch2_asu_discuss_case', text: '談案情。' },
-                          { id: 'ch2_asu_not_now', text: '先不要。' },
-                        ],
-                      });
-                      return;
-                    }
-
-                    const dialog = engine.triggerRandomNpcDialog(npcId);
-                    if (dialog) {
-                      engine.incrementNpcCasualTalk(npcId);
-                      setCurrentDialog(dialog);
-                    }
+                  // 優先檢查是否可以進入五題 QA：完成敏感對話，或至少收集 3 個主線索
+                  if (sensitiveDone || coreCollectedCount >= 3) {
+                    setCurrentDialog({
+                      text: '妳都看過了。\n\n現在要不要把話說清楚？',
+                      type: 'character',
+                      characterId: 'npc_asu',
+                      characterName: '阿蘇（警方技術組）',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                      choices: [
+                        { id: 'ch2_asu_discuss_case', text: '談案情。' },
+                        { id: 'ch2_asu_not_now', text: '先不要。' },
+                      ],
+                    });
                     return;
                   }
-                  if (casualCount >= 3 && canAskSensitive) {
+
+                  // 否則，若尚未完成敏感對話且已閒聊足夠次數，開啟敏感對話門檻
+                  if (!sensitiveDone && casualCount >= 3 && canAskSensitive) {
                     setSensitiveGate({
                       step: 'ask_or_skip',
                       npcId: 'npc_asu',
@@ -2959,6 +3040,8 @@ export default function PlayPage() {
                     });
                     return;
                   }
+
+                  // 其他情況：維持一般閒聊
                   const dialogAsu = engine.triggerRandomNpcDialog(npcId);
                   if (dialogAsu) {
                     engine.incrementNpcCasualTalk(npcId);
@@ -3082,6 +3165,80 @@ export default function PlayPage() {
               debug={debug}
               interactionCount={interactionCount}
             />
+
+            {/* 第二章：浮動答案卡層（直接覆蓋在場景上） */}
+            {ch2QaActive &&
+              ch2QaPhase === 'choices' &&
+              chapterId === 'ch2' &&
+              scene.id === 'scene_ch2_asu_car' && (
+                <div className="pointer-events-none absolute inset-0 z-[70]">
+                  {ch2QuestionConfigs[ch2CurrentQaKey].options.map((opt) => {
+                    const isSelected = ch2QaSelectedId === opt.id;
+                    const baseScale = isSelected ? 1.05 : 1;
+                    const scale = baseScale;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        className="absolute pointer-events-auto origin-center"
+                        style={{
+                          left: `${opt.x * 100}%`,
+                          top: `${opt.y * 100}%`,
+                          transform: `translate(-50%, -50%) rotate(${opt.rotation}deg) scale(${scale})`,
+                          transformOrigin: 'center',
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!engineRef.current) return;
+                          const engine = engineRef.current;
+                          const cfg = ch2QuestionConfigs[ch2CurrentQaKey];
+                          const isCorrect = cfg.correctIds.includes(opt.id);
+
+                          // 寫入原本在 npc 對話中的效果與洞察
+                          const meta = CH2_Q_META[ch2CurrentQaKey];
+                          const choice = meta.choices.find((c) => c.id === opt.id);
+                          if (choice) {
+                            engine.handleDialogChoice(choice);
+                          }
+
+                          setCh2QaSelectedId(opt.id);
+
+                          const replyText = isCorrect
+                            ? cfg.replyByChoiceId[opt.id] ??
+                              '阿蘇看著你選的那一行，像是把某個答案收進抽屜。'
+                            : cfg.wrongFallback;
+
+                          setCurrentDialog({
+                            text: replyText,
+                            type: 'character',
+                            characterId: 'npc_asu',
+                            characterName: '阿蘇（警方技術組）',
+                            characterExpression: 1,
+                            characterPosition: 'left',
+                          });
+                          setCh2QaPhase('feedback');
+                          setCh2QaLastCorrect(isCorrect);
+                          setRefreshKey((k) => k + 1);
+                        }}
+                      >
+                        <div
+                          className={`
+                            px-3 py-2 md:px-4 md:py-2.5 rounded-xl shadow-lg border text-xs md:text-sm
+                            bg-amber-50/95 text-gray-900 border-amber-300/80
+                            backdrop-blur-sm
+                            transition-all duration-150
+                            ${isSelected ? 'ring-2 ring-amber-500 shadow-amber-500/40' : 'ring-0'}
+                          `}
+                        >
+                          <span className="block max-w-[180px] md:max-w-[220px] text-left break-keep">
+                            {opt.label}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
             {/* 立繪：落在場景上，圖層高於 Dock 內對話框（z-40 押在對話框之上） */}
             {(() => {
@@ -3291,40 +3448,7 @@ export default function PlayPage() {
           )}
         </AnimatePresence>
 
-        {/* 第二章：把話補齊（完成後先收尾，再導向 ch3） */}
-        <AnimatePresence>
-          {showCh2SentenceCompletion && engineRef.current && (
-            <m.div
-              key="ch2-sentence-completion"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-blur-md px-4 pointer-events-auto"
-            >
-              <Ch2SentenceCompletion
-                engine={{
-                  getState: () => engineRef.current!.getState(),
-                  handleDialogChoice: (c) => engineRef.current!.handleDialogChoice(c),
-                }}
-                onComplete={() => {
-                  setShowCh2SentenceCompletion(false);
-                  setRefreshKey((k) => k + 1);
-                  setCurrentDialog({
-                    text: '好。\n\n至少你不是在背答案。\n你是在選一種說法。\n\n走吧。',
-                    type: 'character',
-                    characterId: 'npc_asu',
-                    characterName: '阿蘇（警方技術組）',
-                    characterExpression: 1,
-                    characterPosition: 'left',
-                    choices: [{ id: 'ch2_asu_to_ch3', text: '走吧。' }],
-                  });
-                }}
-                onClose={() => setShowCh2SentenceCompletion(false)}
-              />
-            </m.div>
-          )}
-        </AnimatePresence>
+        {/* 第二章：原本的「把話補齊」 overlay 已改為場景內 QA 流程（阿蘇殘句 → 浮動答案 → 回應），此處暫不渲染舊面板 */}
 
         {/* 第一章報告編輯器：向劉隊報告完成後導向 ch2 intro */}
         <AnimatePresence>

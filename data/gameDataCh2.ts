@@ -1,5 +1,396 @@
 import { Scene, Item, NpcDialogNode } from '@/types/game';
 
+// 第二章：阿蘇五題「浮動答案卡」設定 ------------------------------
+
+export type Ch2QuestionKey = 'q1' | 'q2' | 'q3' | 'q4' | 'q5';
+
+export interface FloatingAnswerConfig {
+  id: string;        // 選項 ID，例如 'q1_A'
+  label: string;     // 卡片上顯示的短句
+  fullText: string;  // 用於填入殘句空格的完整文字（通常與 label 相同）
+  x: number;         // 場景相對座標 0~1（寬度方向）
+  y: number;         // 場景相對座標 0~1（高度方向）
+  rotation: number;  // 旋轉角度（度數），正負皆可
+}
+
+export interface QuestionConfig {
+  key: Ch2QuestionKey;
+  title: string;               // 題目標題（UI 用）
+  sentencePrefix: string;      // 殘句前半（含換行）
+  sentenceSuffix: string;      // 殘句後半（含換行），中間空出一格給填入答案
+  options: FloatingAnswerConfig[]; // 七個選項
+  correctIds: string[];        // 有效答案 ID（主正解＋也算對）
+  replyByChoiceId: Record<string, string>; // 阿蘇回應句（正解／也算對專屬）
+  wrongFallback: string;       // 答錯時的通用回應
+}
+
+export const ch2QuestionConfigs: Record<Ch2QuestionKey, QuestionConfig> = {
+  q1: {
+    key: 'q1',
+    title: '草稿那句（記事本）',
+    sentencePrefix:
+      '「……不是設備本身。\n也不是那種簡報裡會先講的好處。\n問題一直都在後面那半句。\n省電、省時，最後連 ',
+    sentenceSuffix: ' 都一起省掉。\n他們很熟這種寫法。」',
+    options: [
+      {
+        id: 'q1_A',
+        label: '爆米花補鹽流程',
+        fullText: '爆米花補鹽流程',
+        x: 0.68,
+        y: 0.78,
+        rotation: -8,
+      },
+      {
+        id: 'q1_B',
+        label: '午夜場的浪漫氣氛',
+        fullText: '午夜場的浪漫氣氛',
+        x: 0.8,
+        y: 0.72,
+        rotation: 10,
+      },
+      {
+        id: 'q1_C',
+        label: '連帶責任',
+        fullText: '連帶責任',
+        x: 0.62,
+        y: 0.58,
+        rotation: -5,
+      },
+      {
+        id: 'q1_D',
+        label: '維修工時',
+        fullText: '維修工時',
+        x: 0.78,
+        y: 0.55,
+        rotation: 4,
+      },
+      {
+        id: 'q1_E',
+        label: '觀眾耐心',
+        fullText: '觀眾耐心',
+        x: 0.55,
+        y: 0.72,
+        rotation: 7,
+      },
+      {
+        id: 'q1_F',
+        label: '片尾字幕',
+        fullText: '片尾字幕',
+        x: 0.9,
+        y: 0.6,
+        rotation: -12,
+      },
+      {
+        id: 'q1_G',
+        label: '可以說清楚的那一段',
+        fullText: '可以說清楚的那一段',
+        x: 0.7,
+        y: 0.48,
+        rotation: 6,
+      },
+    ],
+    correctIds: ['q1_C', 'q1_D', 'q1_G'],
+    replyByChoiceId: {
+      q1_C: '阿蘇點點頭：「嗯。這就像他寫給自己看的版本。懶得修飾，所以比較真。」',
+      q1_D: '阿蘇看了一眼你選的字：「工時也會被省。但這句不是在替現場抱不平，是在指有人把後果往外推。」',
+      q1_G: '阿蘇笑了一下：「很好聽。像是他會說的話。」',
+    },
+    wrongFallback:
+      '「可以這樣想，但他寫的不是觀眾情緒，也不是影城裝潢。」\n「他在算的是，誰有辦法把責任拆小、拆散，拆到最後沒有人要負。」',
+  },
+  q2: {
+    key: 'q2',
+    title: '那句「她也在場」（Unknown）',
+    sentencePrefix: '「……兩年前那次，她也在 ',
+    sentenceSuffix: ' ，會開始不安靜。」',
+    options: [
+      {
+        id: 'q2_A',
+        label: '停車繳費名單裡',
+        fullText: '停車繳費名單裡',
+        x: 0.3,
+        y: 0.7,
+        rotation: -6,
+      },
+      {
+        id: 'q2_B',
+        label: '員工慶生合照裡',
+        fullText: '員工慶生合照裡',
+        x: 0.4,
+        y: 0.62,
+        rotation: 8,
+      },
+      {
+        id: 'q2_C',
+        label: '那次事故裡',
+        fullText: '那次事故裡',
+        x: 0.52,
+        y: 0.55,
+        rotation: -4,
+      },
+      {
+        id: 'q2_D',
+        label: '他的私人關係裡',
+        fullText: '他的私人關係裡',
+        x: 0.35,
+        y: 0.48,
+        rotation: 5,
+      },
+      {
+        id: 'q2_E',
+        label: '早期驗收流程裡',
+        fullText: '早期驗收流程裡',
+        x: 0.6,
+        y: 0.68,
+        rotation: 9,
+      },
+      {
+        id: 'q2_F',
+        label: '影評留言串裡',
+        fullText: '影評留言串裡',
+        x: 0.48,
+        y: 0.78,
+        rotation: -10,
+      },
+      {
+        id: 'q2_G',
+        label: '那個不該再被叫出名字的地方',
+        fullText: '那個不該再被叫出名字的地方',
+        x: 0.65,
+        y: 0.45,
+        rotation: 3,
+      },
+    ],
+    correctIds: ['q2_C', 'q2_E', 'q2_G'],
+    replyByChoiceId: {
+      q2_C: '阿蘇點了一下：「對。這裡的『在』比較像紀錄語言。不是感情，不是單位分工，是事故位置。」',
+      q2_E: '阿蘇說：「有抓到方向，把人洗成文件。」',
+      q2_G: '阿蘇看了一眼：「他偶爾會這樣寫專欄，都不知道在寫什麼。」',
+    },
+    wrongFallback:
+      '「如果只是照片或留言，他不會用這種講法。」\n「他在講的是事件本身，哪裡開始讓它『不安靜』。」',
+  },
+  q3: {
+    key: 'q3',
+    title: '三個節點那句（代號聯絡人）',
+    sentencePrefix:
+      '「……如果只看每一件，都能被講成個案。\n可排在一起之後，就不是巧合。\n比較像先做成三個 ',
+    sentenceSuffix: ' ，之後才知道是不是同一套東西留下來的。」',
+    options: [
+      {
+        id: 'q3_A',
+        label: '平行時空入口',
+        fullText: '平行時空入口',
+        x: 0.2,
+        y: 0.25,
+        rotation: -12,
+      },
+      {
+        id: 'q3_B',
+        label: '深夜優惠方案',
+        fullText: '深夜優惠方案',
+        x: 0.35,
+        y: 0.22,
+        rotation: 6,
+      },
+      {
+        id: 'q3_C',
+        label: '獨立節點',
+        fullText: '獨立節點',
+        x: 0.5,
+        y: 0.2,
+        rotation: -4,
+      },
+      {
+        id: 'q3_D',
+        label: '系列專欄題綱',
+        fullText: '系列專欄題綱',
+        x: 0.65,
+        y: 0.24,
+        rotation: 9,
+      },
+      {
+        id: 'q3_E',
+        label: '事故樣本',
+        fullText: '事故樣本',
+        x: 0.8,
+        y: 0.28,
+        rotation: -7,
+      },
+      {
+        id: 'q3_F',
+        label: '媒體炒作方向',
+        fullText: '媒體炒作方向',
+        x: 0.28,
+        y: 0.35,
+        rotation: 3,
+      },
+      {
+        id: 'q3_G',
+        label: '能暫時放住懷疑的抽屜',
+        fullText: '能暫時放住懷疑的抽屜',
+        x: 0.72,
+        y: 0.36,
+        rotation: -5,
+      },
+    ],
+    correctIds: ['q3_C', 'q3_E', 'q3_G'],
+    replyByChoiceId: {
+      q3_C: '阿蘇點頭：「對。節點這個字很不近人情，所以很有用。它不先幫誰洗白，也不先把誰寫成兇手。」',
+      q3_E: '「『樣本』像做完統計的人會用的字。」阿蘇說，「事後把東西排好看一點的時候會出現。」',
+      q3_G: '「誰都可以說它有道理，也誰都不用負責。」她把那行話縮小關掉。',
+    },
+    wrongFallback:
+      '「如果只是專欄題目或行銷方案，他不需要這樣排。」\n「他在試著把同一種錯誤切成三格，看會不會露出一樣的痕跡。」',
+  },
+  q4: {
+    key: 'q4',
+    title: '他在等什麼（定位）',
+    sentencePrefix:
+      '「……比開演早很多。\n沒進去，先在外面繞。一圈，兩圈，像在等什麼自己對上。\n我知道不是人在遲到。我等的不是人，是 ',
+    sentenceSuffix: ' 。\n人只會把事情帶來，那東西才會準時發生。」',
+    options: [
+      {
+        id: 'q4_A',
+        label: '自動販賣機補貨時間',
+        fullText: '自動販賣機補貨時間',
+        x: 0.3,
+        y: 0.6,
+        rotation: 7,
+      },
+      {
+        id: 'q4_B',
+        label: '散場後的幽靈觀眾',
+        fullText: '散場後的幽靈觀眾',
+        x: 0.22,
+        y: 0.52,
+        rotation: -9,
+      },
+      {
+        id: 'q4_C',
+        label: '甜蜜時點',
+        fullText: '甜蜜時點',
+        x: 0.45,
+        y: 0.65,
+        rotation: -4,
+      },
+      {
+        id: 'q4_D',
+        label: '門禁切換',
+        fullText: '門禁切換',
+        x: 0.58,
+        y: 0.62,
+        rotation: 5,
+      },
+      {
+        id: 'q4_E',
+        label: '燈控排程',
+        fullText: '燈控排程',
+        x: 0.72,
+        y: 0.6,
+        rotation: -6,
+      },
+      {
+        id: 'q4_F',
+        label: '停車位空出來',
+        fullText: '停車位空出來',
+        x: 0.38,
+        y: 0.72,
+        rotation: 9,
+      },
+      {
+        id: 'q4_G',
+        label: '那個會讓所有人看起來都合理的瞬間',
+        fullText: '那個會讓所有人看起來都合理的瞬間',
+        x: 0.65,
+        y: 0.48,
+        rotation: -3,
+      },
+    ],
+    correctIds: ['q4_C', 'q4_E', 'q4_G'],
+    replyByChoiceId: {
+      q4_C: '阿蘇嗯了一聲：「嗯。這就不是赴約，是觀測。那種人很煩，也很容易死。」',
+      q4_E: '「燈控是裡面的一部分。」她說，「是最大的那一層，他等的是那個東西開始咬合。」',
+      q4_G: '阿蘇皺了一下眉：「這真的是專欄作家嗎？」\n她又補一句：「很適合寫在文案上，完全不適合寫在事故報告裡。」',
+    },
+    wrongFallback:
+      '「如果只是補貨或停車，他不用繞那麼多圈。」\n「他在等的是一個『所有條件都對上』的時點，不是一個人。」',
+  },
+  q5: {
+    key: 'q5',
+    title: '他們會怎麼收尾（錄音）',
+    sentencePrefix:
+      '「……最怪的不是有人先動手。\n最怪的是事情一出來，每個人只知道自己那一小塊，\n一出事，他們就知道怎麼 ',
+    sentenceSuffix: ' 。\n太熟了。熟到像不是第一次。」',
+    options: [
+      {
+        id: 'q5_A',
+        label: '集體改賣熱狗',
+        fullText: '集體改賣熱狗',
+        x: 0.18,
+        y: 0.68,
+        rotation: -11,
+      },
+      {
+        id: 'q5_B',
+        label: '假裝是首映會來賓',
+        fullText: '假裝是首映會來賓',
+        x: 0.28,
+        y: 0.42,
+        rotation: 8,
+      },
+      {
+        id: 'q5_C',
+        label: '亂講',
+        fullText: '亂講',
+        x: 0.48,
+        y: 0.5,
+        rotation: -5,
+      },
+      {
+        id: 'q5_D',
+        label: '切割',
+        fullText: '切割',
+        x: 0.6,
+        y: 0.4,
+        rotation: 7,
+      },
+      {
+        id: 'q5_E',
+        label: '補紀錄',
+        fullText: '補紀錄',
+        x: 0.72,
+        y: 0.54,
+        rotation: -4,
+      },
+      {
+        id: 'q5_F',
+        label: '逃跑',
+        fullText: '逃跑',
+        x: 0.36,
+        y: 0.3,
+        rotation: 10,
+      },
+      {
+        id: 'q5_G',
+        label: '把真正的那句留到最後才說',
+        fullText: '把真正的那句留到最後才說',
+        x: 0.82,
+        y: 0.32,
+        rotation: -9,
+      },
+    ],
+    correctIds: ['q5_C', 'q5_D', 'q5_E'],
+    replyByChoiceId: {
+      q5_C: '阿蘇點頭：「對，是怎麼亂講。跑掉的是人，講出來的是版本。」',
+      q5_D: '「切割是後面會長出來的東西。」她說，「前面有人已經先決定要怎麼講。」',
+      q5_E: '「那還是太晚了。」她說，「有人更早就在決定哪一句先活下來。」',
+    },
+    wrongFallback:
+      '「如果只是跑掉或裝沒事，不需要這麼熟練。」\n「他在講的是：一出事，大家各自只拿出自己那一小塊說法。」',
+  },
+};
+
 // ch2 道具
 const items: Record<string, Item> = {
   'item_victim_basic_info': {
@@ -83,17 +474,28 @@ const scenes: Record<string, Scene> = {
     ],
     hotspotEventMap: {
       'hotspot_car_phone_main': 'examine_car_phone_main',
-      'hotspot_car_unknown_chat': 'examine_car_unknown_chat',
+      'hotspot_car_unknown_chat': 'route_car_unknown_chat',
       'hotspot_car_an_chat': 'examine_car_an_chat',
-      'hotspot_car_notepad': 'examine_car_notepad',
-      'hotspot_car_recording': 'examine_car_recording',
-      'hotspot_car_contacts': 'examine_car_contacts',
-      'hotspot_car_location': 'examine_car_location',
+      'hotspot_car_notepad': 'route_car_notepad',
+      'hotspot_car_recording': 'route_car_recording',
+      'hotspot_car_contacts': 'route_car_contacts',
+      'hotspot_car_location': 'route_car_location',
       'hotspot_car_toolbox': 'examine_car_toolbox',
       'hotspot_car_coffee': 'examine_car_coffee',
       'hotspot_car_charm': 'examine_car_charm',
     },
     events: [
+      {
+        id: 'route_car_notepad',
+        name: '記事本互動路由',
+        description: '',
+        requirements: [],
+        effects: [
+          { type: 'triggerEvent', eventId: 'examine_car_notepad' },
+          { type: 'triggerEvent', eventId: 'replay_car_notepad' },
+          { type: 'triggerEvent', eventId: 'asu_q1_from_notepad' },
+        ],
+      },
       {
         id: 'examine_car_phone_main',
         name: '受害者手機主畫面',
@@ -150,6 +552,17 @@ const scenes: Record<string, Scene> = {
               ],
             },
           },
+        ],
+      },
+      {
+        id: 'route_car_unknown_chat',
+        name: 'Unknown 訊息互動路由',
+        description: '',
+        requirements: [],
+        effects: [
+          { type: 'triggerEvent', eventId: 'examine_car_unknown_chat' },
+          { type: 'triggerEvent', eventId: 'replay_car_unknown_chat' },
+          { type: 'triggerEvent', eventId: 'asu_q2_from_unknown' },
         ],
       },
       {
@@ -362,6 +775,25 @@ const scenes: Record<string, Scene> = {
         requirements: [
           { type: 'hasInteracted', hotspotId: 'hotspot_car_notepad' },
           { type: 'hasItem', itemId: 'item_column_draft' },
+          // 基本探索：六項主線索中，任意取得至少三項
+          {
+            type: 'custom',
+            customCheck: (state) => {
+              const inv = state.inventory || [];
+              const coreIds = [
+                'item_victim_basic_info',
+                'item_encrypted_messages',
+                'item_column_draft',
+                'item_unfinished_recording',
+                'item_coded_contacts',
+                'item_location_record',
+              ];
+              const count = coreIds.filter(id => inv.includes(id)).length;
+              return count >= 3;
+            },
+          },
+          // 已完成阿蘇敏感對話
+          { type: 'hasFlag', flag: 'npc_asu_sensitive_done' },
         ],
         effects: [
           {
@@ -428,6 +860,17 @@ const scenes: Record<string, Scene> = {
               ],
             },
           },
+        ],
+      },
+      {
+        id: 'route_car_recording',
+        name: '錄音互動路由',
+        description: '',
+        requirements: [],
+        effects: [
+          { type: 'triggerEvent', eventId: 'examine_car_recording' },
+          { type: 'triggerEvent', eventId: 'replay_car_recording' },
+          { type: 'triggerEvent', eventId: 'asu_q5_from_recording' },
         ],
       },
       {
@@ -507,6 +950,17 @@ const scenes: Record<string, Scene> = {
         ],
       },
       {
+        id: 'route_car_contacts',
+        name: '聯絡人互動路由',
+        description: '',
+        requirements: [],
+        effects: [
+          { type: 'triggerEvent', eventId: 'examine_car_contacts' },
+          { type: 'triggerEvent', eventId: 'replay_car_contacts' },
+          { type: 'triggerEvent', eventId: 'asu_q3_from_contacts' },
+        ],
+      },
+      {
         id: 'asu_q3_from_contacts',
         name: '阿蘇問答 Q3：三起事故',
         description: '',
@@ -581,6 +1035,17 @@ const scenes: Record<string, Scene> = {
               ],
             },
           },
+        ],
+      },
+      {
+        id: 'route_car_location',
+        name: '定位互動路由',
+        description: '',
+        requirements: [],
+        effects: [
+          { type: 'triggerEvent', eventId: 'examine_car_location' },
+          { type: 'triggerEvent', eventId: 'replay_car_location' },
+          { type: 'triggerEvent', eventId: 'asu_q4_from_location' },
         ],
       },
       {
@@ -738,6 +1203,84 @@ const scenes: Record<string, Scene> = {
 };
 
 const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
+  // 第二章 阿蘇（警方技術組）— 敏感一：為什麼來／受害者資料怎麼看；敏感二：三起事故誰在放風聲（二選一）
+  npc_asu: {
+    'node_asu_sensitive1_1': {
+      id: 'node_asu_sensitive1_1',
+      npcId: 'npc_asu',
+      text: 'KK：「你可以把資料丟回警方，回家睡覺。為什麼坐在這裡？」\n\n阿蘇笑一下，不愉快：\n阿蘇：「因為他死在流程裡。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_2',
+    },
+    'node_asu_sensitive1_2': {
+      id: 'node_asu_sensitive1_2',
+      npcId: 'npc_asu',
+      text: 'KK：「妳怎麼會牽扯進兩年前的樓梯間？」\n\n阿蘇把筆電合起來又打開，像需要一個動作冷靜一下。\n阿蘇：「兩年前那起樓梯間事故，我是技術顧問之一。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_3',
+    },
+    'node_asu_sensitive1_3': {
+      id: 'node_asu_sensitive1_3',
+      npcId: 'npc_asu',
+      text: 'KK：「妳覺得自己有責任？」\n\n阿蘇：「我以為我交的是報告，後來才發現我交的是『某一種版本』。」\n阿蘇：「版本聽起來很中性，實際上像刀。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_4',
+    },
+    'node_asu_sensitive1_4': {
+      id: 'node_asu_sensitive1_4',
+      npcId: 'npc_asu',
+      text: 'KK：「妳認識他？」\n\n阿蘇：「看過名字，收過一封很長很長的信，全是抱怨和猜測。」\n阿蘇：「他寄過信給我，長得像在吵架。」\n阿蘇：「我回得很不耐煩，叫他別把事故當素材。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_5',
+    },
+    'node_asu_sensitive1_5': {
+      id: 'node_asu_sensitive1_5',
+      npcId: 'npc_asu',
+      text: 'KK：「他沒聽？」\n\n阿蘇：「他停手一陣子。寫慢一點不代表放棄。」\n她把那封信的寄件人頁面打開又關掉，像在避免讓你看見某個地址。',
+      choices: [
+        {
+          id: 'choice_asu_s1_done',
+          label: '（結束對話）',
+          description: '此分支不再出現 KK 內心旁白，只留給玩家自己拼。',
+          effects: [{ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true }],
+        },
+      ],
+    },
+    'node_asu_sensitive2_1': {
+      id: 'node_asu_sensitive2_1',
+      npcId: 'npc_asu',
+      text: 'KK：「這句：『用三起事故來揭……』，妳覺得誰寫的？」\n\n阿蘇：「格式像他，語氣又像另一個人。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_2',
+    },
+    'node_asu_sensitive2_2': {
+      id: 'node_asu_sensitive2_2',
+      npcId: 'npc_asu',
+      text: 'KK：「兩邊都像？」\n\n阿蘇聳了一下肩：「一邊想把話講完，一邊很清楚什麼不能講。」\n阿蘇：「兩種人湊在一起，句子會碎得像這樣。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_3',
+    },
+    'node_asu_sensitive2_3': {
+      id: 'node_asu_sensitive2_3',
+      npcId: 'npc_asu',
+      text: 'KK：「誰在放『三起事故』這種說法？」\n\n阿蘇：「還有一種可能——有人刻意用他熟悉的格式寫給他看。」\n阿蘇：「讓他以為自己踩到一個大案，逼他把手伸更深。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_4',
+    },
+    'node_asu_sensitive2_4': {
+      id: 'node_asu_sensitive2_4',
+      npcId: 'npc_asu',
+      text: 'KK：「伸深了？」\n\n阿蘇：「伸深了，就比較容易被抓住。」\n阿蘇：「你看，連『她也在場』都像釘書釘。」\n阿蘇：「釘在你腦子裡，讓你一直回頭。」',
+      choices: [
+        {
+          id: 'choice_asu_s2_done',
+          label: '（結束對話）',
+          description: '',
+          effects: [{ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true }],
+        },
+      ],
+    },
+  },
   // 第二章 阿蘇問答 Q1：「省掉了什麼」
   npc_asu_q1: {
     node_asu_q1_start: {
