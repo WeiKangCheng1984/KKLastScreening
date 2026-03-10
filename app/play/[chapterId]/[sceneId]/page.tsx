@@ -28,7 +28,7 @@ import MazePath from '@/components/MazePath';
 import LogicSwitches from '@/components/LogicSwitches';
 import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
-import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, ListOrdered, FlaskConical, Brain, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, FlaskConical, Brain, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import { chapters } from '@/data/chapters';
@@ -43,6 +43,7 @@ import ScoreDisplay from '@/components/ScoreDisplay';
 import NpcRightStrip from '@/components/NpcRightStrip';
 import ReasoningPanel from '@/components/ReasoningPanel';
 import Ch1ReportEditor from '@/components/Ch1ReportEditor';
+import Ch2SentenceCompletion from '@/components/Ch2SentenceCompletion';
 import { reasoningByChapter } from '@/data/reasoningByChapter';
 import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
@@ -192,6 +193,8 @@ export default function PlayPage() {
   // 第一章章末：報告編輯器（取代解謎／推理舊路徑）
   const [showReasoningPanel, setShowReasoningPanel] = useState(false);
   const [showCh1ReportEditor, setShowCh1ReportEditor] = useState(false);
+  // 第二章章末：把話補齊（取代推理分析）
+  const [showCh2SentenceCompletion, setShowCh2SentenceCompletion] = useState(false);
   /** 旗標測試面板：設定區點「旗標測試」後開啟，可逐一開關所有旗標 */
   const [showFlagTestPanel, setShowFlagTestPanel] = useState(false);
   /** 旗標測試面板目前分頁 */
@@ -750,6 +753,25 @@ export default function PlayPage() {
     if (!engineRef.current) return;
     const engine = engineRef.current;
     const scene = engine.getCurrentScene();
+
+    // 第二章：阿蘇收束入口（先談不談案情 → 再進殘句整理）
+    if (choice.id === 'ch2_asu_discuss_case') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      setShowCh2SentenceCompletion(true);
+      return;
+    }
+    if (choice.id === 'ch2_asu_not_now') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+    if (choice.id === 'ch2_asu_to_ch3') {
+      engine.setReasoningComplete('ch2');
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
 
     // 第一章：劉隊頭像互動（階段二+／三）
     if (choice.id === 'ch1_liu_keep_exploring' || choice.id === 'ch1_liu_try_reasoning') {
@@ -2548,10 +2570,13 @@ export default function PlayPage() {
   const showReasoningButton =
     hasReasoningForChapter &&
     chapterId !== 'ch1' &&
+    chapterId !== 'ch2' &&
     allScenesVisited &&
     !reasoningDone &&
     !showSceneName &&
     (chapterId !== 'ch1' || hasCh1CoreClues);
+
+  // 第二章：殘句整理（Q1~Q5）入口改為「阿蘇對話」觸發（不再顯示右下角按鈕）
 
   // 第一章內心獨白按鈕：完成全部 4 位 NPC 敏感對話後顯示，全章一次
   const allCh1SensitiveDone =
@@ -2876,10 +2901,39 @@ export default function PlayPage() {
                   const sensitiveDone = !!flags.npc_asu_sensitive_done;
                   const inv = st?.inventory ?? [];
                   const hasVictimInfo = inv.includes('item_victim_basic_info');
-                  const hasEncryptedAndDraft = inv.includes('item_encrypted_messages') && inv.includes('item_column_draft');
-                  const canAskSensitive = hasVictimInfo || hasEncryptedAndDraft;
+                  const hasEncrypted = inv.includes('item_encrypted_messages');
+                  const hasColumnDraft = inv.includes('item_column_draft');
+                  // 第二章：任一道具即可解鎖敏感問題（劇情：至少取得部分車內線索後可問）
+                  const canAskSensitive = hasVictimInfo || hasEncrypted || hasColumnDraft;
+
+                  const ch2CoreItems = [
+                    'item_victim_basic_info',
+                    'item_encrypted_messages',
+                    'item_column_draft',
+                    'item_unfinished_recording',
+                    'item_coded_contacts',
+                    'item_location_record',
+                  ];
+                  const coreCollectedCount = ch2CoreItems.filter((id) => inv.includes(id)).length;
+                  const readyToDiscussCase = coreCollectedCount >= 4 && sensitiveDone;
 
                   if (sensitiveDone) {
+                    if (readyToDiscussCase) {
+                      setCurrentDialog({
+                        text: '妳都看過了。\n\n現在要不要把話說清楚？',
+                        type: 'character',
+                        characterId: 'npc_asu',
+                        characterName: '阿蘇（警方技術組）',
+                        characterExpression: 1,
+                        characterPosition: 'left',
+                        choices: [
+                          { id: 'ch2_asu_discuss_case', text: '談案情。' },
+                          { id: 'ch2_asu_not_now', text: '先不要。' },
+                        ],
+                      });
+                      return;
+                    }
+
                     const dialog = engine.triggerRandomNpcDialog(npcId);
                     if (dialog) {
                       engine.incrementNpcCasualTalk(npcId);
@@ -3149,7 +3203,7 @@ export default function PlayPage() {
         </div>
       </div>
 
-      {/* 推理分析按鈕（ch1/ch2/ch3 且本章全場景已訪且未完成時顯示） */}
+      {/* 推理分析按鈕（ch3+ 且本章全場景已訪且未完成時顯示；ch2 改用「把話補齊」） */}
       {showReasoningButton && (
         <button
           type="button"
@@ -3161,6 +3215,8 @@ export default function PlayPage() {
           <span>推理分析</span>
         </button>
       )}
+
+      {/* ch2：入口改由阿蘇對話觸發，不顯示右下角按鈕 */}
 
       {/* 第一章內心獨白按鈕：完成全部 4 位 NPC 敏感對話後顯示，全章一次 */}
       {showCh1MonologueButton && (
@@ -3224,6 +3280,41 @@ export default function PlayPage() {
                   }
                 }}
                 onClose={() => setShowReasoningPanel(false)}
+              />
+            </m.div>
+          )}
+        </AnimatePresence>
+
+        {/* 第二章：把話補齊（完成後先收尾，再導向 ch3） */}
+        <AnimatePresence>
+          {showCh2SentenceCompletion && engineRef.current && (
+            <m.div
+              key="ch2-sentence-completion"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-blur-md px-4 pointer-events-auto"
+            >
+              <Ch2SentenceCompletion
+                engine={{
+                  getState: () => engineRef.current!.getState(),
+                  handleDialogChoice: (c) => engineRef.current!.handleDialogChoice(c),
+                }}
+                onComplete={() => {
+                  setShowCh2SentenceCompletion(false);
+                  setRefreshKey((k) => k + 1);
+                  setCurrentDialog({
+                    text: '好。\n\n至少你不是在背答案。\n你是在選一種說法。\n\n走吧。',
+                    type: 'character',
+                    characterId: 'npc_asu',
+                    characterName: '阿蘇（警方技術組）',
+                    characterExpression: 1,
+                    characterPosition: 'left',
+                    choices: [{ id: 'ch2_asu_to_ch3', text: '走吧。' }],
+                  });
+                }}
+                onClose={() => setShowCh2SentenceCompletion(false)}
               />
             </m.div>
           )}
@@ -3542,7 +3633,7 @@ export default function PlayPage() {
 
         {/* 敏感抉擇：次優先，中央對話框 */}
         <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && sensitiveGate && (
+          {!showReasoningPanel && !showCh1ReportEditor && !showCh2SentenceCompletion && sensitiveGate && (
             <m.div
               key="sensitive-gate"
               initial={{ opacity: 0 }}
@@ -3563,7 +3654,7 @@ export default function PlayPage() {
 
         {/* 第一章內心獨白：完成 4 位 NPC 敏感對話後由按鈕觸發，全章一次 */}
         <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && showCh1MonologueOverlay && (
+          {!showReasoningPanel && !showCh1ReportEditor && !showCh2SentenceCompletion && !sensitiveGate && showCh1MonologueOverlay && (
             <m.div
               key="ch1-monologue"
               initial={{ opacity: 0 }}
@@ -3584,7 +3675,7 @@ export default function PlayPage() {
 
         {/* 背包道具詳解：中央詳解卡，優先於 toast */}
         <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !sensitiveGate && !showCh1MonologueOverlay && activeItemDetail && (
+          {!showReasoningPanel && !showCh1ReportEditor && !showCh2SentenceCompletion && !sensitiveGate && !showCh1MonologueOverlay && activeItemDetail && (
             <m.div
               key="item-detail"
               initial={{ opacity: 0 }}

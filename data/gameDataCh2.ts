@@ -1344,6 +1344,84 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       ],
     },
   },
+  // 第二章 阿蘇敏感對話（點擊頭像「問敏感」二選一後進入，與 ch1 共用同一棵樹）
+  npc_asu: {
+    node_asu_sensitive1_1: {
+      id: 'node_asu_sensitive1_1',
+      npcId: 'npc_asu',
+      text: 'KK：「你可以把資料丟回警方，回家睡覺。為什麼坐在這裡？」\n\n阿蘇笑一下，不愉快：\n阿蘇：「因為他死在流程裡。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_2',
+    },
+    node_asu_sensitive1_2: {
+      id: 'node_asu_sensitive1_2',
+      npcId: 'npc_asu',
+      text: 'KK：「妳怎麼會牽扯進兩年前的樓梯間？」\n\n阿蘇把筆電合起來又打開，像需要一個動作冷靜一下。\n阿蘇：「兩年前那起樓梯間事故，我是技術顧問之一。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_3',
+    },
+    node_asu_sensitive1_3: {
+      id: 'node_asu_sensitive1_3',
+      npcId: 'npc_asu',
+      text: 'KK：「妳覺得自己有責任？」\n\n阿蘇：「我以為我交的是報告，後來才發現我交的是『某一種版本』。」\n阿蘇：「版本聽起來很中性，實際上像刀。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_4',
+    },
+    node_asu_sensitive1_4: {
+      id: 'node_asu_sensitive1_4',
+      npcId: 'npc_asu',
+      text: 'KK：「妳認識他？」\n\n阿蘇：「看過名字，收過一封很長很長的信，全是抱怨和猜測。」\n阿蘇：「他寄過信給我，長得像在吵架。」\n阿蘇：「我回得很不耐煩，叫他別把事故當素材。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive1_5',
+    },
+    node_asu_sensitive1_5: {
+      id: 'node_asu_sensitive1_5',
+      npcId: 'npc_asu',
+      text: 'KK：「他沒聽？」\n\n阿蘇：「他停手一陣子。寫慢一點不代表放棄。」\n她把那封信的寄件人頁面打開又關掉，像在避免讓你看見某個地址。',
+      choices: [
+        {
+          id: 'choice_asu_s1_done',
+          label: '（結束對話）',
+          description: '此分支不再出現 KK 內心旁白，只留給玩家自己拼。',
+          effects: [{ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true }],
+        },
+      ],
+    },
+    node_asu_sensitive2_1: {
+      id: 'node_asu_sensitive2_1',
+      npcId: 'npc_asu',
+      text: 'KK：「這句：『用三起事故來揭……』，妳覺得誰寫的？」\n\n阿蘇：「格式像他，語氣又像另一個人。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_2',
+    },
+    node_asu_sensitive2_2: {
+      id: 'node_asu_sensitive2_2',
+      npcId: 'npc_asu',
+      text: 'KK：「兩邊都像？」\n\n阿蘇聳了一下肩：「一邊想把話講完，一邊很清楚什麼不能講。」\n阿蘇：「兩種人湊在一起，句子會碎得像這樣。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_3',
+    },
+    node_asu_sensitive2_3: {
+      id: 'node_asu_sensitive2_3',
+      npcId: 'npc_asu',
+      text: 'KK：「誰在放『三起事故』這種說法？」\n\n阿蘇：「還有一種可能——有人刻意用他熟悉的格式寫給他看。」\n阿蘇：「讓他以為自己踩到一個大案，逼他把手伸更深。」',
+      choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
+      next: 'node_asu_sensitive2_4',
+    },
+    node_asu_sensitive2_4: {
+      id: 'node_asu_sensitive2_4',
+      npcId: 'npc_asu',
+      text: 'KK：「伸深了？」\n\n阿蘇：「伸深了，就比較容易被抓住。」\n阿蘇：「你看，連『她也在場』都像釘書釘。」\n阿蘇：「釘在你腦子裡，讓你一直回頭。」',
+      choices: [
+        {
+          id: 'choice_asu_s2_done',
+          label: '（結束對話）',
+          description: '',
+          effects: [{ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true }],
+        },
+      ],
+    },
+  },
 };
 
 export { scenes, items, npcDialogs };
