@@ -44,6 +44,7 @@ import NpcRightStrip from '@/components/NpcRightStrip';
 import ReasoningPanel from '@/components/ReasoningPanel';
 import Ch1ReportEditor from '@/components/Ch1ReportEditor';
 import Ch2SentenceCompletion from '@/components/Ch2SentenceCompletion';
+import ChapterConclusionOverlay from '@/components/ChapterConclusionOverlay';
 import { reasoningByChapter } from '@/data/reasoningByChapter';
 import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
@@ -262,8 +263,10 @@ export default function PlayPage() {
   // 第一章章末：報告編輯器（取代解謎／推理舊路徑）
   const [showReasoningPanel, setShowReasoningPanel] = useState(false);
   const [showCh1ReportEditor, setShowCh1ReportEditor] = useState(false);
-  // 第二章章末：把話補齊（取代推理分析）
+  // 第二章章末：把話補齊（改為由劉隊結算的 QA overlay）
   const [showCh2SentenceCompletion, setShowCh2SentenceCompletion] = useState(false);
+  const [ch2ConclusionIndex, setCh2ConclusionIndex] = useState(0);
+  const [ch2ConclusionSelectedId, setCh2ConclusionSelectedId] = useState<string | null>(null);
   /** 旗標測試面板：設定區點「旗標測試」後開啟，可逐一開關所有旗標 */
   const [showFlagTestPanel, setShowFlagTestPanel] = useState(false);
   /** 旗標測試面板目前分頁 */
@@ -833,46 +836,20 @@ export default function PlayPage() {
     const engine = engineRef.current;
     const scene = engine.getCurrentScene();
 
-    // 第二章：阿蘇收束入口（談案情 → 啟動五題 QA 流程，場景浮動卡＋底部對話）
+    // 第二章：阿蘇「談案情」現在僅作為敘事提示，不再啟動 QA（QA 由劉隊結算）
     if (choice.id === 'ch2_asu_discuss_case') {
-      const state = engine.getState();
-      if (!shouldAllowAction(state, 'ch2', 'start_ch2_qa')) {
-        // 若不允許啟動 QA（例如已完成整章推理），僅關閉當前對話
-        setCurrentDialog(null);
-        setRefreshKey((prev) => prev + 1);
-        return;
-      }
-
-      setDialogQueue([]);
-      setCurrentDialog(null);
+      setCurrentDialog({
+        text: '阿蘇：「這些話，你之後可以跟劉隊講一次。」\n\n「他會想知道你現在看到的是哪一個版本。」',
+        type: 'character',
+        characterId: 'npc_asu',
+        characterName: '阿蘇（警方技術組）',
+        characterExpression: 1,
+        characterPosition: 'left',
+      });
       setRefreshKey((prev) => prev + 1);
-      setShowCh2SentenceCompletion(false);
-
-      const sceneNow = engine.getCurrentScene();
-      if (sceneNow?.id !== 'scene_ch2_asu_car') {
-        engine.applyEffect({ type: 'changeScene', chapterId: 'ch2', sceneId: 'scene_ch2_asu_car' });
-        router.replace('/play/ch2/scene_ch2_asu_car');
-      }
-
-      setCh2QaActive(true);
-      setCh2QaQuestionIndex(0);
-      setCh2QaPhase('prompt');
-      setCh2QaSelectedId(null);
-      setCh2QaLastCorrect(null);
-      showCh2QaPrompt(0);
       return;
     }
     if (choice.id === 'ch2_asu_not_now') {
-      setCurrentDialog(null);
-      setRefreshKey((prev) => prev + 1);
-      return;
-    }
-    if (choice.id === 'ch2_asu_to_ch3') {
-      const state = engine.getState();
-      const milestones = getMilestones(state);
-      if (milestones.ch2.canLeaveWithAsu) {
-        engine.setReasoningComplete('ch2');
-      }
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
       return;
@@ -888,6 +865,21 @@ export default function PlayPage() {
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
       setShowCh1ReportEditor(true);
+      return;
+    }
+
+    // 第二章：劉隊結算五題 QA
+    if (choice.id === 'ch2_liu_keep_exploring') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+    if (choice.id === 'ch2_liu_open_qa_conclusion') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      setCh2ConclusionIndex(0);
+      setCh2ConclusionSelectedId(null);
+      setShowCh2SentenceCompletion(true);
       return;
     }
     const currentState = engine.getState();
@@ -963,8 +955,15 @@ export default function PlayPage() {
 
   // 處理對話關閉：若有進行中的 NPC 關鍵對話則結束，使下次點擊該 NPC 可恢復隨機談話
   const handleDialogClose = useCallback(() => {
-    if (engineRef.current?.getState().activeNpcDialogId) {
-      engineRef.current.endNpcDialog();
+    const engine = engineRef.current;
+    const activeNpcId = engine?.getState().activeNpcDialogId;
+
+    if (activeNpcId) {
+      // 特例：阿蘇敏感對話若是透過關閉對話框結束，也視為已完成敏感對話
+      if (activeNpcId === 'npc_asu') {
+        engine!.applyEffect({ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true } as any);
+      }
+      engine!.endNpcDialog();
     }
     // 若有下一則且與當前同角色，直接換成下一則、不先清空，立繪固定不跳動
     if (currentDialog?.characterId && dialogQueue.length > 0) {
@@ -1474,6 +1473,19 @@ export default function PlayPage() {
 
   const handleHotspotClick = useCallback((hotspotId: string) => {
     if (!scene || !engineRef.current) return;
+    // 有正在顯示的對話或 overlay 時，暫停接受新的 hotspot 互動，避免玩家連點堆疊多組對話
+    if (
+      currentDialog ||
+      zoomOverlay?.active ||
+      currentPuzzle ||
+      activeItemDetail ||
+      showCh1ReportEditor ||
+      showCh2SentenceCompletion ||
+      !!sensitiveGate ||
+      showCh1MonologueOverlay
+    ) {
+      return;
+    }
     if (ch2QaActive && (ch2QaPhase === 'prompt' || ch2QaPhase === 'choices')) return;
     const engine = engineRef.current;
     
@@ -3085,24 +3097,7 @@ export default function PlayPage() {
                   ];
                   const coreCollectedCount = ch2CoreItems.filter((id) => inv.includes(id)).length;
 
-                  // 優先檢查是否可以進入五題 QA：完成敏感對話，或至少收集 3 個主線索
-                  if (sensitiveDone || coreCollectedCount >= 3) {
-                    setCurrentDialog({
-                      text: '妳都看過了。\n\n現在要不要把話說清楚？',
-                      type: 'character',
-                      characterId: 'npc_asu',
-                      characterName: '阿蘇（警方技術組）',
-                      characterExpression: 1,
-                      characterPosition: 'left',
-                      choices: [
-                        { id: 'ch2_asu_discuss_case', text: '談案情。' },
-                        { id: 'ch2_asu_not_now', text: '先不要。' },
-                      ],
-                    });
-                    return;
-                  }
-
-                  // 否則，若尚未完成敏感對話且已閒聊足夠次數，開啟敏感對話門檻
+                  // 若尚未完成敏感對話且已閒聊足夠次數，開啟敏感對話門檻
                   if (!sensitiveDone && casualCount >= 3 && canAskSensitive) {
                     setSensitiveGate({
                       step: 'ask_or_skip',
@@ -3141,11 +3136,11 @@ export default function PlayPage() {
                 }
 
                 if (npcId === 'npc_liu') {
-                  if (chapterId === 'ch1') {
-                    // 點擊當下從 engine 重算里程碑，避免使用舊狀態
-                    const st = engine.getState();
-                    const milestones = getMilestones(st);
+                  const st = engine.getState();
+                  const milestones = getMilestones(st);
 
+                  if (chapterId === 'ch1') {
+                    // 第一章：向劉隊報告
                     const baseDialog: Dialog = {
                       text: '初步看完了嗎？\n\n如果還沒把重點串起來，可以再繞一輪，或者先試著整理一次想法。',
                       type: 'character',
@@ -3172,6 +3167,69 @@ export default function PlayPage() {
                         }
                       : baseDialog;
 
+                    setCurrentDialog(dialog);
+                    return;
+                  }
+
+                  if (chapterId === 'ch2') {
+                    // 第二章：五題殘句 QA 由劉隊結算，前提是已完成阿蘇敏感對話
+                    const flags = st.flags || {};
+                    let asuSensitiveDone = !!flags.npc_asu_sensitive_done;
+
+                    // 保險修復：若條件已滿足但 flag 未被寫入，這裡自動補上
+                    if (!asuSensitiveDone) {
+                      const casualCountAsu = engine.getNpcCasualTalkCount('npc_asu');
+                      const inv = st.inventory ?? [];
+                      const ch2CoreItems = [
+                        'item_victim_basic_info',
+                        'item_encrypted_messages',
+                        'item_column_draft',
+                        'item_unfinished_recording',
+                        'item_coded_contacts',
+                        'item_location_record',
+                      ];
+                      const coreCollectedCount = ch2CoreItems.filter((id) => inv.includes(id)).length;
+                      const meetsSensitivePrereq = casualCountAsu >= 3 && coreCollectedCount > 0;
+
+                      if (meetsSensitivePrereq) {
+                        engine.applyEffect({ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true } as any);
+                        asuSensitiveDone = true;
+                      }
+                    }
+
+                    if (milestones.ch2.reasoningDone) {
+                      const rand = engine.triggerRandomNpcDialog(npcId);
+                      if (rand) {
+                        setCurrentDialog(rand);
+                      }
+                      return;
+                    }
+
+                    if (!asuSensitiveDone) {
+                      const dialog: Dialog = {
+                        text: '「先去跟阿蘇把那些話講完。等她講清楚，你再回來跟我說。」',
+                        type: 'character',
+                        characterId: 'npc_liu',
+                        characterName: '劉隊',
+                        characterExpression: 1,
+                        characterPosition: 'left',
+                      };
+                      setCurrentDialog(dialog);
+                      return;
+                    }
+
+                    const dialog: Dialog = {
+                      text: '「好，來說一次你現在看到的版本。」\n\n「我們把那幾句話排在一起，看它們指向哪裡。」',
+                      type: 'character',
+                      characterId: 'npc_liu',
+                      characterName: '劉隊',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                      choices: [
+                        { id: 'ch2_liu_keep_exploring', text: '我再多看一下現場。' },
+                        { id: 'ch2_liu_open_qa_conclusion', text: '好，現在就試著說一次。' },
+                      ],
+                    };
                     setCurrentDialog(dialog);
                     return;
                   }
@@ -3513,19 +3571,10 @@ export default function PlayPage() {
           )}
         </AnimatePresence>
 
-        {/* 第二章：原本的「把話補齊」 overlay 已改為場景內 QA 流程（阿蘇殘句 → 浮動答案 → 回應），此處暫不渲染舊面板 */}
-
-        {/* 第一章報告編輯器：向劉隊報告完成後導向 ch2 intro */}
+        {/* 第一章報告編輯器：透過 ChapterConclusionOverlay 呈現，完成後導向 ch2 intro */}
         <AnimatePresence>
           {showCh1ReportEditor && engineRef.current && (
-            <m.div
-              key="ch1-report-editor"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-blur-md px-4 pointer-events-auto"
-            >
+            <ChapterConclusionOverlay>
               <Ch1ReportEditor
                 engine={{
                   getState: () => engineRef.current!.getState(),
@@ -3543,7 +3592,37 @@ export default function PlayPage() {
                 }}
                 onClose={() => setShowCh1ReportEditor(false)}
               />
-            </m.div>
+            </ChapterConclusionOverlay>
+          )}
+        </AnimatePresence>
+
+        {/* 第二章 QA 結算：由劉隊啟動的章尾 overlay */}
+        <AnimatePresence>
+          {showCh2SentenceCompletion && engineRef.current && (
+            <ChapterConclusionOverlay>
+              <Ch2SentenceCompletion
+                engine={{
+                  getState: () => engineRef.current!.getState(),
+                  handleDialogChoice: (c) => engineRef.current!.handleDialogChoice(c),
+                }}
+                currentIndex={ch2ConclusionIndex}
+                onIndexChange={setCh2ConclusionIndex}
+                selectedChoiceId={ch2ConclusionSelectedId}
+                onSelectedChoiceChange={setCh2ConclusionSelectedId}
+                onComplete={() => {
+                  const engine = engineRef.current!;
+                  engine.applyEffect({
+                    type: 'setFlag',
+                    flag: 'ch2_qa_reviewed_with_liu',
+                    value: true,
+                  } as any);
+                  engine.setReasoningComplete('ch2');
+                  setShowCh2SentenceCompletion(false);
+                  setRefreshKey((k) => k + 1);
+                }}
+                onClose={() => setShowCh2SentenceCompletion(false)}
+              />
+            </ChapterConclusionOverlay>
           )}
         </AnimatePresence>
 

@@ -43,7 +43,7 @@ export function getMilestones(state: GameState): ChapterMilestones {
   const ch2QaDoneFlags = ['ch2_q1_done', 'ch2_q2_done', 'ch2_q3_done', 'ch2_q4_done', 'ch2_q5_done'];
   const ch2QaAllDone = ch2QaDoneFlags.every((key) => !!flags[key]);
 
-  const ch2CanLeaveWithAsu = ch2QaAllDone && !!flags.ch2_qa_epilogue_shown;
+  const ch2CanLeaveWithAsu = ch2QaAllDone && !!flags.ch2_qa_reviewed_with_liu;
   const ch2ReasoningDone = !!flags.ch2_reasoning_done;
 
   return {

@@ -137,7 +137,7 @@ export default function Ch2SentenceCompletion({
             把話補齊
           </h2>
           <p className="text-xs text-amber-100/70 mt-1">
-            阿蘇把句子放大，你只要把空格填回去。
+            劉隊把這幾句話攤開，要你把空格補齊，說出你看到的版本。
           </p>
         </div>
         <button
