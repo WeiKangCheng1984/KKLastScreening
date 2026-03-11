@@ -4,6 +4,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, useRef, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { GameEngine } from '@/lib/gameEngine';
+import { getMilestones, shouldAllowAction } from '@/lib/flowController';
 import { Dialog, DialogChoice, Hotspot, ConversationTurn, NpcDialogChoice } from '@/types/game';
 import SceneView, { SceneViewRef } from '@/components/SceneView';
 import BottomDock, { DOCK_NARROW_LEFT_RATIO, DOCK_NARROW_WIDTH } from '@/components/BottomDock';
@@ -116,9 +117,9 @@ export default function PlayPage() {
   const router = useRouter();
   const chapterId = params.chapterId as string;
   const sceneId = params.sceneId as string;
-  // 僅在 ?debug=1 時顯示互動框圈圈；預設隱藏以增加探索難度
+  // 互動框顯示：預設開啟，僅在 ?debug=0 時關閉，方便開發時快速測試
   const debugParam = searchParams.get('debug');
-  const debug = debugParam === '1';
+  const debug = debugParam !== '0';
   // 開發者模式：由選單開關，並存入 localStorage（不再使用網址 ?dev=1）
   const [devMode, setDevMode] = useState(false);
   useEffect(() => {
@@ -834,6 +835,14 @@ export default function PlayPage() {
 
     // 第二章：阿蘇收束入口（談案情 → 啟動五題 QA 流程，場景浮動卡＋底部對話）
     if (choice.id === 'ch2_asu_discuss_case') {
+      const state = engine.getState();
+      if (!shouldAllowAction(state, 'ch2', 'start_ch2_qa')) {
+        // 若不允許啟動 QA（例如已完成整章推理），僅關閉當前對話
+        setCurrentDialog(null);
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
       setDialogQueue([]);
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
@@ -859,7 +868,11 @@ export default function PlayPage() {
       return;
     }
     if (choice.id === 'ch2_asu_to_ch3') {
-      engine.setReasoningComplete('ch2');
+      const state = engine.getState();
+      const milestones = getMilestones(state);
+      if (milestones.ch2.canLeaveWithAsu) {
+        engine.setReasoningComplete('ch2');
+      }
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
       return;
@@ -1002,7 +1015,15 @@ export default function PlayPage() {
                 setCh2QaQuestionIndex(nextIndex);
                 showCh2QaPrompt(nextIndex);
               } else {
-                // 五題全部完成：收束對話，結束 QA
+                // 五題全部完成：收束對話，結束 QA，標記 epilogue 已顯示
+                if (engineRef.current) {
+                  engineRef.current.applyEffect({
+                    type: 'setFlag',
+                    flag: 'ch2_qa_epilogue_shown',
+                    value: true,
+                  } as any);
+                }
+
                 setCh2QaActive(false);
                 setCh2QaPhase('idle');
                 setCh2QaSelectedId(null);
@@ -2987,6 +3008,7 @@ export default function PlayPage() {
                     if (dialog) {
                       engine.incrementNpcCasualTalk(npcId);
                       setCurrentDialog(dialog);
+                      setRefreshKey((prev) => prev + 1);
                     }
                     return;
                   }
@@ -3006,6 +3028,7 @@ export default function PlayPage() {
                   if (dialogXz) {
                     engine.incrementNpcCasualTalk(npcId);
                     setCurrentDialog(dialogXz);
+                    setRefreshKey((prev) => prev + 1);
                   }
                   return;
                 }
@@ -3119,46 +3142,36 @@ export default function PlayPage() {
 
                 if (npcId === 'npc_liu') {
                   if (chapterId === 'ch1') {
-                    // 點擊當下從 engine 重算，避免閉包使用到舊的 hasCh1CoreClues / allScenesVisited
+                    // 點擊當下從 engine 重算里程碑，避免使用舊狀態
                     const st = engine.getState();
-                    const flags = st.flags || {};
-                    const ch1Scenes = getCurrentChapterScenes('ch1');
-                    const allVisited =
-                      ch1Scenes.length > 0 &&
-                      ch1Scenes.every((s) => (st.visitedScenes || []).includes(s));
-                    const hasClues =
-                      !!flags.ticket_stub_collected &&
-                      (!!flags.security_monitor_viewed ||
-                        !!flags.clue_manual_light_control ||
-                        !!flags.black_fragment_found ||
-                        !!flags.clue_clean_trash);
-                    const readyToReport = hasClues && allVisited;
+                    const milestones = getMilestones(st);
 
-                    const dialog: Dialog = readyToReport
+                    const baseDialog: Dialog = {
+                      text: '初步看完了嗎？\n\n如果還沒把重點串起來，可以再繞一輪，或者先試著整理一次想法。',
+                      type: 'character',
+                      characterId: 'npc_liu',
+                      characterName: '劉隊',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                      choices: [
+                        { id: 'ch1_liu_keep_exploring', text: '我再多看一下現場。' },
+                        { id: 'ch1_liu_try_reasoning', text: '我想先試著整理一次。' },
+                      ],
+                    };
+
+                    const canShowReportEntry = shouldAllowAction(st, 'ch1', 'show_liu_report_entry');
+
+                    const dialog: Dialog = canShowReportEntry
                       ? {
+                          ...baseDialog,
                           text: '初步看完了嗎？\n\n要再去看一輪，還是現在跟我報告？',
-                          type: 'character',
-                          characterId: 'npc_liu',
-                          characterName: '劉隊',
-                          characterExpression: 1,
-                          characterPosition: 'left',
                           choices: [
                             { id: 'ch1_liu_keep_exploring', text: '還想再繞繞。' },
                             { id: 'ch1_liu_report_now', text: '我想向你報告。' },
                           ],
                         }
-                      : {
-                          text: '初步看完了嗎？\n\n如果還沒把重點串起來，可以再繞一輪，或者先試著整理一次想法。',
-                          type: 'character',
-                          characterId: 'npc_liu',
-                          characterName: '劉隊',
-                          characterExpression: 1,
-                          characterPosition: 'left',
-                          choices: [
-                            { id: 'ch1_liu_keep_exploring', text: '我再多看一下現場。' },
-                            { id: 'ch1_liu_try_reasoning', text: '我想先試著整理一次。' },
-                          ],
-                        };
+                      : baseDialog;
+
                     setCurrentDialog(dialog);
                     return;
                   }
