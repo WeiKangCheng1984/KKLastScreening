@@ -474,12 +474,12 @@ const scenes: Record<string, Scene> = {
     ],
     hotspotEventMap: {
       'hotspot_car_phone_main': 'examine_car_phone_main',
-      'hotspot_car_unknown_chat': 'route_car_unknown_chat',
+      'hotspot_car_unknown_chat': 'examine_car_unknown_chat',
       'hotspot_car_an_chat': 'examine_car_an_chat',
-      'hotspot_car_notepad': 'route_car_notepad',
-      'hotspot_car_recording': 'route_car_recording',
-      'hotspot_car_contacts': 'route_car_contacts',
-      'hotspot_car_location': 'route_car_location',
+      'hotspot_car_notepad': 'examine_car_notepad',
+      'hotspot_car_recording': 'examine_car_recording',
+      'hotspot_car_contacts': 'examine_car_contacts',
+      'hotspot_car_location': 'examine_car_location',
       'hotspot_car_toolbox': 'examine_car_toolbox',
       'hotspot_car_coffee': 'examine_car_coffee',
       'hotspot_car_charm': 'examine_car_charm',
@@ -493,7 +493,6 @@ const scenes: Record<string, Scene> = {
         effects: [
           { type: 'triggerEvent', eventId: 'examine_car_notepad' },
           { type: 'triggerEvent', eventId: 'replay_car_notepad' },
-          { type: 'triggerEvent', eventId: 'asu_q1_from_notepad' },
         ],
       },
       {
@@ -562,7 +561,6 @@ const scenes: Record<string, Scene> = {
         effects: [
           { type: 'triggerEvent', eventId: 'examine_car_unknown_chat' },
           { type: 'triggerEvent', eventId: 'replay_car_unknown_chat' },
-          { type: 'triggerEvent', eventId: 'asu_q2_from_unknown' },
         ],
       },
       {
@@ -661,23 +659,7 @@ const scenes: Record<string, Scene> = {
           },
         ],
       },
-      {
-        id: 'asu_q2_from_unknown',
-        name: '阿蘇問答 Q2：她也在場',
-        description: '',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_car_unknown_chat' },
-          { type: 'hasItem', itemId: 'item_encrypted_messages' },
-          { type: 'hasFlag', flag: 'ch2_q1_done' },
-        ],
-        effects: [
-          {
-            type: 'startNpcDialog',
-            dialogId: 'npc_asu_q2',
-          },
-        ],
-        oneTime: true,
-      },
+      // Q2~Q5 的正式問答現在集中在「談案情」modal 中進行，探索期不再從場景事件啟動這些對話樹。
       {
         id: 'examine_car_an_chat',
         name: '通訊紀錄 An',
@@ -768,41 +750,8 @@ const scenes: Record<string, Scene> = {
           },
         ],
       },
-      {
-        id: 'asu_q1_from_notepad',
-        name: '阿蘇問答 Q1：省掉了什麼',
-        description: '',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_car_notepad' },
-          { type: 'hasItem', itemId: 'item_column_draft' },
-          // 基本探索：六項主線索中，任意取得至少三項
-          {
-            type: 'custom',
-            customCheck: (state) => {
-              const inv = state.inventory || [];
-              const coreIds = [
-                'item_victim_basic_info',
-                'item_encrypted_messages',
-                'item_column_draft',
-                'item_unfinished_recording',
-                'item_coded_contacts',
-                'item_location_record',
-              ];
-              const count = coreIds.filter(id => inv.includes(id)).length;
-              return count >= 3;
-            },
-          },
-          // 已完成阿蘇敏感對話
-          { type: 'hasFlag', flag: 'npc_asu_sensitive_done' },
-        ],
-        effects: [
-          {
-            type: 'startNpcDialog',
-            dialogId: 'npc_asu_q1',
-          },
-        ],
-        oneTime: true,
-      },
+      // 阿蘇問答 Q1~Q5（省掉了什麼／她也在場／三起事故／提早到場／大家會怎麼做）
+      // 現在改由 ch2 章末「談案情」modal（Ch2SentenceCompletion）統一觸發，不在探索期由場景事件主動啟動。
       {
         id: 'examine_car_recording',
         name: '錄音備忘_事故',
@@ -870,25 +819,7 @@ const scenes: Record<string, Scene> = {
         effects: [
           { type: 'triggerEvent', eventId: 'examine_car_recording' },
           { type: 'triggerEvent', eventId: 'replay_car_recording' },
-          { type: 'triggerEvent', eventId: 'asu_q5_from_recording' },
         ],
-      },
-      {
-        id: 'asu_q5_from_recording',
-        name: '阿蘇問答 Q5：大家會怎麼做',
-        description: '',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_car_recording' },
-          { type: 'hasItem', itemId: 'item_unfinished_recording' },
-          { type: 'hasFlag', flag: 'ch2_q4_done' },
-        ],
-        effects: [
-          {
-            type: 'startNpcDialog',
-            dialogId: 'npc_asu_q5',
-          },
-        ],
-        oneTime: true,
       },
       {
         id: 'examine_car_contacts',
@@ -957,25 +888,7 @@ const scenes: Record<string, Scene> = {
         effects: [
           { type: 'triggerEvent', eventId: 'examine_car_contacts' },
           { type: 'triggerEvent', eventId: 'replay_car_contacts' },
-          { type: 'triggerEvent', eventId: 'asu_q3_from_contacts' },
         ],
-      },
-      {
-        id: 'asu_q3_from_contacts',
-        name: '阿蘇問答 Q3：三起事故',
-        description: '',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_car_contacts' },
-          { type: 'hasItem', itemId: 'item_coded_contacts' },
-          { type: 'hasFlag', flag: 'ch2_q2_done' },
-        ],
-        effects: [
-          {
-            type: 'startNpcDialog',
-            dialogId: 'npc_asu_q3',
-          },
-        ],
-        oneTime: true,
       },
       {
         id: 'examine_car_location',
@@ -1045,25 +958,7 @@ const scenes: Record<string, Scene> = {
         effects: [
           { type: 'triggerEvent', eventId: 'examine_car_location' },
           { type: 'triggerEvent', eventId: 'replay_car_location' },
-          { type: 'triggerEvent', eventId: 'asu_q4_from_location' },
         ],
-      },
-      {
-        id: 'asu_q4_from_location',
-        name: '阿蘇問答 Q4：提早到場',
-        description: '',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_car_location' },
-          { type: 'hasItem', itemId: 'item_location_record' },
-          { type: 'hasFlag', flag: 'ch2_q3_done' },
-        ],
-        effects: [
-          {
-            type: 'startNpcDialog',
-            dialogId: 'npc_asu_q4',
-          },
-        ],
-        oneTime: true,
       },
       {
         id: 'examine_car_toolbox',

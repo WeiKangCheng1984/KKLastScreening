@@ -239,6 +239,14 @@ export default function PlayPage() {
     [ch2QaKeys],
   );
 
+  // 第二章 QA 保險：若已關閉提示對話但 phase 未切到 choices（佇列為空、無當前對話），延遲強制顯示浮動答案卡
+  useEffect(() => {
+    if (!ch2QaActive || ch2QaPhase !== 'prompt') return;
+    if (currentDialog != null || dialogQueue.length > 0) return;
+    const t = setTimeout(() => setCh2QaPhase('choices'), 150);
+    return () => clearTimeout(t);
+  }, [ch2QaActive, ch2QaPhase, currentDialog, dialogQueue.length]);
+
   // 方案 B：對話關閉時清掉 turn；開啟時由 setCurrentConversationTurn(turns[0]) 與 onTurnChange 設入
   useEffect(() => {
     if (!currentConversation) setCurrentConversationTurn(null);
@@ -554,7 +562,17 @@ export default function PlayPage() {
           description: item.description,
         });
 
-        // 不排入同事件的 showDialog，避免關閉詳解卡後再跳出第二段道具解說
+        // 同時排入該事件的 showDialog（道具說明＋阿蘇／旁白敘事），取得道具時一併告知道具文案
+        if (dialogEffects.length > 0) {
+          const dialogs: Dialog[] = [];
+          dialogEffects.forEach((effect: any) => {
+            if (effect.dialog) dialogs.push(effect.dialog);
+          });
+          if (dialogs.length > 0) {
+            const hotspot = scene.hotspots.find(h => h.id === hotspotId);
+            addDialogsToQueue(dialogs, hotspot?.description);
+          }
+        }
         setRefreshKey(prev => prev + 1);
         return true;
       }
@@ -814,13 +832,24 @@ export default function PlayPage() {
     const engine = engineRef.current;
     const scene = engine.getCurrentScene();
 
-    // 第二章：阿蘇收束入口（談案情 → 啟動五題 QA 流程）
+    // 第二章：阿蘇收束入口（談案情 → 啟動五題 QA 流程，場景浮動卡＋底部對話）
     if (choice.id === 'ch2_asu_discuss_case') {
+      setDialogQueue([]);
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
       setShowCh2SentenceCompletion(false);
+
+      const sceneNow = engine.getCurrentScene();
+      if (sceneNow?.id !== 'scene_ch2_asu_car') {
+        engine.applyEffect({ type: 'changeScene', chapterId: 'ch2', sceneId: 'scene_ch2_asu_car' });
+        router.replace('/play/ch2/scene_ch2_asu_car');
+      }
+
       setCh2QaActive(true);
       setCh2QaQuestionIndex(0);
+      setCh2QaPhase('prompt');
+      setCh2QaSelectedId(null);
+      setCh2QaLastCorrect(null);
       showCh2QaPrompt(0);
       return;
     }
@@ -1047,7 +1076,16 @@ export default function PlayPage() {
         return prev;
       }
     });
-  }, [currentDialog, dialogQueue]);
+  }, [
+    currentDialog,
+    dialogQueue,
+    ch2QaActive,
+    ch2QaPhase,
+    ch2QaLastCorrect,
+    ch2QaQuestionIndex,
+    ch2QaKeys,
+    showCh2QaPrompt,
+  ]);
 
   // 開發者模式按鈕（移除快捷鍵，只保留按鈕）
 
@@ -1155,20 +1193,22 @@ export default function PlayPage() {
                           state.currentScene !== sceneId;
     
     // 如果是新場景，顯示場景名稱（確保每次切換都有特效）
-    // 使用 setTimeout 確保在客戶端首次渲染後才更新狀態，避免 hydration 錯誤
-    if (isNewScene) {
-      // 更新追蹤的場景
+    // 第二章 QA 談案情時會 router.replace 到車內場景，此時不顯示場景名稱，讓阿蘇題目提示先出來
+    if (isNewScene && !ch2QaActive) {
       lastDisplayedSceneRef.current = sceneId;
-      
-      // 延遲到下一幀執行，確保在首次渲染完成後才更新狀態
       setTimeout(() => {
         showSceneNameWithTimer(currentScene.name, 2000);
       }, 0);
     }
-    
-    // 場景切換時清空對話隊列與 Zoom 覆蓋層
-    setCurrentDialog(null);
-    setDialogQueue([]);
+    if (isNewScene && ch2QaActive) {
+      lastDisplayedSceneRef.current = sceneId;
+    }
+
+    // 場景切換時清空對話隊列與 Zoom 覆蓋層（第二章 QA 進行中不清，保留阿蘇題目提示）
+    if (!ch2QaActive) {
+      setCurrentDialog(null);
+      setDialogQueue([]);
+    }
     setZoomOverlay(null);
     
     // 確保當前章節的所有場景都被標記為可訪問（添加到 visitedScenes）
@@ -1196,18 +1236,19 @@ export default function PlayPage() {
         chapterId: chapterId,
         sceneId: sceneId,
       });
-      
-      // 即使場景已在 visitedScenes 中，如果 URL 改變了，也要顯示場景名稱
-      // 使用 ref 檢查是否為新場景
-      if (lastDisplayedSceneRef.current !== sceneId) {
-        lastDisplayedSceneRef.current = sceneId;
-        const newScene = scenes[sceneId];
-        if (newScene) {
-          // 延遲到下一幀執行，確保在首次渲染完成後才更新狀態
-          setTimeout(() => {
-            showSceneNameWithTimer(newScene.name, 2000);
-          }, 0);
+
+      if (!ch2QaActive) {
+        if (lastDisplayedSceneRef.current !== sceneId) {
+          lastDisplayedSceneRef.current = sceneId;
+          const newScene = scenes[sceneId];
+          if (newScene) {
+            setTimeout(() => {
+              showSceneNameWithTimer(newScene.name, 2000);
+            }, 0);
+          }
         }
+      } else {
+        lastDisplayedSceneRef.current = sceneId;
       }
     }
     
@@ -1232,7 +1273,7 @@ export default function PlayPage() {
       }
       setShowSceneName(false);
     };
-  }, [chapterId, sceneId, showSceneNameWithTimer]);
+  }, [chapterId, sceneId, showSceneNameWithTimer, ch2QaActive]);
 
   // 保存狀態到 localStorage（當狀態改變時）
   useEffect(() => {
@@ -1412,6 +1453,7 @@ export default function PlayPage() {
 
   const handleHotspotClick = useCallback((hotspotId: string) => {
     if (!scene || !engineRef.current) return;
+    if (ch2QaActive && (ch2QaPhase === 'prompt' || ch2QaPhase === 'choices')) return;
     const engine = engineRef.current;
     
     // 增加互動次數（用於閃爍頻率調整）
@@ -2122,7 +2164,8 @@ export default function PlayPage() {
     }
 
     // 步驟3：通用事件處理（處理不會添加道具的事件）
-    // 檢查是否有事件映射但沒有被 handleItemCollection 處理
+    // 先記錄此 hotspot 已互動，讓後續 examine_* 事件的 hasInteracted 檢查能通過（第二章車內等場景）
+    engine.addInteraction(hotspotId);
     // 首先檢查 hotspotEventMap 中映射的事件
     const mappedEventId = scene.hotspotEventMap?.[hotspotId];
     let eventToTrigger = mappedEventId ? scene.events.find(e => e.id === mappedEventId) : null;
@@ -2250,7 +2293,7 @@ export default function PlayPage() {
       }
       setRefreshKey(prev => prev + 1);
     }
-  }, [scene, handleItemCollection, addDialogsToQueue, chapterId]); // engine 來自 useRef，不需要在依賴中
+  }, [scene, handleItemCollection, addDialogsToQueue, chapterId, ch2QaActive, ch2QaPhase]); // engine 來自 useRef，不需要在依賴中
 
   const handleItemClick = useCallback((itemId: string) => {
     if (!engineRef.current) return;
