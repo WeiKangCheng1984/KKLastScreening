@@ -4,7 +4,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, useRef, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { GameEngine } from '@/lib/gameEngine';
-import { Dialog, Hotspot, ConversationTurn } from '@/types/game';
+import { Dialog, DialogChoice, Hotspot, ConversationTurn, NpcDialogChoice } from '@/types/game';
 import SceneView, { SceneViewRef } from '@/components/SceneView';
 import BottomDock, { DOCK_NARROW_LEFT_RATIO, DOCK_NARROW_WIDTH } from '@/components/BottomDock';
 import DialogBox from '@/components/DialogBox';
@@ -38,7 +38,6 @@ import TutorialGuide from '@/components/TutorialGuide';
 import AudioControl from '@/components/AudioControl';
 import MuteAllButton from '@/components/MuteAllButton';
 import { preloadSVGBatch } from '@/lib/svgLoader';
-import { DialogChoice } from '@/types/game';
 import ScoreDisplay from '@/components/ScoreDisplay';
 import NpcRightStrip from '@/components/NpcRightStrip';
 import ReasoningPanel from '@/components/ReasoningPanel';
@@ -82,22 +81,32 @@ function getHotspotCenter(hotspot: Hotspot): { x: number; y: number } {
   return { x: 0.5, y: 0.5 };
 }
 
+// 將 NpcDialogChoice（label）轉成 DialogChoice（text），供 handleDialogChoice 與 CH2_Q_META 使用
+function npcChoiceToDialogChoice(npc: NpcDialogChoice): DialogChoice {
+  return {
+    id: npc.id,
+    text: npc.label,
+    effects: npc.effects,
+    insightEffects: npc.insightEffects,
+  };
+}
+
 // 第二章：阿蘇五題 QA 對應的 NpcDialogChoice（用於寫入旗標與洞察）
 const CH2_Q_META: Record<Ch2QuestionKey, { choices: DialogChoice[] }> = {
   q1: {
-    choices: ch2NpcDialogs.npc_asu_q1.node_asu_q1_start.choices as DialogChoice[],
+    choices: ch2NpcDialogs.npc_asu_q1.node_asu_q1_start.choices.map(npcChoiceToDialogChoice),
   },
   q2: {
-    choices: ch2NpcDialogs.npc_asu_q2.node_asu_q2_start.choices as DialogChoice[],
+    choices: ch2NpcDialogs.npc_asu_q2.node_asu_q2_start.choices.map(npcChoiceToDialogChoice),
   },
   q3: {
-    choices: ch2NpcDialogs.npc_asu_q3.node_asu_q3_start.choices as DialogChoice[],
+    choices: ch2NpcDialogs.npc_asu_q3.node_asu_q3_start.choices.map(npcChoiceToDialogChoice),
   },
   q4: {
-    choices: ch2NpcDialogs.npc_asu_q4.node_asu_q4_start.choices as DialogChoice[],
+    choices: ch2NpcDialogs.npc_asu_q4.node_asu_q4_start.choices.map(npcChoiceToDialogChoice),
   },
   q5: {
-    choices: ch2NpcDialogs.npc_asu_q5.node_asu_q5_start.choices as DialogChoice[],
+    choices: ch2NpcDialogs.npc_asu_q5.node_asu_q5_start.choices.map(npcChoiceToDialogChoice),
   },
 };
 
