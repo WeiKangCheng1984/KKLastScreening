@@ -39,7 +39,7 @@ export const flowConfig: FlowConfig = {
       type: 'scene_explore',
       next: 'ch3_intro',
       chapterId: 'ch2',
-      sceneIds: ['scene_ch2_asu_car'],
+      sceneIds: ['scene_ch2_cinema_entrance', 'scene_ch2_asu_car', 'scene_ch2_asu_desktop'],
     },
     ch3_intro: {
       id: 'ch3_intro',
@@ -52,7 +52,9 @@ export const flowConfig: FlowConfig = {
       type: 'chapter_hub',
       chapterId: 'ch2',
       choices: [
+        { id: 'scene_ch2_cinema_entrance', label: '電影院大門口', sceneId: 'scene_ch2_cinema_entrance' },
         { id: 'scene_ch2_asu_car', label: '阿蘇的車裡', sceneId: 'scene_ch2_asu_car' },
+        { id: 'scene_ch2_asu_desktop', label: '阿蘇的電腦', sceneId: 'scene_ch2_asu_desktop' },
       ],
     },
   },

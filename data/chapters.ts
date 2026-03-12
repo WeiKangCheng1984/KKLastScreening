@@ -34,7 +34,7 @@ export const chapters: Record<string, Chapter> = {
     id: 'ch2',
     name: '第二章：死者是誰',
     description: '手機裡的線索',
-    scenes: ['scene_ch2_asu_car'],
+    scenes: ['scene_ch2_cinema_entrance', 'scene_ch2_asu_car', 'scene_ch2_asu_desktop'],
     intro: {
       title: '第二章：死者是誰',
       subtitle: '手機裡的線索',

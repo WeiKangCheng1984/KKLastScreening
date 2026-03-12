@@ -219,6 +219,7 @@ export default function PlayPage() {
     choices: DialogChoice[];
   } | null>(null);
   const sceneViewRef = useRef<SceneViewRef>(null);
+  const lastSceneClickRef = useRef<number>(0);
 
   // 第二章 QA：當前題目提示對話（阿蘇講殘句）
   const showCh2QaPrompt = useCallback(
@@ -382,7 +383,7 @@ export default function PlayPage() {
       }
     }
 
-    if (chapterId === 'ch2' && sceneId === 'scene_ch2_asu_car') {
+    if (chapterId === 'ch2' && sceneId === 'scene_ch2_cinema_entrance') {
       const flagKey = 'ch2_police_intro_shown';
       if (!state.flags[flagKey]) {
         const police = reasoningByChapter['ch2']?.police;
@@ -1476,6 +1477,14 @@ export default function PlayPage() {
 
   const handleHotspotClick = useCallback((hotspotId: string) => {
     if (!scene || !engineRef.current) return;
+
+    // 極短暫點擊冷卻，避免玩家連點時連續觸發多個對話/事件
+    const now = performance.now();
+    // 冷卻時間略微拉長，降低連續點擊多個互動框時同時觸發的機率
+    if (now - lastSceneClickRef.current < 300) {
+      return;
+    }
+    lastSceneClickRef.current = now;
     // 有正在顯示的對話或 overlay 時，暫停接受新的 hotspot 互動，避免玩家連點堆疊多組對話
     if (
       currentDialog ||
@@ -2781,6 +2790,55 @@ export default function PlayPage() {
     const targetScene = engine.getScenes()[targetSceneId];
     if (!targetScene) return;
 
+    // 第二章場景解鎖條件：先完成大門口與車內一定程度探索，再解鎖阿蘇電腦場景
+    if (chapterId === 'ch2') {
+      const state = engine.getState();
+      const flags = state.flags || {};
+      const inv = state.inventory ?? [];
+
+      // 1) 從第二章其他場景想直接跳到阿蘇車上：需要先跟劉隊談過任務
+      if (targetSceneId === 'scene_ch2_asu_car' && !flags.ch2_task_from_liu) {
+        setCurrentDialog({
+          text:
+            '劉隊看了你一眼：「先在這裡把話講清楚。」\n\n' +
+            '「你知道自己要去找誰、要看什麼，再去找阿蘇。」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊（偵查隊）',
+          characterExpression: 1,
+          characterPosition: 'left',
+        });
+        return;
+      }
+
+      // 2) 想前往阿蘇電腦畫面：需先接到劉隊任務，且在車上實際點過一定數量的核心手機畫面（即使內容尚在破譯中）
+      if (targetSceneId === 'scene_ch2_asu_desktop') {
+        // 使用 interactions 而不是 inventory，避免將證據內容移到電腦場景後造成循環依賴
+        const coreHotspots = [
+          'hotspot_car_unknown_chat',
+          'hotspot_car_notepad',
+          'hotspot_car_recording',
+          'hotspot_car_location',
+        ];
+        const interactedCount = coreHotspots.filter((id) => engine.hasInteracted(id)).length;
+        const hasLiuTask = !!flags.ch2_task_from_liu;
+
+        if (!hasLiuTask || interactedCount < 3) {
+          setCurrentDialog({
+            text:
+              '阿蘇把手從觸控板上收回來：「先把車上的東西看熟一點。」\n\n' +
+              '「等你對這些線索有自己的版本，再來坐到這裡。」',
+            type: 'character',
+            characterId: 'npc_asu',
+            characterName: '阿蘇（警方技術組）',
+            characterExpression: 1,
+            characterPosition: 'left',
+          });
+          return;
+        }
+      }
+    }
+
     lastDisplayedSceneRef.current = targetSceneId;
 
     // 步驟 1：只顯示大字（不改 engine、不 router），此時仍為舊場景，不會觸發「場景不存在」或 chapterData 重算
@@ -3084,37 +3142,43 @@ export default function PlayPage() {
                   const casualCount = engine.getNpcCasualTalkCount('npc_asu');
                   const sensitiveDone = !!flags.npc_asu_sensitive_done;
                   const inv = st?.inventory ?? [];
-                  const hasVictimInfo = inv.includes('item_victim_basic_info');
-                  const hasEncrypted = inv.includes('item_encrypted_messages');
-                  const hasColumnDraft = inv.includes('item_column_draft');
-                  // 第二章：任一道具即可解鎖敏感問題（劇情：至少取得部分車內線索後可問）
-                  const canAskSensitive = hasVictimInfo || hasEncrypted || hasColumnDraft;
 
-                  const ch2CoreItems = [
-                    'item_victim_basic_info',
-                    'item_encrypted_messages',
-                    'item_column_draft',
-                    'item_unfinished_recording',
-                    'item_coded_contacts',
-                    'item_location_record',
-                  ];
-                  const coreCollectedCount = ch2CoreItems.filter((id) => inv.includes(id)).length;
-
-                  // 若尚未完成敏感對話且已閒聊足夠次數，開啟敏感對話門檻
-                  if (!sensitiveDone && casualCount >= 3 && canAskSensitive) {
-                    setSensitiveGate({
-                      step: 'ask_or_skip',
-                      npcId: 'npc_asu',
-                      text: '妳覺得氣氛已經沉到一個程度，可以試著往深一點問。',
-                      choices: [
-                        { id: 'asu_sensitive_ask', text: '我想問一些比較敏感的問題。' },
-                        { id: 'asu_sensitive_skip', text: '先看資料就好，暫時不問。' },
-                      ],
-                    });
+                  // 已完成敏感對話：只保留隨機閒聊
+                  if (sensitiveDone) {
+                    const dialogAsuDone = engine.triggerRandomNpcDialog(npcId);
+                    if (dialogAsuDone) {
+                      engine.incrementNpcCasualTalk(npcId);
+                      setCurrentDialog(dialogAsuDone);
+                    }
                     return;
                   }
 
-                  // 其他情況：維持一般閒聊
+                  // 只在阿蘇電腦場景檢查敏感問答門檻
+                  if (scene?.id === 'scene_ch2_asu_desktop') {
+                    const coreDocFlags = [
+                      'ch2_pc_unknown_viewed',
+                      'ch2_pc_column_viewed',
+                      'ch2_pc_recording_viewed',
+                      'ch2_pc_location_viewed',
+                    ] as const;
+                    const coreDocsViewedCount = coreDocFlags.filter((f) => !!flags[f]).length;
+
+                    // 至少看過 3 份重點資料，且有一定程度互動後，開啟敏感對話門檻
+                    if (coreDocsViewedCount >= 3 && casualCount >= 1) {
+                      setSensitiveGate({
+                        step: 'ask_or_skip',
+                        npcId: 'npc_asu',
+                        text: '妳覺得氣氛已經沉到一個程度，可以試著往深一點問。',
+                        choices: [
+                          { id: 'asu_sensitive_ask', text: '我想問一些比較敏感的問題。' },
+                          { id: 'asu_sensitive_skip', text: '先看資料就好，暫時不問。' },
+                        ],
+                      });
+                      return;
+                    }
+                  }
+
+                  // 其他情況：維持一般閒聊（車上或電腦前的輕鬆對話）
                   const dialogAsu = engine.triggerRandomNpcDialog(npcId);
                   if (dialogAsu) {
                     engine.incrementNpcCasualTalk(npcId);
@@ -3177,28 +3241,7 @@ export default function PlayPage() {
                   if (chapterId === 'ch2') {
                     // 第二章：五題殘句 QA 由劉隊結算，前提是已完成阿蘇敏感對話
                     const flags = st.flags || {};
-                    let asuSensitiveDone = !!flags.npc_asu_sensitive_done;
-
-                    // 保險修復：若條件已滿足但 flag 未被寫入，這裡自動補上
-                    if (!asuSensitiveDone) {
-                      const casualCountAsu = engine.getNpcCasualTalkCount('npc_asu');
-                      const inv = st.inventory ?? [];
-                      const ch2CoreItems = [
-                        'item_victim_basic_info',
-                        'item_encrypted_messages',
-                        'item_column_draft',
-                        'item_unfinished_recording',
-                        'item_coded_contacts',
-                        'item_location_record',
-                      ];
-                      const coreCollectedCount = ch2CoreItems.filter((id) => inv.includes(id)).length;
-                      const meetsSensitivePrereq = casualCountAsu >= 3 && coreCollectedCount > 0;
-
-                      if (meetsSensitivePrereq) {
-                        engine.applyEffect({ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true } as any);
-                        asuSensitiveDone = true;
-                      }
-                    }
+                    const asuSensitiveDone = !!flags.npc_asu_sensitive_done;
 
                     if (milestones.ch2.reasoningDone) {
                       const rand = engine.triggerRandomNpcDialog(npcId);
@@ -3210,7 +3253,9 @@ export default function PlayPage() {
 
                     if (!asuSensitiveDone) {
                       const dialog: Dialog = {
-                        text: '「先去跟阿蘇把那些話講完。等她講清楚，你再回來跟我說。」',
+                        text:
+                          '「先去跟阿蘇把那些話講完。」\n\n' +
+                          '「等她把那些東西講清楚，你再回來跟我說一次。」',
                         type: 'character',
                         characterId: 'npc_liu',
                         characterName: '劉隊',

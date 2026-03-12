@@ -231,8 +231,23 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
     return {};
   };
 
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // 空點背景時觸發水波紋，用輕微視覺回饋告訴玩家「有點到，但這裡沒有互動」
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setRipplePosition({ x, y, hotspotId: '__empty__' });
+    setShowRipple(true);
+
+    setTimeout(() => {
+      setShowRipple(false);
+      setRipplePosition(null);
+    }, 600);
+  };
+
   return (
-    <div className="relative w-full h-full bg-dark-bg">
+    <div className="relative w-full h-full bg-dark-bg" onClick={handleBackgroundClick}>
       {/* 閃爍效果已取消 */}
       
       {/* 環境光照層（整合光照管理器） */}
@@ -313,6 +328,17 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
           </div>
         );
       })}
+
+      {/* 空點水波紋效果：在場景背景上顯示輕微的點擊回饋 */}
+      {showRipple && ripplePosition && ripplePosition.hotspotId === '__empty__' && (
+        <RippleEffect
+          show={true}
+          position={{ x: ripplePosition.x, y: ripplePosition.y }}
+          color="#ffffff40"
+          duration={400}
+          size={160}
+        />
+      )}
     </div>
   );
 });
