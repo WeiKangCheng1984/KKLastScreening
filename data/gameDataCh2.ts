@@ -994,6 +994,7 @@ const scenes: Record<string, Scene> = {
         id: 'pc_view_unknown_chat',
         name: '查看 Unknown 對話殘句',
         description: '',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
@@ -1043,6 +1044,7 @@ const scenes: Record<string, Scene> = {
         id: 'pc_view_column_draft',
         name: '查看未發表專欄草稿',
         description: '',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
@@ -1092,6 +1094,7 @@ const scenes: Record<string, Scene> = {
         id: 'pc_view_recording',
         name: '查看錄音逐字稿',
         description: '',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
@@ -1141,6 +1144,7 @@ const scenes: Record<string, Scene> = {
         id: 'pc_view_location',
         name: '查看行蹤與節點地圖',
         description: '',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
