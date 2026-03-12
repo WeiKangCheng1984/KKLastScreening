@@ -2,7 +2,21 @@
   第二章：死者是誰 — 劇情、線索、台詞（與程式一致）
 ================================================================================
 
-  資料來源：data/chapters.ts（ch2 intro）、data/gameDataCh2.ts（場景 scene_ch2_asu_car、道具、事件、阿蘇／劉隊 NPC）、data/reasoningByChapter.ts（ch2 police introLine、outroStandard、outroPlayerLines）。
+  資料來源：data/chapters.ts（ch2 intro）、data/gameDataCh2.ts（場景 scene_ch2_asu_car、道具、事件、阿蘇／劉隊 NPC、ch2QuestionConfigs）、data/getChapterData.ts（getChapterData('ch2') 動態載入）、data/reasoningByChapter.ts（ch2 police introLine、outroStandard、outroPlayerLines）、lib/flowController.ts（show_asu_discuss_case_entry）、app/play/[chapterId]/[sceneId]/page.tsx、components/Ch2SentenceCompletion.tsx（五題填空 modal）。
+
+
+--------------------------------------------------------------------------------
+程式邏輯與互動方式（最新版）
+--------------------------------------------------------------------------------
+
+  • 章節資料：getChapterData('ch2') → gameDataCh2，單一可探索場景 scene_ch2_asu_car（阿蘇的車裡）。
+  • 車內 Hotspot：hotspotEventMap 對應 examine_car_*（手機主畫面、Unknown 對話、An 對話、記事本、錄音、聯絡人、定位、工具箱、咖啡、吊飾）。部分線索有 route_car_* 事件（未互動時先 trigger 對應 examine_*），避免第一次點擊被其他邏輯搶走。
+  • 道具取得：點擊 hotspot → handleItemCollection 觸發 examine_* 事件 → addItem + showDialog；取得時顯示道具浮動卡並將阿蘇／旁白 showDialog 排入 dialogQueue。已取得後再次點擊同一 hotspot 觸發 replay_* 事件（僅 showDialog），重新播放說明。
+  • 阿蘇閒聊：點阿蘇頭像觸發隨機 randomDialogs。敏感對話為 npc_asu 對話樹（二選一：樓梯間／三起事故來源），走完或關閉對話框時設 npc_asu_sensitive_done；flowController.shouldAllowAction(..., 'show_asu_discuss_case_entry') 為 true 時才顯示「談案情」選項。
+  • 談案情（ch2_asu_discuss_case）：玩家選「談案情」後僅顯示敘事提示——「這些話，你之後可以跟劉隊講一次。」「他會想知道你現在看到的是哪一個版本。」不啟動五題 QA；QA 改由劉隊結算入口進入。
+  • 劉隊結算：點劉隊頭像。若尚未 npc_asu_sensitive_done → 劉隊：「先去跟阿蘇把那些話講完。等她講清楚，你再回來跟我說。」若已完成敏感對話 → 劉隊：「好，來說一次你現在看到的版本。」「我們把那幾句話排在一起，看它們指向哪裡。」選項：「我再多看一下現場。」／「好，現在就試著說一次。」選後者 → setShowCh2SentenceCompletion(true)，開啟 Ch2SentenceCompletion 全螢幕模態。
+  • 五題 QA（Ch2SentenceCompletion）：標題「把話補齊」，劉隊把五句殘句攤開，玩家依序選答案。題目來源 ch2QuestionConfigs（q1～q5）與 npc_asu_q1～q5 的 choices 一致；答對寫入 ch2_q*_done / ch2_q*_answer 並顯示阿蘇回應，答錯顯示 wrongFallback。五題全部完成後可關閉 modal，ch2 章末流程依 flag ch2_reasoning_done 等決定。
+  • 場景與對話保留：ch2 僅一景；若 ch2QaActive 為 true（舊版浮動卡流程用），場景切換 effect 不清 currentDialog／dialogQueue、不顯示場景名。目前實際使用為「劉隊 → Ch2SentenceCompletion modal」，不經 ch2QaActive 浮動卡。
 
 
 --------------------------------------------------------------------------------
@@ -65,7 +79,10 @@
   她停半秒，又補一句，像在防禦。
   阿蘇：「資料有時候也不一定值得信任。」
 
-車內調查（線索獲得區，與 gameDataCh2 events 一致）
+車內調查（線索獲得區，與 gameDataCh2 events、hotspotEventMap 一致）
+
+  Hotspot → 事件 ID：hotspot_car_phone_main → examine_car_phone_main（已取得後 replay_car_phone_main）；其餘同理（examine_car_unknown_chat、examine_car_an_chat、examine_car_notepad、examine_car_recording、examine_car_contacts、examine_car_location）。無道具的為 examine_car_toolbox、examine_car_coffee、examine_car_charm。
+
 1) 受害者手機主畫面（hotspot_car_phone_main）→ 取得：受害者基礎資料（item_victim_basic_info）
 
   獲得：受害者基礎資料
@@ -270,7 +287,7 @@ KK：「這句『用三起事故來揭』，你覺得誰寫的？」
 章尾釘句：事故能被分類。
 
 --------------------------------------------------------------------------------
-尾聲：第二章 — 劉隊（與 data/reasoningByChapter.ts ch2.police 一致）
+尾聲：第二章 — 劉隊（與 data/reasoningByChapter.ts、page.tsx 一致）
 --------------------------------------------------------------------------------
 
 【第二章開場時的劉隊】
@@ -279,42 +296,25 @@ KK：「這句『用三起事故來揭』，你覺得誰寫的？」
   劉隊：「這是技術組解完密的那份。你不用幫我寫報告，只要告訴我——哪一段值得我們怕。」
   gameDataCh2 劉隊 ch2_liu_briefing：「手機資料在這。你跟阿蘇先看，有結論再跟我說。」
 
-【玩家完成車內調查後的劉隊回應（回顧錄音框架）】
+【玩家完成車內調查後 — 劉隊結算入口（現行實作）】
 
-  觸發條件（建議）：
-    - 車內七大類線索中，至少查看／取得其中三項以上（受害者基礎資料、Unknown 對話、草稿、錄音、代號聯絡人、行蹤紀錄等）。
-    - 至少經歷一次與阿蘇的「敏感對話」（樓梯間／三起事故的來源二選一）。
+  觸發：在場景內點擊劉隊頭像。
 
-  場景：畫面轉到一台錄音機，或警局辦公室一角。
+  條件與分支：
+    • 若尚未完成阿蘇敏感對話（!npc_asu_sensitive_done）：劉隊：「先去跟阿蘇把那些話講完。等她講清楚，你再回來跟我說。」不提供選項，關閉對話後玩家需先與阿蘇完成敏感對話再來。
+    • 若已完成阿蘇敏感對話：劉隊：「好，來說一次你現在看到的版本。」「我們把那幾句話排在一起，看它們指向哪裡。」
+      選項一：「我再多看一下現場。」（ch2_liu_keep_exploring）→ 關閉對話，繼續探索。
+      選項二：「好，現在就試著說一次。」（ch2_liu_open_qa_conclusion）→ 關閉對話，setShowCh2SentenceCompletion(true)，開啟 Ch2SentenceCompletion 全螢幕模態（五題填空）。
 
-  敘述者：
-    「你把整理過的筆記推給劉隊，他沒有立刻翻，只是先按下錄音鍵。」
+  五題 QA（Ch2SentenceCompletion）：
+    標題「把話補齊」，副標「劉隊把這幾句話攤開，要你把空格補齊，說出你看到的版本。」
+    q1～q5 依 ch2QuestionConfigs 與 npc_asu_q1～q5 的 choices；答對寫入 ch2_q*_done / ch2_q*_answer、顯示阿蘇回應，答錯顯示 wrongFallback。五題全部完成後可關閉 modal；章末 ch2_reasoning_done 等旗標由 modal 完成流程寫入。
 
-  劉隊（錄音開頭）：
-    「城市影城案，補充紀錄第二號。」
-    「外部顧問 KK 與工程師阿蘇，協助判讀受害人手機解密內容。」
-
-  接著是一段『警方標準版』的總結（可依之後實作微調）：
-    - 把「三起事故」先稱為「一種說法」；
-    - 把兩年前樓梯間、結案報告兩個版本，提成「傳言／尚待查證」；
-    - 把死者的焦慮寫成「長期關心公共安全議題」。
-
-  之後才給玩家介入空間（與你先前方案四相容）：
-
-  KK 若選擇「不插話」：
-    - 劉隊照原稿念完，官方檔案偏向「受害者主觀焦慮」版本。
-
-  KK 若選擇「在某一句後面加一句」：
-    - 例如要求補上一句：「目前資料不足以排除系統性問題，只是尚未取得完整證據。」
-    - 或：「受害人的焦慮來源中，包含真實事故記憶與未被證實的內部說法。」
-
-  劉隊會在錄音裡加上那句，並提醒你：
-    「這句話上去，之後每一場開會都會有人拿出來問。」
+【劉隊標準結論與玩家補句（reasoningByChapter.ch2.police）】
 
   劉隊標準結論（outroStandard）全文：通訊紀錄中多次出現「三起事故」等字眼，目前可視為內部說法或比喻，尚不足以構成具體預告。未完成錄音提到「結案報告有兩個版本」，經比對現有文件，暫時無法證實有正式報告遭到篡改。受害人長期書寫公共安全與外包議題，其焦慮可視為在高壓工作與輿論環境下的主觀反應。
 
-  說明：
-    - 程式內劉隊標準結論見 reasoningByChapter.ch2.police.outroStandard；玩家補句見 outroPlayerLines（ch2_extra_procedure / ch2_extra_human / ch2_extra_evidence）。
+  玩家補句選項（outroPlayerLines）：ch2_extra_procedure / ch2_extra_human / ch2_extra_evidence（若之後實作錄音框架時，可讓玩家在某一句後面加一句，劉隊錄音時納入）。
 
 
 --------------------------------------------------------------------------------

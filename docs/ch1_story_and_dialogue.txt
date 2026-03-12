@@ -2,7 +2,20 @@
   KK 流程偵探 — 序章與第一章：細節劇情、NPC 台詞、線索文案（整合版）
 ================================================================================
 
-  資料來源：data/chapters.ts（序章、章節 meta）、data/gameDataCh1.ts（場景／道具／事件／NPC 對話，getChapterData('ch1') 動態載入）、data/ch1ReportConfig.ts（報告編輯器）、data/reasoningByChapter.ts（劉隊 intro/outro）。
+  資料來源：data/chapters.ts（序章、章節 meta）、data/gameDataCh1.ts（場景／道具／事件／NPC 對話，經 getChapterData('ch1') 動態載入）、data/ch1ReportConfig.ts（報告編輯器）、data/reasoningByChapter.ts（劉隊 intro/outro）、data/getChapterData.ts（依 chapterId 載入 gameDataCh1）。
+
+
+--------------------------------------------------------------------------------
+程式邏輯與互動方式（最新版）
+--------------------------------------------------------------------------------
+
+  • 章節資料：Play 頁依 chapterId 呼叫 getChapterData('ch1')，取得 scenes / items / npcDialogs 後 engine.loadChapterData(data)，不直接 import 完整 gameData。
+  • 場景進入：每個場景 initialDialog 進入時顯示；劉隊階段一（第一次進入 ch1 任一場景）觸發 reasoningByChapter.ch1.police.introLines，寫入 ch1_police_intro_shown。
+  • Hotspot 點擊：handleHotspotClick → 先 handleItemCollection(hotspotId)。若該 hotspot 對應事件含 addItem，則觸發事件、顯示道具浮動卡（activeItemDetail）並將事件內 showDialog 排入 dialogQueue；否則走一般事件流程。角色對話（talk_to_character_* / character_*_talk）由 CharacterConversation 系統載入 data/characterConversations.ts。
+  • 道具取得：取得時僅顯示浮動詳解卡（與背包點擊同一套），不把「獲得：xxx」排入一般對話佇列；事件的 showDialog（線索說明／旁白）會排入隊列依序播放。
+  • 敏感抉擇：sensitiveGate 顯示「問敏感」入口；完成任一人敏感對話後寫入對應 npc_*_sensitive_done；完成至少三次寫入 ch1_liu_mid_ready，觸發劉隊中段問候並設 ch1_liu_mid_shown，解鎖劉隊頭像。
+  • 劉隊頭像：階段二+ 點擊後「初步看完了嗎」→ 選「整理一下」或「再繞繞」；階段三選「向劉隊報告」需 readyToReport（hasCh1CoreClues + allScenesVisited）→ setShowCh1ReportEditor(true)。
+  • 報告流程：Ch1ReportEditor 四步驟（證據桌 → 時間線 → 版本深度 → 態度宣言），完成後 setReasoningComplete('ch1')，寫入 ch1_reasoning_done 並導向 /play/ch2/intro。ch1 不顯示右下角「推理分析」按鈕，章末僅能經「向劉隊報告」完成。
 
 
 --------------------------------------------------------------------------------
@@ -650,6 +663,7 @@
   • ch1 不顯示右下角「推理分析」按鈕；章末僅能經「向劉隊報告 → Ch1ReportEditor」完成第一章。
 
   • gameDataCh1 場景內謎題（保留，主線不經此入口）：放映廳 puzzles 含 puzzle_ch1_how_murder_happened（input，解為「延後亮燈3分鐘」）、ch1_pair_matching（pick_three，三組道具組合）、ch1_reasoning_1/2/3（arrangement 字詞排列）。解鎖 chapter2 主線以 setReasoningComplete('ch1') 為準。
+  • 章節資料載入：getChapterData('ch1') 回傳 gameDataCh1 的 scenes / items / npcDialogs；play 頁載入後 engine.loadChapterData(data)，scenes、items 由 engine.getScenes()、engine.getItems() 取得。
 
 
 ================================================================================
