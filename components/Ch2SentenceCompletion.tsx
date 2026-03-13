@@ -1,61 +1,19 @@
- 'use client';
+'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { npcDialogs as ch2NpcDialogs, ch2QuestionConfigs, type Ch2QuestionKey } from '@/data/gameDataCh2';
-import type { DialogChoice, Effect, GameState } from '@/types/game';
+import type { DialogChoice, Effect, GameState, NpcDialogNode } from '@/types/game';
+import { buildFilledSentence, evaluateSelection, type FillBlankConfig } from '@/components/FloatingFillBlankCore';
 
-type QKey = Ch2QuestionKey;
-
-const QUESTIONS: Array<{
-  key: QKey;
-  title: string;
-  choices: Array<{ id: string; label: string; effects?: Effect[]; insightEffects?: DialogChoice['insightEffects'] }>;
-  doneFlag: keyof GameState['flags'];
-  answerFlag: keyof GameState['flags'];
-}> = [
-  {
-    key: 'q1',
-    title: '草稿那句（記事本）',
-    choices: ch2NpcDialogs.npc_asu_q1.node_asu_q1_start.choices,
-    doneFlag: 'ch2_q1_done',
-    answerFlag: 'ch2_q1_answer',
-  },
-  {
-    key: 'q2',
-    title: '那句「她也在場」（Unknown）',
-    choices: ch2NpcDialogs.npc_asu_q2.node_asu_q2_start.choices,
-    doneFlag: 'ch2_q2_done',
-    answerFlag: 'ch2_q2_answer',
-  },
-  {
-    key: 'q3',
-    title: '三個節點那句（代號聯絡人）',
-    choices: ch2NpcDialogs.npc_asu_q3.node_asu_q3_start.choices,
-    doneFlag: 'ch2_q3_done',
-    answerFlag: 'ch2_q3_answer',
-  },
-  {
-    key: 'q4',
-    title: '他在等什麼（定位）',
-    choices: ch2NpcDialogs.npc_asu_q4.node_asu_q4_start.choices,
-    doneFlag: 'ch2_q4_done',
-    answerFlag: 'ch2_q4_answer',
-  },
-  {
-    key: 'q5',
-    title: '他們會怎麼收尾（錄音）',
-    choices: ch2NpcDialogs.npc_asu_q5.node_asu_q5_start.choices,
-    doneFlag: 'ch2_q5_done',
-    answerFlag: 'ch2_q5_answer',
-  },
-];
+type QKey = 'q1' | 'q2' | 'q3' | 'q4' | 'q5';
 
 export interface Ch2SentenceCompletionProps {
   engine: {
     getState: () => GameState;
     handleDialogChoice: (choice: DialogChoice) => void;
   };
+  ch2QuestionConfigs: Record<string, FillBlankConfig>;
+  ch2NpcDialogs: Record<string, Record<string, NpcDialogNode>>;
   currentIndex: number;
   onIndexChange: (nextIndex: number) => void;
   selectedChoiceId: string | null;
@@ -66,6 +24,8 @@ export interface Ch2SentenceCompletionProps {
 
 export default function Ch2SentenceCompletion({
   engine,
+  ch2QuestionConfigs,
+  ch2NpcDialogs,
   currentIndex,
   onIndexChange,
   selectedChoiceId,
@@ -73,6 +33,54 @@ export default function Ch2SentenceCompletion({
   onComplete,
   onClose,
 }: Ch2SentenceCompletionProps) {
+  const QUESTIONS = useMemo(() => {
+    const getChoices = (groupKey: string, nodeKey: string) =>
+      ch2NpcDialogs?.[groupKey]?.[nodeKey]?.choices ?? [];
+    return [
+      {
+        key: 'q1' as QKey,
+        title: '草稿那句（記事本）',
+        choices: getChoices('npc_asu_q1', 'node_asu_q1_start'),
+        doneFlag: 'ch2_q1_done' as keyof GameState['flags'],
+        answerFlag: 'ch2_q1_answer' as keyof GameState['flags'],
+      },
+      {
+        key: 'q2' as QKey,
+        title: '那句「她也在場」（Unknown）',
+        choices: getChoices('npc_asu_q2', 'node_asu_q2_start'),
+        doneFlag: 'ch2_q2_done' as keyof GameState['flags'],
+        answerFlag: 'ch2_q2_answer' as keyof GameState['flags'],
+      },
+      {
+        key: 'q3' as QKey,
+        title: '三個節點那句（代號聯絡人）',
+        choices: getChoices('npc_asu_q3', 'node_asu_q3_start'),
+        doneFlag: 'ch2_q3_done' as keyof GameState['flags'],
+        answerFlag: 'ch2_q3_answer' as keyof GameState['flags'],
+      },
+      {
+        key: 'q4' as QKey,
+        title: '他在等什麼（定位）',
+        choices: getChoices('npc_asu_q4', 'node_asu_q4_start'),
+        doneFlag: 'ch2_q4_done' as keyof GameState['flags'],
+        answerFlag: 'ch2_q4_answer' as keyof GameState['flags'],
+      },
+      {
+        key: 'q5' as QKey,
+        title: '他們會怎麼收尾（錄音）',
+        choices: getChoices('npc_asu_q5', 'node_asu_q5_start'),
+        doneFlag: 'ch2_q5_done' as keyof GameState['flags'],
+        answerFlag: 'ch2_q5_answer' as keyof GameState['flags'],
+      },
+    ] as Array<{
+      key: QKey;
+      title: string;
+      choices: Array<{ id: string; label: string; effects?: Effect[]; insightEffects?: DialogChoice['insightEffects'] }>;
+      doneFlag: keyof GameState['flags'];
+      answerFlag: keyof GameState['flags'];
+    }>;
+  }, [ch2NpcDialogs]);
+
   const [flagsSnapshot, setFlagsSnapshot] = useState<GameState['flags']>(() => engine.getState().flags ?? {});
   const [currentCorrect, setCurrentCorrect] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -80,7 +88,7 @@ export default function Ch2SentenceCompletion({
   const progress = useMemo(() => {
     const doneCount = QUESTIONS.filter((q) => Boolean(flagsSnapshot?.[q.doneFlag as string])).length;
     return { doneCount, total: QUESTIONS.length };
-  }, [flagsSnapshot]);
+  }, [flagsSnapshot, QUESTIONS]);
 
   const current = QUESTIONS[Math.min(currentIndex, QUESTIONS.length - 1)];
   const currentConfig = ch2QuestionConfigs[current.key];
@@ -92,14 +100,14 @@ export default function Ch2SentenceCompletion({
   }, [currentIndex]);
 
   const handleConfirm = () => {
-    if (!selectedChoiceId) return;
+    if (!selectedChoiceId || !currentConfig) return;
 
-    const correctIds = currentConfig.correctIds;
-    const isCorrect = correctIds.includes(selectedChoiceId);
+    const evalResult = evaluateSelection(currentConfig, selectedChoiceId);
+    if (!evalResult.hasSelection) return;
 
-    if (!isCorrect) {
+    if (!evalResult.isCorrect) {
       setCurrentCorrect(false);
-      setFeedback(currentConfig.wrongFallback);
+      setFeedback(evalResult.feedback);
       return;
     }
 
@@ -116,11 +124,10 @@ export default function Ch2SentenceCompletion({
     }
 
     setCurrentCorrect(true);
-    const reply = currentConfig.replyByChoiceId[selectedChoiceId];
-    setFeedback(
-      reply ??
-        '阿蘇看著你選的那一行，像是把某個答案收進抽屜。'
-    );
+    const reply =
+      evalResult.feedback ??
+      '阿蘇看著你選的那一行，像是把某個答案收進抽屜。';
+    setFeedback(reply);
 
     const nextIndex = currentIndex + 1;
     if (nextIndex < QUESTIONS.length) {
@@ -128,6 +135,8 @@ export default function Ch2SentenceCompletion({
       onSelectedChoiceChange(null);
     }
   };
+
+  if (!currentConfig) return null;
 
   return (
     <div className="rounded-2xl border border-amber-600/40 bg-gradient-to-br from-slate-950/95 via-slate-900/95 to-slate-950/95 shadow-2xl p-6 md:p-7 flex flex-col">
@@ -156,13 +165,7 @@ export default function Ch2SentenceCompletion({
         </div>
 
         <div className="p-4 rounded-xl bg-black/30 border border-amber-500/20 text-amber-50/90 text-sm whitespace-pre-line mb-4">
-          {currentConfig.sentencePrefix}
-          <span className="inline-block px-1 mx-0.5 min-w-[3rem] text-amber-200 font-semibold border-b border-dashed border-amber-400/80">
-            {selectedChoiceId
-              ? currentConfig.options.find((o) => o.id === selectedChoiceId)?.fullText ?? '______'
-              : '______'}
-          </span>
-          {currentConfig.sentenceSuffix}
+          {buildFilledSentence(currentConfig, selectedChoiceId, '______')}
         </div>
 
         {/* 題目框內同步顯示七個選項，確保即使看不到場景上的卡片也能操作 */}

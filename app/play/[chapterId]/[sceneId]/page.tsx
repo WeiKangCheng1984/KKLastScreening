@@ -1,10 +1,11 @@
 'use client';
 
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect, useLayoutEffect, useCallback, useRef, type CSSProperties } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { GameEngine } from '@/lib/gameEngine';
 import { getMilestones, shouldAllowAction } from '@/lib/flowController';
+import { getNpcClickBehaviour } from '@/lib/chapterBehaviours';
 import { Dialog, DialogChoice, Hotspot, ConversationTurn, NpcDialogChoice } from '@/types/game';
 import SceneView, { SceneViewRef } from '@/components/SceneView';
 import BottomDock, { DOCK_NARROW_LEFT_RATIO, DOCK_NARROW_WIDTH } from '@/components/BottomDock';
@@ -14,19 +15,7 @@ import { characterConversations } from '@/data/characterConversations';
 import Inventory from '@/components/Inventory';
 import SceneNameDisplay from '@/components/SceneNameDisplay';
 import ItemObtainedNotification from '@/components/ItemObtainedNotification';
-import PuzzleInput from '@/components/PuzzleInput';
-import ArrangementPuzzle from '@/components/ArrangementPuzzle';
-import VisualSelectionPuzzle from '@/components/VisualSelectionPuzzle';
-import CombinationLock from '@/components/CombinationLock';
-import WordScramble from '@/components/WordScramble';
-import WireConnection from '@/components/WireConnection';
-import JigsawPuzzle from '@/components/JigsawPuzzle';
-import RotatingDial from '@/components/RotatingDial';
-import SequenceMemory from '@/components/SequenceMemory';
-import SlidingPuzzle from '@/components/SlidingPuzzle';
-import SymbolMatching from '@/components/SymbolMatching';
-import MazePath from '@/components/MazePath';
-import LogicSwitches from '@/components/LogicSwitches';
+import PuzzleRenderer from '@/components/PuzzleRenderer';
 import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
 import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, FlaskConical, Brain, MessageSquare } from 'lucide-react';
@@ -45,15 +34,17 @@ import ReasoningPanel from '@/components/ReasoningPanel';
 import Ch1ReportEditor from '@/components/Ch1ReportEditor';
 import Ch2SentenceCompletion from '@/components/Ch2SentenceCompletion';
 import ChapterConclusionOverlay from '@/components/ChapterConclusionOverlay';
-import { reasoningByChapter } from '@/data/reasoningByChapter';
 import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { m, AnimatePresence } from 'framer-motion';
 import SensitiveGateOverlay from '@/components/SensitiveGateOverlay';
 import TestFloatingFillBlank from '@/components/TestFloatingFillBlank';
-import { CH1_MONOLOGUE_TEXT, CH1_MONOLOGUE_CHOICES } from '@/data/ch1Monologue';
 import { flagTestGroups, ch1ReportCoreFlagIds, ch1ReportEvidenceItemIds, npcTestByChapter, sensitiveChoiceGroups, flagToItemIds } from '@/data/flagTestConfig';
-import { ch2QuestionConfigs, type Ch2QuestionKey, npcDialogs as ch2NpcDialogs } from '@/data/gameDataCh2';
+// ch2QuestionConfigs / npcDialogs 透過 useChapterData 動態載入，不在此靜態 import
+import { useChapterData } from '@/hooks/useChapterData';
+import { useDialogQueue } from '@/hooks/useDialogQueue';
+import { useInventoryDetail } from '@/hooks/useInventoryDetail';
+import { getChapterConfig } from '@/data/getChapterConfig';
 
 // 獲取當前章節的所有場景
 const getCurrentChapterScenes = (chapterId: string): string[] => {
@@ -84,7 +75,10 @@ function getHotspotCenter(hotspot: Hotspot): { x: number; y: number } {
   return { x: 0.5, y: 0.5 };
 }
 
-// 將 NpcDialogChoice（label）轉成 DialogChoice（text），供 handleDialogChoice 與 CH2_Q_META 使用
+// ch2 五題 key 型別（與 gameDataCh2.ts 的 Ch2QuestionKey 同義，此處本地定義避免靜態 import）
+type Ch2QuestionKey = 'q1' | 'q2' | 'q3' | 'q4' | 'q5';
+
+// 將 NpcDialogChoice（label）轉成 DialogChoice（text），供 handleDialogChoice 使用
 function npcChoiceToDialogChoice(npc: NpcDialogChoice): DialogChoice {
   return {
     id: npc.id,
@@ -93,25 +87,6 @@ function npcChoiceToDialogChoice(npc: NpcDialogChoice): DialogChoice {
     insightEffects: npc.insightEffects,
   };
 }
-
-// 第二章：阿蘇五題 QA 對應的 NpcDialogChoice（用於寫入旗標與洞察）
-const CH2_Q_META: Record<Ch2QuestionKey, { choices: DialogChoice[] }> = {
-  q1: {
-    choices: ch2NpcDialogs.npc_asu_q1.node_asu_q1_start.choices.map(npcChoiceToDialogChoice),
-  },
-  q2: {
-    choices: ch2NpcDialogs.npc_asu_q2.node_asu_q2_start.choices.map(npcChoiceToDialogChoice),
-  },
-  q3: {
-    choices: ch2NpcDialogs.npc_asu_q3.node_asu_q3_start.choices.map(npcChoiceToDialogChoice),
-  },
-  q4: {
-    choices: ch2NpcDialogs.npc_asu_q4.node_asu_q4_start.choices.map(npcChoiceToDialogChoice),
-  },
-  q5: {
-    choices: ch2NpcDialogs.npc_asu_q5.node_asu_q5_start.choices.map(npcChoiceToDialogChoice),
-  },
-};
 
 export default function PlayPage() {
   const params = useParams();
@@ -163,47 +138,40 @@ export default function PlayPage() {
   const [ch2QaLastCorrect, setCh2QaLastCorrect] = useState<boolean | null>(null);
   const engine = engineRef.current!;
 
-  // 章節資料按需載入：載入後 engine 才有 scenes/items，供下方 scenes/items 使用
-  const [chapterDataReady, setChapterDataReady] = useState(false);
-  useEffect(() => {
-    if (!chapterId) return;
-    const targetChapterId = chapterId;
-    const targetSceneId = sceneId; // 閉包：載入完成時同步到「進入此頁時」的場景
-    getChapterData(targetChapterId).then((data) => {
-      if (!data || !engineRef.current) return;
-      const eng = engineRef.current;
-      eng.loadChapterData(data);
-      // 載入後無條件同步 engine 到當前 URL（初次進入 ch2 時 state 可能與 URL 不同步，導致 triggerEvent 用錯場景）
-      eng.applyEffect({
-        type: 'changeScene',
-        chapterId: targetChapterId,
-        sceneId: targetSceneId,
-      });
-      setChapterDataReady(true);
-    }).catch((err) => {
-      console.warn('getChapterData failed:', err);
-    });
-  }, [chapterId]); // sceneId 僅供閉包；章節內切場景由 useLayoutEffect 同步
+  const sceneViewRef = useRef<SceneViewRef>(null);
+  const lastSceneClickRef = useRef<number>(0);
 
-  const scenes = chapterDataReady ? engine.getScenes() : {};
-  const items = chapterDataReady ? engine.getItems() : {};
+  const { chapterDataReady, scenes, items, ch2QuestionConfigs, ch2NpcDialogs } = useChapterData(chapterId, sceneId, engineRef);
 
-  // 章節資料就緒後、首次繪製前，再次強制 engine 與 URL 一致（useLayoutEffect 在 paint 前執行，確保第一次點擊時 engine 已正確）
-  useLayoutEffect(() => {
-    if (!chapterDataReady || !chapterId || !sceneId || !engineRef.current) return;
-    const eng = engineRef.current;
-    const state = eng.getState();
-    if (state.currentChapter === chapterId && state.currentScene === sceneId) return;
-    eng.applyEffect({
-      type: 'changeScene',
-      chapterId,
-      sceneId,
-    });
-  }, [chapterDataReady, chapterId, sceneId]);
+  // ch2 五題 QA choices（含 effects/insightEffects），動態 import 後從 npcDialogs 提取
+  const ch2QMeta = useMemo(() => {
+    if (!ch2NpcDialogs) return null;
+    const npc = ch2NpcDialogs;
+    return {
+      q1: { choices: (npc.npc_asu_q1?.node_asu_q1_start?.choices ?? []).map(npcChoiceToDialogChoice) },
+      q2: { choices: (npc.npc_asu_q2?.node_asu_q2_start?.choices ?? []).map(npcChoiceToDialogChoice) },
+      q3: { choices: (npc.npc_asu_q3?.node_asu_q3_start?.choices ?? []).map(npcChoiceToDialogChoice) },
+      q4: { choices: (npc.npc_asu_q4?.node_asu_q4_start?.choices ?? []).map(npcChoiceToDialogChoice) },
+      q5: { choices: (npc.npc_asu_q5?.node_asu_q5_start?.choices ?? []).map(npcChoiceToDialogChoice) },
+    } as Record<Ch2QuestionKey, { choices: DialogChoice[] }>;
+  }, [ch2NpcDialogs]);
 
-  // 定義所有 state，確保在 useEffect 之前
-  const [currentDialog, setCurrentDialog] = useState<Dialog | null>(null);
-  const [dialogQueue, setDialogQueue] = useState<Dialog[]>([]);
+  const {
+    currentDialog,
+    setCurrentDialog,
+    dialogQueue,
+    setDialogQueue,
+    addDialogsToQueue,
+    handleDialogCloseBase,
+  } = useDialogQueue({
+    sceneViewRef,
+    ch2QaActive,
+    ch2QaPhase,
+    setCh2QaPhase,
+    onShowNextQaPrompt: () => {
+      // 由原本 ch2 QA 關閉隊列後進下一題的行為承接
+    },
+  });
   const [zoomOverlay, setZoomOverlay] = useState<{
     active: boolean;
     background: string;
@@ -239,8 +207,6 @@ export default function PlayPage() {
     text: string;
     choices: DialogChoice[];
   } | null>(null);
-  const sceneViewRef = useRef<SceneViewRef>(null);
-  const lastSceneClickRef = useRef<number>(0);
 
   // 第二章 QA：當前題目提示對話（阿蘇講殘句）
   const showCh2QaPrompt = useCallback(
@@ -309,57 +275,11 @@ export default function PlayPage() {
   // 追蹤場景名稱顯示計時器，避免重複設置
   const sceneNameTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sceneTransitionTimerRef = useRef<NodeJS.Timeout | null>(null);
-  // 道具獲得提示狀態
-  const [activeItemDetail, setActiveItemDetail] = useState<{ id: string; name: string; image?: string; svgImage?: string; description?: string } | null>(null);
+  const { activeItemDetail, setActiveItemDetail } = useInventoryDetail();
+  const chapterConfig = getChapterConfig(chapterId);
 
-  // 添加對話到隊列（需要在 handleItemCollection 之前定義）；interactionName 為選填，用於顯示互動點名稱於對話框上方
-  const addDialogsToQueue = useCallback((dialogs: Dialog[], interactionName?: string) => {
-    if (dialogs.length === 0) return;
-    const toQueue = interactionName
-      ? [{ ...dialogs[0], title: interactionName }, ...dialogs.slice(1)]
-      : dialogs;
-
-    // 使用函數式更新來避免閉包問題
-    setCurrentDialog(current => {
-      if (!current) {
-        // 如果當前沒有對話，直接顯示第一個，其餘加入隊列
-        const firstDialog = toQueue[0];
-        // 檢查是否為廣播類型，需要特殊處理
-        if (firstDialog.type === 'broadcast') {
-          // 廣播特殊效果：僅保留閃爍，不再播放音效
-          if (sceneViewRef.current) {
-            sceneViewRef.current.triggerFlicker('intense');
-            setTimeout(() => {
-              sceneViewRef.current?.triggerFlicker('strong');
-            }, 200);
-            setTimeout(() => {
-              sceneViewRef.current?.triggerFlicker('intense');
-            }, 400);
-          }
-          // 廣播對話需要特殊處理，先返回 null，然後在 setTimeout 中設置
-          setTimeout(() => {
-            setCurrentDialog(firstDialog);
-            if (toQueue.length > 1) {
-              setDialogQueue(toQueue.slice(1));
-            }
-          }, 0);
-          return null;
-        } else {
-          // 使用 setTimeout 確保狀態更新順序正確
-          setTimeout(() => {
-            if (toQueue.length > 1) {
-              setDialogQueue(toQueue.slice(1));
-            }
-          }, 0);
-          return firstDialog;
-        }
-      } else {
-        // 如果當前有對話，將所有新對話加入隊列
-        setDialogQueue(prev => [...prev, ...toQueue]);
-        return current;
-      }
-    });
-  }, []);
+  // 用 ref 記錄所有「阻擋 hotspot 點擊」的 overlay 狀態，避免 handleHotspotClick 閉包過期問題
+  const hotspotBlockedRef = useRef(false);
 
   // 劉隊章節開場：僅在 ch1/ch2 第一個場景、且尚未顯示過時觸發一次
   useEffect(() => {
@@ -370,7 +290,7 @@ export default function PlayPage() {
     if (chapterId === 'ch1') {
       const flagKey = 'ch1_police_intro_shown';
       if (!state.flags[flagKey]) {
-        const police = reasoningByChapter['ch1']?.police;
+        const police = chapterConfig.reasoning?.police;
         const introLines = police?.introLines;
         if (introLines?.length) {
           addDialogsToQueue(
@@ -407,7 +327,7 @@ export default function PlayPage() {
     if (chapterId === 'ch2' && sceneId === 'scene_ch2_cinema_entrance') {
       const flagKey = 'ch2_police_intro_shown';
       if (!state.flags[flagKey]) {
-        const police = reasoningByChapter['ch2']?.police;
+        const police = chapterConfig.reasoning?.police;
         if (police?.introLine) {
           addDialogsToQueue(
             [
@@ -454,6 +374,20 @@ export default function PlayPage() {
     );
     engine.applyEffect({ type: 'setFlag', flag: 'ch1_liu_mid_shown', value: true });
   }, [chapterId, sceneId, addDialogsToQueue]);
+
+  // 同步所有會阻擋 hotspot 的 overlay 狀態到 ref，使 handleHotspotClick 不受閉包過期影響
+  useEffect(() => {
+    hotspotBlockedRef.current = !!(
+      currentDialog ||
+      zoomOverlay?.active ||
+      currentPuzzle ||
+      activeItemDetail ||
+      showCh1ReportEditor ||
+      showCh2SentenceCompletion ||
+      sensitiveGate ||
+      showCh1MonologueOverlay
+    );
+  });
 
   // 統一道具獲取處理函數
   const handleItemCollection = useCallback((hotspotId: string): boolean => {
@@ -1497,26 +1431,22 @@ export default function PlayPage() {
   }, [triggerIntenseFlicker]);
 
   const handleHotspotClick = useCallback((hotspotId: string) => {
-    if (!scene || !engineRef.current) return;
+    if (!scene || !engineRef.current) {
+      return;
+    }
 
     // 極短暫點擊冷卻，避免玩家連點時連續觸發多個對話/事件
     const now = performance.now();
     if (now - lastSceneClickRef.current < 300) return;
     lastSceneClickRef.current = now;
     // 有正在顯示的對話或 overlay 時，暫停接受新的 hotspot 互動
-    if (
-      currentDialog ||
-      zoomOverlay?.active ||
-      currentPuzzle ||
-      activeItemDetail ||
-      showCh1ReportEditor ||
-      showCh2SentenceCompletion ||
-      !!sensitiveGate ||
-      showCh1MonologueOverlay
-    ) {
+    // 使用 ref 確保讀到最新狀態，避免閉包過期導致永遠阻擋
+    if (hotspotBlockedRef.current) {
       return;
     }
-    if (ch2QaActive && (ch2QaPhase === 'prompt' || ch2QaPhase === 'choices')) return;
+    if (ch2QaActive && (ch2QaPhase === 'prompt' || ch2QaPhase === 'choices')) {
+      return;
+    }
 
     const engine = engineRef.current;
     // 密碼進入／intro 後首次進入場景時，engine 可能尚未與 URL 一致，導致 triggerEvent 用錯場景而無反應。
@@ -2779,7 +2709,7 @@ export default function PlayPage() {
   const allScenesVisited =
     chapterScenes.length > 0 && chapterScenes.every((s) => state.visitedScenes.includes(s));
   const reasoningDone = !!state.flags[`${chapterId}_reasoning_done`];
-  const hasReasoningForChapter = !!reasoningByChapter[chapterId];
+  const hasReasoningForChapter = !!chapterConfig.reasoning;
   const ch1Flags = state.flags || {};
   const hasCh1CoreClues =
     ch1Flags.ticket_stub_collected &&
@@ -3034,184 +2964,32 @@ export default function PlayPage() {
                 if (!engineRef.current) return;
                 const engine = engineRef.current;
                 const st = engine.getState();
-                const flags = st.flags || {};
 
-                if (npcId === 'npc_lin_ruitang') {
-                  const casualCount = engine.getNpcCasualTalkCount('npc_lin_ruitang');
-                  const observed = !!flags.observed_any_ch1;
-                  const sensitiveDone = !!flags.npc_lin_sensitive_done;
+                const behaviour = getNpcClickBehaviour(chapterId, {
+                  state: st,
+                  npcId,
+                  sceneId,
+                  casualTalkCount: engine.getNpcCasualTalkCount(npcId),
+                });
 
-                  if (sensitiveDone) {
-                    const dialog = engine.triggerRandomNpcDialog(npcId);
-                    if (dialog) {
-                      engine.incrementNpcCasualTalk(npcId);
-                      setCurrentDialog(dialog);
-                    }
-                    return;
-                  }
-                  if (observed && casualCount >= 3) {
-                    setSensitiveGate({
-                      step: 'ask_or_skip',
-                      npcId: 'npc_lin_ruitang',
-                      text: '你覺得時機差不多了，可以試著往深一點問。',
-                      choices: [
-                        { id: 'lin_sensitive_ask', text: '我想問一些比較敏感的問題。' },
-                        { id: 'lin_sensitive_skip', text: '先不用，再聊聊就好。' },
-                      ],
-                    });
-                    return;
-                  }
+                if (behaviour.type === 'sensitive_gate') {
+                  setSensitiveGate({
+                    step: 'ask_or_skip',
+                    npcId: behaviour.payload.npcId,
+                    text: behaviour.payload.text,
+                    choices: behaviour.payload.choices,
+                  });
+                  return;
+                }
+
+                if (behaviour.type === 'random_dialog') {
                   const dialog = engine.triggerRandomNpcDialog(npcId);
                   if (dialog) {
                     engine.incrementNpcCasualTalk(npcId);
                     setCurrentDialog(dialog);
-                  }
-                  return;
-                }
-
-                if (npcId === 'npc_ashun') {
-                  const casualCount = engine.getNpcCasualTalkCount('npc_ashun');
-                  const observed = !!flags.observed_any_ch1;
-                  const sensitiveDone = !!flags.npc_ashun_sensitive_done;
-                  if (sensitiveDone) {
-                    const dialog = engine.triggerRandomNpcDialog(npcId);
-                    if (dialog) {
-                      engine.incrementNpcCasualTalk(npcId);
-                      setCurrentDialog(dialog);
-                    }
-                    return;
-                  }
-                  if (observed && casualCount >= 3) {
-                    setSensitiveGate({
-                      step: 'ask_or_skip',
-                      npcId: 'npc_ashun',
-                      text: '你覺得時機差不多了，可以試著往深一點問。',
-                      choices: [
-                        { id: 'ashun_sensitive_ask', text: '我想問一些比較敏感的問題。' },
-                        { id: 'ashun_sensitive_skip', text: '先不用，再聊聊就好。' },
-                      ],
-                    });
-                    return;
-                  }
-                  const dialogAshun = engine.triggerRandomNpcDialog(npcId);
-                  if (dialogAshun) {
-                    engine.incrementNpcCasualTalk(npcId);
-                    setCurrentDialog(dialogAshun);
-                  }
-                  return;
-                }
-
-                if (npcId === 'npc_xiaozhang') {
-                  const casualCount = engine.getNpcCasualTalkCount('npc_xiaozhang');
-                  const observed = !!flags.projection_room_observed && !!flags.projection_room_unlocked;
-                  const sensitiveDone = !!flags.npc_xiaozhang_sensitive_done;
-                  if (sensitiveDone) {
-                    const dialog = engine.triggerRandomNpcDialog(npcId);
-                    if (dialog) {
-                      engine.incrementNpcCasualTalk(npcId);
-                      setCurrentDialog(dialog);
+                    if (npcId === 'npc_xiaozhang') {
                       setRefreshKey((prev) => prev + 1);
                     }
-                    return;
-                  }
-                  if (observed && casualCount >= 3) {
-                    setSensitiveGate({
-                      step: 'ask_or_skip',
-                      npcId: 'npc_xiaozhang',
-                      text: '你覺得時機差不多了，可以試著往深一點問。',
-                      choices: [
-                        { id: 'xiaozhang_sensitive_ask', text: '我想問一些比較敏感的問題。' },
-                        { id: 'xiaozhang_sensitive_skip', text: '先不用，再聊聊就好。' },
-                      ],
-                    });
-                    return;
-                  }
-                  const dialogXz = engine.triggerRandomNpcDialog(npcId);
-                  if (dialogXz) {
-                    engine.incrementNpcCasualTalk(npcId);
-                    setCurrentDialog(dialogXz);
-                    setRefreshKey((prev) => prev + 1);
-                  }
-                  return;
-                }
-
-                if (npcId === 'npc_zhou_jie') {
-                  const casualCount = engine.getNpcCasualTalkCount('npc_zhou_jie');
-                  const observed = !!flags.observed_restroom_ch1;
-                  const sensitiveDone = !!flags.npc_zhou_jie_sensitive_done;
-                  if (sensitiveDone) {
-                    const dialog = engine.triggerRandomNpcDialog(npcId);
-                    if (dialog) {
-                      engine.incrementNpcCasualTalk(npcId);
-                      setCurrentDialog(dialog);
-                    }
-                    return;
-                  }
-                  if (observed && casualCount >= 3) {
-                    setSensitiveGate({
-                      step: 'ask_or_skip',
-                      npcId: 'npc_zhou_jie',
-                      text: '你覺得時機差不多了，可以試著往深一點問。',
-                      choices: [
-                        { id: 'zhou_sensitive_ask', text: '我想問一些比較敏感的問題。' },
-                        { id: 'zhou_sensitive_skip', text: '先不用，再聊聊就好。' },
-                      ],
-                    });
-                    return;
-                  }
-                  const dialogZhou = engine.triggerRandomNpcDialog(npcId);
-                  if (dialogZhou) {
-                    engine.incrementNpcCasualTalk(npcId);
-                    setCurrentDialog(dialogZhou);
-                  }
-                  return;
-                }
-
-                if (npcId === 'npc_asu') {
-                  const casualCount = engine.getNpcCasualTalkCount('npc_asu');
-                  const sensitiveDone = !!flags.npc_asu_sensitive_done;
-                  const inv = st?.inventory ?? [];
-
-                  // 已完成敏感對話：只保留隨機閒聊
-                  if (sensitiveDone) {
-                    const dialogAsuDone = engine.triggerRandomNpcDialog(npcId);
-                    if (dialogAsuDone) {
-                      engine.incrementNpcCasualTalk(npcId);
-                      setCurrentDialog(dialogAsuDone);
-                    }
-                    return;
-                  }
-
-                  // 只在阿蘇電腦場景檢查敏感問答門檻
-                  if (scene?.id === 'scene_ch2_asu_desktop') {
-                    const coreDocFlags = [
-                      'ch2_pc_unknown_viewed',
-                      'ch2_pc_column_viewed',
-                      'ch2_pc_recording_viewed',
-                      'ch2_pc_location_viewed',
-                    ] as const;
-                    const coreDocsViewedCount = coreDocFlags.filter((f) => !!flags[f]).length;
-
-                    // 至少看過 3 份重點資料，且有一定程度互動後，開啟敏感對話門檻
-                    if (coreDocsViewedCount >= 3 && casualCount >= 1) {
-                      setSensitiveGate({
-                        step: 'ask_or_skip',
-                        npcId: 'npc_asu',
-                        text: '妳覺得氣氛已經沉到一個程度，可以試著往深一點問。',
-                        choices: [
-                          { id: 'asu_sensitive_ask', text: '我想問一些比較敏感的問題。' },
-                          { id: 'asu_sensitive_skip', text: '先看資料就好，暫時不問。' },
-                        ],
-                      });
-                      return;
-                    }
-                  }
-
-                  // 其他情況：維持一般閒聊（車上或電腦前的輕鬆對話）
-                  const dialogAsu = engine.triggerRandomNpcDialog(npcId);
-                  if (dialogAsu) {
-                    engine.incrementNpcCasualTalk(npcId);
-                    setCurrentDialog(dialogAsu);
                   }
                   return;
                 }
@@ -3370,9 +3148,10 @@ export default function PlayPage() {
             {ch2QaActive &&
               ch2QaPhase === 'choices' &&
               chapterId === 'ch2' &&
+              ch2QuestionConfigs &&
               scene.id === 'scene_ch2_asu_car' && (
                 <div className="pointer-events-none absolute inset-0 z-[70]">
-                  {ch2QuestionConfigs[ch2CurrentQaKey].options.map((opt) => {
+                  {ch2QuestionConfigs[ch2CurrentQaKey]?.options.map((opt) => {
                     const isSelected = ch2QaSelectedId === opt.id;
                     const baseScale = isSelected ? 1.05 : 1;
                     const scale = baseScale;
@@ -3389,14 +3168,15 @@ export default function PlayPage() {
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (!engineRef.current) return;
+                          if (!engineRef.current || !ch2QuestionConfigs) return;
                           const engine = engineRef.current;
                           const cfg = ch2QuestionConfigs[ch2CurrentQaKey];
+                          if (!cfg) return;
                           const isCorrect = cfg.correctIds.includes(opt.id);
 
                           // 寫入原本在 npc 對話中的效果與洞察
-                          const meta = CH2_Q_META[ch2CurrentQaKey];
-                          const choice = meta.choices.find((c) => c.id === opt.id);
+                          const meta = ch2QMeta?.[ch2CurrentQaKey];
+                          const choice = meta?.choices.find((c) => c.id === opt.id);
                           if (choice) {
                             engine.handleDialogChoice(choice);
                           }
@@ -3613,6 +3393,7 @@ export default function PlayPage() {
         <TestFloatingFillBlank
           chapterId={chapterId}
           onClose={() => setShowTestFloatingFillBlank(false)}
+          ch2QuestionConfigs={ch2QuestionConfigs}
         />
       )}
 
@@ -3672,7 +3453,7 @@ export default function PlayPage() {
 
         {/* 第一章報告編輯器：透過 ChapterConclusionOverlay 呈現，完成後導向 ch2 intro */}
         <AnimatePresence>
-          {showCh1ReportEditor && engineRef.current && (
+          {showCh1ReportEditor && engineRef.current && chapterConfig.ch1ReportConfig && (
             <ChapterConclusionOverlay>
               <Ch1ReportEditor
                 engine={{
@@ -3681,6 +3462,7 @@ export default function PlayPage() {
                   handleDialogChoice: (c) => engineRef.current!.handleDialogChoice(c),
                   setReasoningComplete: (ch) => engineRef.current!.setReasoningComplete(ch),
                 }}
+                config={chapterConfig.ch1ReportConfig}
                 onComplete={() => {
                   setShowCh1ReportEditor(false);
                   setRefreshKey((k) => k + 1);
@@ -3704,6 +3486,8 @@ export default function PlayPage() {
                   getState: () => engineRef.current!.getState(),
                   handleDialogChoice: (c) => engineRef.current!.handleDialogChoice(c),
                 }}
+                ch2QuestionConfigs={ch2QuestionConfigs ?? {}}
+                ch2NpcDialogs={ch2NpcDialogs ?? {}}
                 currentIndex={ch2ConclusionIndex}
                 onIndexChange={setCh2ConclusionIndex}
                 selectedChoiceId={ch2ConclusionSelectedId}
@@ -4037,8 +3821,8 @@ export default function PlayPage() {
               className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 pointer-events-auto"
             >
               <SensitiveGateOverlay
-                text={CH1_MONOLOGUE_TEXT}
-                choices={CH1_MONOLOGUE_CHOICES}
+                text={chapterConfig.ch1MonologueText ?? ''}
+                choices={chapterConfig.ch1MonologueChoices ?? []}
                 onChoiceSelect={handleCh1MonologueChoice}
                 onClose={() => setShowCh1MonologueOverlay(false)}
               />
@@ -4382,150 +4166,16 @@ export default function PlayPage() {
 
       {/* 謎題輸入 */}
       {currentPuzzle && (
-        currentPuzzle.type === 'arrangement' ? (
-          <ArrangementPuzzle
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'visual_selection' ? (
-          <VisualSelectionPuzzle
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'combination_lock' ? (
-          <CombinationLock
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'word_scramble' ? (
-          <WordScramble
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'wire_connection' ? (
-          <WireConnection
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'jigsaw' ? (
-          <JigsawPuzzle
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'rotating_dial' ? (
-          <RotatingDial
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'sequence_memory' ? (
-          <SequenceMemory
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'sliding_puzzle' ? (
-          <SlidingPuzzle
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'symbol_matching' ? (
-          <SymbolMatching
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'maze_path' ? (
-          <MazePath
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : currentPuzzle.type === 'logic_switches' ? (
-          <LogicSwitches
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        ) : (
-          <PuzzleInput
-            puzzle={currentPuzzle}
-            onSolve={handlePuzzleSolve}
-            onClose={() => {
-              setCurrentPuzzle(null);
-              setPuzzleError('');
-            }}
-            error={puzzleError}
-            onErrorClear={() => setPuzzleError('')}
-          />
-        )
+        <PuzzleRenderer
+          puzzle={currentPuzzle}
+          onSolve={handlePuzzleSolve}
+          onClose={() => {
+            setCurrentPuzzle(null);
+            setPuzzleError('');
+          }}
+          error={puzzleError}
+          onErrorClear={() => setPuzzleError('')}
+        />
       )}
 
       {/* 脈搏夾量測面板 */}

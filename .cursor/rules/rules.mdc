@@ -407,3 +407,140 @@ alwaysApply: true
 7. **視覺穩定**：淡入淡出動畫、固定卡片高度，避免「繼續」出現時跳動
 8. **編譯相容**：CharacterConversation 主檔不以 JSX 回傳，改以 React.createElement(CharacterConversationCard) 避免部分環境下「Expected jsx identifier」錯誤
 9. **一般對話立繪穩定**：同角色連續一般對話時不先清空 currentDialog，直接換下一則並用 effectiveDialog = currentDialog ?? dialogQueue[0] 驅動立繪，避免立繪先消失再出現
+
+---
+
+## 【21】核心檔案實測數據
+
+以下為已審查量測的實際規模，AI 修改前必須意識到這些檔案的複雜度。
+
+### 21.1 超大高風險檔案
+
+| 檔案 | 行數 | 重點數據 |
+|---|---|---|
+| `app/play/[chapterId]/[sceneId]/page.tsx` | **~4,600 行** | 37 個 state、13 個 useEffect、18 個 useCallback、11 個 useRef |
+| `lib/gameEngine.ts` | **~900 行** | 35+ 個公開方法，混入章節特定 hardcode |
+| `data/gameDataCh2.ts` | **~1,900 行** | 含 Ch2 QA 浮動答案卡型別定義（應移到 `types/`） |
+| `data/gameDataCh1.ts` | **~1,225 行** | 正常資料量 |
+| `data/ch1PasswordPresets.ts` | **~639 行** | 純資料，20 組密碼預設 |
+| `data/ch1ReportConfig.ts` | **~437 行** | 型別定義與資料混在一起 |
+
+### 21.2 主遊玩頁 page.tsx 架構快照
+
+```
+URL params (chapterId, sceneId)
+  ↓
+useChapterData（動態 import gameDataChX → engine.loadChapterData → chapterDataReady）
+  ↓ chapterDataReady = true
+useEffect [chapterId, sceneId]（URL 同步 engine + 顯示場景名稱）
+  ↓
+render → engineRef.current.getCurrentScene() → scene
+  ↓
+SceneView.onHotspotClick → handleHotspotClick
+  ├─ hotspotBlockedRef.current 檢查（阻擋 overlay 期間的點擊）
+  ├─ handleItemCollection → setActiveItemDetail（道具詳解卡）
+  ├─ engine.solvePuzzle → setCurrentPuzzle → handlePuzzleSolve
+  ├─ engine.triggerEvent → addDialogsToQueue / setCurrentDialog
+  ├─ NPC 頭像點擊 → sensitive gate / key dialog / random dialog
+  └─ setRefreshKey（觸發 localStorage 儲存 + 進度更新）
+
+handleDialogClose → 下一則對話 / ch2 QA 階段切換 / 章節導航 / 遊戲結束
+```
+
+### 21.3 hooks 依賴現況
+
+三個 hook 全部只被 `app/play/[chapterId]/[sceneId]/page.tsx` 使用：
+
+| Hook | 行數 | 職責 |
+|---|---|---|
+| `useChapterData` | ~55 行 | 封裝章節資料非同步載入 + engine 初始化 |
+| `useDialogQueue` | ~124 行 | 管理 currentDialog + dialogQueue + ch2 QA phase 轉換 |
+| `useInventoryDetail` | ~17 行 | activeItemDetail state（極輕量） |
+
+### 21.4 lib/ 各模組用途速查
+
+| 模組 | 行數 | 被幾個檔案使用 | 主要消費者 |
+|---|---|---|---|
+| `gameEngine.ts` | ~900 | 2 | `page.tsx`、`useChapterData`（type only） |
+| `audioManager.ts` | ~221 | 9 | 廣泛：page、prologue、SceneView、AudioControl 等 |
+| `flowController.ts` | ~123 | 1 | `page.tsx` |
+| `chapterPassword.ts` | ~175 | 1 | `PasswordLoadModal.tsx` |
+| `characterPortrait.ts` | ~59 | 4 | `page.tsx`、`DialogBox`、`CharacterConversation`、`NpcRightStrip` |
+| `svgLoader.ts` | ~144 | 4 | `svgPreloader`、`SVGImage`、`UIIcon`、`page.tsx` |
+| `lightingManager.ts` | ~199 | 1 | `SceneView.tsx` |
+| `transitionEffects.ts` | ~234 | 1 | `SceneTransition.tsx` |
+| `performanceUtils.ts` | ~260 | 3 | `SceneView`、`BeamEffect`、`RippleEffect` |
+| `responsiveUtils.ts` | ~124 | 2 | `UIIcon`、`ItemIcon` |
+
+---
+
+## 【22】已知技術債與禁止寫法
+
+AI 協作時**絕對不可**繼續加重以下問題。
+
+### 22.1 絕對禁止
+
+**禁止在 render 函數主體執行副作用：**
+`page.tsx` render body 中有 `engine.applyEffect()` 呼叫（約 2804 行附近），違反 React 純 render 原則。任何新增程式碼不得在 render 函數主體（非 `useEffect`、非 `useCallback`）中呼叫 `engine` 的任何方法。
+
+**禁止新增 `setRefreshKey(prev => prev + 1)`：**
+目前已有 50+ 次呼叫，是 `forceUpdate` 的反模式，掩蓋真正應透過 state 更新或 derived state 解決的問題。若臨時確需強制重渲染，須在 PR 說明原因。
+
+**禁止繼續擴大 `handleHotspotClick`：**
+該 callback 已達 ~870 行（行 1435–2302），內有大量 `if (hotspotId === 'xxx' && scene?.id === 'ch1_sc_y')` 寫死分支。**新的 hotspot 互動邏輯必須透過 `scene.hotspotEventMap` + `event.effects` 資料驅動，寫進對應章節的 `gameDataChX.ts`，不得在 callback 內繼續堆分支。**
+
+### 22.2 應避免的模式
+
+**stale closure（閉包過期）：**
+`useCallback` 依賴陣列必須包含所有函數內讀取的 state 變數，或改用 ref 鏡像模式。
+已有範例（可參考）：
+```typescript
+// 無依賴陣列的 useEffect，每次 render 後同步 ref → callback 讀 ref 取最新值
+useEffect(() => {
+  hotspotBlockedRef.current = !!(currentDialog || zoomOverlay?.active || ...);
+});
+// useCallback 內改讀 ref，不讀 state（避免過期問題）
+if (hotspotBlockedRef.current) return;
+```
+
+**無 cleanup 的 `setTimeout`：**
+目前全檔已有 20+ 處無 cleanup 的 `setTimeout`。新增定時器一律放在 `useEffect` 內並於 cleanup 中 `clearTimeout`：
+```typescript
+useEffect(() => {
+  const t = setTimeout(() => { ... }, delay);
+  return () => clearTimeout(t);
+}, [deps]);
+```
+
+**JSX 層中的匿名複雜函數：**
+NpcRightStrip 的 `onNpcClick` prop 目前是 ~140 行的匿名函數寫在 JSX 中，每次 render 重建。類似的大型 handler 應提取為 `useCallback`。
+
+### 22.3 已存在的死碼（不要繼續使用，應清除）
+
+| 位置 | 死碼 | 處置 |
+|---|---|---|
+| `page.tsx` | `showChapterPuzzle` + `if (false && _isUnlocked...)` | 整段刪除 |
+| `page.tsx` | `handleTutorialComplete = useCallback(() => {}, [])` | 傳 `undefined` 給 `TutorialGuide` |
+| `page.tsx` | `sceneLoading` state（有 set 但從未讀取） | 刪除 state 與所有 `setSceneLoading` |
+| `page.tsx` | `showDoor701Confirm` 的 JSX 渲染了兩次（完整重複貼上） | 合併成一個 |
+
+### 22.4 重複定義警告
+
+`isMobileDevice()` 同時存在於：
+- `lib/responsiveUtils.ts`：僅比較 `window.innerWidth < 768`
+- `lib/performanceUtils.ts`：含 userAgent 檢測，更準確
+
+**呼叫方應統一使用 `lib/performanceUtils.ts` 的版本。** 目前 `UIIcon.tsx`、`ItemIcon.tsx` 用 `responsiveUtils`，`SceneView.tsx`、`BeamEffect.tsx`、`RippleEffect.tsx` 用 `performanceUtils`，不一致。
+
+---
+
+## 【23】孤兒檔案與未接入模組
+
+以下檔案**已存在且功能完整，但目前無任何其他檔案 import**。操作前必須確認其接入狀態，避免重複實作相同功能。
+
+| 檔案 | 行數 | 設計意圖 | 建議 |
+|---|---|---|---|
+| `lib/chapterBehaviours.ts` | ~150 行 | 純函式 `getNpcClickBehaviour(chapterId, ctx)` — 依章節與 NPC Context 決定點擊行為（閒聊 vs 敏感入口） | **應儘早接入**：設計意圖是替代 `page.tsx` 中大量分散的 NPC if-else 邏輯 |
+| `lib/svgPreloader.ts` | ~139 行 | 分優先級 SVG 預載（關鍵/次要，含 `requestIdleCallback`） | 接入 `app/play/layout.tsx` 或場景 useEffect，可改善首次場景載入速度 |
+| `lib/svgDragSystem.ts` | ~138 行 | SVG 元素拖曳 Singleton（含 AABB 碰撞檢測） | 確認是否為謎題組件備用；若無具體謎題使用計畫可移除 |
+| `data/characterConversations.ts` | ~9 行 | export 空物件 `{}`，預留角色多輪對話腳本擴充位 | 維持現狀；填入對話資料時遵循 `ConversationTurn[]` 結構 |

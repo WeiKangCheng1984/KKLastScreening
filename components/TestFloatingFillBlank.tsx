@@ -1,29 +1,15 @@
- 'use client';
- 
- import { useMemo, useState } from 'react';
- import { X, Sparkles } from 'lucide-react';
- import { ch2QuestionConfigs } from '@/data/gameDataCh2';
- 
- type ChapterId = 'ch1' | 'ch2' | string;
- 
- type FloatingOption = {
-   id: string;
-   label: string;
-   fullText: string;
-   x: number;
-   y: number;
-   rotation: number;
- };
- 
- type FillBlankConfig = {
-   title: string;
-   sentencePrefix: string;
-   sentenceSuffix: string;
-   options: FloatingOption[];
-   correctIds: string[];
-   replyByChoiceId: Record<string, string>;
-   wrongFallback: string;
- };
+'use client';
+
+import { useMemo, useState } from 'react';
+import { X, Sparkles } from 'lucide-react';
+import {
+  buildFilledSentence,
+  evaluateSelection,
+  type FillBlankConfig,
+  type FloatingOption,
+} from '@/components/FloatingFillBlankCore';
+
+type ChapterId = 'ch1' | 'ch2' | string;
  
  const CH1_TEST_CONFIG: FillBlankConfig = {
    title: '第一章（測試題）',
@@ -46,19 +32,20 @@
    wrongFallback: '「這個詞也許很像線索，但它不是那種會害死人、也不會被寫進報告的那種。」',
  };
  
- function getConfigForChapter(chapterId: ChapterId): FillBlankConfig {
-   if (chapterId === 'ch2') {
-     // 第二章直接沿用 q1（記事本那句）與其浮動卡位置
-     const q = ch2QuestionConfigs.q1;
-     return {
-       title: '第二章（測試題）',
-       sentencePrefix: q.sentencePrefix,
-       sentenceSuffix: q.sentenceSuffix,
-       options: q.options,
-       correctIds: q.correctIds,
-       replyByChoiceId: q.replyByChoiceId,
-       wrongFallback: q.wrongFallback,
-     };
+ function getConfigForChapter(chapterId: ChapterId, ch2Configs?: Record<string, FillBlankConfig>): FillBlankConfig {
+   if (chapterId === 'ch2' && ch2Configs) {
+     // 第二章沿用 q1（記事本那句）與其浮動卡位置
+     const q = ch2Configs.q1;
+     if (q) {
+       return {
+         sentencePrefix: q.sentencePrefix,
+         sentenceSuffix: q.sentenceSuffix,
+         options: q.options,
+         correctIds: q.correctIds,
+         replyByChoiceId: q.replyByChoiceId,
+         wrongFallback: q.wrongFallback,
+       };
+     }
    }
    return CH1_TEST_CONFIG;
  }
@@ -66,31 +53,33 @@
  export default function TestFloatingFillBlank({
    chapterId,
    onClose,
+   ch2QuestionConfigs,
  }: {
    chapterId: ChapterId;
    onClose: () => void;
+   ch2QuestionConfigs?: Record<string, FillBlankConfig>;
  }) {
-   const cfg = useMemo(() => getConfigForChapter(chapterId), [chapterId]);
+   const cfg = useMemo(() => getConfigForChapter(chapterId, ch2QuestionConfigs), [chapterId, ch2QuestionConfigs]);
    const [selectedId, setSelectedId] = useState<string | null>(null);
    const [feedback, setFeedback] = useState<string | null>(null);
    const [passed, setPassed] = useState(false);
  
-   const sentence = useMemo(() => {
-     const selected = cfg.options.find((o) => o.id === selectedId);
-     const fill = selected?.fullText ?? '＿＿＿＿';
-     return `${cfg.sentencePrefix}${fill}${cfg.sentenceSuffix}`;
-   }, [cfg, selectedId]);
+  const sentence = useMemo(
+    () => buildFilledSentence(cfg, selectedId, '＿＿＿＿'),
+    [cfg, selectedId],
+  );
  
    const confirm = () => {
      if (!selectedId) return;
-     const isCorrect = cfg.correctIds.includes(selectedId);
-     if (!isCorrect) {
-       setPassed(false);
-       setFeedback(cfg.wrongFallback);
-       return;
-     }
-     setPassed(true);
-     setFeedback(cfg.replyByChoiceId[selectedId] ?? '好。');
+    const evalResult = evaluateSelection(cfg, selectedId);
+    if (!evalResult.hasSelection) return;
+    if (!evalResult.isCorrect) {
+      setPassed(false);
+      setFeedback(evalResult.feedback);
+      return;
+    }
+    setPassed(true);
+    setFeedback(evalResult.feedback ?? '好。');
    };
  
    return (

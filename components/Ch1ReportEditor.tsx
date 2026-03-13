@@ -5,12 +5,11 @@ import { m, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, FileText, Clock, Layers, MessageSquare, Lock } from 'lucide-react';
 import OverlayCard from '@/components/OverlayCard';
 import {
-  ch1ReportConfig,
   CH1_EVIDENCE_CATEGORIES,
   type Ch1EvidenceCategory,
   type Ch1AttitudeWordCategory,
+  type Ch1ReportConfig,
 } from '@/data/ch1ReportConfig';
-import { reasoningByChapter } from '@/data/reasoningByChapter';
 import type { GameState, Effect, DialogChoice } from '@/types/game';
 
 export interface Ch1ReportEditorProps {
@@ -20,6 +19,7 @@ export interface Ch1ReportEditorProps {
     handleDialogChoice: (choice: DialogChoice) => void;
     setReasoningComplete: (chapterId: string) => void;
   };
+  config: Ch1ReportConfig;
   onComplete: () => void;
   onClose: () => void;
 }
@@ -105,6 +105,7 @@ const PHRASE_CATEGORY_COLORS: Record<Ch1AttitudeWordCategory, string> = {
 
 export default function Ch1ReportEditor({
   engine,
+  config,
   onComplete,
   onClose,
 }: Ch1ReportEditorProps) {
@@ -133,8 +134,7 @@ export default function Ch1ReportEditor({
 
   const state = engine.getState();
   const inventory = state.inventory ?? [];
-  const config = ch1ReportConfig;
-  const policeConfig = reasoningByChapter.ch1?.police;
+  const policeConfig = undefined;
 
   useEffect(() => {
     engine.applyEffect({
