@@ -1,596 +1,783 @@
-import { Scene, Item, NpcDialogNode } from '@/types/game';
+import { Scene, Item, NpcDialogNode, GameState } from '@/types/game';
 
-// ch4 道具
+// ──────────────────────────────────────────────
+// 第四章 道具
+// ──────────────────────────────────────────────
 const items: Record<string, Item> = {
-  'item_light_adjustment_request': {
-    id: 'item_light_adjustment_request',
-    name: '臨時調燈申請單',
-    description: '一張臨時調燈申請單貼在售票口。\n\n申請日期：案發當天上午\n申請人簽名：黃志誠\n申請理由：觀眾反映亮燈太刺眼\n結果：批准，延後亮燈 3 分鐘\n\n這個申請很常見，這個理由很合理。\n但申請人，是黃志誠。',
-    svgImage: '/svg/items/light_adjustment_request.svg',
+  // 場景一：樓梯間 / 逃生動線
+  item_lighting_time_diff: {
+    id: 'item_lighting_time_diff',
+    name: '節能燈提前切換記錄',
+    description:
+      '樓梯間燈控的操作記錄，時間欄位顯示一個異常：散場前 3 分鐘，燈光切換到節能模式。\n\n正常流程是散場後才切換，這次比散場時間早了整整 3 分鐘。\n\n梁以安說得沒錯：「黑得太早。」\n\n3 分鐘。樓梯間從亮到暗。這是窗口，不是疏失。',
+    svgImage: '/svg/items/lighting_time_diff.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_ticket_system_timestamp': {
-    id: 'item_ticket_system_timestamp',
-    name: '票務系統時間戳',
-    description: '票務系統的時間戳記錄著所有交易時間。\n\n案發當晚的記錄：\n22:30 場次，H排12號\n購票時間：案發當天下午\n\n這個時間戳，與第一章死亡時間完全吻合。\n太吻合了，像是刻意安排。',
-    svgImage: '/svg/items/ticket_system_timestamp.svg',
+  item_stairwell_wear_trace: {
+    id: 'item_stairwell_wear_trace',
+    name: '樓梯踏面磨損與扶手抓痕',
+    description:
+      '樓梯中段的踏面有一道不規則磨損，像是有人腳滑後緊急踩穩。扶手鍍層在同一位置有指甲抓痕，深度不像日常使用。\n\n地面還有一個零碎物件：一顆鈕扣，材質偏工作服用料。\n\n有人差點摔落，或者有人讓別人差點摔落。',
+    svgImage: '/svg/items/stairwell_wear_trace.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_cleaning_schedule': {
-    id: 'item_cleaning_schedule',
-    name: '清潔排程表',
-    description: '清潔排程表記錄著所有清潔時間。\n\n案發當晚的排程：\n散場後 2 分鐘，美食街進行清潔\n\n這個時間，與空橋時間完美銜接。\n2分鐘，足夠完成犯案並到達空橋。\n\n太完美了，像是刻意安排。',
-    svgImage: '/svg/items/cleaning_schedule.svg',
+  item_monitor_blind_stair: {
+    id: 'item_monitor_blind_stair',
+    name: '監視器覆蓋範圍圖（樓梯間）',
+    description:
+      '保全提供的監視器覆蓋範圍圖顯示：樓梯間入口和出口都有拍到，但中段轉角沒有任何鏡頭。\n\n有人能站在那個位置，觀察到上下兩端的混亂，卻完全不入鏡。\n\n這個死角不是偶然形成的，監視器的安裝位置是被設計過的。',
+    svgImage: '/svg/items/monitor_blind_stair.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_security_camera_replay': {
-    id: 'item_security_camera_replay',
-    name: '監視器回放',
-    description: '監視器回放顯示了案發當晚的情況。\n\n時間戳：00:12\n地點：清潔通道\n\n畫面中，黃志誠走進清潔通道。\n然後，消失了 47 秒。\n\n47秒後，他從另一個出口出現。\n手裡端著清潔工具，像是剛完成工作。',
-    svgImage: '/svg/items/security_camera_replay.svg',
+
+  // 場景二：放映控制區 / 副面板區
+  item_plugin_same_version: {
+    id: 'item_plugin_same_version',
+    name: '與城市影城同版的操作介面截圖',
+    description:
+      '陳佑誠翻出一張截圖，副面板的操作介面版本號：v2.3.1-patch07。\n\n這個版本號和城市影城的版本完全一致——不只是同一套軟體，是同一個 patch 版本。\n\n「同一套插件跑三館，你還要我相信這些都是巧合？」',
+    svgImage: '/svg/items/plugin_same_version.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_black_glove_incomplete': {
-    id: 'item_black_glove_incomplete',
-    name: '黑色手套（不完整）',
-    description: '垃圾回收站裡發現了一隻黑色手套。\n\n手套不完整，像是被撕過。\n材質：與第一章發現的塑膠碎片吻合。\n\n這個位置，正好在清潔通道附近。\n\n太巧合了，不可能是意外。',
-    svgImage: '/svg/items/black_glove_incomplete.svg',
+  item_plugin_sync_record: {
+    id: 'item_plugin_sync_record',
+    name: '插件版本號與同步紀錄',
+    description:
+      '維護記錄顯示：光芒 R 與城市 W 的插件在同一週內完成了版本更新，時間差在一天以內。\n\n更新的觸發來源：遠端推送。推送帳號：系統維護帳號。\n\n技術上，系統維護帳號可以由多人共用。它不能告訴你誰在裡面，只能告訴你有人進來過。',
+    svgImage: '/svg/items/plugin_sync_record.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_access_card_record': {
-    id: 'item_access_card_record',
-    name: '門禁刷卡紀錄',
-    description: '門禁刷卡紀錄顯示了所有進出記錄。\n\n但黃志誠的記錄，是空的。\n\n不是沒有記錄，而是「無紀錄通行」。\n他擁有最高權限，可以無紀錄通行。\n\n這意味著，沒有人知道他來過這裡。\n沒有人知道，他什麼時候來，什麼時候走。',
-    svgImage: '/svg/items/access_card_record.svg',
+  item_risk_report_buried: {
+    id: 'item_risk_report_buried',
+    name: '被擱置的風險回報單',
+    description:
+      '陳佑誠從抽屜最底層找出三份回報單，每一份都有格式、有日期、有優先標記。\n\n第一份：四個月前。第二份：兩個月前。第三份：六週前。\n\n三份都標了「優先 B」——緊急但不是最高優先。三份都消失在審核流程裡，沒有任何批示。\n\n「回報過。不是一次。格式都對，優先級也對，消失得更對。」',
+    svgImage: '/svg/items/risk_report_buried.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  
-  // 第五章：最後一場放映
+
+  // 場景三：散場大廳 / 事故當下
+  item_crowd_timing_log: {
+    id: 'item_crowd_timing_log',
+    name: '廣播延遲與燈光錯拍記錄',
+    description:
+      '事故當下的現場記錄：廣播比散場信號延遲 8 秒，燈光在廣播前已切換，觀眾尚未收到疏散提示時大廳已陷入半暗。\n\n梁以安說他聽到有人跌倒。保全記錄說有三個人被推擠。\n\n這個順序——燈先滅、廣播後響——不是設備故障，是序列被改過。',
+    svgImage: '/svg/items/crowd_timing_log.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
+  item_panel_operator_trace: {
+    id: 'item_panel_operator_trace',
+    name: '面板操作痕跡與快步離開的鞋印',
+    description:
+      '面板旁邊的地面上有一道新鮮的橡膠鞋底印，角度朝向側門出口。\n\n面板螢幕有殘留指紋，位置在「手動切換」區域，不是正常操作的位置。\n\n有人在混亂發生的瞬間快速操作了面板，然後從側門離開——這不是維修動作，這是逃脫路線。',
+    svgImage: '/svg/items/panel_operator_trace.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
 };
 
-// ch4 場景
+// ──────────────────────────────────────────────
+// 第四章 場景
+// ──────────────────────────────────────────────
 const scenes: Record<string, Scene> = {
-    'ch4_sc1': {
-    id: 'ch4_sc1',
+
+  // ──────────────────────────────────────────────
+  // 場景一：樓梯間 / 逃生動線
+  // ──────────────────────────────────────────────
+  scene_ch4_stairwell: {
+    id: 'scene_ch4_stairwell',
     chapterId: 'ch4',
-    name: '地震後・程序開始動搖',
-    description: '地震發生，程序開始出現壓力。',
+    name: '樓梯間',
+    description: '光芒影城的後側樓梯間，入口和出口都有監視器，但中段轉角沒有。散場時燈光比預定時間早了 3 分鐘切換，梁以安說那次黑得太早。',
     background: '/images/bg_ch4_sc1_v1.webp',
     hotspots: [
       {
-        id: 'earthquake_alarm',
+        id: 'hotspot_stairwell_liu',
         shape: 'rect',
-        coords: [0.3, 0.1, 0.7, 0.3],
-        description: '地震警報',
-        hint: '地震警報響起。',
+        coords: [0.04, 0.3, 0.24, 0.78],
+        description: '劉隊',
+        hint: '劉隊在樓梯間入口等著，表情不算輕鬆。',
       },
       {
-        id: 'broken_equipment',
+        id: 'hotspot_stairwell_liang',
         shape: 'rect',
-        coords: [0.1, 0.4, 0.4, 0.7],
-        description: '故障的設備',
-        hint: '部分設備故障。',
+        coords: [0.62, 0.28, 0.82, 0.78],
+        description: '梁以安',
+        hint: '梁以安站在扶手旁，視線落在中段的轉角。',
       },
       {
-        id: 'scattered_manual',
+        id: 'hotspot_stairwell_chen',
         shape: 'rect',
-        coords: [0.5, 0.4, 0.9, 0.7],
-        description: '散落的程序手冊',
-        hint: '程序手冊被震落。',
+        coords: [0.82, 0.28, 0.97, 0.78],
+        description: '陳佑誠',
+        hint: '陳佑誠在燈控箱旁看著時間記錄，像個早就知道答案的人。',
+      },
+      {
+        id: 'hotspot_stairwell_light_diff',
+        shape: 'rect',
+        coords: [0.28, 0.08, 0.6, 0.4],
+        description: '燈控箱（時間記錄）',
+        hint: '燈控箱上有一份操作記錄，顯示燈光切換的時間比正常早了 3 分鐘。',
+      },
+      {
+        id: 'hotspot_stairwell_wear',
+        shape: 'rect',
+        coords: [0.28, 0.45, 0.6, 0.72],
+        description: '樓梯踏面（磨損與抓痕）',
+        hint: '踏面有不規則磨損，扶手上有抓痕，地面有一顆工作服鈕扣。',
+      },
+      {
+        id: 'hotspot_stairwell_monitor',
+        shape: 'rect',
+        coords: [0.28, 0.75, 0.6, 0.95],
+        description: '監視器覆蓋圖',
+        hint: '牆上貼著監視器覆蓋範圍圖，中段轉角是死角。',
+      },
+    ],
+    npcs: [
+      {
+        id: 'npc_liu',
+        name: '劉隊（偵查隊）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch4_liu_idle_1', text: '劉隊說：「先看樓梯間，再去找陳佑誠，那邊有東西要讓你看。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liu_idle_2', text: '「未遂事故不是沒有痕跡，是痕跡不夠整齊。你去找那個不夠整齊的地方。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_liang_yian',
+        name: '梁以安（觀眾）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch4_liang_idle_1', text: '梁以安說：「我不是難搞。我只是記得那次黑得太早。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liang_idle_2', text: '「有人老說是節能。我聽起來比較像偷懶，或測試。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_chen_youcheng',
+        name: '陳佑誠（技術維護）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch4_chen_stair_idle_1', text: '陳佑誠說：「系統不怕壞，怕的是壞得剛剛好，像正常老化。」', type: 'hint', weight: 1 },
+          { id: 'ch4_chen_stair_idle_2', text: '「控制區那邊有更多東西，你先把樓梯這邊看完。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
       },
     ],
     items: [
-      items.faulty_equipment,
-      items.scattered_files,
-      items.emergency_manual,
+      items.item_lighting_time_diff,
+      items.item_stairwell_wear_trace,
+      items.item_monitor_blind_stair,
     ],
     hotspotEventMap: {
-      'earthquake_alarm': 'hear_alarm',
-      'broken_equipment': 'see_broken',
-      'scattered_manual': 'find_manual',
+      hotspot_stairwell_liu: 'talk_liu_ch4_task',
+      hotspot_stairwell_liang: 'talk_liang_ch4_stair',
+      hotspot_stairwell_chen: 'talk_chen_ch4_stair',
+      hotspot_stairwell_light_diff: 'inspect_ch4_light_diff',
+      hotspot_stairwell_wear: 'inspect_ch4_stair_wear',
+      hotspot_stairwell_monitor: 'inspect_ch4_stair_monitor',
     },
     events: [
       {
-        id: 'hear_alarm',
-        name: '聽到地震警報',
-        description: '地震警報響起。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'earthquake_alarm' },
-        ],
+        id: 'talk_liu_ch4_task',
+        name: '接受劉隊任務',
+        description: '與劉隊確認第四章任務。',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '地震警報響起。\n\n時間開始變得緊迫。',
+              text: '劉隊說：「光芒影城，第二起事故——那次沒有人死，所以沒有人認真記錄。」\n\n「但樓梯間的燈比該亮的時間早了 3 分鐘，有人差點在黑暗裡摔下去。」\n\n「你去看陳佑誠，他說他早就回報過這個漏洞。我想知道那份報告去了哪裡。」',
+              type: 'character',
+              characterId: 'npc_liu',
+              characterName: '劉隊（偵查隊）',
+              characterExpression: 1,
+              characterPosition: 'left',
+            },
+          },
+          { type: 'setFlag', flag: 'ch4_task_from_liu', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'talk_liang_ch4_stair',
+        name: '問梁以安（樓梯間）',
+        description: '詢問梁以安關於第二起事故的直接感受。',
+        requirements: [],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '梁以安說：「我不是難搞。我只是記得那次黑得太早。」\n\n「片尾字幕還在跑，燈就先滅了。然後有人在樓梯間推擠，有人跌倒，有人在叫。」\n\n「觀眾罵我，我還得跟他們道歉。像是我親手把電影掐死一樣。」\n\n他停了一下：「那不是節能，那是有人在測試——不管是測系統，還是測觀眾。」',
+              type: 'character',
+              characterId: 'npc_liang_yian',
+              characterName: '梁以安',
+              characterExpression: 1,
+              characterPosition: 'right',
+            },
+          },
+          { type: 'setFlag', flag: 'ch4_liang_stair_talked', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'talk_chen_ch4_stair',
+        name: '問陳佑誠（樓梯間）',
+        description: '詢問陳佑誠關於燈控漏洞。',
+        requirements: [],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '陳佑誠說：「回報過。不是一次。格式都對，優先級也對，消失得更對。」\n\n「控制區那邊有我的回報單副本，還有那個插件的版本記錄。你去看，然後再告訴我你有什麼問題。」',
+              type: 'character',
+              characterId: 'npc_chen_youcheng',
+              characterName: '陳佑誠（技術維護）',
+              characterExpression: 1,
+              characterPosition: 'right',
+            },
+          },
+          { type: 'setFlag', flag: 'ch4_chen_stair_talked', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'inspect_ch4_light_diff',
+        name: '查看燈控時間記錄',
+        description: '仔細看燈控箱上的操作記錄。',
+        requirements: [],
+        effects: [
+          { type: 'addItem', itemId: 'item_lighting_time_diff' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '記錄顯示燈光比散場時間早了 3 分鐘切換。\n\n這是第二起事故的起點：不是設備故障，是操作指令在錯誤的時間點執行。\n\n那 3 分鐘——樓梯間從亮到暗，人群還在移動，沒有預警，沒有廣播。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'alarm_heard', value: true },
+          { type: 'setFlag', flag: 'ch4_stairwell_time_viewed', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'see_broken',
-        name: '看到故障設備',
-        description: '你看到部分設備故障。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'broken_equipment' },
-        ],
+        id: 'inspect_ch4_stair_wear',
+        name: '查看踏面磨損與抓痕',
+        description: '仔細看樓梯中段的磨損與殘留物。',
+        requirements: [],
         effects: [
+          { type: 'addItem', itemId: 'item_stairwell_wear_trace' },
           {
             type: 'showDialog',
             dialog: {
-              text: '部分設備故障，但程序手冊還在。\n\n你發現「程序來不及」。',
+              text: '踏面的磨損不像日常使用，扶手的抓痕是緊急施力的力道。還有一顆鈕扣——工作服材質，不是觀眾的衣物。\n\n有人在這裡差點摔落。也可能，有人在這裡讓另一個人差點摔落。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'broken_seen', value: true },
+          { type: 'setFlag', flag: 'ch4_stairwell_trace_viewed', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'find_manual',
-        name: '找到程序手冊',
-        description: '你找到散落的程序手冊。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'scattered_manual' },
-        ],
+        id: 'inspect_ch4_stair_monitor',
+        name: '查看監視器覆蓋範圍圖',
+        description: '看牆上貼的監視器覆蓋圖。',
+        requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'emergency_manual' },
+          { type: 'addItem', itemId: 'item_monitor_blind_stair' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：緊急程序手冊\n\n緊急情況下的程序手冊，但時間已經不夠了。\n\n時間、壓力與後果都變得真實。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'manual_found', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'realize_pressure',
-        name: '理解壓力',
-        description: '你理解了時間、壓力與後果都變得真實。',
-        requirements: [
-          { type: 'hasFlag', flag: 'alarm_heard', value: true },
-          { type: 'hasFlag', flag: 'broken_seen', value: true },
-          { type: 'hasFlag', flag: 'manual_found', value: true },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你發現「程序來不及」。\n\n時間、壓力與後果都變得真實。',
+              text: '入口有鏡頭，出口有鏡頭，中段轉角——沒有。\n\n站在那個轉角，你能看到兩端的動靜，但不會被任何一台鏡頭拍到。\n\n這個設計讓「有人能觀察混亂、卻不入鏡」成為可能。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'pressure_realized', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'collect_scattered_files',
-        name: '收集散落文件',
-        description: '你收集散落的文件。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'scattered_manual' },
-        ],
-        effects: [
-          { type: 'addItem', itemId: 'scattered_files' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：散落的文件\n\n地震時散落的程序文件，需要重新整理。\n\n文件被震散，編號缺角。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'files_collected', value: true },
+          { type: 'setFlag', flag: 'ch4_stairwell_monitor_viewed', value: true },
         ],
         oneTime: true,
       },
     ],
-    puzzles: [
-      {
-        id: 'scattered_files_puzzle',
-        type: 'arrangement',
-        solution: ['file1', 'file2', 'file3', 'file4', 'file5'],
-        hint: '散落文件：你整理的不是紙，是責任鏈。\n\n文件被震散，編號缺角。\n\n玩家要把它們依「時間—部門—設備」排序。\n\n排完會露出一行隱藏字（例如：「FME-STEP-2 缺失」）。',
-        requirements: [
-          { type: 'hasItem', itemId: 'scattered_files' },
-          { type: 'hasFlag', flag: 'files_collected', value: true },
-        ],
-        onSolve: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你按照「時間—部門—設備」排序文件。\n\n排完會露出一行隱藏字：FME-STEP-2 缺失。',
-              type: 'narrator',
-            },
-          },
-          { type: 'addItem', itemId: 'fme_gap_note' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：FME程序缺口記錄\n\n從散落文件中發現的程序缺口記錄：FME-STEP-2 缺失。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'files_puzzle_solved', value: true },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '指出程序缺口，讓 SPACE 4-2 的衝突變得具體。',
-              type: 'narrator',
-            },
-          },
-        ],
-      },
-    ],
+    puzzles: [],
     initialDialog: {
-      text: '地震發生，程序開始出現壓力。\n\n地震警報響起、部分設備故障、程序手冊被震落。\n\n時間開始變得緊迫。',
+      text: '光芒影城的樓梯間比城市影城的老一些，照明偏冷，扶手有磨損。\n\n第二起事故沒有人死，所以很快被歸類為「偶發事件」。但梁以安說，那次黑得太早。',
       type: 'narrator',
     },
   },
-  
-  // SPACE 4-2: 異物事件・規則與時間衝突
-  'ch4_sc2': {
-    id: 'ch4_sc2',
+
+  // ──────────────────────────────────────────────
+  // 場景二：放映控制區 / 副面板區
+  // ──────────────────────────────────────────────
+  scene_ch4_control_panel: {
+    id: 'scene_ch4_control_panel',
     chapterId: 'ch4',
-    name: '異物事件・規則與時間衝突',
-    description: 'FME（異物防止）事件處理，規則與時間衝突。',
+    name: '放映控制區',
+    description: '副面板區的操作介面和城市影城的一模一樣——不只是同一套軟體，是同一個 patch 版本。陳佑誠說他回報過三次，三次都消失在審核流程裡。',
     background: '/images/bg_ch4_sc2_v1.webp',
     hotspots: [
       {
-        id: 'foreign_object',
+        id: 'hotspot_control_chen',
         shape: 'rect',
-        coords: [0.3, 0.3, 0.7, 0.6],
-        description: '異物',
-        hint: '發現異物，需要處理。',
+        coords: [0.04, 0.22, 0.28, 0.78],
+        description: '陳佑誠',
+        hint: '陳佑誠在面板旁，他顯然等了很久才等到一個願意聽他說話的人。',
       },
       {
-        id: 'detector',
+        id: 'hotspot_control_liang',
         shape: 'rect',
-        coords: [0.1, 0.2, 0.3, 0.4],
-        description: '異物檢測器',
-        hint: '異物檢測器顯示需要按照程序處理。',
+        coords: [0.72, 0.25, 0.9, 0.78],
+        description: '梁以安',
+        hint: '梁以安站在旁邊，表情說他也在等這個問題被回答。',
       },
       {
-        id: 'quick_tool_spot',
+        id: 'hotspot_control_plugin_version',
         shape: 'rect',
-        coords: [0.7, 0.2, 0.9, 0.4],
-        description: '快速處理工具',
-        hint: '可以快速處理問題的工具，但不在正式程序裡。',
+        coords: [0.3, 0.1, 0.62, 0.42],
+        description: '副面板（版本號截圖）',
+        hint: '螢幕角落顯示的版本號：v2.3.1-patch07，和城市影城完全相同。',
+      },
+      {
+        id: 'hotspot_control_sync_record',
+        shape: 'rect',
+        coords: [0.3, 0.48, 0.62, 0.72],
+        description: '插件版本同步記錄',
+        hint: '維護紀錄顯示兩館插件在同一週內由遠端推送更新，帳號是系統維護帳號。',
+      },
+      {
+        id: 'hotspot_control_risk_report',
+        shape: 'rect',
+        coords: [0.3, 0.76, 0.62, 0.95],
+        description: '被擱置的風險回報單',
+        hint: '抽屜最底層有三份回報單，每份都標「優先 B」，每份都沒有批示回應。',
+      },
+    ],
+    npcs: [
+      {
+        id: 'npc_chen_youcheng',
+        name: '陳佑誠（技術維護）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch4_chen_control_idle_1', text: '陳佑誠說：「同一套插件跑三館，你還要我相信這些都是巧合？」', type: 'hint', weight: 1 },
+          { id: 'ch4_chen_control_idle_2', text: '「這個版本的插件有一個很方便的特性：可以遠端觸發燈控，不需要本地授權。」', type: 'hint', weight: 1 },
+          { id: 'ch4_chen_control_idle_3', text: '「三份回報單。四個月、兩個月、六週。每次都消失在審核流程裡。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_liang_yian',
+        name: '梁以安',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch4_liang_control_idle_1', text: '梁以安說：「我以為那次只是我倒霉。陳先生說，這個漏洞三館都有。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liang_control_idle_2', text: '「如果這不是偶發，那第一次——那個死掉的人——也不是偶發。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
       },
     ],
     items: [
-      items.foreign_object_detector,
-      items.quick_fix_tool,
+      items.item_plugin_same_version,
+      items.item_plugin_sync_record,
+      items.item_risk_report_buried,
     ],
     hotspotEventMap: {
-      'foreign_object': 'find_foreign_object',
-      'detector': 'check_detector',
-      'quick_tool_spot': 'see_quick_tool',
+      hotspot_control_chen: 'talk_chen_ch4_control',
+      hotspot_control_liang: 'talk_liang_ch4_control',
+      hotspot_control_plugin_version: 'inspect_ch4_plugin_version',
+      hotspot_control_sync_record: 'inspect_ch4_sync_record',
+      hotspot_control_risk_report: 'inspect_ch4_risk_report',
     },
     events: [
       {
-        id: 'find_foreign_object',
-        name: '發現異物',
-        description: '你發現異物。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'foreign_object' },
-        ],
+        id: 'talk_chen_ch4_control',
+        name: '問陳佑誠（控制區）',
+        description: '在控制區和陳佑誠深入交談。',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '你發現異物。\n\n按照程序需要多個步驟，但時間不夠了。',
-              type: 'narrator',
+              text: '陳佑誠說：「你看到版本號了嗎？城市 W 跟光芒 R，完全一樣。不只是同一套，是同一個 patch。」\n\n「這個版本有一個問題：燈控可以被遠端觸發，不需要人在本地操作。我六週前就回報了，格式對、優先級對，就是沒有人回應。」\n\n他頓了頓：「回報過，不代表有人想解。」',
+              type: 'character',
+              characterId: 'npc_chen_youcheng',
+              characterName: '陳佑誠（技術維護）',
+              characterExpression: 1,
+              characterPosition: 'left',
             },
           },
-          { type: 'setFlag', flag: 'object_found', value: true },
+          { type: 'setFlag', flag: 'ch4_chen_control_talked', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'check_detector',
-        name: '檢查檢測器',
-        description: '你檢查異物檢測器。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'detector' },
-        ],
+        id: 'talk_liang_ch4_control',
+        name: '問梁以安（控制區）',
+        description: '在控制區和梁以安對話。',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '異物檢測器顯示需要按照程序處理。\n\n但時間不夠了。',
-              type: 'narrator',
+              text: '梁以安說：「陳先生說這個 patch 版本三個館都有，我聽完就有點不舒服。」\n\n「因為這代表那次事故不是光芒影城自己的問題——是個更大的問題的其中一次。」\n\n「我開始討厭『差一點』這三個字。它們通常只是下次的預告。」',
+              type: 'character',
+              characterId: 'npc_liang_yian',
+              characterName: '梁以安',
+              characterExpression: 1,
+              characterPosition: 'right',
             },
           },
-          { type: 'setFlag', flag: 'detector_checked', value: true },
+          { type: 'setFlag', flag: 'ch4_liang_control_talked', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'see_quick_tool',
-        name: '看到快速處理工具',
-        description: '你看到快速處理工具。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'quick_tool_spot' },
-        ],
+        id: 'inspect_ch4_plugin_version',
+        name: '查看副面板版本號截圖',
+        description: '仔細看副面板螢幕角落的版本資訊。',
+        requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'quick_fix_tool' },
+          { type: 'addItem', itemId: 'item_plugin_same_version' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：快速處理工具\n\n可以快速處理問題的工具，但不在正式程序裡。\n\n出現「可以偷偷做點什麼」的縫隙。',
-              type: 'item',
+              text: '版本號：v2.3.1-patch07。\n\n這和第三章在城市影城看到的插件版本完全一致——不只是相同軟體，是同一個 patch 號。\n\n同一個版本，意味著同一套漏洞；同一套漏洞，意味著同一種觸發方式。',
+              type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'quick_tool_seen', value: true },
+          { type: 'setFlag', flag: 'ch4_control_plugin_viewed', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'feel_conflict',
-        name: '感受到衝突',
-        description: '你第一次覺得「規則太慢了」。',
-        requirements: [
-          { type: 'hasFlag', flag: 'object_found', value: true },
-          { type: 'hasFlag', flag: 'detector_checked', value: true },
-          { type: 'hasFlag', flag: 'quick_tool_seen', value: true },
-        ],
+        id: 'inspect_ch4_sync_record',
+        name: '查看插件同步記錄',
+        description: '閱讀維護紀錄裡的版本更新記錄。',
+        requirements: [],
         effects: [
+          { type: 'addItem', itemId: 'item_plugin_sync_record' },
           {
             type: 'showDialog',
             dialog: {
-              text: '你第一次覺得「規則太慢了」。\n\n把「廟學到的捷徑思維」帶進來測試。',
+              text: '兩館插件在同一週完成更新，觸發來源是「系統維護帳號（遠端推送）」。\n\n系統維護帳號可以多人共用，它不記錄是誰進來的，只記錄帳號登入過。\n\n這條記錄能告訴你「有人做了這件事」，但不能告訴你是誰。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'conflict_felt', value: true },
+          { type: 'setFlag', flag: 'ch4_control_sync_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'inspect_ch4_risk_report',
+        name: '查看被擱置的風險回報單',
+        description: '翻看抽屜裡陳佑誠的三份回報單。',
+        requirements: [],
+        effects: [
+          { type: 'addItem', itemId: 'item_risk_report_buried' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '三份回報單，四個月到六週前，每份格式完整、優先標記正確，每份都沒有批示。\n\n最後一份的備註欄位陳佑誠手寫了一行：「若此漏洞被利用，燈控可被遠端觸發，散場時間可控。」\n\n這行字沒有人回應。直到現在。',
+              type: 'narrator',
+            },
+          },
+          { type: 'setFlag', flag: 'ch4_control_risk_viewed', value: true },
         ],
         oneTime: true,
       },
     ],
-    puzzles: [
-      {
-        id: 'detector_calibration_puzzle',
-        type: 'rotating_dial',
-        solution: { dial1: 0, dial2: 120, dial3: 240 },
-        hint: '異物檢測器校正：規則要求你慢，但地震不等你。\n\n手冊要求校正 3 次、每次要等 30 秒（你可以做倒數）。\n\n但警報會越來越急促。\n\n玩家會開始想「能不能跳過？」——這裡埋“捷徑”選項。',
-        requirements: [
-          { type: 'hasItem', itemId: 'emergency_manual' },
-          { type: 'hasInteracted', hotspotId: 'detector' },
-          { type: 'hasFlag', flag: 'object_found', value: true },
-        ],
-        config: {
-          dials: [
-            { id: 'dial1', segments: 12, target: 0 },
-            { id: 'dial2', segments: 12, target: 4 },
-            { id: 'dial3', segments: 12, target: 8 },
-          ],
-        },
-        onSolve: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你完成了 3 次校正，每次等待 30 秒。\n\n但警報越來越急促，你開始想「能不能跳過？」',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'detector_calibrated', value: true },
-          { type: 'setFlag', flag: 'detector_puzzle_solved', value: true },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '開啟分歧：正式流程 vs 快速工具。',
-              type: 'system',
-            },
-          },
-        ],
-      },
-      {
-        id: 'quick_fix_puzzle',
-        type: 'visual_selection',
-        solution: ['use_quick_tool', 'hide_evidence'],
-        hint: '快速處理工具：你第一次把廟的手伸進電廠。\n\n玩家可用快速工具直接取出異物，但會跳出提示：「這一步沒有記錄欄位。你要把它藏在哪裡？」\n\n玩家需要選一個“藏證據的位置”（設備背板／工具箱／鞋底磁吸）。\n\n選錯會在後續留下破綻（影響 ROOM 5 後果記錄的內容）。',
-        requirements: [
-          { type: 'hasItem', itemId: 'quick_fix_tool' },
-          { type: 'hasItem', itemId: 'temple_charm' },
-          { type: 'hasFlag', flag: 'detector_calibrated', value: true },
-          { type: 'hasInteracted', hotspotId: 'foreign_object' },
-        ],
-        options: [
-          { id: 'use_quick_tool', label: '使用快速工具', description: '直接取出異物' },
-          { id: 'hide_equipment', label: '藏在設備背板', description: '設備背板' },
-          { id: 'hide_toolbox', label: '藏在工具箱', description: '工具箱' },
-          { id: 'hide_shoe', label: '藏在鞋底磁吸', description: '鞋底磁吸' },
-        ],
-        onSolve: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你使用快速工具直接取出異物。\n\n「這一步沒有記錄欄位。你要把它藏在哪裡？」',
-              type: 'narrator',
-            },
-          },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你選擇了藏證據的位置。\n\n異物處理完成，但「記錄表」會出現空白洞。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'quick_fix_used', value: true },
-          { type: 'setFlag', flag: 'quick_fix_puzzle_solved', value: true },
-        ],
-      },
-    ],
+    puzzles: [],
     initialDialog: {
-      text: 'FME（異物防止）事件處理，規則與時間衝突。\n\n發現異物、按照程序需要多個步驟（但時間不夠）、出現「可以偷偷做點什麼」的縫隙。\n\n你需要選擇：照程序 vs 快速處理。',
+      text: '副面板區的介面比外面乾淨，但陳佑誠說，乾淨的地方有時候只是因為沒有人真的進來看過。',
       type: 'narrator',
     },
   },
-  
-  // SPACE 4-3: 壓力點・自我說服
-  'ch4_sc3': {
-    id: 'ch4_sc3',
+
+  // ──────────────────────────────────────────────
+  // 場景三：散場大廳 / 事故當下
+  // ──────────────────────────────────────────────
+  scene_ch4_main_hall: {
+    id: 'scene_ch4_main_hall',
     chapterId: 'ch4',
-    name: '壓力點・自我說服',
-    description: '自我說服，開始考慮捷徑。',
+    name: '散場大廳',
+    description: '事故發生時的散場大廳還保留著部分現場狀態。燈光在廣播響前就滅了，梁以安說他聽到有人跌倒，面板旁邊有快步離開的鞋印。',
     background: '/images/bg_ch4_sc3_v1.webp',
     hotspots: [
       {
-        id: 'consequence_table',
+        id: 'hotspot_hall_liang',
         shape: 'rect',
-        coords: [0.2, 0.3, 0.5, 0.6],
-        description: '後果評估表',
-        hint: '如果照程序處理，會發生什麼後果。',
+        coords: [0.04, 0.28, 0.28, 0.78],
+        description: '梁以安',
+        hint: '梁以安站在事故當下他所在的位置附近，還記得那時的混亂。',
       },
       {
-        id: 'quick_solution',
+        id: 'hotspot_hall_chen',
         shape: 'rect',
-        coords: [0.5, 0.3, 0.8, 0.6],
-        description: '快速處理方案',
-        hint: '「捷徑」的誘惑（廟的方法）。',
+        coords: [0.72, 0.28, 0.9, 0.78],
+        description: '陳佑誠',
+        hint: '陳佑誠指著面板方向，說他記得那個操作的位置。',
+      },
+      {
+        id: 'hotspot_hall_timing',
+        shape: 'rect',
+        coords: [0.3, 0.1, 0.62, 0.42],
+        description: '廣播延遲與燈光錯拍記錄',
+        hint: '管理室牆上貼著事故當下的廣播與燈光時序記錄，兩者之間有 8 秒的落差。',
+      },
+      {
+        id: 'hotspot_hall_panel_trace',
+        shape: 'rect',
+        coords: [0.3, 0.48, 0.62, 0.88],
+        description: '面板操作痕跡與鞋印',
+        hint: '面板旁邊有一道橡膠鞋底印，面板「手動切換」區域有殘留指紋。',
+      },
+    ],
+    npcs: [
+      {
+        id: 'npc_liang_yian',
+        name: '梁以安',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch4_liang_hall_idle_1', text: '梁以安說：「那個人不是從主出口走的。他從側門出去，那邊沒有監視器。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liang_hall_idle_2', text: '「我想衝過去，但我不確定要救人還是跟著那個人。結果兩個都來不及。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_chen_youcheng',
+        name: '陳佑誠（技術維護）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch4_chen_hall_idle_1', text: '陳佑誠說：「他知道哪個面板、哪個操作、哪個時機。不是隨機的，這是準備過的。」', type: 'hint', weight: 1 },
+          { id: 'ch4_chen_hall_idle_2', text: '「如果你問我誰有能力做到這件事，我只能給你一個技術清單，而不是一個名字。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
       },
     ],
     items: [
-      items.consequence_report,
+      items.item_crowd_timing_log,
+      items.item_panel_operator_trace,
     ],
     hotspotEventMap: {
-      'consequence_table': 'read_consequence',
-      'quick_solution': 'see_quick_solution',
+      hotspot_hall_liang: 'talk_liang_ch4_hall',
+      hotspot_hall_chen: 'talk_chen_ch4_hall',
+      hotspot_hall_timing: 'inspect_ch4_crowd_timing',
+      hotspot_hall_panel_trace: 'inspect_ch4_panel_trace',
     },
     events: [
       {
-        id: 'read_consequence',
-        name: '閱讀後果評估',
-        description: '你閱讀後果評估表。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'consequence_table' },
-        ],
+        id: 'talk_liang_ch4_hall',
+        name: '問梁以安（大廳）',
+        description: '詢問梁以安關於事故當下他看到的事。',
+        requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'consequence_report' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：後果評估表\n\n如果照程序處理，會發生什麼後果的評估表。\n\n你看到後果（如果照程序會怎樣）。',
-              type: 'item',
+              text: '梁以安說：「廣播還沒響，燈就先滅了。沒有提示，大家就往出口擠。」\n\n「我看到有個人在面板附近，不是在修，是在操作什麼——然後他轉身就走，從側門出去。」\n\n「我記得他的鞋，深色運動鞋，走路的速度不像是巡邏，更像是完成了一件事。」',
+              type: 'character',
+              characterId: 'npc_liang_yian',
+              characterName: '梁以安',
+              characterExpression: 1,
+              characterPosition: 'left',
             },
           },
-          { type: 'setFlag', flag: 'consequence_read', value: true },
+          { type: 'setFlag', flag: 'ch4_liang_hall_talked', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'see_quick_solution',
-        name: '看到快速處理方案',
-        description: '你看到快速處理方案。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'quick_solution' },
-        ],
+        id: 'talk_chen_ch4_hall',
+        name: '問陳佑誠（大廳）',
+        description: '詢問陳佑誠關於面板操作者的技術判斷。',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '你看到「捷徑」的誘惑（廟的方法）。\n\n內在辯解：「我只是想解決問題」。',
-              type: 'narrator',
+              text: '陳佑誠說：「那個指紋位置是手動切換區域，不是日常操作的按鍵。」\n\n「能在那種混亂裡知道要按哪裡——要嘛是花時間學過，要嘛是平常就在操作。」\n\n「登入很多次，不代表每次都是同一個人在裡面。這個版本的插件讓共用帳號在技術上是可行的。」',
+              type: 'character',
+              characterId: 'npc_chen_youcheng',
+              characterName: '陳佑誠（技術維護）',
+              characterExpression: 1,
+              characterPosition: 'right',
             },
           },
-          { type: 'setFlag', flag: 'quick_solution_seen', value: true },
+          { type: 'setFlag', flag: 'ch4_chen_hall_talked', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'self_persuasion',
-        name: '自我說服',
-        description: '你完成自我說服。',
-        requirements: [
-          { type: 'hasFlag', flag: 'consequence_read', value: true },
-          { type: 'hasFlag', flag: 'quick_solution_seen', value: true },
-        ],
+        id: 'inspect_ch4_crowd_timing',
+        name: '查看廣播延遲與燈光錯拍記錄',
+        description: '閱讀事故當下的時序記錄。',
+        requirements: [],
         effects: [
+          { type: 'addItem', itemId: 'item_crowd_timing_log' },
           {
             type: 'showDialog',
             dialog: {
-              text: '你完成自我說服。\n\n你第一次覺得「規則太慢了」。',
+              text: '廣播比散場信號延遲 8 秒；燈光在廣播前已切換。\n\n觀眾在沒有任何廣播提示的情況下，面對驟然變暗的大廳開始移動。\n\n這個序列——燈先滅、廣播後響——不是設備偶然失序，這是執行順序被刻意改過。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'room4_completed', value: true },
+          { type: 'setFlag', flag: 'ch4_hall_crowd_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'inspect_ch4_panel_trace',
+        name: '查看面板操作痕跡與鞋印',
+        description: '仔細看面板旁的殘留痕跡。',
+        requirements: [],
+        effects: [
+          { type: 'addItem', itemId: 'item_panel_operator_trace' },
           {
             type: 'showDialog',
             dialog: {
-              text: '你離開 ROOM 4，帶著「自我說服」的理由，前往 ROOM 5。',
-              type: 'system',
+              text: '橡膠鞋底印朝向側門，步伐間距比正常走路大一點——是快走，不是奔跑。\n\n面板「手動切換」按鍵上的指紋殘留還在，這個位置不是日常操作會碰到的地方。\n\n有人完成了操作，然後走向沒有監視器的側門。知道哪裡可以消失，這不是巧合。',
+              type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'navigate_to_ch5_intro', value: true },
+          { type: 'setFlag', flag: 'ch4_hall_trace_viewed', value: true },
         ],
         oneTime: true,
       },
     ],
-    puzzles: [
-      {
-        id: 'consequence_evaluation_puzzle',
-        type: 'visual_selection',
-        solution: ['self_persuasion_reason'],
-        hint: '後果評估表：自我說服是一道題，不是心情。\n\n表格列出 A：照程序／B：快速處理，各自後果（停機、延誤、風險、可追責性）。\n\n玩家要選一個「最能說服自己」的理由（不是最安全）。\n\n選完會產生一句個人化辯解，寫進系統（成為 ROOM 5 身份文件素材）。',
-        requirements: [
-          { type: 'hasItem', itemId: 'consequence_report' },
-          { type: 'hasFlag', flag: 'consequence_read', value: true },
-        ],
-        options: [
-          { id: 'self_persuasion_reason', label: '我只是想解決問題', description: '最能說服自己的理由' },
-          { id: 'time_reason', label: '時間不夠', description: '時間緊迫' },
-          { id: 'risk_reason', label: '風險可控', description: '風險評估' },
-          { id: 'efficiency_reason', label: '效率優先', description: '效率考量' },
-        ],
-        onSolve: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你選擇了「最能說服自己」的理由。\n\n你以為你在選方法；其實你在選「你願意相信的自己」。',
-              type: 'narrator',
-            },
-          },
-          { type: 'addItem', itemId: 'self_persuasion_text' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：自我說服文字\n\n你選擇的自我辯解文字，會成為身份文件的一部分。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'consequence_puzzle_solved', value: true },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '進入 ROOM 5 的通行權限（或核心入口）。',
-              type: 'system',
-            },
-          },
-        ],
-      },
-    ],
+    puzzles: [],
     initialDialog: {
-      text: '自我說服，開始考慮捷徑。\n\n看到後果（如果照程序會怎樣）、看到「捷徑」的誘惑（廟的方法）、內在辯解（「我只是想解決問題」）。',
+      text: '大廳的燈又亮起來了，但梁以安說，他永遠記得它滅下去的順序。\n\n「人群能被當測試。」這句話在這裡有了重量。',
       type: 'narrator',
     },
   },
-  
-  // ========== ROOM 5: 反應爐核心・抉擇 ==========
-  // SPACE 5-1: 核心入口・承認兩套系統
 };
 
-const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {};
+// ──────────────────────────────────────────────
+// 第四章 NPC 對話樹
+// ──────────────────────────────────────────────
+const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
+
+  // ──────────────────────────────────────────────
+  // 陳佑誠 敏感對話（ch4 核心 NPC）
+  // ──────────────────────────────────────────────
+  npc_chen_youcheng: {
+    // 敏感 branch 1：追問「回報為什麼消失」
+    node_chen_sensitive1_1: {
+      id: 'node_chen_sensitive1_1',
+      npcId: 'npc_chen_youcheng',
+      text:
+        '陳佑誠說：「我把三份回報單都按標準流程送出去了。第一份四個月前，第二份兩個月前，最後一份六週前。」\n\n「每次都有承辦人簽收，每次都進了系統，每次都沒有下文。」\n\n「你問我是誰擋住的——我不知道。但我知道，不是所有擱置都是遺忘，有些擱置是決策。」',
+      choices: [
+        {
+          id: 'chen_s1_q1',
+          label: '你知道那個承辦人是誰嗎？',
+          effects: [{ type: 'setFlag', flag: 'ch4_chen_s1_q1', value: true }],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+        {
+          id: 'chen_s1_q2',
+          label: '這個漏洞——如果被利用，能做到什麼？',
+          effects: [{ type: 'setFlag', flag: 'ch4_chen_s1_q2', value: true }],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+      ],
+      next: (state: GameState): string | null => {
+        if (state.flags.ch4_chen_s1_q1) return 'node_chen_s1_reply_q1';
+        return 'node_chen_s1_reply_q2';
+      },
+    },
+    node_chen_s1_reply_q1: {
+      id: 'node_chen_s1_reply_q1',
+      npcId: 'npc_chen_youcheng',
+      text:
+        '「技術回報的審核鏈最後會到部門主管那邊。光芒影城的技術這端，線最後接到哪裡，我沒辦法直接告訴你，但你可以從維護帳號的授權樹往上追。」\n\n「我只能說：不是每個人都想讓這個漏洞被修掉。」',
+      choices: [
+        {
+          id: 'chen_s1_end',
+          label: '（結束對話）',
+          effects: [
+            { type: 'setFlag', flag: 'npc_chen_sensitive_done', value: true },
+          ],
+        },
+      ],
+    },
+    node_chen_s1_reply_q2: {
+      id: 'node_chen_s1_reply_q2',
+      npcId: 'npc_chen_youcheng',
+      text:
+        '陳佑誠說：「燈控可以被遠端觸發，不需要人在場。時機可以被指定——散場前幾分鐘、開場時、片尾字幕。」\n\n「如果你知道時間表，你可以讓黑暗發生在最混亂的那一秒。」\n\n他停頓了一下：「我在最後一份回報單上寫了這一點。沒有人回應。」',
+      choices: [
+        {
+          id: 'chen_s1_end',
+          label: '（結束對話）',
+          effects: [
+            { type: 'setFlag', flag: 'npc_chen_sensitive_done', value: true },
+          ],
+        },
+      ],
+    },
+
+    // 敏感 branch 2：追問「誰有這個技術能力」
+    node_chen_sensitive2_1: {
+      id: 'node_chen_sensitive2_1',
+      npcId: 'npc_chen_youcheng',
+      text:
+        '陳佑誠說：「你問我誰有能力操作這個——我可以給你一個技術條件清單。」\n\n「需要：插件存取權限、兩個館的系統維護帳號、知道這個 patch 版本的燈控指令。」\n\n「這個清單，不長。符合的人，也不多。」',
+      choices: [
+        {
+          id: 'chen_s2_q1',
+          label: '高文傑符合這個清單嗎？',
+          effects: [{ type: 'setFlag', flag: 'ch4_chen_s2_q1', value: true }],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+        {
+          id: 'chen_s2_q2',
+          label: '你符合這個清單嗎？',
+          effects: [{ type: 'setFlag', flag: 'ch4_chen_s2_q2', value: true }],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+      next: (state: GameState): string | null => {
+        if (state.flags.ch4_chen_s2_q1) return 'node_chen_s2_reply_q1';
+        return 'node_chen_s2_reply_q2';
+      },
+    },
+    node_chen_s2_reply_q1: {
+      id: 'node_chen_s2_reply_q1',
+      npcId: 'npc_chen_youcheng',
+      text:
+        '「他的名字在登入記錄裡，次數不少。」\n\n「但符合技術清單不等於做了這件事——這個版本的系統維護帳號是可以共用的。登入紀錄只能告訴你帳號在場，不保證靈魂也在場。」\n\n「你們現在才開始問，已經算慢了。」',
+      choices: [
+        {
+          id: 'chen_s2_end',
+          label: '（結束對話）',
+          effects: [
+            { type: 'setFlag', flag: 'npc_chen_sensitive_done', value: true },
+          ],
+        },
+      ],
+    },
+    node_chen_s2_reply_q2: {
+      id: 'node_chen_s2_reply_q2',
+      npcId: 'npc_chen_youcheng',
+      text:
+        '陳佑誠沉默了幾秒。\n\n「技術上，符合。但我把漏洞回報了三次。如果我想利用它，我不會一邊回報一邊動手。」\n\n「我更想讓這個洞被修掉。結果它沒有被修，反而被用了。」',
+      choices: [
+        {
+          id: 'chen_s2_end',
+          label: '（結束對話）',
+          effects: [
+            { type: 'setFlag', flag: 'npc_chen_sensitive_done', value: true },
+          ],
+        },
+      ],
+    },
+  },
+};
 
 export { scenes, items, npcDialogs };

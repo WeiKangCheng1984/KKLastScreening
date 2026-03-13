@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Play, BookOpen } from 'lucide-react';
+import { Play, BookOpen, FlaskConical } from 'lucide-react';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import MuteAllButton from '@/components/MuteAllButton';
@@ -120,6 +121,17 @@ export default function Home() {
         />
         <div className="mt-10 text-sm text-orange-200/60 animate-fade-float" style={{ animationDelay: '0.4s' }}>
           <p>使用滑鼠點擊場景中的物件進行互動</p>
+        </div>
+
+        {/* 開發測試入口 */}
+        <div className="mt-6 animate-fade-float" style={{ animationDelay: '0.45s' }}>
+          <Link
+            href="/dev/simulate"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/70 text-xs font-medium transition-all duration-200"
+          >
+            <FlaskConical size={13} />
+            模擬演練 / 測試
+          </Link>
         </div>
       </div>
       </div>

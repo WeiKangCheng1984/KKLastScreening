@@ -8,6 +8,7 @@ export type FloatingOption = {
 };
 
 export type FillBlankConfig = {
+  title?: string;
   sentencePrefix: string;
   sentenceSuffix: string;
   options: FloatingOption[];

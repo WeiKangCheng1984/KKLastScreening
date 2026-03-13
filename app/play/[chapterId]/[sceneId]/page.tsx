@@ -211,6 +211,7 @@ export default function PlayPage() {
   // 第二章 QA：當前題目提示對話（阿蘇講殘句）
   const showCh2QaPrompt = useCallback(
     (questionIndex: number) => {
+      if (!ch2QuestionConfigs) return;
       const key = ch2QaKeys[Math.min(Math.max(questionIndex, 0), ch2QaKeys.length - 1)];
       const cfg = ch2QuestionConfigs[key];
       const promptText = `${cfg.sentencePrefix}______${cfg.sentenceSuffix}`;
@@ -713,6 +714,10 @@ export default function PlayPage() {
     if (choice.id === 'xiaozhang_sensitive_skip') { closeAndRandom('npc_xiaozhang'); return; }
     if (choice.id === 'zhou_sensitive_skip') { closeAndRandom('npc_zhou_jie'); return; }
     if (choice.id === 'asu_sensitive_skip') { closeAndRandom('npc_asu'); return; }
+    if (choice.id === 'gu_sensitive_skip') { closeAndRandom('npc_gu_naiqian'); return; }
+    if (choice.id === 'chen_sensitive_skip') { closeAndRandom('npc_chen_youcheng'); return; }
+    if (choice.id === 'gao_sensitive_skip') { closeAndRandom('npc_gao_wenjie'); return; }
+    if (choice.id === 'lin_ch6_confront_skip') { closeAndRandom('npc_lin_zirui'); return; }
 
     // 問敏感 → 第二層：選哪一條
     if (choice.id === 'lin_sensitive_ask') {
@@ -750,6 +755,34 @@ export default function PlayPage() {
       ]});
       return;
     }
+    if (choice.id === 'gu_sensitive_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_gu_naiqian', text: '你只能問一個方向。問了，另一個今晚就沒辦法再追了。', choices: [
+        { id: 'gu_branch_1', text: '我想問：整理版 log 少了哪些欄位？那些欄位能讓你追到誰在操作？' },
+        { id: 'gu_branch_2', text: '我想問：城市 W 和光芒 R 同步的事——你一直知道，為什麼一直沒說？' },
+      ]});
+      return;
+    }
+    if (choice.id === 'chen_sensitive_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_chen_youcheng', text: '你只能問一個方向。問了，另一個今晚就沒辦法再追了。', choices: [
+        { id: 'chen_branch_1', text: '我想問：那三份回報消失在誰的手裡？審核鏈最後停在哪裡？' },
+        { id: 'chen_branch_2', text: '我想問：你說符合技術清單的人不多——你心裡有幾個名字？' },
+      ]});
+      return;
+    }
+    if (choice.id === 'gao_sensitive_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_gao_wenjie', text: '你只能問一個方向。問了，另一個今晚就沒辦法再追了。', choices: [
+        { id: 'gao_branch_1', text: '我想問：那幾次登入——你真的在做什麼？有人借用你的帳號嗎？' },
+        { id: 'gao_branch_2', text: '我想問：林子睿——你怎麼看他？誰最希望你看起來像答案？' },
+      ]});
+      return;
+    }
+    if (choice.id === 'lin_ch6_confront_ask') {
+      setSensitiveGate({ step: 'pick_one', npcId: 'npc_lin_zirui', text: '這是最後一次。你只能把一個問題真的問出去。', choices: [
+        { id: 'lin_ch6_branch_1', text: '你在等這場危機把舊結構一起燒掉——對嗎？' },
+        { id: 'lin_ch6_branch_2', text: '最後說清楚一件事：有人死了，這是你算進去的代價嗎？' },
+      ]});
+      return;
+    }
 
     // 選定敏感題目 → 進入 NPC 對話樹
     if (choice.id === 'lin_branch_light') { closeAndStartBranch('npc_lin_ruitang', 'node_lin_light_1'); return; }
@@ -779,6 +812,14 @@ export default function PlayPage() {
     }
     if (choice.id === 'asu_branch_1') { closeAndStartBranch('npc_asu', 'node_asu_sensitive1_1'); return; }
     if (choice.id === 'asu_branch_2') { closeAndStartBranch('npc_asu', 'node_asu_sensitive2_1'); return; }
+    if (choice.id === 'gu_branch_1') { closeAndStartBranch('npc_gu_naiqian', 'node_gu_sensitive1_1'); return; }
+    if (choice.id === 'gu_branch_2') { closeAndStartBranch('npc_gu_naiqian', 'node_gu_sensitive2_1'); return; }
+    if (choice.id === 'chen_branch_1') { closeAndStartBranch('npc_chen_youcheng', 'node_chen_sensitive1_1'); return; }
+    if (choice.id === 'chen_branch_2') { closeAndStartBranch('npc_chen_youcheng', 'node_chen_sensitive2_1'); return; }
+    if (choice.id === 'gao_branch_1') { closeAndStartBranch('npc_gao_wenjie', 'node_gao_sensitive1_1'); return; }
+    if (choice.id === 'gao_branch_2') { closeAndStartBranch('npc_gao_wenjie', 'node_gao_sensitive2_1'); return; }
+    if (choice.id === 'lin_ch6_branch_1') { closeAndStartBranch('npc_lin_zirui', 'node_lin_ch6_final1_1'); return; }
+    if (choice.id === 'lin_ch6_branch_2') { closeAndStartBranch('npc_lin_zirui', 'node_lin_ch6_final2_1'); return; }
   }, [sensitiveGate, buildDialogFromNpcNode, addDialogsToQueue]);
 
   // 第一章內心獨白 overlay 選擇：套用洞察與 ch1_monologue_done，關閉 overlay
@@ -841,6 +882,520 @@ export default function PlayPage() {
       setShowCh2SentenceCompletion(true);
       return;
     }
+
+    // 第三章：劉隊推理 QA 殘句流程
+    if (choice.id?.startsWith('ch3_q1_') || choice.id?.startsWith('ch3_q2_') || choice.id?.startsWith('ch3_q3_') || choice.id?.startsWith('ch3_qa_') || choice.id?.startsWith('ch3_outro_')) {
+      // 套用效果（setFlag、insightEffects 等）
+      engine.handleDialogChoice(choice);
+
+      const st = engine.getState();
+      const flags = st.flags || {};
+
+      // Q1 選答後 → 顯示 Q1 回應
+      if (choice.id?.startsWith('ch3_q1_')) {
+        const answer = flags.ch3_q1_answer as string;
+        let replyText = '劉隊說：「周姊說得比你清楚：第一次是為了改，第二次是為了像沒改。兩個動作，先做後掩。」';
+        if (answer === 'A') replyText = '劉隊點頭：「對。改了，然後把改的痕跡也抹掉。這是兩個動作，不是一個。」\n\n「有人很清楚——只要讓它看起來像從來沒動過，就不會有人回頭追。」';
+        else if (answer === 'F') replyText = '劉隊說：「掩飾不太對，但方向抓到了。重點是第二次的動機——不是要讓別人看不到，是要讓人以為從來就這樣。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch3_q1_next', text: '（繼續下一題）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q1 繼續 → 顯示 Q2
+      if (choice.id === 'ch3_q1_next') {
+        setCurrentDialog({
+          text: '劉隊翻到下一頁：「顧乃謙說整理版和原始 log 有差異。」\n\n「殘句：『這份 log 的問題，不在它說了什麼，而在它______了什麼。』」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch3_q2_A', text: 'A. 漏記', effects: [{ type: 'setFlag', flag: 'ch3_q2_answer', value: 'A' }, { type: 'setFlag', flag: 'ch3_q2_partial_correct', value: true }, { type: 'setFlag', flag: 'ch3_q2_done', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 1 }] },
+            { id: 'ch3_q2_B', text: 'B. 選擇性地遺漏', effects: [{ type: 'setFlag', flag: 'ch3_q2_answer', value: 'B' }, { type: 'setFlag', flag: 'ch3_q2_main_correct', value: true }, { type: 'setFlag', flag: 'ch3_q2_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
+            { id: 'ch3_q2_C', text: 'C. 誇大', effects: [{ type: 'setFlag', flag: 'ch3_q2_answer', value: 'C' }, { type: 'setFlag', flag: 'ch3_q2_done', value: true }] },
+            { id: 'ch3_q2_D', text: 'D. 偽造', effects: [{ type: 'setFlag', flag: 'ch3_q2_answer', value: 'D' }, { type: 'setFlag', flag: 'ch3_q2_done', value: true }] },
+            { id: 'ch3_q2_G', text: 'G. 刪除', effects: [{ type: 'setFlag', flag: 'ch3_q2_answer', value: 'G' }, { type: 'setFlag', flag: 'ch3_q2_partial_correct', value: true }, { type: 'setFlag', flag: 'ch3_q2_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q2 選答後 → 顯示 Q2 回應
+      if (choice.id?.startsWith('ch3_q2_')) {
+        const answer = flags.ch3_q2_answer as string;
+        let replyText = '劉隊說：「顧乃謙說，操作來源 IP 和覆寫前的原始值，整理版裡都沒有。缺的剛好能讓你問清楚那個操作從哪裡發出來的幾個欄位。」';
+        if (answer === 'B') replyText = '劉隊說：「對。不是全部沒有，是選了哪些要、哪些不要。」\n\n「問題就在『選擇』這個動作上，這不是錯誤，這是決定。」';
+        else if (answer === 'A' || answer === 'G') replyText = '劉隊說：「接近了。但不是全部被拿走，是有人決定某幾個欄位不重要——而那幾個欄位，剛好能讓案件說清楚遠端操作的事。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch3_q2_next', text: '（繼續下一題）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q2 繼續 → 顯示 Q3
+      if (choice.id === 'ch3_q2_next') {
+        setCurrentDialog({
+          text: '劉隊翻到最後一頁：「顧乃謙說城市 W 和光芒 R 在同一插件版本序列。」\n\n「殘句：『這代表這不是______，而是______。』」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch3_q3_A', text: 'A. 單點故障 / 系統性問題', effects: [{ type: 'setFlag', flag: 'ch3_q3_answer', value: 'A' }, { type: 'setFlag', flag: 'ch3_q3_main_correct', value: true }, { type: 'setFlag', flag: 'ch3_q3_done', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 2 }] },
+            { id: 'ch3_q3_B', text: 'B. 偶發事件 / 有人刻意安排的結果', effects: [{ type: 'setFlag', flag: 'ch3_q3_answer', value: 'B' }, { type: 'setFlag', flag: 'ch3_q3_partial_correct', value: true }, { type: 'setFlag', flag: 'ch3_q3_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 1 }] },
+            { id: 'ch3_q3_C', text: 'C. 資安漏洞 / 人為疏失', effects: [{ type: 'setFlag', flag: 'ch3_q3_answer', value: 'C' }, { type: 'setFlag', flag: 'ch3_q3_done', value: true }] },
+            { id: 'ch3_q3_E', text: 'E. 孤立事件 / 有跨館聯繫的操作', effects: [{ type: 'setFlag', flag: 'ch3_q3_answer', value: 'E' }, { type: 'setFlag', flag: 'ch3_q3_partial_correct', value: true }, { type: 'setFlag', flag: 'ch3_q3_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
+            { id: 'ch3_q3_G', text: 'G. 個人行為 / 組織行為', effects: [{ type: 'setFlag', flag: 'ch3_q3_answer', value: 'G' }, { type: 'setFlag', flag: 'ch3_q3_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 1 }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q3 選答後 → 顯示 Q3 回應
+      if (choice.id?.startsWith('ch3_q3_')) {
+        const answer = flags.ch3_q3_answer as string;
+        let replyText = '劉隊說：「顧乃謙說：跨館同步不是故障，那比較像有人知道哪裡會一起響。不是單點，不是巧合，是有人同時在兩邊動手——而且知道怎麼動。」';
+        if (answer === 'A') replyText = '劉隊說：「對。單點故障可以獨立處理，但版本序列一致，代表背後有共同的操作入口或共同的人。」\n\n「這是系統性問題的定義：不是一個地方壞掉，是有人知道哪裡會一起響。」';
+        else if (answer === 'B' || answer === 'E') replyText = '劉隊說：「方向有了，但要更精確一點。重點不是它是不是刻意的，而是它的結構——兩個館，同一條線，這個結構本身就不是單點的問題。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch3_qa_complete', text: '（完成推理討論）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q3 完成 → 顯示章節結語選擇
+      if (choice.id === 'ch3_qa_complete') {
+        setCurrentDialog({
+          text: '劉隊把記錄本合上：「log 能被整理。」\n\n「這句話寫進去，還是不寫進去，我現在問你。」\n\n他等著你的決定。',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch3_outro_write_in', text: '寫進去——「log 被整理過，原始欄位遺失，跨館操作痕跡無法重建。」', effects: [{ type: 'setFlag', flag: 'ch3_outro_write_raw', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 2 }] },
+            { id: 'ch3_outro_use_filtered', text: '先用整理版——「現有資料指向個別操作，尚無跨館系統性問題之直接證據。」', effects: [{ type: 'setFlag', flag: 'ch3_outro_use_filtered', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 1 }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // 結語選擇後 → 最終回應
+      if (choice.id === 'ch3_outro_write_in' || choice.id === 'ch3_outro_use_filtered') {
+        const isRaw = choice.id === 'ch3_outro_write_in';
+        const replyText = isRaw
+          ? '劉隊把那行字寫進去，然後說：「這種句子寫進去，今晚有些人的手機會響。」\n\n「我知道。但它是真的。」'
+          : '劉隊把那行字寫進去，然後說：「這樣的話，今晚大家都能回家睡覺。」\n\n他停了一下：「但那兩個欄位，我會自己記著。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch3_outro_done', text: '（結束本章）', effects: [{ type: 'setFlag', flag: 'ch3_reasoning_done', value: true }] }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // 完成本章
+      if (choice.id === 'ch3_outro_done') {
+        engine.handleDialogChoice(choice);
+        setCurrentDialog(null);
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+
+    // 第六章：劉隊最終總結（含四結局）
+    if (choice.id?.startsWith('ch6_q1_') || choice.id?.startsWith('ch6_q2_') || choice.id?.startsWith('ch6_q3_') || choice.id?.startsWith('ch6_qa_') || choice.id?.startsWith('ch6_final_') || choice.id === 'ch6_outro_done') {
+      engine.handleDialogChoice(choice);
+
+      const st = engine.getState();
+      const flags = st.flags || {};
+
+      // Q1 選答後
+      if (choice.id?.startsWith('ch6_q1_')) {
+        const answer = flags.ch6_q1_answer as string;
+        let replyText = '劉隊說：「張景衡改的那幾個字，剛好都是讓案件能繼續被追的字。不是疏忽，是選擇。」';
+        if (answer === 'ch6_q1_c') replyText = '劉隊點頭：「對。林子睿提供框架，張景衡製成口徑。那句話刪掉之後，整個敘事就從『有人這樣做』變成『系統本來就這樣』。」\n\n「繼續。」';
+        else if (answer === 'ch6_q1_b') replyText = '劉隊說：「方向對了。刪掉技術細節，是讓責任從個人行為變成系統性問題——而系統性問題沒有人要負責。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch6_q1_next', text: '（繼續）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+      if (choice.id === 'ch6_q1_next') {
+        setCurrentDialog({
+          text: '劉隊說：「林子睿說的那句話——」\n\n「殘句：『我讓一個已經存在的洞繼續存在，等它在對的時機被看見。這句話的意思是：______。』」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch6_q2_A', text: 'A. 沉默也是一種授權——他讓漏洞可利用，不阻止就等於允許', effects: [{ type: 'setFlag', flag: 'ch6_q2_answer', value: 'A' }, { type: 'setFlag', flag: 'ch6_q2_main_correct', value: true }, { type: 'setFlag', flag: 'ch6_q2_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 2 }] },
+            { id: 'ch6_q2_B', text: 'B. 他在等一個更大的結構性改革——代價是他預期的副產品', effects: [{ type: 'setFlag', flag: 'ch6_q2_answer', value: 'B' }, { type: 'setFlag', flag: 'ch6_q2_partial_correct', value: true }, { type: 'setFlag', flag: 'ch6_q2_done', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 1 }] },
+            { id: 'ch6_q2_C', text: 'C. 他只是疏忽了，沒有主動意圖', effects: [{ type: 'setFlag', flag: 'ch6_q2_answer', value: 'C' }, { type: 'setFlag', flag: 'ch6_q2_done', value: true }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+      if (choice.id?.startsWith('ch6_q2_')) {
+        const answer = flags.ch6_q2_answer as string;
+        let replyText = '劉隊說：「他說得很清楚：讓它繼續存在是決定，等它在對的時機是期待。這兩個動作合在一起，在法律上怎麼定義是另一回事，但在現實裡，它不是疏忽。」';
+        if (answer === 'A') replyText = '劉隊說：「對。他沒有指令叫人操作，但他讓操作成為可能、讓漏洞保持開著。」\n\n「在那個位置，沉默不是中立，沉默是決策。」';
+        else if (answer === 'B') replyText = '劉隊說：「B 和 A 其實可以同時成立。他等的是改革，但他知道代價是什麼——他只是沒有說出口，也沒有阻止它發生。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch6_q2_next', text: '（最後一題）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+      if (choice.id === 'ch6_q2_next') {
+        setCurrentDialog({
+          text: '劉隊說：「最後一題，不是給你的，是你給我的。」\n\n「章尾釘句：「你也能被剪裁。」」\n\n「你怎麼回應這句話？」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch6_q3_A', text: 'A. 那就讓我的版本先出去——把我找到的，說清楚，說完整。', effects: [{ type: 'setFlag', flag: 'ch6_q3_answer', value: 'A' }, { type: 'setFlag', flag: 'ch6_q3_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 2 }] },
+            { id: 'ch6_q3_B', text: 'B. 先確保那份原始 log 不消失——真相在資料裡，不在誰先說。', effects: [{ type: 'setFlag', flag: 'ch6_q3_answer', value: 'B' }, { type: 'setFlag', flag: 'ch6_q3_done', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 2 }] },
+            { id: 'ch6_q3_C', text: 'C. 我知道了。這就夠了。不是每個真相都能說出去的形狀。', effects: [{ type: 'setFlag', flag: 'ch6_q3_answer', value: 'C' }, { type: 'setFlag', flag: 'ch6_q3_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 2 }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q3 選答後 → 生成四結局
+      if (choice.id?.startsWith('ch6_q3_')) {
+        const hasRawLog = !!flags.ch6_raw_log_secured;
+        const d6Lin = !!flags.ch5_d6_lin;
+        const d7Archive = !!flags.ch6_d7_archive;
+        const linConfronted = !!flags.npc_lin_ch6_confrontation_done;
+
+        let endingTitle = '';
+        let endingText = '';
+
+        if (hasRawLog && d6Lin && linConfronted) {
+          // 真相結局
+          endingTitle = '完整揭露';
+          endingText = '劉隊把記錄本放下，說：「原始 log 在，林子睿的話有記錄，插件權限樹的頂端對上了。」\n\n「這份報告，我今晚就送出去。有些人的手機今晚會響，有些電話明天就不好打了。」\n\n他停頓了一下：「但這份東西是真的。不是說法，不是口徑，不是說帖第三版。」\n\n「KK——你沒有讓它被剪裁。」\n\n窗外記者會的燈光亮起，然後又滅了。\n\n有些事結束了。有些事才剛開始說清楚。';
+        } else if (hasRawLog && !d6Lin) {
+          // 程序先行結局
+          endingTitle = '程序完成，真相待續';
+          endingText = '劉隊說：「高文傑的案子，程序上走得下去。」\n\n「原始 log 在，比對結果你看到了。林子睿在技術層的位置——我寫進去了，但現在還不夠壓他。」\n\n「你做了一個可以走的選擇。不是最完整的，但不是錯的。」\n\n他把報告合上：「有些案子，第一份報告只是起點。」\n\n窗外的記者會開始了，宋雅甄在說話，措辭比張景衡的說帖乾淨一點點。\n\n不是你要的那種結束。但今晚有東西留下來了。';
+        } else if (!hasRawLog && d6Lin) {
+          // 有代價的追查結局
+          endingTitle = '追到了，但資料沒了';
+          endingText = '劉隊說：「林子睿那邊，你有對話記錄，有他的承認。但整理版 log 是張景衡的版本，原始檔沒有封存。」\n\n「你追到了腦，但能拿出去的，比你找到的少一截。」\n\n阿蘇說：「這個缺口，以後還能追。但以後比現在難。」\n\n窗外的記者會正在進行，宋雅甄的稿子是張景衡的版本。今晚說出去的，是那個版本。\n\n「你也能被剪裁。」\n林子睿說過那句話。今晚，它有了一個具體的形狀。';
+        } else {
+          // 現場優先結局
+          endingTitle = '現場平安，真相之後';
+          endingText = '劉隊說：「觀眾都出去了。沒有重傷。」\n\n「這是你今晚做到的最清楚的一件事。」\n\n他停了一下：「log 的部分，比較麻煩。整理版是張景衡的版本。原始檔的狀況……阿蘇說她在想辦法。」\n\n「不是你不好。是今晚有太多事要同時決定，你選了讓人先安全。」\n\n記者會正在播出，外面的版本，不是你的版本。\n\n但今晚有幾個人活著走出去了。這也是一種答案。';
+        }
+
+        engine.applyEffect({ type: 'setFlag', flag: 'ch6_ending_triggered', value: true });
+
+        setCurrentDialog({
+          text: `【${endingTitle}】\n\n${endingText}`,
+          type: 'narrator',
+          choices: [{ id: 'ch6_qa_complete', text: '（繼續）' }],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // 結局後 → 最終章尾
+      if (choice.id === 'ch6_qa_complete') {
+        setCurrentDialog({
+          text: '劉隊說：「你也能被剪裁。」\n\n「但那要看你讓誰先拿到你找到的東西。」\n\n他把記錄本合上，遞給你。\n\n「這是你的。從頭到尾，都是你的判斷。」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [{ id: 'ch6_final_reflection', text: '（最後一句話）' }],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // 最後反思
+      if (choice.id === 'ch6_final_reflection') {
+        const q3 = flags.ch6_q3_answer as string;
+        let reflectionText = '「我知道了。這就夠了。」';
+        if (q3 === 'A') reflectionText = '「讓我的版本先出去。」\n\n說完，你拿起記錄本，往記者會的方向走去。';
+        else if (q3 === 'B') reflectionText = '「真相在資料裡。不在說法裡。」\n\n那份原始 log，你知道它在哪裡。你知道它說了什麼。';
+        else if (q3 === 'C') reflectionText = '「我知道了。這就夠了。」\n\n不是每個真相都能說出去的形狀。但你知道它的形狀。這件事，沒有人能從你身上剪裁走。';
+        setCurrentDialog({
+          text: reflectionText,
+          type: 'narrator',
+          choices: [{ id: 'ch6_outro_done', text: '（完成遊戲）', effects: [{ type: 'setFlag', flag: 'ch6_reasoning_done', value: true }, { type: 'setFlag', flag: 'game_completed', value: true }] }],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // 遊戲完成
+      if (choice.id === 'ch6_outro_done') {
+        engine.handleDialogChoice(choice);
+        setCurrentDialog({
+          text: '——KK 流程偵探：最後一場放映——\n\n感謝你把這個案件調查到底。\n\n你找到的每一個字、每一份記錄、每一個不對的時間點，都在這裡。\n\n「你也能被剪裁。」\n但你沒有。',
+          type: 'narrator',
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+
+    // 第五章：劉隊推理 QA 殘句流程
+    if (choice.id?.startsWith('ch5_q1_') || choice.id?.startsWith('ch5_q2_') || choice.id?.startsWith('ch5_q3_') || choice.id?.startsWith('ch5_qa_') || choice.id?.startsWith('ch5_outro_')) {
+      engine.handleDialogChoice(choice);
+
+      const st = engine.getState();
+      const flags = st.flags || {};
+
+      // Q1 選答後 → 顯示 Q1 回應
+      if (choice.id?.startsWith('ch5_q1_')) {
+        const answer = flags.ch5_q1_answer as string;
+        let replyText = '劉隊說：「阿蘇說得清楚：登入紀錄只證明帳號在場，不保證靈魂也在場。『接近』需要來源欄位才能說清楚。」';
+        if (answer === 'ch5_q1_b') replyText = '劉隊點頭：「對。帳號在場，不代表操作者在場。整理版少了那幾個欄位，就是讓你只能說到『接近』這個程度。」\n\n「繼續。」';
+        else if (answer === 'ch5_q1_c') replyText = '劉隊說：「C 是可能的方向，但要能站得住腳，需要找到那個讓高文傑看起來最可疑的人——以及他這樣做的理由。繼續推。」';
+        else if (answer === 'ch5_q1_a') replyText = '劉隊說：「如果接近就夠，阿蘇不會特別提『帳號在場不代表靈魂在場』。那句話是在提醒你，光憑現有資料，押人站不住。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch5_q1_next', text: '（繼續下一題）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q1 繼續 → 顯示 Q2
+      if (choice.id === 'ch5_q1_next') {
+        setCurrentDialog({
+          text: '劉隊說：「整理版 log 比原始版少了四類欄位。」\n\n「殘句：『少的那些欄位，剛好能說清楚______。』」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch5_q2_A', text: 'A. 誰在哪裡做了什麼', effects: [{ type: 'setFlag', flag: 'ch5_q2_answer', value: 'A' }, { type: 'setFlag', flag: 'ch5_q2_main_correct', value: true }, { type: 'setFlag', flag: 'ch5_q2_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 2 }] },
+            { id: 'ch5_q2_B', text: 'B. 系統為什麼崩潰', effects: [{ type: 'setFlag', flag: 'ch5_q2_answer', value: 'B' }, { type: 'setFlag', flag: 'ch5_q2_done', value: true }] },
+            { id: 'ch5_q2_C', text: 'C. 高文傑的真實動機', effects: [{ type: 'setFlag', flag: 'ch5_q2_answer', value: 'C' }, { type: 'setFlag', flag: 'ch5_q2_done', value: true }] },
+            { id: 'ch5_q2_D', text: 'D. log 是不是被偽造過', effects: [{ type: 'setFlag', flag: 'ch5_q2_answer', value: 'D' }, { type: 'setFlag', flag: 'ch5_q2_partial_correct', value: true }, { type: 'setFlag', flag: 'ch5_q2_done', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 1 }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q2 選答後 → 顯示 Q2 回應
+      if (choice.id?.startsWith('ch5_q2_')) {
+        const answer = flags.ch5_q2_answer as string;
+        let replyText = '劉隊說：「四個欄位：來源 IP、失敗登入、遠端節點、覆寫前原始值。這四個加在一起，就能說清楚那個操作從哪裡來、由誰發出。整理版把這四個拿掉，你就只剩下一個不完整的故事。」';
+        if (answer === 'A') replyText = '劉隊說：「對。那四個欄位——操作來源、失敗紀錄、遠端節點、原始值——合在一起就是一份能說清楚誰在哪裡動了什麼的證據。」\n\n「少了它們，你有的只是一份說法很順、但卡不住追問的報告。」';
+        else if (answer === 'D') replyText = '劉隊說：「偽造是可能的，但更精確的說法是：選擇性遺漏。不是全部拿走，是把能追到操作者的那幾個欄位拿走，讓它看起來還是一份正常的 log。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch5_q2_next', text: '（繼續下一題）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q2 繼續 → 顯示 Q3
+      if (choice.id === 'ch5_q2_next') {
+        setCurrentDialog({
+          text: '劉隊說：「插件權限樹的頂層授權靠近技術長職位。」\n\n「殘句：『高文傑能按下執行，但能決定執行什麼的人，在______。』」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch5_q3_A', text: 'A. 更高的授權層級，靠近技術長的位置', effects: [{ type: 'setFlag', flag: 'ch5_q3_answer', value: 'A' }, { type: 'setFlag', flag: 'ch5_q3_main_correct', value: true }, { type: 'setFlag', flag: 'ch5_q3_done', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 2 }] },
+            { id: 'ch5_q3_B', text: 'B. 警方目前還沒查到的第三方', effects: [{ type: 'setFlag', flag: 'ch5_q3_answer', value: 'B' }, { type: 'setFlag', flag: 'ch5_q3_done', value: true }] },
+            { id: 'ch5_q3_C', text: 'C. 高文傑上面的直屬主管', effects: [{ type: 'setFlag', flag: 'ch5_q3_answer', value: 'C' }, { type: 'setFlag', flag: 'ch5_q3_partial_correct', value: true }, { type: 'setFlag', flag: 'ch5_q3_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 1 }] },
+            { id: 'ch5_q3_D', text: 'D. Unknown 的實際身份', effects: [{ type: 'setFlag', flag: 'ch5_q3_answer', value: 'D' }, { type: 'setFlag', flag: 'ch5_q3_done', value: true }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q3 選答後 → 顯示 Q3 回應
+      if (choice.id?.startsWith('ch5_q3_')) {
+        const answer = flags.ch5_q3_answer as string;
+        let replyText = '劉隊說：「顧乃謙說得清楚：真正能改插件的人，不需要每次自己登入。能在多館部署的那個層級，只有一個職位的帳號可以觸及——而那個位置，靠近技術長。」';
+        if (answer === 'A') replyText = '劉隊點頭：「對。插件邏輯不是在執行層決定的，是在授權的頂層定義的。」\n\n「高文傑是手，但決定手要做什麼的人，在另一個層級。」';
+        else if (answer === 'C') replyText = '劉隊說：「接近了，但層級更高。直屬主管不一定有插件頂層授權——這個案子的結構，讓決定者和操作者分了很遠。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch5_qa_complete', text: '（完成推理討論）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q3 完成 → 顯示 D6 決策
+      if (choice.id === 'ch5_qa_complete') {
+        setCurrentDialog({
+          text: '劉隊把記錄本合上：「動機能被剪裁。」\n\n「現在上面要一個名字。你要給哪一個？」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch5_outro_gao', text: '先押高文傑——登入紀錄在，程序可以走，之後再繼續追林子睿。', effects: [{ type: 'setFlag', flag: 'ch5_d6_gao', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 1 }] },
+            { id: 'ch5_outro_lin', text: '盯林子睿——插件頂層授權在他那裡，先押高文傑會讓真正的人跑掉。', effects: [{ type: 'setFlag', flag: 'ch5_d6_lin', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 2 }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // D6 選擇後 → 最終回應
+      if (choice.id === 'ch5_outro_gao' || choice.id === 'ch5_outro_lin') {
+        const isGao = choice.id === 'ch5_outro_gao';
+        const replyText = isGao
+          ? '劉隊說：「高文傑的名字先進去。」\n\n「程序走得動，報告好寫。」\n\n他停頓了一下：「林子睿那邊，我自己記著。你繼續查，別讓這件事在這裡結束。」'
+          : '劉隊說：「盯林子睿，這很難。他的職位讓他有足夠的理由跟程序溝通。」\n\n「但你問的問題方向是對的：手和腦分開的案子，先押手，腦就有機會消失。」\n\n「我們需要找到原始 log。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch5_outro_done', text: '（結束本章）', effects: [{ type: 'setFlag', flag: 'ch5_reasoning_done', value: true }] }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // 完成本章
+      if (choice.id === 'ch5_outro_done') {
+        engine.handleDialogChoice(choice);
+        setCurrentDialog(null);
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+
+    // 第四章：劉隊推理 QA 殘句流程
+    if (choice.id?.startsWith('ch4_q1_') || choice.id?.startsWith('ch4_q2_') || choice.id?.startsWith('ch4_q3_') || choice.id?.startsWith('ch4_qa_') || choice.id?.startsWith('ch4_outro_')) {
+      engine.handleDialogChoice(choice);
+
+      const st = engine.getState();
+      const flags = st.flags || {};
+
+      // Q1 選答後 → 顯示 Q1 回應
+      if (choice.id?.startsWith('ch4_q1_')) {
+        const answer = flags.ch4_q1_answer as string;
+        let replyText = '劉隊說：「梁以安說得清楚——黑下去的時間不對。燈不是壞了，是被安排在那個時機點亮下去的。」';
+        if (answer === 'ch4_q1_b') replyText = '劉隊點頭：「對。3 分鐘不是意外值，是操作窗口。在那段時間裡，黑暗是有人準備的條件，不是意外的結果。」\n\n「繼續。」';
+        else if (answer === 'ch4_q1_a') replyText = '劉隊說：「如果是失誤，那份風險回報不需要被三次擱置。有人不希望這個洞被修掉，這不是失誤的邏輯，這是利用的邏輯。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch4_q1_next', text: '（繼續下一題）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q1 繼續 → 顯示 Q2
+      if (choice.id === 'ch4_q1_next') {
+        setCurrentDialog({
+          text: '劉隊說：「陳佑誠送了三次回報單，每次都消失在流程裡。」\n\n「殘句：『不是每個擱置都是遺忘，有些擱置是______。』」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch4_q2_A', text: 'A. 決策', effects: [{ type: 'setFlag', flag: 'ch4_q2_answer', value: 'A' }, { type: 'setFlag', flag: 'ch4_q2_main_correct', value: true }, { type: 'setFlag', flag: 'ch4_q2_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 2 }] },
+            { id: 'ch4_q2_B', text: 'B. 程序問題', effects: [{ type: 'setFlag', flag: 'ch4_q2_answer', value: 'B' }, { type: 'setFlag', flag: 'ch4_q2_done', value: true }] },
+            { id: 'ch4_q2_C', text: 'C. 忽略', effects: [{ type: 'setFlag', flag: 'ch4_q2_answer', value: 'C' }, { type: 'setFlag', flag: 'ch4_q2_partial_correct', value: true }, { type: 'setFlag', flag: 'ch4_q2_done', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 1 }] },
+            { id: 'ch4_q2_D', text: 'D. 共謀', effects: [{ type: 'setFlag', flag: 'ch4_q2_answer', value: 'D' }, { type: 'setFlag', flag: 'ch4_q2_done', value: true }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q2 選答後 → 顯示 Q2 回應
+      if (choice.id?.startsWith('ch4_q2_')) {
+        const answer = flags.ch4_q2_answer as string;
+        let replyText = '劉隊說：「陳佑誠的回報格式正確、優先級正確，卻三次沒有批示。這條批示鏈的決定，在某個地方就停下來了。」';
+        if (answer === 'A') replyText = '劉隊說：「對。不是沒人看到，是有人決定不動。」\n\n「三份回報，三次決定。這不是程序疏漏，這是一個一致的選擇。」';
+        else if (answer === 'C') replyText = '劉隊說：「接近，但忽略還能是無意識的。這三次很一致，一致到它更像一個有意的選擇。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch4_q2_next', text: '（繼續下一題）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q2 繼續 → 顯示 Q3
+      if (choice.id === 'ch4_q2_next') {
+        setCurrentDialog({
+          text: '劉隊說：「光芒 R 和城市 W 用的是同一個 patch 版本的插件。」\n\n「殘句：『這讓本來需要______的事，變成只需要______。』」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch4_q3_A', text: 'A. 分別進入兩個館 / 一個入口就能觸及兩個館', effects: [{ type: 'setFlag', flag: 'ch4_q3_answer', value: 'A' }, { type: 'setFlag', flag: 'ch4_q3_main_correct', value: true }, { type: 'setFlag', flag: 'ch4_q3_done', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 2 }] },
+            { id: 'ch4_q3_B', text: 'B. 特殊技術能力 / 基本的系統存取權', effects: [{ type: 'setFlag', flag: 'ch4_q3_answer', value: 'B' }, { type: 'setFlag', flag: 'ch4_q3_partial_correct', value: true }, { type: 'setFlag', flag: 'ch4_q3_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
+            { id: 'ch4_q3_C', text: 'C. 很多人合謀 / 只需要一個知道入口的人', effects: [{ type: 'setFlag', flag: 'ch4_q3_answer', value: 'C' }, { type: 'setFlag', flag: 'ch4_q3_partial_correct', value: true }, { type: 'setFlag', flag: 'ch4_q3_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 1 }] },
+            { id: 'ch4_q3_D', text: 'D. 兩次不同的計畫 / 一個計畫複用兩次', effects: [{ type: 'setFlag', flag: 'ch4_q3_answer', value: 'D' }, { type: 'setFlag', flag: 'ch4_q3_done', value: true }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q3 選答後 → 顯示 Q3 回應
+      if (choice.id?.startsWith('ch4_q3_')) {
+        const answer = flags.ch4_q3_answer as string;
+        let replyText = '劉隊說：「陳佑誠說得清楚：同一個 patch，意味著同一個漏洞，同一種觸發方式。不需要去兩個地方，只需要知道怎麼用那個共同的入口。」';
+        if (answer === 'A') replyText = '劉隊點頭：「對。兩個館，一條線。操作者不需要兩個計畫，只需要一個知道怎麼進去的辦法。」\n\n「這讓規模擴大的成本，低到像只是多打一個指令。」';
+        else if (answer === 'B' || answer === 'C') replyText = '劉隊說：「接近了。重點不是人數或技術高低，是那個 patch 讓兩個館變成同一個攻擊面——進一個，等於進兩個。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch4_qa_complete', text: '（完成推理討論）' }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // Q3 完成 → 顯示章節結語
+      if (choice.id === 'ch4_qa_complete') {
+        setCurrentDialog({
+          text: '劉隊把記錄本合上：「人群能被當測試。」\n\n「這句話——你想怎麼寫進報告？」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊',
+          characterExpression: 1,
+          characterPosition: 'left',
+          choices: [
+            { id: 'ch4_outro_direct', text: '直接寫：「第二起事故具備人為操作條件，建議重新調查，不維持偶發認定。」', effects: [{ type: 'setFlag', flag: 'ch4_outro_direct_flag', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 2 }] },
+            { id: 'ch4_outro_cautious', text: '謹慎寫：「現有物證顯示燈控異常具備人為可能，建議待更多技術比對後再行定性。」', effects: [{ type: 'setFlag', flag: 'ch4_outro_cautious_flag', value: true }], insightEffects: [{ target: 'procedure_insight', delta: 1 }] },
+          ],
+        });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // 結語選擇後 → 最終回應
+      if (choice.id === 'ch4_outro_direct' || choice.id === 'ch4_outro_cautious') {
+        const isDirect = choice.id === 'ch4_outro_direct';
+        const replyText = isDirect
+          ? '劉隊寫進去，說：「這樣寫，上面今晚會打電話過來。」\n\n「我知道。但這是目前最接近真的說法。」\n\n他合上記錄本，頓了一下：「陳佑誠三份回報的批示鏈，我會另外追。」'
+          : '劉隊寫進去，說：「這樣的話，程序上比較好走。」\n\n他停頓了一下：「但梁以安說黑得太早，陳佑誠說漏洞被刻意留著——這些，我自己記著。」';
+        setCurrentDialog({ text: replyText, type: 'character', characterId: 'npc_liu', characterName: '劉隊', characterExpression: 1, characterPosition: 'left', choices: [{ id: 'ch4_outro_done', text: '（結束本章）', effects: [{ type: 'setFlag', flag: 'ch4_reasoning_done', value: true }] }] });
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      // 完成本章
+      if (choice.id === 'ch4_outro_done') {
+        engine.handleDialogChoice(choice);
+        setCurrentDialog(null);
+        setRefreshKey((prev) => prev + 1);
+        return;
+      }
+
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+
     const currentState = engine.getState();
 
     // NPC 關鍵對話模式：使用 handleNpcDialogChoice，並顯示下一節點或結束
@@ -859,6 +1414,22 @@ export default function PlayPage() {
         // 專門處理阿蘇敏感對話：只要這棵對話樹走到結束，就視為完成敏感 QTE
         if (currentState.activeNpcDialogId === 'npc_asu') {
           engine.applyEffect({ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true });
+        }
+        // 第三章：顧乃謙敏感對話完成
+        if (currentState.activeNpcDialogId === 'npc_gu_naiqian') {
+          engine.applyEffect({ type: 'setFlag', flag: 'npc_gu_naiqian_sensitive_done', value: true });
+        }
+        // 第四章：陳佑誠敏感對話完成
+        if (currentState.activeNpcDialogId === 'npc_chen_youcheng') {
+          engine.applyEffect({ type: 'setFlag', flag: 'npc_chen_sensitive_done', value: true });
+        }
+        // 第五章：高文傑敏感對話完成
+        if (currentState.activeNpcDialogId === 'npc_gao_wenjie') {
+          engine.applyEffect({ type: 'setFlag', flag: 'npc_gao_sensitive_done', value: true });
+        }
+        // 第六章：林子睿最終對決完成
+        if (currentState.activeNpcDialogId === 'npc_lin_zirui') {
+          engine.applyEffect({ type: 'setFlag', flag: 'npc_lin_ch6_confrontation_done', value: true });
         }
         engine.endNpcDialog();
         setCurrentDialog(null);
@@ -921,6 +1492,22 @@ export default function PlayPage() {
       // 特例：阿蘇敏感對話若是透過關閉對話框結束，也視為已完成敏感對話
       if (activeNpcId === 'npc_asu') {
         engine!.applyEffect({ type: 'setFlag', flag: 'npc_asu_sensitive_done', value: true } as any);
+      }
+      // 第三章：顧乃謙敏感對話若透過關閉結束，也視為已完成
+      if (activeNpcId === 'npc_gu_naiqian') {
+        engine!.applyEffect({ type: 'setFlag', flag: 'npc_gu_naiqian_sensitive_done', value: true } as any);
+      }
+      // 第四章：陳佑誠敏感對話若透過關閉結束，也視為已完成
+      if (activeNpcId === 'npc_chen_youcheng') {
+        engine!.applyEffect({ type: 'setFlag', flag: 'npc_chen_sensitive_done', value: true } as any);
+      }
+      // 第五章：高文傑敏感對話若透過關閉結束，也視為已完成
+      if (activeNpcId === 'npc_gao_wenjie') {
+        engine!.applyEffect({ type: 'setFlag', flag: 'npc_gao_sensitive_done', value: true } as any);
+      }
+      // 第六章：林子睿最終對決若透過關閉結束，也視為已完成
+      if (activeNpcId === 'npc_lin_zirui') {
+        engine!.applyEffect({ type: 'setFlag', flag: 'npc_lin_ch6_confrontation_done', value: true } as any);
       }
       engine!.endNpcDialog();
     }
@@ -2798,6 +3385,164 @@ export default function PlayPage() {
       }
     }
 
+    // 第六章場景解鎖條件
+    if (chapterId === 'ch6') {
+      const state = engine.getState();
+      const flags = state.flags || {};
+
+      // 1) 想前往中控室：需要先接到劉隊任務
+      if (targetSceneId === 'scene_ch6_control_room' && !flags.ch6_task_from_liu) {
+        setCurrentDialog({
+          text: '劉隊說：「先過來，我跟你說現在的狀況。」\n\n「第三起事故已經在發生了。」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊（偵查隊）',
+          characterExpression: 1,
+          characterPosition: 'left',
+        });
+        return;
+      }
+
+      // 2) 想前往記者會前廊：需要先接任務，且已完成 D7 選擇
+      if (targetSceneId === 'scene_ch6_press_corridor') {
+        if (!flags.ch6_task_from_liu || !flags.ch6_d7_done) {
+          setCurrentDialog({
+            text: '阿蘇說：「中控室那邊還沒做決定。」\n\n「你去做那個決定之後，再去後台。順序不能反。」',
+            type: 'character',
+            characterId: 'npc_asu',
+            characterName: '阿蘇（警方技術組）',
+            characterExpression: 1,
+            characterPosition: 'left',
+          });
+          return;
+        }
+      }
+    }
+
+    // 第五章場景解鎖條件
+    if (chapterId === 'ch5') {
+      const state = engine.getState();
+      const flags = state.flags || {};
+
+      // 1) 想前往技術比對室：需要先接到劉隊任務
+      if (targetSceneId === 'scene_ch5_log_lab' && !flags.ch5_task_from_liu) {
+        setCurrentDialog({
+          text: '劉隊在資料室角落看著你。\n\n「先過來，我跟你說這章你要搞清楚什麼。」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊（偵查隊）',
+          characterExpression: 1,
+          characterPosition: 'left',
+        });
+        return;
+      }
+
+      // 2) 想前往林子睿辦公室外圍：需要先接任務，且在技術比對室互動過兩個以上核心物件
+      if (targetSceneId === 'scene_ch5_lin_office') {
+        const coreLogLabHotspots = [
+          'hotspot_ch5_log_diff',
+          'hotspot_ch5_permission_tree',
+        ];
+        const interactedCount = coreLogLabHotspots.filter((id) => engine.hasInteracted(id)).length;
+
+        if (!flags.ch5_task_from_liu || interactedCount < 2) {
+          setCurrentDialog({
+            text: '顧乃謙說：「這邊還沒看完。」\n\n「log 差異和權限樹——你弄清楚這兩個，再去那邊才有意義。」',
+            type: 'character',
+            characterId: 'npc_gu_naiqian',
+            characterName: '顧乃謙（系統工程）',
+            characterExpression: 1,
+            characterPosition: 'left',
+          });
+          return;
+        }
+      }
+    }
+
+    // 第四章場景解鎖條件
+    if (chapterId === 'ch4') {
+      const state = engine.getState();
+      const flags = state.flags || {};
+
+      // 1) 想前往放映控制區：需要先接到劉隊任務
+      if (targetSceneId === 'scene_ch4_control_panel' && !flags.ch4_task_from_liu) {
+        setCurrentDialog({
+          text: '劉隊站在樓梯間入口，表情說他有話要說。\n\n「先過來，我跟你說你要查什麼。」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊（偵查隊）',
+          characterExpression: 1,
+          characterPosition: 'left',
+        });
+        return;
+      }
+
+      // 2) 想前往散場大廳：需要先接任務，且在放映控制區互動過兩個以上核心物件
+      if (targetSceneId === 'scene_ch4_main_hall') {
+        const coreControlHotspots = [
+          'hotspot_control_plugin_version',
+          'hotspot_control_sync_record',
+          'hotspot_control_risk_report',
+        ];
+        const interactedCount = coreControlHotspots.filter((id) => engine.hasInteracted(id)).length;
+
+        if (!flags.ch4_task_from_liu || interactedCount < 2) {
+          setCurrentDialog({
+            text: '陳佑誠說：「控制區那邊還沒看完。」\n\n「那個版本記錄和回報單——你帶著問題來，比較有意義。」',
+            type: 'character',
+            characterId: 'npc_chen_youcheng',
+            characterName: '陳佑誠（技術維護）',
+            characterExpression: 1,
+            characterPosition: 'left',
+          });
+          return;
+        }
+      }
+    }
+
+    // 第三章場景解鎖條件
+    if (chapterId === 'ch3') {
+      const state = engine.getState();
+      const flags = state.flags || {};
+
+      // 1) 想前往品牌應對室：需要先接到劉隊任務
+      if (targetSceneId === 'scene_ch3_brand_room' && !flags.ch3_task_from_liu) {
+        setCurrentDialog({
+          text:
+            '劉隊站在大廳角落看著你。\n\n「先過來，我跟你說一下你要查什麼。」',
+          type: 'character',
+          characterId: 'npc_liu',
+          characterName: '劉隊（偵查隊）',
+          characterExpression: 1,
+          characterPosition: 'left',
+        });
+        return;
+      }
+
+      // 2) 想前往機房外走道：需要先接任務，且在品牌應對室互動過兩個以上核心物件
+      if (targetSceneId === 'scene_ch3_server_corridor') {
+        const coreBrandHotspots = [
+          'hotspot_brand_filtered_log',
+          'hotspot_brand_press_draft',
+          'hotspot_brand_monitor_report',
+        ];
+        const interactedCount = coreBrandHotspots.filter((id) => engine.hasInteracted(id)).length;
+
+        if (!flags.ch3_task_from_liu || interactedCount < 2) {
+          setCurrentDialog({
+            text:
+              '顧乃謙說：「先把那邊的東西看完。」\n\n「帶著問題來，不要帶著空白的筆記本過來。」',
+            type: 'character',
+            characterId: 'npc_gu_naiqian',
+            characterName: '顧乃謙（系統工程）',
+            characterExpression: 1,
+            characterPosition: 'left',
+          });
+          return;
+        }
+      }
+    }
+
     lastDisplayedSceneRef.current = targetSceneId;
 
     // 步驟 1：只顯示大字（不改 engine、不 router），此時仍為舊場景，不會觸發「場景不存在」或 chapterData 重算
@@ -3093,6 +3838,198 @@ export default function PlayPage() {
                   if (rand) {
                     setCurrentDialog(rand);
                   }
+                  return;
+                }
+
+                // 第三章：劉隊結算推理 QA（前提是已完成顧乃謙敏感對話）
+                if (chapterId === 'ch3' && npcId === 'npc_liu') {
+                  const st = engine.getState();
+                  const flags = st.flags || {};
+                  const guSensitiveDone = !!flags.npc_gu_naiqian_sensitive_done;
+                  const ch3ReasoningDone = !!flags.ch3_reasoning_done;
+
+                  if (ch3ReasoningDone) {
+                    const rand = engine.triggerRandomNpcDialog('npc_liu');
+                    if (rand) setCurrentDialog(rand);
+                    return;
+                  }
+
+                  if (!flags.ch3_task_from_liu) {
+                    // 任務還沒接，走 hotspot event 處理（不在此重複）
+                    return;
+                  }
+
+                  if (!guSensitiveDone) {
+                    setCurrentDialog({
+                      text:
+                        '「先去跟顧乃謙把機房那邊的東西確認完。」\n\n「等你知道那個 log 少了什麼，再回來跟我說。」',
+                      type: 'character',
+                      characterId: 'npc_liu',
+                      characterName: '劉隊',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                    });
+                    return;
+                  }
+
+                  // 顧乃謙已完成 → 開啟推理 QA（Q1 殘句）
+                  setCurrentDialog({
+                    text:
+                      '劉隊把記錄本翻到某一頁，說：「周姊說白板被擦了兩次。」\n\n「所以我把殘句填了一半：」\n\n「『白板有人擦過兩次。第一次為了______，第二次為了______。』」',
+                    type: 'character',
+                    characterId: 'npc_liu',
+                    characterName: '劉隊',
+                    characterExpression: 1,
+                    characterPosition: 'left',
+                    choices: [
+                      { id: 'ch3_q1_A', text: 'A. 改內容 / 讓它看起來像沒改過', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'A' }, { type: 'setFlag', flag: 'ch3_q1_main_correct', value: true }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
+                      { id: 'ch3_q1_B', text: 'B. 記錄 / 完成交接', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'B' }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }] },
+                      { id: 'ch3_q1_C', text: 'C. 備忘 / 整理版面', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'C' }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }] },
+                      { id: 'ch3_q1_D', text: 'D. 通報 / 讓更多人知道', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'D' }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }] },
+                      { id: 'ch3_q1_F', text: 'F. 掩飾 / 轉移注意力', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'F' }, { type: 'setFlag', flag: 'ch3_q1_partial_correct', value: true }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 1 }] },
+                      { id: 'ch3_q1_G', text: 'G. 佈達 / 讓流程正式化', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'G' }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }] },
+                    ],
+                  });
+                  return;
+                }
+
+                // 第六章：劉隊最終總結（前提是已完成林子睿最終對決）
+                if (chapterId === 'ch6' && npcId === 'npc_liu') {
+                  const st = engine.getState();
+                  const flags = st.flags || {};
+                  const linConfrontationDone = !!flags.npc_lin_ch6_confrontation_done;
+                  const ch6ReasoningDone = !!flags.ch6_reasoning_done;
+
+                  if (ch6ReasoningDone) {
+                    const rand = engine.triggerRandomNpcDialog('npc_liu');
+                    if (rand) setCurrentDialog(rand);
+                    return;
+                  }
+
+                  if (!flags.ch6_task_from_liu) {
+                    return;
+                  }
+
+                  if (!linConfrontationDone) {
+                    setCurrentDialog({
+                      text: '「先去跟林子睿把那個問題問完。」\n\n「他在後台。你知道要問什麼。」',
+                      type: 'character',
+                      characterId: 'npc_liu',
+                      characterName: '劉隊',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                    });
+                    return;
+                  }
+
+                  // 林子睿最終對決完成 → 開啟最終總結 QA
+                  setCurrentDialog({
+                    text: '劉隊說：「好。你問完了，我也問你。」\n\n「張景衡把說帖裡的『遠端操作存在可能性』這整句話刪掉了。」\n\n「殘句：『這個刪除，代表的不是公關考量，而是______。』」',
+                    type: 'character',
+                    characterId: 'npc_liu',
+                    characterName: '劉隊',
+                    characterExpression: 1,
+                    characterPosition: 'left',
+                    choices: [
+                      { id: 'ch6_q1_a', text: 'A. 公關稿的正常處理，技術細節本來就不適合出現在聲明裡', effects: [{ type: 'setFlag', flag: 'ch6_q1_answer', value: 'a' }, { type: 'setFlag', flag: 'ch6_q1_done', value: true }] },
+                      { id: 'ch6_q1_b', text: 'B. 刻意的敘事框架轉換——從「人為操作」變成「系統問題」', effects: [{ type: 'setFlag', flag: 'ch6_q1_answer', value: 'b' }, { type: 'setFlag', flag: 'ch6_q1_partial_correct', value: true }, { type: 'setFlag', flag: 'ch6_q1_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
+                      { id: 'ch6_q1_c', text: 'C. 在替林子睿製造口徑：讓操作者從文字裡消失，讓責任也跟著消失', effects: [{ type: 'setFlag', flag: 'ch6_q1_answer', value: 'c' }, { type: 'setFlag', flag: 'ch6_q1_main_correct', value: true }, { type: 'setFlag', flag: 'ch6_q1_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 2 }] },
+                    ],
+                  });
+                  return;
+                }
+
+                // 第五章：劉隊結算推理 QA（前提是已完成高文傑敏感對話）
+                if (chapterId === 'ch5' && npcId === 'npc_liu') {
+                  const st = engine.getState();
+                  const flags = st.flags || {};
+                  const gaoSensitiveDone = !!flags.npc_gao_sensitive_done;
+                  const ch5ReasoningDone = !!flags.ch5_reasoning_done;
+
+                  if (ch5ReasoningDone) {
+                    const rand = engine.triggerRandomNpcDialog('npc_liu');
+                    if (rand) setCurrentDialog(rand);
+                    return;
+                  }
+
+                  if (!flags.ch5_task_from_liu) {
+                    return;
+                  }
+
+                  if (!gaoSensitiveDone) {
+                    setCurrentDialog({
+                      text: '「先去跟高文傑談清楚。」\n\n「等你問完他那個問題，再回來跟我說你怎麼看。」',
+                      type: 'character',
+                      characterId: 'npc_liu',
+                      characterName: '劉隊',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                    });
+                    return;
+                  }
+
+                  // 高文傑已完成 → 開啟推理 QA
+                  setCurrentDialog({
+                    text: '劉隊把記錄本翻到某一頁，說：「嫌疑矩陣攤在這裡，高文傑的欄位最滿。」\n\n「殘句填一半：」\n\n「『高文傑的登入紀錄與命案時間「接近但不完全吻合」——這代表他是______，不是______。』」',
+                    type: 'character',
+                    characterId: 'npc_liu',
+                    characterName: '劉隊',
+                    characterExpression: 1,
+                    characterPosition: 'left',
+                    choices: [
+                      { id: 'ch5_q1_a', text: 'A. 可以押的人 / 真正的操作者', effects: [{ type: 'setFlag', flag: 'ch5_q1_answer', value: 'a' }, { type: 'setFlag', flag: 'ch5_q1_done', value: true }] },
+                      { id: 'ch5_q1_b', text: 'B. 方便的嫌疑人 / 可以確認有罪的人', effects: [{ type: 'setFlag', flag: 'ch5_q1_answer', value: 'b' }, { type: 'setFlag', flag: 'ch5_q1_main_correct', value: true }, { type: 'setFlag', flag: 'ch5_q1_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 2 }] },
+                      { id: 'ch5_q1_c', text: 'C. 被借名的工具 / 主謀本人', effects: [{ type: 'setFlag', flag: 'ch5_q1_answer', value: 'c' }, { type: 'setFlag', flag: 'ch5_q1_partial_correct', value: true }, { type: 'setFlag', flag: 'ch5_q1_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
+                      { id: 'ch5_q1_d', text: 'D. 知情者 / 無辜的人', effects: [{ type: 'setFlag', flag: 'ch5_q1_answer', value: 'd' }, { type: 'setFlag', flag: 'ch5_q1_done', value: true }] },
+                    ],
+                  });
+                  return;
+                }
+
+                // 第四章：劉隊結算推理 QA（前提是已完成陳佑誠敏感對話）
+                if (chapterId === 'ch4' && npcId === 'npc_liu') {
+                  const st = engine.getState();
+                  const flags = st.flags || {};
+                  const chenSensitiveDone = !!flags.npc_chen_sensitive_done;
+                  const ch4ReasoningDone = !!flags.ch4_reasoning_done;
+
+                  if (ch4ReasoningDone) {
+                    const rand = engine.triggerRandomNpcDialog('npc_liu');
+                    if (rand) setCurrentDialog(rand);
+                    return;
+                  }
+
+                  if (!flags.ch4_task_from_liu) {
+                    return;
+                  }
+
+                  if (!chenSensitiveDone) {
+                    setCurrentDialog({
+                      text: '「先去跟陳佑誠把控制區的東西確認完。」\n\n「等你知道那份回報是誰擱置的，再回來跟我說。」',
+                      type: 'character',
+                      characterId: 'npc_liu',
+                      characterName: '劉隊',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                    });
+                    return;
+                  }
+
+                  // 陳佑誠已完成 → 開啟推理 QA（Q1 殘句）
+                  setCurrentDialog({
+                    text: '劉隊把記錄本翻到某一頁，說：「梁以安說那次黑得太早。」\n\n「殘句填一半：」\n\n「『節能燈提前切換的那 3 分鐘，對兇手來說是______，不是______。』」',
+                    type: 'character',
+                    characterId: 'npc_liu',
+                    characterName: '劉隊',
+                    characterExpression: 1,
+                    characterPosition: 'left',
+                    choices: [
+                      { id: 'ch4_q1_a', text: 'A. 失誤 / 計畫', effects: [{ type: 'setFlag', flag: 'ch4_q1_answer', value: 'a' }, { type: 'setFlag', flag: 'ch4_q1_done', value: true }] },
+                      { id: 'ch4_q1_b', text: 'B. 窗口 / 意外', effects: [{ type: 'setFlag', flag: 'ch4_q1_answer', value: 'b' }, { type: 'setFlag', flag: 'ch4_q1_main_correct', value: true }, { type: 'setFlag', flag: 'ch4_q1_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
+                      { id: 'ch4_q1_c', text: 'C. 測試 / 正式操作', effects: [{ type: 'setFlag', flag: 'ch4_q1_answer', value: 'c' }, { type: 'setFlag', flag: 'ch4_q1_partial_correct', value: true }, { type: 'setFlag', flag: 'ch4_q1_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 1 }] },
+                      { id: 'ch4_q1_d', text: 'D. 節能設定 / 人為操作', effects: [{ type: 'setFlag', flag: 'ch4_q1_answer', value: 'd' }, { type: 'setFlag', flag: 'ch4_q1_done', value: true }] },
+                    ],
+                  });
                   return;
                 }
 

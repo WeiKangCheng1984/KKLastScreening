@@ -1,597 +1,1264 @@
-import { Scene, Item, NpcDialogNode } from '@/types/game';
+import { Scene, Item, NpcDialogNode, GameState } from '@/types/game';
 
-// ch3 道具
+// ──────────────────────────────────────────────
+// 第三章 道具
+// ──────────────────────────────────────────────
 const items: Record<string, Item> = {
-  'item_recorder': {
-    id: 'item_recorder',
-    name: '錄音筆',
-    description: '垃圾桶裡很乾淨，但底部有一支錄音筆。\n\n黑色的外殼，看起來很新。\n像是被人刻意丟棄，但又放在一個容易被發現的位置。\n\n內容（可播放）：\n「我不是恨她。\n我只是討厭，\n散場後那種被留下來的感覺。」',
-    svgImage: '/svg/items/recorder.svg',
+  // 場景一：封鎖大廳前台
+  item_whiteboard_rewrite: {
+    id: 'item_whiteboard_rewrite',
+    name: '交接白板（重寫的筆跡）',
+    description:
+      '交接白板上有一處被重寫的筆劃——字體比周圍的字更新，墨水比較深。\n\n與第一章紅筆塗改做比對：同樣的書寫習慣，先劃掉再補字，下筆的角度幾乎一致。\n\n周姊說，白板擦過兩次。第一次是為了改，第二次是為了讓它看起來像沒改過。',
+    svgImage: '/svg/items/whiteboard_rewrite.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_visitor_log': {
-    id: 'item_visitor_log',
-    name: '訪客登記表',
-    description: '訪客登記表上記錄著所有人的進出時間。\n\n案發當晚，嫌犯 A 的記錄清晰可見：\n進入時間：08:30\n離開時間：22:30\n\n這個時間戳無法偽造。',
-    svgImage: '/svg/items/visitor_log.svg',
+  item_promo_wall_text: {
+    id: 'item_promo_wall_text',
+    name: '宣傳牆文案（口徑矛盾）',
+    description:
+      '宣傳牆上的文案寫著：「城市影城全系列場館支援分區控制與自動排程，打造最佳觀影體驗。」\n\n但現場口徑是「只開了節能模式，沒有做任何自動控制。」\n\n「可分區」和「可自動」——這兩個功能如果都有，那第一章的「延後亮燈」就不只是疏失，而是有人知道怎麼用這個系統。',
+    svgImage: '/svg/items/promo_wall_text.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_audience_psychology_notebook': {
-    id: 'item_audience_psychology_notebook',
-    name: '觀眾心理筆記本',
-    description: '書桌上放著一本筆記本。\n\n封面寫著：「觀眾心理分析」\n裡面記錄著他對電影、觀眾、散場的觀察。\n\n重點段落：\n「真正的高潮，\n不在片中，\n而在散場。\n\n當燈亮起，當人群開始移動，\n那一刻，所有人都最脆弱。」',
-    svgImage: '/svg/items/audience_psychology_notebook.svg',
+  item_scene_control_sheet: {
+    id: 'item_scene_control_sheet',
+    name: '前台場控簡表（過期版本）',
+    description:
+      '前台抽屜裡有一份過期的場控手冊，附著一張臨時簡表。\n\n簡表的第三頁有一個被手寫補注的功能頁：「C4：散場延後照明申請——適用條件：觀眾投訴、特殊活動、VIP場次。」\n\n這一頁原本不在正式版本裡。是誰加進來的？加的時間，比第一章的案發時間還早了三個月。',
+    svgImage: '/svg/items/scene_control_sheet.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_gloves_clean': {
-    id: 'item_gloves_clean',
-    name: '手套（完整、未使用）',
-    description: '抽屜裡放著一雙手套。\n\n黑色的，完整、未使用。\n沒有任何血跡，沒有任何使用痕跡。\n\n這雙手套很新，像是剛買的，但從未用過。',
-    svgImage: '/svg/items/gloves_clean.svg',
+
+  // 場景二：臨時會議室 / 品牌應對室
+  item_filtered_log: {
+    id: 'item_filtered_log',
+    name: '張景衡整理版 log',
+    description:
+      '張景衡提供的 log 報告，版面乾淨，每一欄都有清楚說明。\n\n「操作員：高文傑。時間：22:57。操作類型：手動覆寫。結果：照明模式切換。」\n\n這份報告讀起來非常清楚——清楚到顧乃謙看了一眼就說：「原始檔不長這樣。」\n\n問題不在這份 log 寫了什麼，而在它少說了什麼。',
+    svgImage: '/svg/items/filtered_log.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  
-  // 第三章：預測（電影院 B 和 C）
-  'item_screening_schedule_b': {
-    id: 'item_screening_schedule_b',
-    name: '電影院B放映表',
-    description: '放映表上記錄著所有場次的時間。\n\n今晚的場次：\n22:00 場次，散場時間：23:00\n\n這個時間與第一案的時間節奏接近。\n太接近了，像是刻意安排。',
-    svgImage: '/svg/items/screening_schedule_b.svg',
+  item_press_draft: {
+    id: 'item_press_draft',
+    name: '記者應對話術草稿',
+    description:
+      '一張 A4 草稿，字跡工整，像是背稿用的：\n\n「—— 如媒體詢問：請一律使用『個別失誤』，不使用『系統問題』。\n—— 如追問三館：回答『尚在釐清關聯性』，不主動提及聯繫。\n—— 禁用語：三起事故、跨館、系統性風險。」\n\n最下方有一行潦草的補注：「告訴記者，這是局部異常，無系統性風險。」\n\n這不是防禦媒體，這是在防止真相被串起來。',
+    svgImage: '/svg/items/press_draft.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_light_control_request': {
-    id: 'item_light_control_request',
-    name: '售票口燈控申請單',
-    description: '售票口貼著一張燈控申請單。\n\n申請日期：一週前\n申請理由：觀眾投訴「太刺眼」\n結果：臨時延後亮燈 3 分鐘\n\n這個理由很常見，這個申請很合理。\n但時間點，太巧合了。',
-    svgImage: '/svg/items/light_control_request.svg',
+  item_brand_monitor_report: {
+    id: 'item_brand_monitor_report',
+    name: '宋雅甄品牌監測報表',
+    description:
+      '品牌監測報表的標題是「輿情分析—城市影城 W-R 事件關聯度」。\n\n報表裡有一欄被手工圈起來，旁邊寫著：「三館同日出現在搜尋趨勢，需降低關聯性。」\n\n宋雅甄在意的不是死者是誰，是「三館」這個詞能不能同時出現在新聞裡。\n\n她的邏輯是：一間影城出事是事故，三間一起被聯想，就是品牌問題。',
+    svgImage: '/svg/items/brand_monitor_report.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_security_patrol_schedule': {
-    id: 'item_security_patrol_schedule',
-    name: '保全巡邏表',
-    description: '保全巡邏表記錄著所有巡邏時間。\n\n散場後 5 分鐘內為空檔。\n這段時間，沒有人會巡邏。\n\n這是一個完美的時間窗口。',
-    svgImage: '/svg/items/security_patrol_schedule.svg',
+
+  // 場景三：機房外走道 / 系統接點區
+  item_cross_venue_sync: {
+    id: 'item_cross_venue_sync',
+    name: '跨館同步異常片段',
+    description:
+      '顧乃謙列印出一段系統記錄，在上面用紅筆圈了三個時間點。\n\n「城市 W」和「光芒 R」在三個不同日期，各自出現了同樣的插件版本更新記錄——時間差在 15 分鐘以內。\n\n「跨館同步不是故障，那比較像……有人知道哪裡會一起響。」\n\n這不是系統自動同步。同版本、不同館、幾乎同時更新——背後要嘛是同一個操作入口，要嘛是同一個人。',
+    svgImage: '/svg/items/cross_venue_sync.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_auto_light_system_c': {
-    id: 'item_auto_light_system_c',
-    name: '電影院C全自動燈控系統',
-    description: '全自動燈控系統的說明書貼在控制室牆上。\n\n系統特點：\n- 無人工介入\n- 準時亮燈\n- 無法延後\n\n這與第一案的手動控制不同。\n但「準時」本身，也是一種可預測性。',
-    svgImage: '/svg/items/auto_light_system_c.svg',
+  item_network_device_label: {
+    id: 'item_network_device_label',
+    name: '網路設備標籤與館別代號對照',
+    description:
+      '機房走道的設備架上貼著標籤，旁邊有一份手寫的館別代號對照表：\n\n「W-01：城市影城（本館）\nR-02：光芒影城（遠端）\nM-03：明星影城（遠端）」\n\nW 和 R 的設備在同一個子網段。這不是預設的標準配置——有人在設定網路時，特意讓兩館可以直接溝通。',
+    svgImage: '/svg/items/network_device_label.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_monitor_deadzone_map': {
-    id: 'item_monitor_deadzone_map',
-    name: '監視器配置圖',
-    description: '監視器配置圖上標示了所有監視器位置。\n\n紅色區域：監視器死角\n集中在「空橋連接處」\n\n這個死角很大，足夠讓一個人完全消失。\n而且，這個位置是合法的通道。',
-    svgImage: '/svg/items/monitor_deadzone_map.svg',
+  item_remote_login_sheet: {
+    id: 'item_remote_login_sheet',
+    name: '遠端登入維護單',
+    description:
+      '一份維護單，記錄了遠端登入的申請與審核流程。\n\n最後一筆記錄日期：三週前。操作人：顧乃謙。說明：「插件版本序列比對——W、R 同步確認。」\n\n這筆記錄是顧乃謙親自做的。他知道這兩館的版本是同步的，早在案發之前就知道。\n\n他在等什麼？還是他一直在看著什麼？',
+    svgImage: '/svg/items/remote_login_sheet.svg',
     svgSize: 'medium',
     collectible: true,
   },
-  'item_crowd_flow_report': {
-    id: 'item_crowd_flow_report',
-    name: '散場人流分析報告',
-    description: '散場人流分析報告顯示了詳細的數據。\n\n數據顯示：\n- 人潮分散（不像電影院B會聚集）\n- 難以聚集注意力\n- 單人觀眾比例高（60%）\n\n這種「分散」的環境，對兇手來說是優勢。',
-    svgImage: '/svg/items/crowd_flow_report.svg',
-    svgSize: 'medium',
-    collectible: true,
-  },
-  'item_black_plastic_fragment_bridge': {
-    id: 'item_black_plastic_fragment_bridge',
-    name: '空橋黑色塑膠碎片',
-    description: '垃圾桶裡有一小片黑色塑膠碎片。\n\n邊緣不規則，材質與第一章發現的碎片相似。\n像是手套的一部分。\n\n這個位置，正好在死角路徑上。',
-    svgImage: '/svg/items/black_plastic_fragment_bridge.svg',
-    svgSize: 'small',
-    collectible: true,
-  },
-  
-  // 第四章：逼近（嫌犯 C）
 };
 
-// ch3 場景
+// ──────────────────────────────────────────────
+// 第三章 場景
+// ──────────────────────────────────────────────
 const scenes: Record<string, Scene> = {
-    'scene_ch3_cinema_b': {
-    id: 'scene_ch3_cinema_b',
+
+  // ──────────────────────────────────────────────
+  // 場景一：封鎖大廳前台
+  // ──────────────────────────────────────────────
+  scene_ch3_lobby_front: {
+    id: 'scene_ch3_lobby_front',
     chapterId: 'ch3',
-    name: '電影院 B',
-    description: '電影院B的放映廳。這裡的散場時間與第一案的時間節奏接近。太接近了，像是刻意安排。',
-    background: '/images/bg_ch3_cinema_b_v1.webp',
+    name: '封鎖大廳前台',
+    description: '城市影城的大廳被封鎖了，前台空無一人，只剩下幾個等著發言的人。劉隊站在角落，林瑞堂看起來快被領帶勒死。',
+    background: '/images/bg_ch3_sc1_v1.webp',
     hotspots: [
       {
-        id: 'hotspot_screening_schedule_b',
+        id: 'hotspot_lobby_liu',
         shape: 'rect',
-        coords: [0.2, 0.2, 0.5, 0.4],
-        description: '放映表',
-        hint: '放映表上記錄著所有場次的時間。今晚的場次：22:00 場次，散場時間：23:00',
+        coords: [0.05, 0.3, 0.25, 0.75],
+        description: '劉隊',
+        hint: '劉隊站在大廳角落，表情不算輕鬆。',
       },
       {
-        id: 'hotspot_cinema_b_layout',
+        id: 'hotspot_lobby_whiteboard',
         shape: 'rect',
-        coords: [0.5, 0.3, 0.8, 0.6],
-        description: '放映廳動線圖',
-        hint: '放映廳的動線圖顯示了所有出口位置。',
+        coords: [0.3, 0.1, 0.6, 0.35],
+        description: '交接白板',
+        hint: '交接白板上有幾行字，仔細看有一處筆跡比較新。',
       },
       {
-        id: 'hotspot_light_control_request_b',
+        id: 'hotspot_lobby_promo_wall',
         shape: 'rect',
-        coords: [0.1, 0.5, 0.4, 0.7],
-        description: '售票口燈控申請單',
-        hint: '售票口貼著一張燈控申請單。',
+        coords: [0.62, 0.05, 0.95, 0.4],
+        description: '宣傳牆文案',
+        hint: '牆上的宣傳文案寫著「可分區、可自動」，但現場說法是「只有節能」。',
       },
       {
-        id: 'hotspot_security_patrol_b',
+        id: 'hotspot_lobby_front_drawer',
         shape: 'rect',
-        coords: [0.5, 0.6, 0.8, 0.8],
-        description: '保全巡邏表',
-        hint: '保全巡邏表記錄著所有巡邏時間。',
+        coords: [0.3, 0.55, 0.6, 0.8],
+        description: '前台抽屜',
+        hint: '前台的抽屜沒有鎖上，裡面有一些文件。',
       },
       {
-        id: 'hotspot_cleaning_memo_b',
+        id: 'hotspot_lobby_lin_ruitang',
         shape: 'rect',
-        coords: [0.1, 0.7, 0.4, 0.9],
-        description: '清潔人員備忘錄',
-        hint: '清潔人員的備忘錄上寫著關於散場的內容。',
+        coords: [0.62, 0.45, 0.82, 0.9],
+        description: '林瑞堂',
+        hint: '林瑞堂站在那裡，看起來每根神經都繃著。',
+      },
+      {
+        id: 'hotspot_lobby_ashun',
+        shape: 'rect',
+        coords: [0.82, 0.4, 0.98, 0.85],
+        description: '阿順',
+        hint: '阿順倚著牆，視線掃著大廳各個角落。',
+      },
+      {
+        id: 'hotspot_lobby_zhou_jie',
+        shape: 'rect',
+        coords: [0.05, 0.78, 0.28, 0.98],
+        description: '周姊',
+        hint: '周姊正在整理清潔推車，沒有看任何人，但她知道發生什麼事。',
+      },
+    ],
+    npcs: [
+      {
+        id: 'npc_liu',
+        name: '劉隊（偵查隊）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_liu_idle_1', text: '「先去把那些人談完，再回來跟我說你看到什麼。」', type: 'hint', weight: 1 },
+          { id: 'ch3_liu_idle_2', text: '劉隊看了一眼大廳：「品牌那邊的話術，你看了就知道他們在保什麼。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_lin_ruitang',
+        name: '林瑞堂（城市影城副理）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_lin_idle_1', text: '林瑞堂說：「你有問題可以問，但我能說的都說了。」', type: 'hint', weight: 1 },
+          { id: 'ch3_lin_idle_2', text: '「總部來了以後，我這邊就沒有決策權了。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_ashun',
+        name: '阿順（巡場保全）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_ashun_lobby_idle_1', text: '阿順說：「這裡熟的人比外人多，但每個人都在假裝不認識彼此。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_zhou_jie',
+        name: '周姊（清潔）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_zhou_idle_1', text: '周姊說：「字跡說話比人說話誠實。」', type: 'hint', weight: 1 },
+          { id: 'ch3_zhou_idle_2', text: '「我只管做清潔，但我知道誰在急著擦什麼。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
       },
     ],
     items: [
-      items.item_screening_schedule_b,
-      items.item_light_control_request,
-      items.item_security_patrol_schedule,
+      items.item_whiteboard_rewrite,
+      items.item_promo_wall_text,
+      items.item_scene_control_sheet,
     ],
     hotspotEventMap: {
-      'hotspot_screening_schedule_b': 'examine_screening_schedule_b',
-      'hotspot_cinema_b_layout': 'examine_cinema_b_layout',
-      'hotspot_light_control_request_b': 'examine_light_control_request_b',
-      'hotspot_security_patrol_b': 'examine_security_patrol_b',
-      'hotspot_cleaning_memo_b': 'examine_cleaning_memo_b',
+      hotspot_lobby_liu: 'talk_liu_ch3_task',
+      hotspot_lobby_whiteboard: 'inspect_ch3_whiteboard',
+      hotspot_lobby_promo_wall: 'inspect_ch3_promo_wall',
+      hotspot_lobby_front_drawer: 'inspect_ch3_front_drawer',
+      hotspot_lobby_lin_ruitang: 'talk_lin_ch3',
+      hotspot_lobby_ashun: 'talk_ashun_ch3_lobby',
+      hotspot_lobby_zhou_jie: 'talk_zhou_jie_ch3',
     },
     events: [
       {
-        id: 'examine_screening_schedule_b',
-        name: '檢查放映表',
-        description: '你檢查放映表。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_screening_schedule_b' },
-        ],
+        id: 'talk_liu_ch3_task',
+        name: '與劉隊說話',
+        description: '與劉隊確認第三章任務。',
+        requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_screening_schedule_b' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：電影院B放映表\n\n放映表上記錄著所有場次的時間。\n\n今晚的場次：\n22:00 場次，散場時間：23:00\n\n這個時間與第一案的時間節奏接近。\n太接近了，像是刻意安排。',
-              type: 'item',
+              text: '劉隊低聲說：「品牌那邊剛到，技術組的顧乃謙也在。\n\n你知道我要你去查什麼，對吧——不是誰動了手，是誰改了 log，改了多少。」\n\n「先去大廳看一眼，再去裡面找品牌的人談，最後去找顧乃謙。他說他有東西要讓你看。」',
+              type: 'character',
+              characterId: 'npc_liu',
+              characterName: '劉隊（偵查隊）',
+              characterExpression: 1,
+              characterPosition: 'left',
             },
           },
-          { type: 'setFlag', flag: 'schedule_b_found', value: true },
+          { type: 'setFlag', flag: 'ch3_task_from_liu', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'examine_cinema_b_layout',
-        name: '檢查放映廳動線圖',
-        description: '你檢查放映廳動線圖。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_cinema_b_layout' },
-        ],
+        id: 'inspect_ch3_whiteboard',
+        name: '查看交接白板',
+        description: '仔細觀察白板上的筆跡。',
+        requirements: [],
         effects: [
+          { type: 'addItem', itemId: 'item_whiteboard_rewrite' },
           {
             type: 'showDialog',
             dialog: {
-              text: '放映廳的動線圖顯示了所有出口位置。\n\n逃生口距離座位區很遠，\n人潮會集中在中段出口。\n\n這種設計，讓散場時人群會聚集，\n不容易注意到個別的人。',
+              text: '白板上有一處字被重寫過——墨水比周圍的字深，筆劃下的角度和第一章紅筆塗改如出一轍。\n\n「白板有人擦過兩次。第一次為了改，第二次為了像沒改。」',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'clue_layout_analysis', value: true },
+          { type: 'setFlag', flag: 'ch3_whiteboard_viewed', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'examine_light_control_request_b',
-        name: '檢查售票口燈控申請單',
-        description: '你檢查售票口燈控申請單。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_light_control_request_b' },
-        ],
+        id: 'inspect_ch3_promo_wall',
+        name: '查看宣傳牆文案',
+        description: '閱讀牆上的宣傳文案。',
+        requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_light_control_request' },
+          { type: 'addItem', itemId: 'item_promo_wall_text' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：售票口燈控申請單\n\n售票口貼著一張燈控申請單。\n\n申請日期：一週前\n申請理由：觀眾投訴「太刺眼」\n結果：臨時延後亮燈 3 分鐘\n\n這個理由很常見，這個申請很合理。\n但時間點，太巧合了。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'light_request_found', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'examine_security_patrol_b',
-        name: '檢查保全巡邏表',
-        description: '你檢查保全巡邏表。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_security_patrol_b' },
-        ],
-        effects: [
-          { type: 'addItem', itemId: 'item_security_patrol_schedule' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：保全巡邏表\n\n保全巡邏表記錄著所有巡邏時間。\n\n散場後 5 分鐘內為空檔。\n這段時間，沒有人會巡邏。\n\n這是一個完美的時間窗口。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'patrol_schedule_found', value: true },
-        ],
-        oneTime: true,
-      },
-      {
-        id: 'examine_cleaning_memo_b',
-        name: '檢查清潔人員備忘錄',
-        description: '你檢查清潔人員備忘錄。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'hotspot_cleaning_memo_b' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '清潔人員的備忘錄上寫著：\n\n「這裡的散場，\n總是拖很久。\n\n觀眾習慣慢慢離場，\n不會急著走。\n這讓我們的工作變得很困難。」\n\n這種「拖很久」的散場，對兇手來說是優勢。',
+              text: '宣傳文案寫著「可分區控制、可自動排程」，但現場口徑是「只開節能」。\n\n這兩個說法不能同時為真。如果「自動排程」是宣傳賣點，那「延後亮燈」就不是偶發疏失。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'cleaning_memo_found', value: true },
+          { type: 'setFlag', flag: 'ch3_promo_wall_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'inspect_ch3_front_drawer',
+        name: '查看前台抽屜',
+        description: '翻看前台抽屜裡的文件。',
+        requirements: [],
+        effects: [
+          { type: 'addItem', itemId: 'item_scene_control_sheet' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '過期場控手冊裡夾著一張手寫補注的簡表。第三頁有一個功能說明：「C4：散場延後照明申請。」\n\n這一頁不在正式版本裡。補注的時間比案發早了三個月。\n\n這是預謀，還是早就知道有人會用這個功能？',
+              type: 'narrator',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_front_drawer_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'talk_lin_ch3',
+        name: '問林瑞堂',
+        description: '詢問城市影城副理林瑞堂。',
+        requirements: [],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '林瑞堂說：「總部來了以後，很多事就不是我能講的。」\n\n「前台的東西我都有按流程處理。場控系統那邊……如果你想知道，你要問技術組，不是我。」\n\n他停頓了一下：「我管場館，不管系統。流程怎麼寫，我就怎麼站。」',
+              type: 'character',
+              characterId: 'npc_lin_ruitang',
+              characterName: '林瑞堂（城市影城副理）',
+              characterExpression: 1,
+              characterPosition: 'right',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_lin_talked', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'talk_ashun_ch3_lobby',
+        name: '問阿順（大廳）',
+        description: '詢問巡場保全阿順。',
+        requirements: [],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '阿順看了一眼大廳：「大廳亮得很，話反而比較黑。」\n\n「這種人不是沒來過，他是來過很多次，才知道哪裡不用看鏡頭。\n\n「熟人才知道怎麼在對的時間消失。」',
+              type: 'character',
+              characterId: 'npc_ashun',
+              characterName: '阿順（巡場保全）',
+              characterExpression: 1,
+              characterPosition: 'right',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_ashun_lobby_talked', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'talk_zhou_jie_ch3',
+        name: '問周姊',
+        description: '詢問清潔人員周姊。',
+        requirements: [],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '周姊沒有停下整理推車的動作：「白板有人擦過兩次。第一次為了改，第二次為了像沒改。」\n\n「字是新的，灰是舊的。這種東西不會幫誰說謊。」\n\n她頓了頓：「我做清潔的，我看字跡、灰塵、鞋印，比很多人看臉還準。」',
+              type: 'character',
+              characterId: 'npc_zhou_jie',
+              characterName: '周姊（清潔）',
+              characterExpression: 1,
+              characterPosition: 'right',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_zhou_jie_talked', value: true },
         ],
         oneTime: true,
       },
     ],
     puzzles: [],
     initialDialog: {
-      text: '這是一間老電影院，\n燈光偏黃，\n觀眾習慣慢慢離場。\n\n這裡的一切都很熟悉，\n就像第一案發生的地方。\n但熟悉，有時候是陷阱。',
+      text: '大廳被封鎖了。宣傳牆燈還開著，讓整個空間看起來比平常亮。\n\n但劉隊說，這種地方的話，通常比燈光黑。',
       type: 'narrator',
     },
   },
-  
-  // 可探索空間二：電影院 C（推測地點）
-  'scene_ch3_cinema_c': {
-    id: 'scene_ch3_cinema_c',
+
+  // ──────────────────────────────────────────────
+  // 場景二：臨時會議室 / 品牌應對室
+  // ──────────────────────────────────────────────
+  scene_ch3_brand_room: {
+    id: 'scene_ch3_brand_room',
     chapterId: 'ch3',
-    name: '電影院 C',
-    description: '電影院C的放映廳。這裡有全自動燈控系統，準時亮燈，無法延後。但「準時」本身，也是一種可預測性。',
-    background: '/images/bg_ch3_cinema_c_v1.webp',
+    name: '臨時會議室',
+    description: '品牌方把這間小會議室當成應對中心。宋雅甄坐在主位，張景衡在側邊整理文件，顧乃謙坐在角落，視線落在桌面上的那本電腦。',
+    background: '/images/bg_ch3_sc2_v1.webp',
     hotspots: [
       {
-        id: 'hotspot_auto_light_system_c',
+        id: 'hotspot_brand_song',
         shape: 'rect',
-        coords: [0.2, 0.2, 0.5, 0.4],
-        description: '全自動燈控系統',
-        hint: '全自動燈控系統的說明書貼在控制室牆上。',
+        coords: [0.05, 0.2, 0.3, 0.75],
+        description: '宋雅甄',
+        hint: '宋雅甄的聲音很平穩，像高級飯店大廳的香氛，讓人忘了那裡其實沒有窗。',
       },
       {
-        id: 'hotspot_monitor_map_c',
+        id: 'hotspot_brand_zhang',
         shape: 'rect',
-        coords: [0.5, 0.3, 0.8, 0.6],
-        description: '監視器配置圖',
-        hint: '監視器配置圖上標示了所有監視器位置。',
+        coords: [0.33, 0.15, 0.55, 0.7],
+        description: '張景衡',
+        hint: '張景衡正在整理一疊文件，表情像在等你先問問題。',
       },
       {
-        id: 'hotspot_crowd_flow_report_c',
+        id: 'hotspot_brand_gu',
         shape: 'rect',
-        coords: [0.1, 0.6, 0.4, 0.8],
-        description: '散場人流分析報告',
-        hint: '散場人流分析報告顯示了詳細的數據。',
+        coords: [0.58, 0.25, 0.78, 0.72],
+        description: '顧乃謙',
+        hint: '顧乃謙坐在角落，看起來對這個房間的每個人都有點不耐煩。',
       },
       {
-        id: 'hotspot_bridge_passage',
+        id: 'hotspot_brand_filtered_log',
         shape: 'rect',
-        coords: [0.5, 0.6, 0.9, 0.9],
-        description: '空橋通道',
-        hint: '空橋通道連接著電影院和百貨公司。',
+        coords: [0.33, 0.72, 0.58, 0.92],
+        description: '張景衡的整理版 log',
+        hint: '桌上放著一份列印好的 log 報告，每一欄都有清楚說明，讀起來非常順。',
+      },
+      {
+        id: 'hotspot_brand_press_draft',
+        shape: 'rect',
+        coords: [0.05, 0.78, 0.3, 0.97],
+        description: '記者應對話術草稿',
+        hint: '宋雅甄旁邊放著一張手寫的 A4 草稿，字跡工整像是背稿用的。',
+      },
+      {
+        id: 'hotspot_brand_monitor_report',
+        shape: 'rect',
+        coords: [0.78, 0.55, 0.97, 0.9],
+        description: '品牌監測報表',
+        hint: '一份輿情報告，標題是「三館關聯度分析」，有一欄被手工圈起來。',
+      },
+    ],
+    npcs: [
+      {
+        id: 'npc_song_yazhen',
+        name: '宋雅甄（品牌長）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_song_idle_1', text: '宋雅甄說：「我不是要阻止你，我只是希望你先把邏輯想清楚。」', type: 'hint', weight: 1 },
+          { id: 'ch3_song_idle_2', text: '「穩定是這個時刻最需要的東西，真相等穩定之後再說也不遲。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_zhang_jingheng',
+        name: '張景衡（品牌特助）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_zhang_idle_1', text: '張景衡說：「我給你的那份報告，比原始 log 好讀多了。」', type: 'hint', weight: 1 },
+          { id: 'ch3_zhang_idle_2', text: '「你需要的是一份能說清楚的版本，不是一份讓更多人睡不著的版本。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_gu_naiqian',
+        name: '顧乃謙（系統工程）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_gu_brand_idle_1', text: '顧乃謙說：「你如果要看原始 log，去機房找我。」', type: 'hint', weight: 1 },
+          { id: 'ch3_gu_brand_idle_2', text: '「整理版可以讀，但它不是全部。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
       },
     ],
     items: [
-      items.item_auto_light_system_c,
-      items.item_monitor_deadzone_map,
-      items.item_crowd_flow_report,
+      items.item_filtered_log,
+      items.item_press_draft,
+      items.item_brand_monitor_report,
     ],
     hotspotEventMap: {
-      'hotspot_auto_light_system_c': 'examine_auto_light_system_c',
-      'hotspot_monitor_map_c': 'examine_monitor_map_c',
-      'hotspot_crowd_flow_report_c': 'examine_crowd_flow_report_c',
-      'hotspot_bridge_passage': 'examine_bridge_passage',
+      hotspot_brand_song: 'talk_song_ch3',
+      hotspot_brand_zhang: 'talk_zhang_ch3',
+      hotspot_brand_gu: 'talk_gu_brand_ch3',
+      hotspot_brand_filtered_log: 'inspect_ch3_filtered_log',
+      hotspot_brand_press_draft: 'inspect_ch3_press_draft',
+      hotspot_brand_monitor_report: 'inspect_ch3_monitor_report',
     },
     events: [
       {
-        id: 'take_test',
-        name: '進行安全測驗',
-        description: '你進行安全測驗。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'test_paper_spot' },
-        ],
+        id: 'talk_song_ch3',
+        name: '問宋雅甄',
+        description: '詢問品牌長宋雅甄。',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '你進行安全測驗，有明確的對錯答案。\n\n明確對錯，但節奏緊繃。',
-              type: 'narrator',
+              text: '宋雅甄說：「現在最重要的是穩定。真相太急著上桌，通常會打翻。」\n\n「一間影城出事是事故，三間一起被聯想，就是品牌問題。」\n\n她停了一下，語氣反而更輕了：「我不是阻止你查。我只是希望你查得像個成年人。」',
+              type: 'character',
+              characterId: 'npc_song_yazhen',
+              characterName: '宋雅甄（品牌長）',
+              characterExpression: 1,
+              characterPosition: 'left',
             },
           },
-          { type: 'setFlag', flag: 'test_taken', value: true },
+          { type: 'setFlag', flag: 'ch3_song_talked', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'check_tools',
-        name: '檢查工具',
-        description: '你按照順序檢查工具。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'tool_check_spot' },
-          { type: 'hasItem', itemId: 'tool_checklist' },
-        ],
+        id: 'talk_zhang_ch3',
+        name: '問張景衡',
+        description: '詢問品牌特助張景衡。',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '你按照順序檢查工具，必須完全按照程序。\n\n明確對錯，但節奏緊繃。',
-              type: 'narrator',
+              text: '張景衡說：「我整理了一份，你會比較好讀。」\n\n「原始資料不是不能看，是看了也未必比這份更真。」\n\n他把那份 log 往你這邊推了一點：「警方要的是可說明，不是可敬畏。」',
+              type: 'character',
+              characterId: 'npc_zhang_jingheng',
+              characterName: '張景衡（品牌特助）',
+              characterExpression: 1,
+              characterPosition: 'left',
             },
           },
-          { type: 'setFlag', flag: 'tools_checked', value: true },
+          { type: 'setFlag', flag: 'ch3_zhang_talked', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'answer_roll_call',
-        name: '回答點名',
-        description: '你回答點名確認。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'roll_call' },
-        ],
+        id: 'talk_gu_brand_ch3',
+        name: '問顧乃謙（會議室）',
+        description: '詢問系統工程師顧乃謙，他坐在會議室角落。',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '你回答點名確認，必須回答正確。\n\n明確對錯，但節奏緊繃。',
-              type: 'narrator',
+              text: '顧乃謙說：「我只看得到系統做了什麼，看不到誰在撒謊。」\n\n「你要整理版，今天就能結案。你要原始檔，今晚很多人睡不好。」\n\n他低頭看了一眼桌面：「機房那邊有東西要讓你看。先把這裡看完，再去找我。」',
+              type: 'character',
+              characterId: 'npc_gu_naiqian',
+              characterName: '顧乃謙（系統工程）',
+              characterExpression: 1,
+              characterPosition: 'right',
             },
           },
-          { type: 'setFlag', flag: 'roll_call_answered', value: true },
+          { type: 'setFlag', flag: 'ch3_gu_brand_talked', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'pass_all_tests',
-        name: '通過所有測驗',
-        description: '你通過了所有測驗。',
-        requirements: [
-          { type: 'hasFlag', flag: 'test_taken', value: true },
-          { type: 'hasFlag', flag: 'tools_checked', value: true },
-          { type: 'hasFlag', flag: 'roll_call_answered', value: true },
-        ],
+        id: 'inspect_ch3_filtered_log',
+        name: '查看整理版 log',
+        description: '閱讀張景衡提供的 log 報告。',
+        requirements: [],
         effects: [
+          { type: 'addItem', itemId: 'item_filtered_log' },
           {
             type: 'showDialog',
             dialog: {
-              text: '你通過了所有測驗。\n\n明確對錯，但節奏緊繃。',
+              text: '「操作員：高文傑。時間：22:57。操作類型：手動覆寫。」\n\n這份 log 寫得很清楚，每一欄都整齊。但顧乃謙說，原始檔不長這樣。\n\n問題不在這份 log 說了什麼，而在它少說了什麼。',
               type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'all_tests_passed', value: true },
+          { type: 'setFlag', flag: 'ch3_filtered_log_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'inspect_ch3_press_draft',
+        name: '查看記者應對話術草稿',
+        description: '閱讀宋雅甄的媒體應對草稿。',
+        requirements: [],
+        effects: [
+          { type: 'addItem', itemId: 'item_press_draft' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '草稿上寫著：「禁用語：三起事故、跨館、系統性風險。」\n\n「如追問三館：回答『尚在釐清』，不主動提及聯繫。」\n\n這不是防禦媒體。這是在阻止三個案件被串在一起的那個句子被說出來。',
+              type: 'narrator',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_press_draft_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'inspect_ch3_monitor_report',
+        name: '查看品牌監測報表',
+        description: '閱讀宋雅甄的輿情分析報告。',
+        requirements: [],
+        effects: [
+          { type: 'addItem', itemId: 'item_brand_monitor_report' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '報表的主要焦點是：「三館同日出現在搜尋趨勢，需降低關聯性。」\n\n她在意的不是死者是誰，是這三間影城的名字能不能同時出現在一行字裡。\n\n「一間影城出事是事故，三間一起被聯想，就是品牌問題。」',
+              type: 'narrator',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_brand_report_viewed', value: true },
         ],
         oneTime: true,
       },
     ],
-    puzzles: [
-      {
-        id: 'roll_call_puzzle',
-        type: 'sequence_memory',
-        solution: ['A1', 'B2', 'C3', 'D4'],
-        hint: '點名確認：你不是人名，你是代碼。\n\n點名不是念名字，是念代碼（A1、B2…）。\n\n玩家必須在特定節拍按下回覆（把自己「對齊制度」）。\n\n可用 ROOM 1 的手錶時間當暗碼（例如：11:25 → A1, B2, C3, D4）。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'roll_call' },
-          { type: 'hasItem', itemId: 'stopped_watch' },
-        ],
-        config: {
-          sequenceLength: 4,
-          symbols: ['A1', 'B2', 'C3', 'D4', 'E5'],
-        },
-        onSolve: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你在特定節拍按下回覆，把自己「對齊制度」。\n\n成功後得到一段短代碼：C-17。',
-              type: 'narrator',
-            },
-          },
-          { type: 'addItem', itemId: 'roll_call_code' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：點名代碼\n\n點名代碼：C-17。\n\n這是進入控制室模擬操作的登入碼。',
-              type: 'item',
-            },
-          },
-          { type: 'setFlag', flag: 'roll_call_puzzle_solved', value: true },
-        ],
-      },
-    ],
+    puzzles: [],
     initialDialog: {
-      text: '你適應規則，完成測驗。\n\n安全測驗、工具檢查、點名確認。\n\n明確對錯，但節奏緊繃。',
+      text: '會議室的空氣是假的，那種高級飯店的香氛，讓人忽略裡面其實沒有窗。\n\n宋雅甄坐在主位，像個封面；張景衡在側邊，像個讓你以為你找到答案的註腳。',
       type: 'narrator',
     },
   },
-  
-  // SPACE 3-3: 控制室・認同制度
-  'ch3_sc3': {
-    id: 'ch3_sc3',
+
+  // ──────────────────────────────────────────────
+  // 場景三：機房外走道 / 系統接點區
+  // ──────────────────────────────────────────────
+  scene_ch3_server_corridor: {
+    id: 'scene_ch3_server_corridor',
     chapterId: 'ch3',
-    name: '控制室・認同制度',
-    description: '你認同制度，信任規則。',
+    name: '機房外走道',
+    description: '機房走廊比大廳暗，設備架上的指示燈一排一排地亮著。顧乃謙站在走道中段，手邊是一份列印好的記錄，那幾行字被紅筆圈了出來。',
     background: '/images/bg_ch3_sc3_v1.webp',
     hotspots: [
       {
-        id: 'simulation',
+        id: 'hotspot_server_gu_naiqian',
         shape: 'rect',
-        coords: [0.2, 0.3, 0.6, 0.7],
-        description: '模擬操作',
-        hint: '模擬操作，完全按照程序。',
+        coords: [0.05, 0.2, 0.3, 0.78],
+        description: '顧乃謙',
+        hint: '顧乃謙站在走道中段，看你走過來，把手邊那份記錄往側面翻了一面。',
       },
       {
-        id: 'record_table',
+        id: 'hotspot_server_cross_venue',
         shape: 'rect',
-        coords: [0.6, 0.3, 0.9, 0.5],
-        description: '記錄表',
-        hint: '確認每個步驟都有記錄。',
+        coords: [0.32, 0.4, 0.62, 0.72],
+        description: '跨館同步異常片段',
+        hint: '一份列印的系統記錄，幾行被紅筆圈起來，城市 W 和光芒 R 的版本更新時間差在 15 分鐘以內。',
       },
       {
-        id: 'cert_spot',
+        id: 'hotspot_server_network_label',
         shape: 'rect',
-        coords: [0.6, 0.5, 0.9, 0.7],
-        description: '安全認證',
-        hint: '完成訓練後獲得的認證。',
+        coords: [0.63, 0.1, 0.95, 0.5],
+        description: '網路設備標籤',
+        hint: '設備架上的標籤旁邊有一份手寫對照表，W 和 R 的設備在同一個子網段。',
+      },
+      {
+        id: 'hotspot_server_remote_login',
+        shape: 'rect',
+        coords: [0.63, 0.55, 0.95, 0.85],
+        description: '遠端登入維護單',
+        hint: '夾在設備架側邊的維護單，最後一筆記錄是三週前，操作人是顧乃謙。',
+      },
+      {
+        id: 'hotspot_server_xiazhang',
+        shape: 'rect',
+        coords: [0.32, 0.78, 0.62, 0.98],
+        description: '小張',
+        hint: '放映員小張在走道旁邊看著設備架，表情像個對表格比對人更有感情的人。',
+      },
+      {
+        id: 'hotspot_server_ashun',
+        shape: 'rect',
+        coords: [0.05, 0.82, 0.28, 0.98],
+        description: '阿順',
+        hint: '阿順從大廳過來，還在打量這條走廊。',
+      },
+    ],
+    npcs: [
+      {
+        id: 'npc_gu_naiqian',
+        name: '顧乃謙（系統工程）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_gu_server_idle_1', text: '顧乃謙說：「你看到那份記錄了嗎？那三個時間點。」', type: 'hint', weight: 1 },
+          { id: 'ch3_gu_server_idle_2', text: '「系統不會說謊，但系統可以被選擇性地展示。」', type: 'hint', weight: 1 },
+          { id: 'ch3_gu_server_idle_3', text: '「你問我，這是不是人為的。我說，有人知道哪裡會一起響。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_xiazhang',
+        name: '小張（放映員）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_xiazhang_idle_1', text: '小張說：「系統設定那種事不是我這層級能做的。需要遠端存取權限。」', type: 'hint', weight: 1 },
+          { id: 'ch3_xiazhang_idle_2', text: '「我只管放映，表上寫什麼我就做什麼。問題是表怎麼來的。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
+      },
+      {
+        id: 'npc_ashun',
+        name: '阿順（巡場保全）',
+        portraitExpression: 1,
+        randomDialogs: [
+          { id: 'ch3_ashun_server_idle_1', text: '阿順說：「機房這條走廊，不是一般員工會來的地方。」', type: 'hint', weight: 1 },
+          { id: 'ch3_ashun_server_idle_2', text: '「知道怎麼進機房的人，通常也知道怎麼讓監視器剛好沒在錄。」', type: 'hint', weight: 1 },
+        ],
+        available: true,
       },
     ],
     items: [
-      items.operation_manual,
-      items.record_log,
-      items.safety_cert,
+      items.item_cross_venue_sync,
+      items.item_network_device_label,
+      items.item_remote_login_sheet,
     ],
     hotspotEventMap: {
-      'simulation': 'do_simulation',
-      'record_table': 'check_records',
-      'cert_spot': 'get_cert',
+      hotspot_server_gu_naiqian: 'talk_gu_naiqian_ch3',
+      hotspot_server_cross_venue: 'inspect_ch3_cross_venue',
+      hotspot_server_network_label: 'inspect_ch3_network_label',
+      hotspot_server_remote_login: 'inspect_ch3_remote_login',
+      hotspot_server_xiazhang: 'talk_xiazhang_ch3',
+      hotspot_server_ashun: 'talk_ashun_ch3_server',
     },
     events: [
       {
-        id: 'do_simulation',
-        name: '進行模擬操作',
-        description: '你進行模擬操作。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'simulation' },
-          { type: 'hasItem', itemId: 'operation_manual' },
-          {
-            type: 'custom',
-            customCheck: (state) => !state.flags.simulation_puzzle_solved,
-          },
-        ],
+        id: 'talk_gu_naiqian_ch3',
+        name: '與顧乃謙說話',
+        description: '詢問系統工程師顧乃謙。',
+        requirements: [],
         effects: [
           {
             type: 'showDialog',
             dialog: {
-              text: '你需要進行模擬操作，並在記錄表上填寫每個步驟。\n\n若少填一格：系統提示「你做對了，但你沒留下證據。」',
-              type: 'narrator',
+              text: '顧乃謙說：「跨館同步不是故障，那比較像……有人知道哪裡會一起響。」\n\n「城市 W 和光芒 R 在同一插件版本序列。這不是預設的標準配置。」\n\n他頓了頓：「你問我這是不是單點故障，我可以很肯定地說：不是。」',
+              type: 'character',
+              characterId: 'npc_gu_naiqian',
+              characterName: '顧乃謙（系統工程）',
+              characterExpression: 1,
+              characterPosition: 'left',
             },
           },
-        ],
-        oneTime: false,
-      },
-      {
-        id: 'check_records',
-        name: '確認記錄',
-        description: '你確認每個步驟都有記錄。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'record_table' },
-        ],
-        effects: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你確認每個步驟都有記錄。\n\n你感受到「被制度保護」。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'records_checked', value: true },
+          { type: 'setFlag', flag: 'ch3_gu_server_talked', value: true },
         ],
         oneTime: true,
       },
       {
-        id: 'get_cert',
-        name: '獲得認證',
-        description: '你獲得安全認證。',
-        requirements: [
-          { type: 'hasInteracted', hotspotId: 'cert_spot' },
-          { type: 'hasFlag', flag: 'simulation_done', value: true },
-          { type: 'hasFlag', flag: 'records_checked', value: true },
-        ],
+        id: 'inspect_ch3_cross_venue',
+        name: '查看跨館同步異常片段',
+        description: '檢視顧乃謙圈出來的系統記錄。',
+        requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'safety_cert' },
+          { type: 'addItem', itemId: 'item_cross_venue_sync' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：安全認證\n\n完成訓練後獲得的認證，證明你已經學會了程序。\n\n你開始信任「只要照規則就沒事」。',
-              type: 'item',
+              text: '城市 W 和光芒 R 在三個不同日期，各自出現了同樣的插件版本更新記錄——時間差在 15 分鐘以內。\n\n這不是系統自動同步。同版本、不同館、幾乎同時更新，背後要嘛是同一個操作入口，要嘛是同一個人。',
+              type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'room3_completed', value: true },
+          { type: 'setFlag', flag: 'ch3_cross_venue_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'inspect_ch3_network_label',
+        name: '查看網路設備標籤',
+        description: '檢視設備架上的館別代號對照。',
+        requirements: [],
+        effects: [
+          { type: 'addItem', itemId: 'item_network_device_label' },
           {
             type: 'showDialog',
             dialog: {
-              text: '你離開 ROOM 3，帶著「安全認證」，前往 ROOM 4。',
-              type: 'system',
+              text: '手寫對照表上：「W-01 城市影城，R-02 光芒影城」——兩個館的設備在同一個子網段。\n\n這不是預設的標準配置，有人在設定網路時，特意讓兩館可以直接溝通。',
+              type: 'narrator',
             },
           },
-          { type: 'setFlag', flag: 'navigate_to_ch4_intro', value: true },
+          { type: 'setFlag', flag: 'ch3_network_label_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'inspect_ch3_remote_login',
+        name: '查看遠端登入維護單',
+        description: '檢視夾在設備架旁的維護單。',
+        requirements: [],
+        effects: [
+          { type: 'addItem', itemId: 'item_remote_login_sheet' },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '維護單最後一筆記錄：「操作人：顧乃謙。說明：W、R 同步確認。」日期是三週前。\n\n他在案發之前就知道這兩館的版本是同步的。\n\n他在等什麼，還是他一直在看著什麼？',
+              type: 'narrator',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_remote_login_viewed', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'talk_xiazhang_ch3',
+        name: '問小張',
+        description: '詢問放映員小張。',
+        requirements: [],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '小張說：「大廳牆上寫自動，機房裡還是要人去碰。」\n\n「表上怎麼寫，我就怎麼放。問題是，表不是自己長字。」\n\n他看了看那份維護單：「那種設定不是一般操作員能做的，得有一定的系統權限才行。」',
+              type: 'character',
+              characterId: 'npc_xiazhang',
+              characterName: '小張（放映員）',
+              characterExpression: 1,
+              characterPosition: 'right',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_xiazhang_talked', value: true },
+        ],
+        oneTime: true,
+      },
+      {
+        id: 'talk_ashun_ch3_server',
+        name: '問阿順（機房走廊）',
+        description: '詢問巡場保全阿順在機房走廊的觀察。',
+        requirements: [],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '阿順看了一眼走廊：「如果大廳和機房都能被接手，誰最像熟門熟路的人？」\n\n他停頓了一下：「不是偶爾來的那種，是每次都知道從哪個門進、走哪條路不會被看到的那種。」',
+              type: 'character',
+              characterId: 'npc_ashun',
+              characterName: '阿順（巡場保全）',
+              characterExpression: 1,
+              characterPosition: 'right',
+            },
+          },
+          { type: 'setFlag', flag: 'ch3_ashun_server_talked', value: true },
         ],
         oneTime: true,
       },
     ],
-    puzzles: [
-      {
-        id: 'simulation_record_puzzle',
-        type: 'arrangement',
-        solution: ['step1_time', 'step1_responsible', 'step1_status', 'step2_time', 'step2_responsible', 'step2_status', 'step3_time', 'step3_responsible', 'step3_status', 'step4_time', 'step4_responsible', 'step4_status', 'step5_time', 'step5_responsible', 'step5_status'],
-        hint: '模擬操作＋記錄表：你要學會被監控。\n\n玩家照手冊做 5 步操作。\n\n每完成一步必須在記錄表上選正確欄位（時間、責任人、狀態）。\n\n若少填一格：系統提示「你做對了，但你沒留下證據。」',
-        requirements: [
-          { type: 'hasItem', itemId: 'operation_manual' },
-          { type: 'hasItem', itemId: 'record_log' },
-          { type: 'hasItem', itemId: 'roll_call_code' },
-          { type: 'hasInteracted', hotspotId: 'simulation' },
-        ],
-        onSolve: [
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '你完成了 5 步操作，並在記錄表上填寫了每個步驟的所有欄位。\n\n時間、責任人、狀態——每一格都填了。',
-              type: 'narrator',
-            },
-          },
-          { type: 'setFlag', flag: 'simulation_done', value: true },
-          { type: 'setFlag', flag: 'simulation_puzzle_solved', value: true },
-          { type: 'addItem', itemId: 'safety_cert' },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '獲得：安全認證\n\n完成訓練後獲得的認證，證明你已經學會了程序。',
-              type: 'item',
-            },
-          },
-          {
-            type: 'showDialog',
-            dialog: {
-              text: '制度保護你，但它更保護「制度自己」。',
-              type: 'narrator',
-            },
-          },
-        ],
-      },
-    ],
+    puzzles: [],
     initialDialog: {
-      text: '你認同制度，信任規則。\n\n模擬操作、確認記錄、感受到「被制度保護」。\n\n你開始信任「只要照規則就沒事」。',
+      text: '機房走道比大廳暗，設備架上的指示燈一排一排地閃著。\n\n顧乃謙在等你，手邊那份記錄被紅筆圈了幾行。',
       type: 'narrator',
     },
   },
-  
-  // ========== ROOM 4: 電廠・災後與異物事件 ==========
 };
 
-const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {};
+// ──────────────────────────────────────────────
+// 第三章 NPC 對話樹
+// ──────────────────────────────────────────────
+const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
+
+  // ──────────────────────────────────────────────
+  // 顧乃謙 敏感對話（ch3 核心 NPC）
+  // ──────────────────────────────────────────────
+  npc_gu_naiqian: {
+    // 敏感 branch 1：追問「原始 log 少了什麼」
+    node_gu_sensitive1_1: {
+      id: 'node_gu_sensitive1_1',
+      npcId: 'npc_gu_naiqian',
+      text:
+        '顧乃謙沉默了幾秒，然後說：「原始 log 裡有兩個欄位，整理版裡沒有。」\n\n「一個是操作來源 IP，一個是覆寫前的原始值。」\n\n「你問我為什麼那份整理版剛好能指向高文傑——因為少了這兩個欄位，你就沒辦法知道那個操作是從本機還是遠端發出來的。」',
+      choices: [
+        {
+          id: 'gu_s1_q1',
+          label: '遠端操作——意思是不用親自在場？',
+          effects: [{ type: 'setFlag', flag: 'ch3_gu_s1_q1', value: true }],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'gu_s1_q2',
+          label: '張景衡知道那兩個欄位的事嗎？',
+          effects: [{ type: 'setFlag', flag: 'ch3_gu_s1_q2', value: true }],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+      next: (state: GameState): string | null => {
+        if (state.flags.ch3_gu_s1_q1) return 'node_gu_s1_reply_q1';
+        return 'node_gu_s1_reply_q2';
+      },
+    },
+    node_gu_s1_reply_q1: {
+      id: 'node_gu_s1_reply_q1',
+      npcId: 'npc_gu_naiqian',
+      text:
+        '「對。遠端操作的話，你在另一個地方就能觸發。」\n\n「只要有存取權、有那個插件版本、知道哪個指令，你連進去就行。」\n\n他看了一眼走廊：「城市 W 和光芒 R 的設備在同一個子網段。這件事，不是很多人知道。」',
+      choices: [
+        {
+          id: 'gu_s1_end',
+          label: '（結束對話）',
+          effects: [
+            { type: 'setFlag', flag: 'npc_gu_naiqian_sensitive_done', value: true },
+          ],
+        },
+      ],
+    },
+    node_gu_s1_reply_q2: {
+      id: 'node_gu_s1_reply_q2',
+      npcId: 'npc_gu_naiqian',
+      text:
+        '顧乃謙說：「他拿的是我給他的那份，不是原始檔。」\n\n「我不知道他看沒看懂差異在哪，但我知道他沒有問過我。」\n\n「有時候人不是看不到差異，是選擇不把差異說出來。」',
+      choices: [
+        {
+          id: 'gu_s1_end',
+          label: '（結束對話）',
+          effects: [
+            { type: 'setFlag', flag: 'npc_gu_naiqian_sensitive_done', value: true },
+          ],
+        },
+      ],
+    },
+
+    // 敏感 branch 2：追問「這不是單點故障」
+    node_gu_sensitive2_1: {
+      id: 'node_gu_sensitive2_1',
+      npcId: 'npc_gu_naiqian',
+      text:
+        '顧乃謙把那份跨館記錄放到你眼前：「三個時間點，兩個館，版本更新的間隔在 15 分鐘以內。」\n\n「這不是巧合，也不是自動化——那個版本的插件沒有跨館自動更新的功能。」\n\n「有人手動推了。而且推的人，對兩個館的系統都有存取權。」',
+      choices: [
+        {
+          id: 'gu_s2_q1',
+          label: '能查出那個人是誰嗎？',
+          effects: [{ type: 'setFlag', flag: 'ch3_gu_s2_q1', value: true }],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+        {
+          id: 'gu_s2_q2',
+          label: '你為什麼在案發前就知道這件事？',
+          effects: [{ type: 'setFlag', flag: 'ch3_gu_s2_q2', value: true }],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+      next: (state: GameState): string | null => {
+        if (state.flags.ch3_gu_s2_q1) return 'node_gu_s2_reply_q1';
+        return 'node_gu_s2_reply_q2';
+      },
+    },
+    node_gu_s2_reply_q1: {
+      id: 'node_gu_s2_reply_q1',
+      npcId: 'npc_gu_naiqian',
+      text:
+        '「理論上可以，前提是拿到原始 log。整理版是拿不到這個資訊的。」\n\n「我們需要那個 IP，需要操作前的版本記錄，需要兩館的維護帳號清單。」\n\n他看著你：「你如果想看那份原始 log，我可以調，但今晚會有很多人睡不好。」',
+      choices: [
+        {
+          id: 'gu_s2_end',
+          label: '（結束對話）',
+          effects: [
+            { type: 'setFlag', flag: 'npc_gu_naiqian_sensitive_done', value: true },
+          ],
+        },
+      ],
+    },
+    node_gu_s2_reply_q2: {
+      id: 'node_gu_s2_reply_q2',
+      npcId: 'npc_gu_naiqian',
+      text:
+        '他沉默了一下。\n\n「因為我負責跨館維護，那份版本序列是我做的記錄。我只是……覺得不對勁，但那時候還沒有人死。」\n\n「現在有了，所以我讓你看。」',
+      choices: [
+        {
+          id: 'gu_s2_end',
+          label: '（結束對話）',
+          effects: [
+            { type: 'setFlag', flag: 'npc_gu_naiqian_sensitive_done', value: true },
+          ],
+        },
+      ],
+    },
+  },
+
+  // ──────────────────────────────────────────────
+  // 劉隊 第三章 QA（殘句猜測）
+  // 此對話樹作為備用節點儲存，實際由 page.tsx 中的直接對話管理驅動
+  // ──────────────────────────────────────────────
+  npc_liu_ch3_qa: {
+    // Q1：白板被擦兩次
+    node_liu_ch3_q1: {
+      id: 'node_liu_ch3_q1',
+      npcId: 'npc_liu',
+      text:
+        '劉隊把記錄本翻到某一頁，說：「周姊說白板被擦了兩次。」\n\n「所以螢幕上的殘句我填了一半：」\n「『白板有人擦過兩次。第一次為了______，第二次為了______。』」',
+      choices: [
+        {
+          id: 'ch3_q1_A',
+          label: 'A. 改內容 / 讓它看起來像沒改過',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q1_answer', value: 'A' },
+            { type: 'setFlag', flag: 'ch3_q1_main_correct', value: true },
+            { type: 'setFlag', flag: 'ch3_q1_done', value: true },
+          ],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+        {
+          id: 'ch3_q1_B',
+          label: 'B. 記錄 / 完成交接',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q1_answer', value: 'B' },
+            { type: 'setFlag', flag: 'ch3_q1_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q1_C',
+          label: 'C. 備忘 / 整理版面',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q1_answer', value: 'C' },
+            { type: 'setFlag', flag: 'ch3_q1_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q1_D',
+          label: 'D. 通報 / 讓更多人知道',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q1_answer', value: 'D' },
+            { type: 'setFlag', flag: 'ch3_q1_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q1_E',
+          label: 'E. 測試 / 確認筆能用',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q1_answer', value: 'E' },
+            { type: 'setFlag', flag: 'ch3_q1_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q1_F',
+          label: 'F. 掩飾 / 轉移注意力',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q1_answer', value: 'F' },
+            { type: 'setFlag', flag: 'ch3_q1_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch3_q1_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+        {
+          id: 'ch3_q1_G',
+          label: 'G. 佈達 / 讓流程正式化',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q1_answer', value: 'G' },
+            { type: 'setFlag', flag: 'ch3_q1_done', value: true },
+          ],
+        },
+      ],
+    },
+    node_liu_ch3_q1_reply_A: {
+      id: 'node_liu_ch3_q1_reply_A',
+      npcId: 'npc_liu',
+      text: '劉隊點頭：「對。改了，然後把改的痕跡也抹掉。這是兩個動作，不是一個。」\n\n「有人很清楚——只要讓它看起來像從來沒動過，就不會有人回頭追。」',
+      choices: [{ id: 'ch3_q1_next', label: '（繼續下一題）' }],
+    },
+    node_liu_ch3_q1_reply_F: {
+      id: 'node_liu_ch3_q1_reply_F',
+      npcId: 'npc_liu',
+      text: '劉隊說：「掩飾不太對，但方向抓到了。重點是第二次的動機——不是要讓別人看不到，是要讓人以為從來就這樣。」',
+      choices: [{ id: 'ch3_q1_next', label: '（繼續下一題）' }],
+    },
+    node_liu_ch3_q1_reply_other: {
+      id: 'node_liu_ch3_q1_reply_other',
+      npcId: 'npc_liu',
+      text: '劉隊說：「周姊說得比你清楚：第一次是為了改，第二次是為了像沒改。兩個動作，先做後掩。」',
+      choices: [{ id: 'ch3_q1_next', label: '（繼續下一題）' }],
+    },
+
+    // Q2：log 少說了什麼
+    node_liu_ch3_q2: {
+      id: 'node_liu_ch3_q2',
+      npcId: 'npc_liu',
+      text:
+        '劉隊翻到下一頁：「顧乃謙說整理版和原始 log 有差異。」\n\n「殘句：『這份 log 的問題，不在它說了什麼，而在它______了什麼。』」',
+      choices: [
+        {
+          id: 'ch3_q2_A',
+          label: 'A. 漏記',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q2_answer', value: 'A' },
+            { type: 'setFlag', flag: 'ch3_q2_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch3_q2_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+        {
+          id: 'ch3_q2_B',
+          label: 'B. 選擇性地遺漏',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q2_answer', value: 'B' },
+            { type: 'setFlag', flag: 'ch3_q2_main_correct', value: true },
+            { type: 'setFlag', flag: 'ch3_q2_done', value: true },
+          ],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+        {
+          id: 'ch3_q2_C',
+          label: 'C. 誇大',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q2_answer', value: 'C' },
+            { type: 'setFlag', flag: 'ch3_q2_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q2_D',
+          label: 'D. 偽造',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q2_answer', value: 'D' },
+            { type: 'setFlag', flag: 'ch3_q2_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q2_E',
+          label: 'E. 整理',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q2_answer', value: 'E' },
+            { type: 'setFlag', flag: 'ch3_q2_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q2_F',
+          label: 'F. 強調',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q2_answer', value: 'F' },
+            { type: 'setFlag', flag: 'ch3_q2_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q2_G',
+          label: 'G. 刪除',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q2_answer', value: 'G' },
+            { type: 'setFlag', flag: 'ch3_q2_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch3_q2_done', value: true },
+          ],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+      ],
+    },
+    node_liu_ch3_q2_reply_B: {
+      id: 'node_liu_ch3_q2_reply_B',
+      npcId: 'npc_liu',
+      text: '劉隊說：「對。不是全部沒有，是選了哪些要，哪些不要。」\n\n「問題就在『選擇』這個動作上，這不是錯誤，這是決定。」',
+      choices: [{ id: 'ch3_q2_next', label: '（繼續下一題）' }],
+    },
+    node_liu_ch3_q2_reply_AG: {
+      id: 'node_liu_ch3_q2_reply_AG',
+      npcId: 'npc_liu',
+      text: '劉隊說：「接近了。但不是全部被拿走或寫錯，是有人決定某幾個欄位不重要——而那幾個欄位，剛好能讓案件說清楚遠端操作的事。」',
+      choices: [{ id: 'ch3_q2_next', label: '（繼續下一題）' }],
+    },
+    node_liu_ch3_q2_reply_other: {
+      id: 'node_liu_ch3_q2_reply_other',
+      npcId: 'npc_liu',
+      text: '劉隊說：「顧乃謙說，操作來源 IP 和覆寫前的原始值，整理版裡都沒有。缺的不是多，缺的是剛好能讓你問清楚那個操作從哪裡發出來的那幾個欄位。」',
+      choices: [{ id: 'ch3_q2_next', label: '（繼續下一題）' }],
+    },
+
+    // Q3：跨館同步不是
+    node_liu_ch3_q3: {
+      id: 'node_liu_ch3_q3',
+      npcId: 'npc_liu',
+      text:
+        '劉隊翻到最後一頁：「顧乃謙說城市 W 和光芒 R 在同一插件版本序列。」\n\n「殘句：『這代表這不是______，而是______。』」',
+      choices: [
+        {
+          id: 'ch3_q3_A',
+          label: 'A. 單點故障 / 系統性問題',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q3_answer', value: 'A' },
+            { type: 'setFlag', flag: 'ch3_q3_main_correct', value: true },
+            { type: 'setFlag', flag: 'ch3_q3_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 2 }],
+        },
+        {
+          id: 'ch3_q3_B',
+          label: 'B. 偶發事件 / 有人刻意安排的結果',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q3_answer', value: 'B' },
+            { type: 'setFlag', flag: 'ch3_q3_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch3_q3_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+        {
+          id: 'ch3_q3_C',
+          label: 'C. 資安漏洞 / 人為疏失',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q3_answer', value: 'C' },
+            { type: 'setFlag', flag: 'ch3_q3_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q3_D',
+          label: 'D. 技術問題 / 設備老化',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q3_answer', value: 'D' },
+            { type: 'setFlag', flag: 'ch3_q3_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q3_E',
+          label: 'E. 孤立事件 / 有跨館聯繫的操作',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q3_answer', value: 'E' },
+            { type: 'setFlag', flag: 'ch3_q3_partial_correct', value: true },
+            { type: 'setFlag', flag: 'ch3_q3_done', value: true },
+          ],
+          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
+        },
+        {
+          id: 'ch3_q3_F',
+          label: 'F. 舊問題 / 新發現',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q3_answer', value: 'F' },
+            { type: 'setFlag', flag: 'ch3_q3_done', value: true },
+          ],
+        },
+        {
+          id: 'ch3_q3_G',
+          label: 'G. 個人行為 / 組織行為',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_q3_answer', value: 'G' },
+            { type: 'setFlag', flag: 'ch3_q3_done', value: true },
+          ],
+          insightEffects: [{ target: 'human_insight', delta: 1 }],
+        },
+      ],
+    },
+    node_liu_ch3_q3_reply_A: {
+      id: 'node_liu_ch3_q3_reply_A',
+      npcId: 'npc_liu',
+      text: '劉隊說：「對。單點故障可以獨立處理，但版本序列一致，代表背後有共同的操作入口或共同的人。」\n\n「這是系統性問題的定義：不是一個地方壞掉，是有人知道哪裡會一起響。」',
+      choices: [{ id: 'ch3_qa_complete', label: '（完成推理討論）' }],
+    },
+    node_liu_ch3_q3_reply_BE: {
+      id: 'node_liu_ch3_q3_reply_BE',
+      npcId: 'npc_liu',
+      text: '劉隊說：「方向有了，但要更精確一點。重點不是它是不是刻意的，而是它的結構——兩個館，同一條線，這個結構本身就不是單點的問題。」',
+      choices: [{ id: 'ch3_qa_complete', label: '（完成推理討論）' }],
+    },
+    node_liu_ch3_q3_reply_other: {
+      id: 'node_liu_ch3_q3_reply_other',
+      npcId: 'npc_liu',
+      text: '劉隊說：「顧乃謙說：跨館同步不是故障，那比較像有人知道哪裡會一起響。」\n\n「不是單點，不是巧合，是有人同時在兩邊動手——而且知道怎麼動。」',
+      choices: [{ id: 'ch3_qa_complete', label: '（完成推理討論）' }],
+    },
+
+    // 結尾：章節結語
+    node_liu_ch3_outro: {
+      id: 'node_liu_ch3_outro',
+      npcId: 'npc_liu',
+      text:
+        '劉隊把記錄本合上：「log 能被整理。」\n\n「這句話寫進去，還是不寫進去，我現在問你。」\n\n他等著你的決定。',
+      choices: [
+        {
+          id: 'ch3_outro_write_in',
+          label: '寫進去——「log 被整理過，原始欄位已遺失，跨館操作痕跡無法完整重建。」',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_outro_write_raw', value: true },
+            { type: 'setFlag', flag: 'ch3_reasoning_done', value: true },
+          ],
+          insightEffects: [{ target: 'evidence_insight', delta: 2 }],
+        },
+        {
+          id: 'ch3_outro_use_filtered',
+          label: '先用整理版——「現有資料指向高文傑個別操作，尚無跨館系統性問題之直接證據。」',
+          effects: [
+            { type: 'setFlag', flag: 'ch3_outro_use_filtered', value: true },
+            { type: 'setFlag', flag: 'ch3_reasoning_done', value: true },
+          ],
+          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
+        },
+      ],
+    },
+    node_liu_ch3_outro_raw: {
+      id: 'node_liu_ch3_outro_raw',
+      npcId: 'npc_liu',
+      text:
+        '劉隊把那行字寫進去，然後說：「這種句子寫進去，今晚有些人的手機會響。」\n\n「我知道。但它是真的。」',
+      choices: [
+        {
+          id: 'ch3_outro_done',
+          label: '（結束本章）',
+          effects: [{ type: 'setFlag', flag: 'ch3_reasoning_done', value: true }],
+        },
+      ],
+    },
+    node_liu_ch3_outro_filtered: {
+      id: 'node_liu_ch3_outro_filtered',
+      npcId: 'npc_liu',
+      text:
+        '劉隊把那行字寫進去，然後說：「這樣的話，今晚大家都能回家睡覺。」\n\n他停了一下：「但那兩個欄位，我會自己記著。」',
+      choices: [
+        {
+          id: 'ch3_outro_done',
+          label: '（結束本章）',
+          effects: [{ type: 'setFlag', flag: 'ch3_reasoning_done', value: true }],
+        },
+      ],
+    },
+  },
+};
 
 export { scenes, items, npcDialogs };

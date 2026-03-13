@@ -30,9 +30,13 @@ export default function PuzzleRenderer({
   error,
   onErrorClear,
 }: PuzzleRendererProps) {
+  // 各謎題元件期望 (input) 簽名，PuzzleRenderer 對外是 (puzzleId, result)
+  // 統一用此包裝轉換，避免元件間型別衝突
+  const handleSolve = (input: unknown) => onSolve(puzzle.id, input);
+
   const commonProps = {
     puzzle,
-    onSolve,
+    onSolve: handleSolve,
     onClose,
     error,
     onErrorClear,

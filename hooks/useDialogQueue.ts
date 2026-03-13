@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Dialog } from '@/types/game';
 
 export interface UseDialogQueueOptions {
-  sceneViewRef?: React.RefObject<{ triggerFlicker: (mode: 'light' | 'strong' | 'intense') => void }>;
+  sceneViewRef?: React.RefObject<{ triggerFlicker: (mode: 'light' | 'strong' | 'intense') => void } | null>;
   ch2QaActive?: boolean;
   ch2QaPhase?: 'idle' | 'prompt' | 'choices' | 'feedback';
   setCh2QaPhase?: (phase: 'idle' | 'prompt' | 'choices' | 'feedback') => void;

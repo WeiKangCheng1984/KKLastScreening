@@ -168,8 +168,8 @@ type ChapterId = 'ch1' | 'ch2' | string;
                            type="button"
                            className="absolute pointer-events-auto origin-center"
                            style={{
-                             left: `${opt.x * 100}%`,
-                             top: `${opt.y * 100}%`,
+                            left: `${(opt.x ?? 0.5) * 100}%`,
+                            top: `${(opt.y ?? 0.5) * 100}%`,
                              transform: `translate(-50%, -50%) rotate(${opt.rotation}deg) scale(${scale})`,
                              transformOrigin: 'center',
                            }}
