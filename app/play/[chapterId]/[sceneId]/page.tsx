@@ -4298,8 +4298,8 @@ export default function PlayPage() {
 
       {/* ch2：入口改由阿蘇對話觸發，不顯示右下角按鈕 */}
 
-      {/* 測試按鈕：浮動字詞填空（ch1/ch2 隨時可測） */}
-      {(chapterId === 'ch1' || chapterId === 'ch2') && (
+      {/* 測試按鈕：浮動字詞填空（各章均可測） */}
+      {(['ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6'] as string[]).includes(chapterId) && (
         <button
           type="button"
           onClick={() => setShowTestFloatingFillBlank(true)}
@@ -4326,7 +4326,7 @@ export default function PlayPage() {
         </button>
       )}
 
-      {showTestFloatingFillBlank && (chapterId === 'ch1' || chapterId === 'ch2') && (
+      {showTestFloatingFillBlank && (
         <TestFloatingFillBlank
           chapterId={chapterId}
           onClose={() => setShowTestFloatingFillBlank(false)}
