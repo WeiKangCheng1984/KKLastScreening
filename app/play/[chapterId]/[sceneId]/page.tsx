@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect, useCallback, useRef, type CSSProperties } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { GameEngine } from '@/lib/gameEngine';
 import { getMilestones, shouldAllowAction } from '@/lib/flowController';
@@ -167,18 +167,39 @@ export default function PlayPage() {
   const [chapterDataReady, setChapterDataReady] = useState(false);
   useEffect(() => {
     if (!chapterId) return;
-    getChapterData(chapterId).then((data) => {
-      if (data && engineRef.current) {
-        engineRef.current.loadChapterData(data);
-        setChapterDataReady(true);
-      }
+    const targetChapterId = chapterId;
+    const targetSceneId = sceneId; // 閉包：載入完成時同步到「進入此頁時」的場景
+    getChapterData(targetChapterId).then((data) => {
+      if (!data || !engineRef.current) return;
+      const eng = engineRef.current;
+      eng.loadChapterData(data);
+      // 載入後無條件同步 engine 到當前 URL（初次進入 ch2 時 state 可能與 URL 不同步，導致 triggerEvent 用錯場景）
+      eng.applyEffect({
+        type: 'changeScene',
+        chapterId: targetChapterId,
+        sceneId: targetSceneId,
+      });
+      setChapterDataReady(true);
     }).catch((err) => {
       console.warn('getChapterData failed:', err);
     });
-  }, [chapterId]);
+  }, [chapterId]); // sceneId 僅供閉包；章節內切場景由 useLayoutEffect 同步
 
   const scenes = chapterDataReady ? engine.getScenes() : {};
   const items = chapterDataReady ? engine.getItems() : {};
+
+  // 章節資料就緒後、首次繪製前，再次強制 engine 與 URL 一致（useLayoutEffect 在 paint 前執行，確保第一次點擊時 engine 已正確）
+  useLayoutEffect(() => {
+    if (!chapterDataReady || !chapterId || !sceneId || !engineRef.current) return;
+    const eng = engineRef.current;
+    const state = eng.getState();
+    if (state.currentChapter === chapterId && state.currentScene === sceneId) return;
+    eng.applyEffect({
+      type: 'changeScene',
+      chapterId,
+      sceneId,
+    });
+  }, [chapterDataReady, chapterId, sceneId]);
 
   // 定義所有 state，確保在 useEffect 之前
   const [currentDialog, setCurrentDialog] = useState<Dialog | null>(null);
@@ -1480,12 +1501,9 @@ export default function PlayPage() {
 
     // 極短暫點擊冷卻，避免玩家連點時連續觸發多個對話/事件
     const now = performance.now();
-    // 冷卻時間略微拉長，降低連續點擊多個互動框時同時觸發的機率
-    if (now - lastSceneClickRef.current < 300) {
-      return;
-    }
+    if (now - lastSceneClickRef.current < 300) return;
     lastSceneClickRef.current = now;
-    // 有正在顯示的對話或 overlay 時，暫停接受新的 hotspot 互動，避免玩家連點堆疊多組對話
+    // 有正在顯示的對話或 overlay 時，暫停接受新的 hotspot 互動
     if (
       currentDialog ||
       zoomOverlay?.active ||
@@ -1499,7 +1517,18 @@ export default function PlayPage() {
       return;
     }
     if (ch2QaActive && (ch2QaPhase === 'prompt' || ch2QaPhase === 'choices')) return;
+
     const engine = engineRef.current;
+    // 密碼進入／intro 後首次進入場景時，engine 可能尚未與 URL 一致，導致 triggerEvent 用錯場景而無反應。
+    // 點擊時強制以「畫面上顯示的 scene」為準，同步 engine，確保後續 handleItemCollection / triggerEvent 用對場景。
+    const state = engine.getState();
+    if (state.currentScene !== scene.id || state.currentChapter !== (scene.chapterId ?? chapterId)) {
+      engine.applyEffect({
+        type: 'changeScene',
+        chapterId: scene.chapterId ?? chapterId,
+        sceneId: scene.id,
+      });
+    }
     
     // 增加互動次數（用於閃爍頻率調整）
     setInteractionCount(prev => prev + 1);

@@ -4,6 +4,9 @@ const nextConfig = {
   images: {
     domains: [],
   },
+  async redirects() {
+    return [{ source: '/favicon.ico', destination: '/icon', permanent: false }];
+  },
 }
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
