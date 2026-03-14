@@ -454,10 +454,10 @@ const scenes: Record<string, Scene> = {
       '夜晚的城市影城門口，人潮已經散得差不多，只剩清潔人員和幾個還不想回家的影迷。霓虹招牌閃個不停，地上是被踩扁的爆米花和飲料杯，像一場還沒被收拾完的道具。警戒線在門邊拉出一個奇怪的框，提醒你這裡本來不是犯罪現場，卻突然被改成了。',
     background: '/images/bg_ch2_gate_v1.webp',
     hotspots: [
-      { id: 'hotspot_gate_liu', shape: 'rect', coords: [0.6, 0.35, 0.2, 0.3], description: '劉隊', hint: '劉隊站在門邊，手上還拿著剛才的簡報資料夾。' },
-      { id: 'hotspot_gate_popcorn', shape: 'rect', coords: [0.2, 0.75, 0.2, 0.2], description: '爆米花殘骸', hint: '散場後留下來的碎屑。' },
-      { id: 'hotspot_gate_poster', shape: 'rect', coords: [0.1, 0.15, 0.2, 0.3], description: '電影海報牆', hint: '幾張還沒來得及換掉的舊海報。' },
-      { id: 'hotspot_gate_neon', shape: 'rect', coords: [0.4, 0.05, 0.3, 0.2], description: '霓虹招牌', hint: '亮度有點不穩的「CITY CINEMA」字樣。' },
+      { id: 'hotspot_gate_liu', shape: 'circle', coords: [0.7, 0.5, 0.1], description: '劉隊', hint: '劉隊站在門邊，手上還拿著剛才的簡報資料夾。' },
+      { id: 'hotspot_gate_popcorn', shape: 'circle', coords: [0.3, 0.85, 0.1], description: '爆米花殘骸', hint: '散場後留下來的碎屑。' },
+      { id: 'hotspot_gate_poster', shape: 'circle', coords: [0.2, 0.3, 0.1], description: '電影海報牆', hint: '幾張還沒來得及換掉的舊海報。' },
+      { id: 'hotspot_gate_neon', shape: 'circle', coords: [0.55, 0.15, 0.1], description: '霓虹招牌', hint: '亮度有點不穩的「CITY CINEMA」字樣。' },
     ],
     items: [],
     hotspotEventMap: {
@@ -569,13 +569,13 @@ const scenes: Record<string, Scene> = {
     background: '/images/bg_ch2_park_v1.webp',
     hotspots: [
       // 僅保留四個「還在破譯中」的手機相關互動，其餘完整內容移至電腦場景
-      { id: 'hotspot_car_unknown_chat', shape: 'rect', coords: [0.1, 0.32, 0.25, 0.22], description: '通訊紀錄 Unknown', hint: '阿蘇：「這格我還在跑還原，等一下在電腦上一起看乾淨版。」' },
-      { id: 'hotspot_car_notepad', shape: 'rect', coords: [0.68, 0.08, 0.22, 0.22], description: '記事本筆記_未發表', hint: '記事本正在同步到終端，畫面上只剩讀條。' },
-      { id: 'hotspot_car_recording', shape: 'rect', coords: [0.68, 0.62, 0.22, 0.22], description: '錄音備忘_事故', hint: '錄音檔還在做降噪處理，波形抖得亂七八糟。' },
-      { id: 'hotspot_car_location', shape: 'rect', coords: [0.08, 0.62, 0.22, 0.22], description: '系統定位紀錄', hint: '定位資料還在重建軌跡，地圖一片馬賽克。' },
-      { id: 'hotspot_car_toolbox', shape: 'rect', coords: [0.7, 0.82, 0.25, 0.18], description: '後座工具箱', hint: '打不開，只能看見上面的貼紙。' },
-      { id: 'hotspot_car_coffee', shape: 'rect', coords: [0.38, 0.8, 0.24, 0.16], description: '便利商店咖啡杯', hint: '杯子上用油性筆寫著「A」和「K」。' },
-      { id: 'hotspot_car_charm', shape: 'rect', coords: [0.45, 0.05, 0.18, 0.18], description: '車上吊飾', hint: '後視鏡上掛著一個像素風電路板造型吊飾。' },
+      { id: 'hotspot_car_unknown_chat', shape: 'circle', coords: [0.225, 0.43, 0.11], description: '通訊紀錄 Unknown', hint: '阿蘇：「這格我還在跑還原，等一下在電腦上一起看乾淨版。」' },
+      { id: 'hotspot_car_notepad', shape: 'circle', coords: [0.79, 0.19, 0.11], description: '記事本筆記_未發表', hint: '記事本正在同步到終端，畫面上只剩讀條。' },
+      { id: 'hotspot_car_recording', shape: 'circle', coords: [0.79, 0.73, 0.11], description: '錄音備忘_事故', hint: '錄音檔還在做降噪處理，波形抖得亂七八糟。' },
+      { id: 'hotspot_car_location', shape: 'circle', coords: [0.19, 0.73, 0.11], description: '系統定位紀錄', hint: '定位資料還在重建軌跡，地圖一片馬賽克。' },
+      { id: 'hotspot_car_toolbox', shape: 'circle', coords: [0.825, 0.91, 0.09], description: '後座工具箱', hint: '打不開，只能看見上面的貼紙。' },
+      { id: 'hotspot_car_coffee', shape: 'circle', coords: [0.5, 0.88, 0.08], description: '便利商店咖啡杯', hint: '杯子上用油性筆寫著「A」和「K」。' },
+      { id: 'hotspot_car_charm', shape: 'circle', coords: [0.54, 0.14, 0.09], description: '車上吊飾', hint: '後視鏡上掛著一個像素風電路板造型吊飾。' },
     ],
     // 案件相關道具改由電腦場景取得，車內僅作為「還在破譯中」的過場
     items: [],
@@ -952,11 +952,11 @@ const scenes: Record<string, Scene> = {
       '阿蘇把解完密的手機資料接上終端，幾個視窗同時攤在螢幕上：聊天殘句、草稿、錄音波形和定位軌跡。車內的光線變得像小型放映室，外面的霓虹被關在玻璃外面，只剩資料在說話。',
     background: '/images/bg_ch2_desktop_v1.webp',
     hotspots: [
-      { id: 'hotspot_pc_overview', shape: 'rect', coords: [0.05, 0.05, 0.9, 0.2], description: '總覽看板', hint: '聊天紀錄、草稿、錄音和定位軌跡被排成一張暫時的看板。' },
-      { id: 'hotspot_pc_unknown_chat', shape: 'rect', coords: [0.05, 0.25, 0.4, 0.25], description: 'Unknown 對話截圖', hint: '那幾句被留到最後的殘句。' },
-      { id: 'hotspot_pc_column_draft', shape: 'rect', coords: [0.55, 0.25, 0.4, 0.25], description: '未發表專欄草稿', hint: '「節能設備，誰省了電，誰省了責任？」' },
-      { id: 'hotspot_pc_recording', shape: 'rect', coords: [0.05, 0.55, 0.4, 0.25], description: '錄音逐字稿', hint: '那段被壓低處理過的聲音，現在變成一行一行的字。' },
-      { id: 'hotspot_pc_location', shape: 'rect', coords: [0.55, 0.55, 0.4, 0.25], description: '行蹤與節點地圖', hint: '三家影城、老商辦和一堆不安靜的座標點。' },
+      { id: 'hotspot_pc_overview', shape: 'circle', coords: [0.5, 0.15, 0.1], description: '總覽看板', hint: '聊天紀錄、草稿、錄音和定位軌跡被排成一張暫時的看板。' },
+      { id: 'hotspot_pc_unknown_chat', shape: 'circle', coords: [0.25, 0.375, 0.125], description: 'Unknown 對話截圖', hint: '那幾句被留到最後的殘句。' },
+      { id: 'hotspot_pc_column_draft', shape: 'circle', coords: [0.75, 0.375, 0.125], description: '未發表專欄草稿', hint: '「節能設備，誰省了電，誰省了責任？」' },
+      { id: 'hotspot_pc_recording', shape: 'circle', coords: [0.25, 0.675, 0.125], description: '錄音逐字稿', hint: '那段被壓低處理過的聲音，現在變成一行一行的字。' },
+      { id: 'hotspot_pc_location', shape: 'circle', coords: [0.75, 0.675, 0.125], description: '行蹤與節點地圖', hint: '三家影城、老商辦和一堆不安靜的座標點。' },
     ],
     items: [],
     hotspotEventMap: {
