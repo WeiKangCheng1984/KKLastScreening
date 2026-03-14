@@ -1,6 +1,6 @@
 // 遊戲核心型別定義
 
-export type HotspotShape = 'rect' | 'poly';
+export type HotspotShape = 'rect' | 'poly' | 'circle';
 
 export type HotspotKind = 'object' | 'clue' | 'npc';
 

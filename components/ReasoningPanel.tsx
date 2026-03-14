@@ -1,10 +1,23 @@
 'use client';
 
+/**
+ * ReasoningPanel（向劉隊回報）
+ *
+ * 步驟流程（有 reportFills 時）：fill1 → fill2 → q1 → q3 → outro
+ * 步驟流程（無 reportFills 時）：q1 → q3 → outro（降級相容）
+ *
+ * fill1/fill2：全屏 ReportFillBlank 元件
+ * q1/q3/outro：OverlayCard 內的既有 UI
+ */
+
 import { reasoningByChapter, ChapterReasoning } from '@/data/reasoningByChapter';
 import { m, AnimatePresence } from 'framer-motion';
 import { Link2, X } from 'lucide-react';
 import { useState } from 'react';
 import OverlayCard from './OverlayCard';
+import ReportFillBlank from './ReportFillBlank';
+
+type ReasoningStep = 'fill1' | 'fill2' | 'q1' | 'q3' | 'outro';
 
 interface ReasoningPanelProps {
   chapterId: string;
@@ -20,9 +33,12 @@ export default function ReasoningPanel({
   onClose,
 }: ReasoningPanelProps) {
   const config = reasoningByChapter[chapterId] as ChapterReasoning | undefined;
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
+
+  // 計算起始步驟
+  const initStep = (): ReasoningStep => (config?.reportFills ? 'fill1' : 'q1');
+
+  const [step, setStep] = useState<ReasoningStep>(initStep);
   const [q1Selected, setQ1Selected] = useState<string | null>(null);
-  const [q2Input, setQ2Input] = useState('');
   const [q3Pairs, setQ3Pairs] = useState<[string, string][]>([]);
   const [q3Selected, setQ3Selected] = useState<string[]>([]);
   const [q3Error, setQ3Error] = useState('');
@@ -30,25 +46,32 @@ export default function ReasoningPanel({
 
   if (!config) return null;
 
-  const handleQ1Next = () => {
-    if (q1Selected) {
-      onSaveAnswer(chapterId, 'q1', q1Selected);
-      setStep(1);
-    }
-  };
-
-  const handleQ2Next = () => {
-    onSaveAnswer(chapterId, 'q2', q2Input.trim() || '');
-    setStep(2);
-  };
-
-  const q3LeftIds = config.q3.leftItems.map((i) => i.id);
+  // Q3 群組數（各章不同）
+  const q3Total = config.q3.leftItems.length;
+  const q3LeftIds  = config.q3.leftItems.map((i) => i.id);
   const q3RightIds = config.q3.rightItems.map((i) => i.id);
-  const q3UsedIds = new Set(q3Pairs.flat());
+  const q3UsedIds  = new Set(q3Pairs.flat());
   const q3CanConfirm = q3Selected.length === 2;
-  const q3OneLeft = q3Selected.some((id) => q3LeftIds.includes(id));
+  const q3OneLeft  = q3Selected.some((id) => q3LeftIds.includes(id));
   const q3OneRight = q3Selected.some((id) => q3RightIds.includes(id));
   const q3ValidPair = q3CanConfirm && q3OneLeft && q3OneRight;
+
+  // ── 步驟處理 ─────────────────────────────────────────────────────
+
+  const handleFill1Done = () => {
+    setStep('fill2');
+  };
+
+  const handleFill2Done = () => {
+    setStep('q1');
+  };
+
+  const handleQ1Next = () => {
+    if (!q1Selected) return;
+    onSaveAnswer(chapterId, 'q1', q1Selected);
+    onSaveAnswer(chapterId, 'q2', ''); // q2 自動略過
+    setStep('q3');
+  };
 
   const handleQ3CardClick = (id: string) => {
     if (q3UsedIds.has(id)) return;
@@ -63,7 +86,7 @@ export default function ReasoningPanel({
   const confirmQ3Pair = () => {
     if (!q3ValidPair) return;
     const [a, b] = q3Selected;
-    const left = q3LeftIds.includes(a) ? a : b;
+    const left  = q3LeftIds.includes(a) ? a : b;
     const right = q3LeftIds.includes(a) ? b : a;
     setQ3Pairs([...q3Pairs, [left, right]]);
     setQ3Selected([]);
@@ -76,17 +99,16 @@ export default function ReasoningPanel({
   };
 
   const handleQ3Submit = () => {
-    if (q3Pairs.length !== 3) {
-      setQ3Error('請先完成三組配對。');
+    if (q3Pairs.length !== q3Total) {
+      setQ3Error(`請先完成全部 ${q3Total} 組配對。`);
       return;
     }
     const value: string[] = q3Pairs.map(([l, r]) => `${l},${r}`);
     onSaveAnswer(chapterId, 'q3', value);
-    // 若本章沒有 police 設定，直接完成；否則進入劉隊結語步驟
     if (!config.police) {
       onComplete();
     } else {
-      setStep(3);
+      setStep('outro');
     }
   };
 
@@ -95,15 +117,39 @@ export default function ReasoningPanel({
     const R = config.q3.rightItems.find((i) => i.id === id);
     return L?.label ?? R?.label ?? id;
   };
+
+  // ── 全屏 Fill 步驟 ────────────────────────────────────────────────
+
+  if (step === 'fill1' && config.reportFills) {
+    return (
+      <ReportFillBlank
+        config={config.reportFills[0]}
+        onComplete={handleFill1Done}
+      />
+    );
+  }
+
+  if (step === 'fill2' && config.reportFills) {
+    return (
+      <ReportFillBlank
+        config={config.reportFills[1]}
+        onComplete={handleFill2Done}
+      />
+    );
+  }
+
+  // ── OverlayCard 步驟（q1 / q3 / outro） ─────────────────────────
+
   return (
     <OverlayCard
       tone="system"
       size="lg"
       className="w-full max-w-4xl max-h-[90vh] min-h-[70vh] p-6 md:p-8 flex flex-col"
     >
+      {/* Header */}
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-orange-500/30">
         <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-          推理分析
+          向劉隊回報
         </h2>
         <button
           type="button"
@@ -116,7 +162,9 @@ export default function ReasoningPanel({
 
       <div className="flex-1 min-h-0 overflow-y-auto pr-1">
         <AnimatePresence mode="wait">
-          {step === 0 && (
+
+          {/* Q1 三選一 */}
+          {step === 'q1' && (
             <m.div
               key="q1"
               initial={{ opacity: 0, x: -10 }}
@@ -124,6 +172,7 @@ export default function ReasoningPanel({
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2 }}
             >
+              <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">判斷</p>
               <p className="text-gray-200 mb-4">{config.q1.question}</p>
               <div className="space-y-2 mb-6">
                 {config.q1.options.map((opt) => (
@@ -144,26 +193,8 @@ export default function ReasoningPanel({
             </m.div>
           )}
 
-          {step === 1 && (
-            <m.div
-              key="q2"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <p className="text-gray-200 mb-4">{config.q2.question}</p>
-              <input
-                type="text"
-                value={q2Input}
-                onChange={(e) => setQ2Input(e.target.value)}
-                placeholder={config.q2.placeholder}
-                className="w-full px-4 py-3 bg-dark-surface border-2 border-orange-500/30 rounded-xl text-gray-200 placeholder-gray-500 focus:border-orange-400 focus:outline-none mb-6"
-              />
-            </m.div>
-          )}
-
-          {step === 2 && (
+          {/* Q3 連連看 */}
+          {step === 'q3' && (
             <m.div
               key="q3"
               initial={{ opacity: 0, x: -10 }}
@@ -171,11 +202,14 @@ export default function ReasoningPanel({
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2 }}
             >
+              <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">線索配對</p>
               <p className="text-gray-200 mb-4">{config.q3.question}</p>
 
               {q3Pairs.length > 0 && (
                 <div className="mb-4">
-                  <p className="text-gray-400 text-sm mb-2">已配對（共 {q3Pairs.length} / 3 組）</p>
+                  <p className="text-gray-400 text-sm mb-2">
+                    已配對（{q3Pairs.length} / {q3Total} 組）
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {q3Pairs.map((pair, idx) => (
                       <div
@@ -198,8 +232,8 @@ export default function ReasoningPanel({
                 </div>
               )}
 
-              {q3Pairs.length < 3 && (
-                <div className="mb-4">
+              {q3Pairs.length < q3Total && (
+                <div className="mb-3">
                   <p className="text-gray-400 text-sm mb-2">點選左一、右一結成一組</p>
                   {q3ValidPair && (
                     <button
@@ -215,7 +249,7 @@ export default function ReasoningPanel({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <p className="text-gray-400 text-sm mb-2">左：道具/線索</p>
+                  <p className="text-gray-400 text-sm mb-2">左：道具 / 線索</p>
                   <div className="space-y-2">
                     {config.q3.leftItems.map((item) => {
                       const used = q3UsedIds.has(item.id);
@@ -272,15 +306,17 @@ export default function ReasoningPanel({
             </m.div>
           )}
 
-          {step === 3 && config.police && (
+          {/* Outro：劉隊結語 + 補充句 */}
+          {step === 'outro' && config.police && (
             <m.div
-              key="police"
+              key="outro"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="text-gray-200 mb-4 whitespace-pre-line">
+              <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">報告結語</p>
+              <p className="text-gray-200 mb-5 whitespace-pre-line leading-relaxed">
                 {config.police.outroStandard}
               </p>
 
@@ -296,7 +332,7 @@ export default function ReasoningPanel({
                         type="button"
                         onClick={() =>
                           setSelectedPoliceNoteId(
-                            selectedPoliceNoteId === line.id ? null : line.id
+                            selectedPoliceNoteId === line.id ? null : line.id,
                           )
                         }
                         className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm transition-all ${
@@ -313,9 +349,11 @@ export default function ReasoningPanel({
               )}
             </m.div>
           )}
+
         </AnimatePresence>
       </div>
 
+      {/* Footer 按鈕 */}
       <div className="mt-4 flex justify-end gap-3">
         <button
           type="button"
@@ -324,27 +362,40 @@ export default function ReasoningPanel({
         >
           關閉
         </button>
-        {step === 2 && (
+
+        {step === 'q1' && (
+          <button
+            type="button"
+            onClick={handleQ1Next}
+            disabled={!q1Selected}
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
+          >
+            下一步
+          </button>
+        )}
+
+        {step === 'q3' && (
           <button
             type="button"
             onClick={handleQ3Submit}
-            disabled={q3Pairs.length !== 3}
+            disabled={q3Pairs.length !== q3Total}
             className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg"
           >
             送出並完成
           </button>
         )}
-        {step === 3 && (
+
+        {step === 'outro' && (
           <button
             type="button"
             onClick={() =>
               onComplete(
-                selectedPoliceNoteId ? { policeNoteId: selectedPoliceNoteId } : undefined
+                selectedPoliceNoteId ? { policeNoteId: selectedPoliceNoteId } : undefined,
               )
             }
             className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg"
           >
-            結束推理
+            結束回報
           </button>
         )}
       </div>

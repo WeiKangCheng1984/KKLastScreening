@@ -11,7 +11,7 @@
 - **主遊玩頁** `app/play/[chapterId]/[sceneId]/page.tsx` 約 4900+ 行、56 個 import、60+ 個 useState/useCallback/useEffect，職責過重。
 - **章節／NPC 邏輯** 以 `chapterId === 'ch1'`、`npcId === 'npc_lin_ruitang'` 等硬編碼散落在 page 多處（約 15+ 處）。
 - **謎題渲染** 為一長串 `currentPuzzle.type === 'xxx' ? <XxxPuzzle ... /> : ...`，新增謎題類型需改動主頁。
-- **填空 UI** 存在兩套：`Ch2SentenceCompletion`（劉隊結算）與 `TestFloatingFillBlank`（測試），邏輯與題目來源重疊。
+- **填空 UI**：`Ch2SentenceCompletion`（劉隊結算）、`ReportFillBlank`（ch1 態度五題雙格填空）等，題目來源依章節設定。
 - **資料檔** 分散：play 頁直接 import 多個 data 檔，缺少「依 chapterId 取得本章設定」的單一入口。
 
 ### 1.2 本計畫涵蓋項目
@@ -21,7 +21,7 @@
 | 高 | 謎題層統一（PuzzleRenderer + type→組件 map） | 階段 1 |
 | 高 | 章節行為表（NPC/章節分支集中） | 階段 3 |
 | 高 | Play 頁抽出 Hooks（場景／對話／道具等） | 階段 4 |
-| 中 | 填空 UI 單一化（Ch2 + Test 共用底層） | 階段 2 |
+| 中 | 填空 UI 共用底層（Ch2 / ReportFillBlank 等） | 階段 2 |
 | 中 | 章節資料／設定單一入口 | 階段 5 |
 
 ---
@@ -69,26 +69,25 @@
 
 ### 4.1 目標
 
-讓 `Ch2SentenceCompletion`（劉隊結算、五題、寫旗標）與 `TestFloatingFillBlank`（測試、單題、不寫旗標）共用同一套「題目 + 選項 + 對錯回饋」的 UI 與狀態邏輯，差別僅由 props（題目來源、是否寫 engine、完成回調）控制。
+讓 `Ch2SentenceCompletion`（劉隊結算、五題）與 `ReportFillBlank`（ch1 態度雙格填空等）共用同一套「題目 + 選項 + 對錯回饋」的 UI 與狀態邏輯，差別僅由 props（題目來源、是否寫 engine、完成回調）控制。（註：獨立填空測試按鈕與 `TestFloatingFillBlank` 已移除。）
 
 ### 4.2 步驟
 
 | 步驟 | 內容 | 備註 |
 |------|------|------|
-| 2.1 | **新增共用元件**（建議檔名：`components/FloatingFillBlankCore.tsx`，或擴充既有 `Ch2SentenceCompletion` 為可複用核心）。接收：題目列表或單題、當前題 index、選項配置（含 correctIds、replyByChoiceId、wrongFallback）、onSelect、onConfirm、是否寫入 engine（可選）、完成回調。負責：殘句顯示、浮動卡或列表選項、確認、對/錯回饋。 | 介面設計時需同時滿足 Ch2 五題輪流與 Test 單題兩種用法。 |
-| 2.2 | **改寫** `components/Ch2SentenceCompletion.tsx`。改為使用上述共用元件，外殼只負責：五題輪流、寫入旗標／engine.handleDialogChoice、進度顯示、onComplete 時關閉與導向。 | 保持現有對 `ch2QuestionConfigs`、`npc_asu_q1～q5` 的依賴與完成後 setReasoningComplete 等行為。 |
-| 2.3 | **改寫** `components/TestFloatingFillBlank.tsx`。改為使用同一共用元件，傳入單題（ch1 測試題 / ch2 的 q1）、不寫旗標、完成時僅關閉或顯示「過關成功」。 | 保持右下角「填空測試」按鈕行為不變。 |
-| 2.4 | 執行 `npm run build`。分別測試：ch2 劉隊結算 → 開啟 Ch2SentenceCompletion 完成五題；ch1/ch2 右下角「填空測試」按鈕 → 單題填空與過關提示。確認文案、選項、對錯回饋與改動前一致。 | 可對照 `ch2QuestionConfigs` 與既有文案逐題檢查。 |
+| 2.1 | **共用元件**：沿用既有 `FloatingFillBlankCore.ts` 型別與 `ReportFillBlank` 雙格填空 UI。必要時擴充為 Ch2 五題輪流可複用。 | 介面需滿足 Ch2 五題與 ch1 態度五題雙格填空等用法。 |
+| 2.2 | **改寫** `components/Ch2SentenceCompletion.tsx`。改為使用共用填空核心，外殼負責：五題輪流、寫入旗標／engine、進度、onComplete 關閉與導向。 | 保持對 `ch2QuestionConfigs`、完成後 setReasoningComplete 等行為。 |
+| 2.3 | 執行 `npm run build`。測試 ch2 劉隊結算完成五題、ch1 報告態度五題填空，確認無 regression。 | 可對照 `ch2QuestionConfigs` 與 ch1AttitudeFillBlanks 逐題檢查。 |
 
 ### 4.3 產出與驗收
 
-- **產出**：共用填空核心元件；Ch2SentenceCompletion 與 TestFloatingFillBlank 均改為消費該核心，邏輯不重複。
-- **驗收**：build 通過；ch2 正式五題流程與測試按鈕單題流程皆正常，無 regression。
+- **產出**：填空核心由 Ch2SentenceCompletion、ReportFillBlank 等共用，邏輯不重複。
+- **驗收**：build 通過；ch2 五題流程與 ch1 態度填空流程皆正常。
 
 ### 4.4 涉及檔案
 
-- 新增：`components/FloatingFillBlankCore.tsx`（或等效名稱）
-- 修改：`components/Ch2SentenceCompletion.tsx`、`components/TestFloatingFillBlank.tsx`
+- 沿用：`components/FloatingFillBlankCore.ts`、`components/ReportFillBlank.tsx`
+- 修改：`components/Ch2SentenceCompletion.tsx`（視需要）
 
 ---
 

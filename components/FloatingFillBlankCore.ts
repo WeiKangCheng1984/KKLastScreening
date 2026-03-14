@@ -17,6 +17,44 @@ export type FillBlankConfig = {
   wrongFallback: string;
 };
 
+/**
+ * 雙空格浮動填空設定（向劉隊回報機制用）
+ *
+ * 句子渲染方式：
+ *   sentenceParts[0] + [BLANK_1] + sentenceParts[1] + [BLANK_2] + sentenceParts[2]
+ */
+export type TwoBlankFillConfig = {
+  id: string;
+
+  /** 句子切成三段，blank 在各段之間 */
+  sentenceParts: [string, string, string];
+
+  /** 空格一：題目提示 + 浮動選項 + 正解 + 填對後 KK 旁白 */
+  blank1: {
+    hintLabel: string;
+    options: FloatingOption[];
+    correctIds: string[];
+    replyOnCorrect: string;
+  };
+
+  /** 空格二：同上結構 */
+  blank2: {
+    hintLabel: string;
+    options: FloatingOption[];
+    correctIds: string[];
+    replyOnCorrect: string;
+  };
+
+  /** 兩格都填對後：KK + 劉隊各一句 */
+  bothCorrectDialogue: {
+    kk: string;
+    liu: string;
+  };
+
+  /** 任一格填錯時顯示的提示（共用） */
+  wrongFallback: string;
+};
+
 /** 將選中的答案填入句子中，其他部分保持原 prefix/suffix。 */
 export function buildFilledSentence(
   config: FillBlankConfig,

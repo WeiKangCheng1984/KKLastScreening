@@ -209,15 +209,27 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
   }, [clickedHotspot]);
 
   const getHotspotStyle = (hotspot: Hotspot): React.CSSProperties => {
+    // 圓形：coords = [圓心x, 圓心y, 半徑] 比例 0～1，與 rect 同用響應式尺寸
+    if (hotspot.shape === 'circle' && hotspot.coords.length >= 3) {
+      const [cx, cy, r] = hotspot.coords;
+      const sizeFactor = 0.6 + (r * 2) * 0.8;
+      const responsiveSize = `calc(clamp(40px, 4vw, 64px) * ${sizeFactor})`;
+      return {
+        position: 'absolute',
+        left: `${cx * 100}%`,
+        top: `${cy * 100}%`,
+        width: responsiveSize,
+        height: responsiveSize,
+        borderRadius: '50%',
+        transform: 'translate(-50%, -50%)',
+      };
+    }
     if (hotspot.shape === 'rect' && hotspot.coords.length >= 4) {
       const [x, y, width, height] = hotspot.coords;
-      // 計算中心點位置（圓心）
       const centerX = (x + width) / 2;
       const centerY = (y + height) / 2;
-      // 圓形直徑：基礎尺寸 × (0.6 + 半徑比例)，讓 coords 的 width/height 影響圓的大小
-      const sizeFactor = 0.6 + (width + height) / 2 * 0.8; // 約 0.64 ~ 1.0
+      const sizeFactor = 0.6 + (width + height) / 2 * 0.8;
       const responsiveSize = `calc(clamp(40px, 4vw, 44px) * ${sizeFactor})`;
-
       return {
         position: 'absolute',
         left: `${centerX * 100}%`,

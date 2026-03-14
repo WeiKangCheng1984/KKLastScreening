@@ -17,7 +17,7 @@ const items: Record<string, Item> = {
     description: '一張播映時間表，上面有塗改的痕跡。\n\n原本某一欄被劃掉，旁邊用紅筆寫了新的時間。',
     svgImage: '/svg/items/schedule_modified.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false, // 第一章道具精簡：僅檢視、不進背包，報告時由 flag 解鎖
   },
   'item_projector_notes': {
     id: 'item_projector_notes',
@@ -25,7 +25,7 @@ const items: Record<string, Item> = {
     description: '一張便條紙貼在控制台上。\n\n字跡匆忙，內容跟燈有關。',
     svgImage: '/svg/items/projector_notes.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false, // 第一章道具精簡：僅檢視、不進背包
   },
   'item_black_plastic_fragment': {
     id: 'item_black_plastic_fragment',
@@ -41,7 +41,7 @@ const items: Record<string, Item> = {
     description: '燈控面板旁的紀錄。\n\n當天的紀錄顯示開關指在手動那一側。',
     svgImage: '/svg/items/schedule_modified.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false, // 第一章道具精簡：僅檢視、不進背包
   },
   'item_cleaning_note': {
     id: 'item_cleaning_note',
@@ -49,7 +49,7 @@ const items: Record<string, Item> = {
     description: '廁所區域的清潔備忘。\n\n上面記了當天的清潔狀況；垃圾桶那欄寫得很簡短，看起來很空。',
     svgImage: '/svg/items/black_plastic_fragment.svg',
     svgSize: 'small',
-    collectible: true,
+    collectible: false, // 第一章道具精簡：僅檢視、不進背包
   },
 };
 
@@ -64,25 +64,25 @@ const scenes: Record<string, Scene> = {
     hotspots: [
       {
         id: 'hotspot_ticket_stub',
-        shape: 'rect',
-        coords: [1.19, 1.62, 0.15, 0.15],
+        shape: 'circle',
+        coords: [1.265, 1.695, 0.075],
         description: '地上的電影票根',
         hint: '一張死者遺留的票根，靜靜躺在地上。',
       },
       // 好笑無意義互動點（放映廳）
-      { id: 'hotspot_fun_popcorn', shape: 'rect', coords: [1.55, 1.6, 0.15, 0.15], description: '爆米花殘渣', hint: '地上有幾顆沒吃完的爆米花。' },
-      { id: 'hotspot_fun_cup', shape: 'rect', coords: [0.03, 1.38, 0.15, 0.15], description: '空飲料杯', hint: '一個空杯還插著吸管。' },
-      { id: 'hotspot_fun_jacket', shape: 'rect', coords: [0.02, 1.5, 0.15, 0.15], description: '椅背上的外套', hint: '一件外套掛在椅背上。' },
-      { id: 'hotspot_fun_screen_dust', shape: 'rect', coords: [1.75, 1.2, 0.15, 0.15], description: '銀幕邊角', hint: '銀幕邊角有一小塊灰。' },
-      { id: 'hotspot_fun_ac', shape: 'rect', coords: [0.52, 0.15, 0.15, 0.15], description: '冷氣出風口', hint: '冷氣呼呼吹。' },
-      { id: 'hotspot_fun_exit_sign', shape: 'rect', coords: [0.12, 1.1, 0.15, 0.15], description: '散場告示', hint: '「散場請依序離場」。' },
-      { id: 'hotspot_fun_seat_number', shape: 'rect', coords: [1.1, 1.45, 0.15, 0.15], description: '座位號碼牌', hint: '椅背上的座位號碼。' },
-      { id: 'hotspot_fun_carpet_stain', shape: 'rect', coords: [0.58, 1.25, 0.15, 0.15], description: '地毯污漬', hint: '地毯上有一小塊深色污漬。' },
-      { id: 'hotspot_fun_popcorn_bucket', shape: 'rect', coords: [0.70, 1.72, 0.15, 0.15], description: '空爆米花桶', hint: '一個倒地的空爆米花桶。' },
+      { id: 'hotspot_fun_popcorn', shape: 'circle', coords: [1.625, 1.675, 0.075], description: '爆米花殘渣', hint: '地上有幾顆沒吃完的爆米花。' },
+      { id: 'hotspot_fun_cup', shape: 'circle', coords: [0.105, 1.455, 0.075], description: '空飲料杯', hint: '一個空杯還插著吸管。' },
+      { id: 'hotspot_fun_jacket', shape: 'circle', coords: [0.095, 1.575, 0.075], description: '椅背上的外套', hint: '一件外套掛在椅背上。' },
+      { id: 'hotspot_fun_screen_dust', shape: 'circle', coords: [1.825, 1.275, 0.075], description: '銀幕邊角', hint: '銀幕邊角有一小塊灰。' },
+      { id: 'hotspot_fun_ac', shape: 'circle', coords: [0.595, 0.225, 0.075], description: '冷氣出風口', hint: '冷氣呼呼吹。' },
+      { id: 'hotspot_fun_exit_sign', shape: 'circle', coords: [0.195, 1.175, 0.075], description: '散場告示', hint: '「散場請依序離場」。' },
+      { id: 'hotspot_fun_seat_number', shape: 'circle', coords: [1.175, 1.525, 0.075], description: '座位號碼牌', hint: '椅背上的座位號碼。' },
+      { id: 'hotspot_fun_carpet_stain', shape: 'circle', coords: [0.655, 1.325, 0.075], description: '地毯污漬', hint: '地毯上有一小塊深色污漬。' },
+      { id: 'hotspot_fun_popcorn_bucket', shape: 'circle', coords: [0.775, 1.795, 0.075], description: '空爆米花桶', hint: '一個倒地的空爆米花桶。' },
       {
         id: 'hotspot_victim_seat',
-        shape: 'rect',
-        coords: [0.44, 1.45, 0.2, 0.22],
+        shape: 'circle',
+        coords: [0.54, 1.56, 0.1],
         description: '死者座位',
         hint: 'H 排 12 號。散場後唯一沒有站起來的那個位子。',
       },
@@ -165,7 +165,7 @@ const scenes: Record<string, Scene> = {
         solution: '延後亮燈3分鐘',
         hint: '拼合線索：\n1. 亮燈延後（播映時間表 + 燈控面板）\n2. 監視器時間（90秒內離開）\n3. 死亡時間（散場後，約00:10-00:15）\n\n推理過程：\n- 兇手知道燈會延後3分鐘\n- 利用這3分鐘完成犯案\n- 在燈亮前離開現場',
         requirements: [
-          { type: 'hasItem', itemId: 'item_schedule_modified' },
+          { type: 'hasFlag', flag: 'schedule_modified_found', value: true },
           { type: 'hasFlag', flag: 'clue_light_delay_confirmed', value: true },
           { type: 'hasFlag', flag: 'security_monitor_viewed', value: true },
         ],
@@ -190,14 +190,14 @@ const scenes: Record<string, Scene> = {
           ['item_projector_notes', 'item_light_control_note', 'item_schedule_modified'],
           ['item_black_plastic_fragment', 'item_cleaning_note', 'item_ticket_stub'],
         ],
-        hint: '選出三樣道具組合成線索。共有三種正確組合，集滿三條線索即完成。',
+        hint: '選出三樣線索組合成推理。共有三種正確組合，集滿三條即完成。（背包 2 件 + 檢視發現 4 項）',
         requirements: [
           { type: 'hasItem', itemId: 'item_ticket_stub' },
-          { type: 'hasItem', itemId: 'item_schedule_modified' },
-          { type: 'hasItem', itemId: 'item_projector_notes' },
-          { type: 'hasItem', itemId: 'item_light_control_note' },
           { type: 'hasItem', itemId: 'item_black_plastic_fragment' },
-          { type: 'hasItem', itemId: 'item_cleaning_note' },
+          { type: 'hasFlag', flag: 'schedule_modified_found', value: true },
+          { type: 'hasFlag', flag: 'clue_manual_light_control', value: true },
+          { type: 'hasFlag', flag: 'projector_notes_found', value: true },
+          { type: 'hasFlag', flag: 'clue_clean_trash', value: true },
         ],
         config: {
           clues: [
@@ -399,46 +399,42 @@ const scenes: Record<string, Scene> = {
     hotspots: [
       {
         id: 'hotspot_screening_schedule',
-        shape: 'rect',
-        coords: [0.11, 0.48, 0.15, 0.15],
+        shape: 'circle',
+        coords: [0.185, 0.555, 0.075],
         description: '播映時間表',
         hint: '一張播映時間表，上面有塗改的痕跡；某一欄被劃掉，旁邊用紅筆寫了新的時間。',
       },
       {
         id: 'hotspot_light_control_panel',
-        shape: 'rect',
-        coords: [1.4, 0.76, 0.15, 0.15],
+        shape: 'circle',
+        coords: [1.475, 0.835, 0.075],
         description: '燈控面板',
         hint: '燈控面板旁的紀錄；開關指在手動那一側。',
       },
       {
         id: 'hotspot_projector_notes',
-        shape: 'rect',
-        coords: [1.10, 0.79, 0.15, 0.15],
+        shape: 'circle',
+        coords: [1.175, 0.865, 0.075],
         description: '放映員的筆記',
         hint: '一張便條紙貼在控制台上。字跡匆忙，但內容清楚。',
       },
       {
         id: 'hotspot_security_monitor',
-        shape: 'rect',
-        coords: [0.79, 0.68, 0.15, 0.15],
+        shape: 'circle',
+        coords: [0.865, 0.755, 0.075],
         description: '監視器畫面',
         hint: '監視器畫面正在播放案發當晚的錄影。昏暗的光線裡，畫面有人影晃動。',
       },
       // 好笑無意義互動（播映室）
-      { id: 'hotspot_fun_coffee', shape: 'rect', coords: [0.53, 0.61, 0.15, 0.15], description: '咖啡杯', hint: '小張的咖啡杯。' },
-      { id: 'hotspot_fun_snack', shape: 'rect', coords: [1.50, 0.62, 0.15, 0.15], description: '零食袋', hint: '一包沒吃完的洋芋片。' },
-      { id: 'hotspot_fun_chair_wheel', shape: 'rect', coords: [0.25, 1.01, 0.15, 0.15], description: '椅子輪子', hint: '控制椅的輪子。' },
-      { id: 'hotspot_fun_sticker', shape: 'rect', coords: [0.34, 0.56, 0.15, 0.15], description: '按鈕上的貼紙', hint: '某個按鈕上貼著「勿按」。' },
-      { id: 'hotspot_fun_remote', shape: 'rect', coords: [0.10, 0.78, 0.15, 0.15], description: '冷氣遙控器', hint: '冷氣遙控器。' },
-      { id: 'hotspot_fun_magazine', shape: 'rect', coords: [1.64, 0.60, 0.15, 0.15], description: '舊雜誌', hint: '一本過期的電影雜誌。' },
-      { id: 'hotspot_fun_whiteboard', shape: 'rect', coords: [0.98, 0.5, 0.15, 0.15], description: '白板', hint: '白板上畫著一個笑臉。' },
+      { id: 'hotspot_fun_coffee', shape: 'circle', coords: [0.605, 0.685, 0.075], description: '咖啡杯', hint: '小張的咖啡杯。' },
+      { id: 'hotspot_fun_snack', shape: 'circle', coords: [1.575, 0.695, 0.075], description: '零食袋', hint: '一包沒吃完的洋芋片。' },
+      { id: 'hotspot_fun_chair_wheel', shape: 'circle', coords: [0.325, 1.085, 0.075], description: '椅子輪子', hint: '控制椅的輪子。' },
+      { id: 'hotspot_fun_sticker', shape: 'circle', coords: [0.415, 0.635, 0.075], description: '按鈕上的貼紙', hint: '某個按鈕上貼著「勿按」。' },
+      { id: 'hotspot_fun_remote', shape: 'circle', coords: [0.175, 0.855, 0.075], description: '冷氣遙控器', hint: '冷氣遙控器。' },
+      { id: 'hotspot_fun_magazine', shape: 'circle', coords: [1.715, 0.675, 0.075], description: '舊雜誌', hint: '一本過期的電影雜誌。' },
+      { id: 'hotspot_fun_whiteboard', shape: 'circle', coords: [1.055, 0.575, 0.075], description: '白板', hint: '白板上畫著一個笑臉。' },
     ],
-    items: [
-      items.item_schedule_modified,
-      items.item_projector_notes,
-      items.item_light_control_note,
-    ],
+    items: [], // 第一章道具精簡：時間表／筆記／燈控改為僅檢視、不進背包
     hotspotEventMap: {
       'hotspot_screening_schedule': 'examine_screening_schedule',
       'hotspot_light_control_panel': 'examine_light_control',
@@ -461,12 +457,11 @@ const scenes: Record<string, Scene> = {
           { type: 'hasInteracted', hotspotId: 'hotspot_screening_schedule' },
         ],
         effects: [
-          { type: 'addItem', itemId: 'item_schedule_modified' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：播映時間表（塗改）\n\n一張播映時間表，上面有塗改的痕跡。\n\n原本某一欄被劃掉，旁邊用紅筆寫了新的時間。\n\n這個改動很細微，如果不是仔細看，根本不會注意到。',
-              type: 'item',
+              text: '播映時間表（塗改）\n\n一張播映時間表，上面有塗改的痕跡。\n\n原本某一欄被劃掉，旁邊用紅筆寫了新的時間。\n\n這個改動很細微，如果不是仔細看，根本不會注意到。',
+              type: 'narrator',
             },
           },
           { type: 'setFlag', flag: 'schedule_modified_found', value: true },
@@ -482,12 +477,11 @@ const scenes: Record<string, Scene> = {
           { type: 'hasInteracted', hotspotId: 'hotspot_light_control_panel' },
         ],
         effects: [
-          { type: 'addItem', itemId: 'item_light_control_note' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：燈控紀錄\n\n燈控面板旁的紀錄。\n\n當天的紀錄顯示開關指在手動那一側。',
-              type: 'item',
+              text: '燈控紀錄\n\n燈控面板旁的紀錄。\n\n當天的紀錄顯示開關指在手動那一側。',
+              type: 'narrator',
             },
           },
           { type: 'setFlag', flag: 'clue_manual_light_control', value: true },
@@ -503,12 +497,11 @@ const scenes: Record<string, Scene> = {
           { type: 'hasInteracted', hotspotId: 'hotspot_projector_notes' },
         ],
         effects: [
-          { type: 'addItem', itemId: 'item_projector_notes' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：放映員的筆記\n\n一張便條紙貼在控制台上。\n\n字跡匆忙，但內容清楚：\n「那天有人說，燈不用急著開。」\n\n沒有署名，沒有時間。',
-              type: 'item',
+              text: '放映員的筆記\n\n一張便條紙貼在控制台上。\n\n字跡匆忙，但內容清楚：\n「那天有人說，燈不用急著開。」\n\n沒有署名，沒有時間。',
+              type: 'narrator',
             },
           },
           { type: 'setFlag', flag: 'projector_notes_found', value: true },
@@ -615,38 +608,37 @@ const scenes: Record<string, Scene> = {
     hotspots: [
       {
         id: 'hotspot_sink_below',
-        shape: 'rect',
-        coords: [1.72, 1.72, 0.15, 0.15],
+        shape: 'circle',
+        coords: [1.795, 1.795, 0.075],
         description: '洗手台下方',
         hint: '在洗手台下方，你發現了一小片黑色塑膠。',
       },
       {
         id: 'hotspot_trash_bin',
-        shape: 'rect',
-        coords: [0.95, 0.95, 0.15, 0.15],
+        shape: 'circle',
+        coords: [1.025, 1.025, 0.075],
         description: '垃圾桶',
         hint: '垃圾桶裡幾乎是空的。',
       },
       {
         id: 'hotspot_mirror',
-        shape: 'rect',
-        coords: [1.5, 0.58, 0.15, 0.15],
+        shape: 'circle',
+        coords: [1.575, 0.655, 0.075],
         description: '鏡子',
         hint: '你在鏡子裡看見自己，和一個沒有留下痕跡的人。',
       },
       // 好笑無意義互動（廁所）
-      { id: 'hotspot_fun_dryer', shape: 'rect', coords: [1.00, 0.66, 0.15, 0.15], description: '烘手機', hint: '烘手機。' },
-      { id: 'hotspot_fun_soap', shape: 'rect', coords: [1.40, 0.86, 0.15, 0.15], description: '洗手乳', hint: '洗手乳是檸檬味。' },
-      { id: 'hotspot_fun_towel', shape: 'rect', coords: [0.93, 0.54, 0.15, 0.15], description: '擦手紙', hint: '擦手紙盒上寫著「一次取用一張」。' },
-      { id: 'hotspot_fun_sign', shape: 'rect', coords: [0.1, 0.58, 0.15, 0.15], description: '標語', hint: '牆上貼著「如廁後請沖水」。' },
-      { id: 'hotspot_fun_air_freshener', shape: 'rect', coords: [0.22, 0.73, 0.15, 0.15], description: '芳香劑', hint: '自動芳香劑。' },
-      { id: 'hotspot_fun_faucet', shape: 'rect', coords: [1.56, 0.91, 0.15, 0.15], description: '水龍頭', hint: '水龍頭。' },
-      { id: 'hotspot_fun_floor', shape: 'rect', coords: [0.74, 1.56, 0.15, 0.15], description: '地板反光', hint: '地板擦得很亮。' },
+      { id: 'hotspot_fun_dryer', shape: 'circle', coords: [1.075, 0.735, 0.075], description: '烘手機', hint: '烘手機。' },
+      { id: 'hotspot_fun_soap', shape: 'circle', coords: [1.475, 0.935, 0.075], description: '洗手乳', hint: '洗手乳是檸檬味。' },
+      { id: 'hotspot_fun_towel', shape: 'circle', coords: [1.005, 0.615, 0.075], description: '擦手紙', hint: '擦手紙盒上寫著「一次取用一張」。' },
+      { id: 'hotspot_fun_sign', shape: 'circle', coords: [0.175, 0.655, 0.075], description: '標語', hint: '牆上貼著「如廁後請沖水」。' },
+      { id: 'hotspot_fun_air_freshener', shape: 'circle', coords: [0.295, 0.805, 0.075], description: '芳香劑', hint: '自動芳香劑。' },
+      { id: 'hotspot_fun_faucet', shape: 'circle', coords: [1.635, 0.985, 0.075], description: '水龍頭', hint: '水龍頭。' },
+      { id: 'hotspot_fun_floor', shape: 'circle', coords: [0.815, 1.635, 0.075], description: '地板反光', hint: '地板擦得很亮。' },
     ],
     items: [
       items.item_black_plastic_fragment,
-      items.item_cleaning_note,
-    ],
+    ], // 第一章道具精簡：清潔備忘改為僅檢視、不進背包
     hotspotEventMap: {
       'hotspot_sink_below': 'examine_sink_below',
       'hotspot_trash_bin': 'examine_trash_bin',
@@ -689,12 +681,11 @@ const scenes: Record<string, Scene> = {
           { type: 'hasInteracted', hotspotId: 'hotspot_trash_bin' },
         ],
         effects: [
-          { type: 'addItem', itemId: 'item_cleaning_note' },
           {
             type: 'showDialog',
             dialog: {
-              text: '獲得：清潔備忘\n\n廁所區域的清潔備忘；垃圾桶那欄寫得很簡短，看起來很空。\n\n沒有血跡，沒有可疑物品。\n\n但這種「空」本身就很可疑。',
-              type: 'item',
+              text: '清潔備忘\n\n廁所區域的清潔備忘；垃圾桶那欄寫得很簡短，看起來很空。\n\n沒有血跡，沒有可疑物品。\n\n但這種「空」本身就很可疑。',
+              type: 'narrator',
             },
           },
           { type: 'setFlag', flag: 'clue_clean_trash', value: true },
@@ -810,14 +801,14 @@ const scenes: Record<string, Scene> = {
   
   /*
     hotspots: [
-      { id: 'hotspot_park_bench', shape: 'rect', coords: [0.3, 0.4, 0.5, 0.35], description: '公園長椅', hint: '長椅上有舊雨痕、踩黑的煙頭和刮痕。' },
-      { id: 'hotspot_park_flyer', shape: 'rect', coords: [0.15, 0.55, 0.35, 0.25], description: '地上的影城傳單', hint: '傳單被鞋跟踩到紙纖維起毛。' },
-      { id: 'hotspot_park_cup', shape: 'rect', coords: [0.5, 0.6, 0.25, 0.22], description: '垃圾桶裡的紙杯', hint: '杯壁上有用油性筆寫的字：「烏」。' },
-      { id: 'hotspot_park_sign', shape: 'rect', coords: [0.65, 0.08, 0.3, 0.25], description: '遠處的影城招牌', hint: '「城市影城」四個字還亮著。' },
-      { id: 'hotspot_park_phone', shape: 'rect', coords: [0.72, 0.35, 0.22, 0.2], description: '手機通知列', hint: '警方傳來新訊息。' },
-      { id: 'hotspot_park_vending', shape: 'rect', coords: [0.08, 0.25, 0.2, 0.35], description: '自動販賣機', hint: '閃著飲料燈箱的販賣機。' },
-      { id: 'hotspot_park_cat', shape: 'rect', coords: [0.45, 0.72, 0.22, 0.18], description: '流浪貓', hint: '長椅底下有一隻貓。' },
-      { id: 'hotspot_park_signboard', shape: 'rect', coords: [0.08, 0.65, 0.25, 0.2], description: '公園告示牌', hint: '生鏽的告示牌上寫著「夜間請降低音量」。' },
+      { id: 'hotspot_park_bench', shape: 'circle', coords: [0.55, 0.575, 0.175], description: '公園長椅', hint: '長椅上有舊雨痕、踩黑的煙頭和刮痕。' },
+      { id: 'hotspot_park_flyer', shape: 'circle', coords: [0.325, 0.675, 0.125], description: '地上的影城傳單', hint: '傳單被鞋跟踩到紙纖維起毛。' },
+      { id: 'hotspot_park_cup', shape: 'circle', coords: [0.625, 0.71, 0.11], description: '垃圾桶裡的紙杯', hint: '杯壁上有用油性筆寫的字：「烏」。' },
+      { id: 'hotspot_park_sign', shape: 'circle', coords: [0.8, 0.205, 0.125], description: '遠處的影城招牌', hint: '「城市影城」四個字還亮著。' },
+      { id: 'hotspot_park_phone', shape: 'circle', coords: [0.83, 0.45, 0.1], description: '手機通知列', hint: '警方傳來新訊息。' },
+      { id: 'hotspot_park_vending', shape: 'circle', coords: [0.18, 0.425, 0.175], description: '自動販賣機', hint: '閃著飲料燈箱的販賣機。' },
+      { id: 'hotspot_park_cat', shape: 'circle', coords: [0.56, 0.81, 0.09], description: '流浪貓', hint: '長椅底下有一隻貓。' },
+      { id: 'hotspot_park_signboard', shape: 'circle', coords: [0.205, 0.75, 0.1], description: '公園告示牌', hint: '生鏽的告示牌上寫著「夜間請降低音量」。' },
     ],
     items: [],
     hotspotEventMap: {

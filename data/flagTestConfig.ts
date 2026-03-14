@@ -172,17 +172,13 @@ export interface SensitiveChoiceGroup {
 }
 
 /**
- * 旗標與道具對應：當「旗標測試」裡把某旗標設為開時，程式會一併把對應道具加入背包，
- * 這樣遊戲邏輯（hasItem、報告編輯器證據桌）才會真的當作「已探索／已取得」。
- * 設為關時會一併從背包移除對應道具。
+ * 旗標與道具對應：當「旗標測試」裡把某旗標設為開時，程式會一併把對應道具加入背包；
+ * 設為關時會一併從背包移除。第一章僅 2 件進背包（票根、黑色碎片），
+ * 其餘 4 項（時間表、燈控、放映員筆記、清潔線索）僅檢視、以 flag 表示已發現，不在此同步。
  */
 export const flagToItemIds: Record<string, string[]> = {
   ticket_stub_collected: ['item_ticket_stub'],
-  schedule_modified_found: ['item_schedule_modified'],
-  clue_manual_light_control: ['item_light_control_note'],
-  projector_notes_found: ['item_projector_notes'],
   black_fragment_found: ['item_black_plastic_fragment'],
-  clue_clean_trash: ['item_cleaning_note'],
 };
 
 export const sensitiveChoiceGroups: SensitiveChoiceGroup[] = [

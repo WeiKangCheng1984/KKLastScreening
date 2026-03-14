@@ -2,6 +2,8 @@
  * 第一章報告編輯器專用設定（證據桌、時間線、版本深度、態度宣言）
  * 與 reasoningByChapter.ch1.police 並存：police 提供 outroStandard / outroPlayerLines，此檔提供步驟結構與驗證規則。
  */
+import type { TwoBlankFillConfig } from '@/components/FloatingFillBlankCore';
+import { ch1AttitudeFillBlanks } from './ch1AttitudeFillBlanks';
 
 export type Ch1EvidenceCategory = 'TimeAnchor' | 'ProcessAnchor' | 'PhysicalTrace';
 
@@ -107,8 +109,10 @@ export interface Ch1ReportAttitudeConfig {
   choices: Ch1AttitudeChoice[];
   /** 必須放進 KK 私人備忘錄的內容卡 id（詞組填空啟用時不用） */
   requireInMemoCardId?: string;
-  /** 詞組填空：六句分次呈現，正確或嚴肅但錯皆可過關 */
+  /** 詞組填空：六句分次呈現，正確或嚴肅但錯皆可過關（若啟用 attitudeFillBlanks 則改為五題雙格填空） */
   phrasePuzzle?: Ch1AttitudePhrasePuzzleConfig;
+  /** 五題雙格浮動填空（與 ReportFillBlank 相同呈現模組），須正確填寫才能過關；有值時取代 phrasePuzzle / 拖曳 */
+  attitudeFillBlanks?: TwoBlankFillConfig[];
   closingInferenceByDimension: {
     procedure_insight: string;
     human_insight: string;
@@ -131,6 +135,18 @@ export const CH1_EVIDENCE_CATEGORIES: Record<string, Ch1EvidenceCategory> = {
   item_projector_notes: 'ProcessAnchor',
   item_black_plastic_fragment: 'PhysicalTrace',
   item_cleaning_note: 'PhysicalTrace',
+};
+
+/**
+ * 第一章道具精簡：僅 2 件進背包，其餘 4 項為「檢視即發現」。
+ * 證據卡解鎖條件 = 背包擁有該 item  OR  對應發現 flag 為 true。
+ * 若 itemId 不在本表，表示解鎖只看背包（item_ticket_stub, item_black_plastic_fragment）。
+ */
+export const CH1_ITEM_ID_TO_DISCOVER_FLAG: Record<string, string> = {
+  item_schedule_modified: 'schedule_modified_found',
+  item_light_control_note: 'clue_manual_light_control',
+  item_projector_notes: 'projector_notes_found',
+  item_cleaning_note: 'clue_clean_trash',
 };
 
 export const ch1ReportConfig: Ch1ReportConfig = {
@@ -424,6 +440,8 @@ export const ch1ReportConfig: Ch1ReportConfig = {
         { id: 'att_linfuli', text: '林副理', category: 'human' },
       ],
     },
+    /** 五題雙格填空（與 ReportFillBlank 相同呈現），取代原詞組填空／拖曳 */
+    attitudeFillBlanks: ch1AttitudeFillBlanks,
     closingInferenceByDimension: {
       procedure_insight:
         '兇手不是在黑暗裡殺人，他是在規定的黑暗裡殺人。',

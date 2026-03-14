@@ -38,8 +38,8 @@ import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { m, AnimatePresence } from 'framer-motion';
 import SensitiveGateOverlay from '@/components/SensitiveGateOverlay';
-import TestFloatingFillBlank from '@/components/TestFloatingFillBlank';
-import { flagTestGroups, ch1ReportCoreFlagIds, ch1ReportEvidenceItemIds, npcTestByChapter, sensitiveChoiceGroups, flagToItemIds } from '@/data/flagTestConfig';
+import { flagTestGroups, ch1ReportCoreFlagIds, npcTestByChapter, sensitiveChoiceGroups, flagToItemIds } from '@/data/flagTestConfig';
+import { CH1_ITEM_ID_TO_DISCOVER_FLAG } from '@/data/ch1ReportConfig';
 // ch2QuestionConfigs / npcDialogs 透過 useChapterData 動態載入，不在此靜態 import
 import { useChapterData } from '@/hooks/useChapterData';
 import { useDialogQueue } from '@/hooks/useDialogQueue';
@@ -257,8 +257,6 @@ export default function PlayPage() {
   const [showCh2SentenceCompletion, setShowCh2SentenceCompletion] = useState(false);
   const [ch2ConclusionIndex, setCh2ConclusionIndex] = useState(0);
   const [ch2ConclusionSelectedId, setCh2ConclusionSelectedId] = useState<string | null>(null);
-  /** 測試按鈕：浮動字詞填空（ch1/ch2 隨時可開） */
-  const [showTestFloatingFillBlank, setShowTestFloatingFillBlank] = useState(false);
   /** 旗標測試面板：設定區點「旗標測試」後開啟，可逐一開關所有旗標 */
   const [showFlagTestPanel, setShowFlagTestPanel] = useState(false);
   /** 旗標測試面板目前分頁 */
@@ -4283,35 +4281,20 @@ export default function PlayPage() {
         </div>
       </div>
 
-      {/* 推理分析按鈕（ch3+ 且本章全場景已訪且未完成時顯示；ch2 改用「把話補齊」） */}
+      {/* 向劉隊回報按鈕（本章全場景已訪且未完成推理時顯示） */}
       {showReasoningButton && (
         <button
           type="button"
           onClick={() => setShowReasoningPanel(true)}
           className="fixed bottom-6 right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-orange-500/90 hover:bg-orange-500 border-2 border-orange-400/80 text-white text-sm font-medium shadow-lg hover:scale-105 transition-all"
-          title="推理分析"
+          title="向劉隊回報"
         >
           <Brain size={20} />
-          <span>推理分析</span>
+          <span>向劉隊回報</span>
         </button>
       )}
 
       {/* ch2：入口改由阿蘇對話觸發，不顯示右下角按鈕 */}
-
-      {/* 測試按鈕：浮動字詞填空（各章均可測） */}
-      {(['ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6'] as string[]).includes(chapterId) && (
-        <button
-          type="button"
-          onClick={() => setShowTestFloatingFillBlank(true)}
-          className={`fixed right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-amber-500/15 hover:bg-amber-500/20 border-2 border-amber-400/40 text-amber-100 text-sm font-medium shadow-lg hover:scale-105 transition-all ${
-            showCh1MonologueButton ? 'bottom-20' : 'bottom-6'
-          }`}
-          title="填空測試（浮動字詞）"
-        >
-          <FlaskConical size={20} className="text-amber-300" />
-          <span>填空測試</span>
-        </button>
-      )}
 
       {/* 第一章內心獨白按鈕：完成全部 4 位 NPC 敏感對話後顯示，全章一次 */}
       {showCh1MonologueButton && (
@@ -4324,14 +4307,6 @@ export default function PlayPage() {
           <MessageSquare size={20} />
           <span>內心獨白</span>
         </button>
-      )}
-
-      {showTestFloatingFillBlank && (
-        <TestFloatingFillBlank
-          chapterId={chapterId}
-          onClose={() => setShowTestFloatingFillBlank(false)}
-          ch2QuestionConfigs={ch2QuestionConfigs}
-        />
       )}
 
       {/* 全域互動層：模態優先權與中心/底部佈局 */}
@@ -4516,12 +4491,17 @@ export default function PlayPage() {
                               const engine = engineRef.current;
                               const ch1Scenes = getCurrentChapterScenes('ch1');
                               ch1ReportCoreFlagIds.forEach((f) => engine.applyEffect({ type: 'setFlag', flag: f, value: true }));
+                              Object.values(CH1_ITEM_ID_TO_DISCOVER_FLAG).forEach((flag) =>
+                                engine.applyEffect({ type: 'setFlag', flag, value: true })
+                              );
                               engine.applyEffect({ type: 'markScenesVisited', sceneIds: ch1Scenes });
-                              ch1ReportEvidenceItemIds.forEach((id) => engine.applyEffect({ type: 'addItem', itemId: id }));
+                              ['item_ticket_stub', 'item_black_plastic_fragment'].forEach((id) =>
+                                engine.applyEffect({ type: 'addItem', itemId: id })
+                              );
                               setRefreshKey((k) => k + 1);
                               setShowFlagTestPanel(false);
                               setCurrentDialog({
-                                text: '已開啟第一章報告條件：五個旗標、三場景已拜訪、報告用六樣道具已加入背包。可點劉隊選「我想向你報告」。',
+                                text: '已開啟第一章報告條件：核心旗標、四項檢視發現旗標、三場景已拜訪、背包兩件（票根、黑色碎片）。可點劉隊選「我想向你報告」。',
                                 type: 'narrator',
                                 choices: [{ id: 'close_only', text: '知道了' }],
                               });

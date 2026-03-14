@@ -4,8 +4,10 @@ import { useState, useMemo, useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, FileText, Clock, Layers, MessageSquare, Lock } from 'lucide-react';
 import OverlayCard from '@/components/OverlayCard';
+import ReportFillBlank from '@/components/ReportFillBlank';
 import {
   CH1_EVIDENCE_CATEGORIES,
+  CH1_ITEM_ID_TO_DISCOVER_FLAG,
   type Ch1EvidenceCategory,
   type Ch1AttitudeWordCategory,
   type Ch1ReportConfig,
@@ -126,6 +128,8 @@ export default function Ch1ReportEditor({
   const [phraseFills, setPhraseFills] = useState<Record<string, Record<string, string>>>({});
   /** 詞組填空：當前選中的空槽（再點詞即填入） */
   const [selectedPhraseSlot, setSelectedPhraseSlot] = useState<{ structureId: string; slotId: string } | null>(null);
+  /** 五題雙格填空：當前題號（0～4 顯示 ReportFillBlank，5 表示全部完成） */
+  const [attitudeFillBlankIndex, setAttitudeFillBlankIndex] = useState(0);
   const [showClosing, setShowClosing] = useState(false);
   const [evidenceError, setEvidenceError] = useState('');
   const [timelineError, setTimelineError] = useState('');
@@ -149,10 +153,25 @@ export default function Ch1ReportEditor({
     });
   }, []);
 
+  const attitudeFillBlanks = config.attitude.attitudeFillBlanks;
+  const useAttitudeFillBlanks = Boolean(attitudeFillBlanks && attitudeFillBlanks.length >= 5);
+  /** 五題填空全完成後也要顯示結尾（不依賴 useEffect 時機） */
+  const showClosingView = showClosing || (useAttitudeFillBlanks && attitudeFillBlankIndex >= 5);
+  useEffect(() => {
+    if (!useAttitudeFillBlanks || attitudeFillBlankIndex < 5) return;
+    engine.applyEffect({ type: 'setFlag', flag: 'ch1_attitude_declared', value: true });
+    setSelectedAttitudeId('ch1_attitude_both');
+    setShowClosing(true);
+  }, [useAttitudeFillBlanks, attitudeFillBlankIndex, engine]);
+
   const evidenceCards = config.evidence.evidenceCards;
   const shuffledEvidenceCards = useMemo(() => shuffleStable(evidenceCards), [evidenceCards]);
   const slotCount = config.evidence.evidenceSlots?.count ?? 3;
-  const hasItem = (itemId: string) => inventory.includes(itemId);
+  const flags = state.flags ?? {};
+  /** 證據卡可選條件：背包擁有 或 該線索已發現（檢視時設定的 flag） */
+  const canUseEvidenceCard = (itemId: string) =>
+    inventory.includes(itemId) ||
+    (!!CH1_ITEM_ID_TO_DISCOVER_FLAG[itemId] && !!flags[CH1_ITEM_ID_TO_DISCOVER_FLAG[itemId]]);
   const usedEvidenceIds = slotEvidenceIds.filter((id): id is string => id != null);
 
   const unlockSlot = (index: number) => {
@@ -187,7 +206,7 @@ export default function Ch1ReportEditor({
   };
 
   const handleEvidenceCardClick = (itemId: string) => {
-    if (!hasItem(itemId) || usedEvidenceIds.includes(itemId)) return;
+    if (!canUseEvidenceCard(itemId) || usedEvidenceIds.includes(itemId)) return;
     if (pendingEvidenceId === itemId) {
       setPendingEvidenceId(null);
       return;
@@ -427,7 +446,7 @@ export default function Ch1ReportEditor({
   };
 
   const closingText = useMemo(() => {
-    if (!showClosing) return '';
+    if (!showClosingView) return '';
     const st = engine.getState();
     const insights = st.insights ?? {
       procedure_insight: 0,
@@ -441,14 +460,21 @@ export default function Ch1ReportEditor({
     const key =
       maxVal === p ? 'procedure_insight' : maxVal === e ? 'evidence_insight' : 'human_insight';
     return config.attitude.closingInferenceByDimension[key];
-  }, [showClosing, engine]);
+  }, [showClosingView, engine]);
 
   return (
-    <OverlayCard
-      tone="system"
-      size="lg"
-      className="w-full max-w-4xl max-h-[90vh] min-h-[70vh] p-6 md:p-8 flex flex-col"
-    >
+    <>
+      {step === 3 && useAttitudeFillBlanks && attitudeFillBlankIndex < 5 && attitudeFillBlanks && (
+        <ReportFillBlank
+          config={attitudeFillBlanks[attitudeFillBlankIndex]}
+          onComplete={() => setAttitudeFillBlankIndex((i) => i + 1)}
+        />
+      )}
+      <OverlayCard
+        tone="system"
+        size="lg"
+        className="w-full max-w-4xl max-h-[90vh] min-h-[70vh] p-6 md:p-8 flex flex-col"
+      >
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-orange-500/30">
         <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
           向劉隊報告
@@ -566,7 +592,7 @@ export default function Ch1ReportEditor({
             </m.div>
           )}
 
-          {step === 3 && !showClosing && isPhrasePuzzle && phrasePuzzle && (
+          {step === 3 && !showClosing && !useAttitudeFillBlanks && isPhrasePuzzle && phrasePuzzle && (
             <m.div
               key="step3phrase"
               initial={{ opacity: 0, x: -10 }}
@@ -672,7 +698,7 @@ export default function Ch1ReportEditor({
             </m.div>
           )}
 
-          {step === 3 && !showClosing && !isPhrasePuzzle && (
+          {step === 3 && !showClosing && !useAttitudeFillBlanks && !isPhrasePuzzle && (
             <m.div
               key="step3"
               initial={{ opacity: 0, x: -10 }}
@@ -740,7 +766,7 @@ export default function Ch1ReportEditor({
             </m.div>
           )}
 
-          {step === 3 && showClosing && (
+          {step === 3 && showClosingView && (
             <m.div
               key="closing"
               initial={{ opacity: 0 }}
@@ -779,7 +805,7 @@ export default function Ch1ReportEditor({
             下一頁
           </button>
         )}
-        {step === 3 && !showClosing && isPhrasePuzzle && (
+        {step === 3 && !showClosing && !useAttitudeFillBlanks && isPhrasePuzzle && (
           <>
             {phraseStructureIndex > 0 ? (
               <button
@@ -828,5 +854,6 @@ export default function Ch1ReportEditor({
         )}
       </div>
     </OverlayCard>
+    </>
   );
 }
