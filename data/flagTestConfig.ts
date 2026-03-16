@@ -43,7 +43,6 @@ export const flagTestGroups: FlagGroup[] = [
       { id: 'ch1_police_intro_shown', label: '劉隊開場已播' },
       { id: 'ch1_liu_mid_ready', label: '劉隊中段可播' },
       { id: 'ch1_liu_mid_shown', label: '劉隊中段已播' },
-      { id: 'ch1_monologue_done', label: '內心獨白完成' },
       { id: 'ch1_report_evidence', label: '報告－證據' },
       { id: 'ch1_report_timeline', label: '報告－時間線' },
       { id: 'ch1_police_note', label: '報告－補句' },

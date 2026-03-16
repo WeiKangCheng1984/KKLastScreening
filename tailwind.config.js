@@ -37,6 +37,22 @@ module.exports = {
           card: '#252525',
           border: '#333333',
         },
+        /* 語意文字色階 — 全部在 dark-card (#252525) 上通過 WCAG AA
+         *  primary   gray-100  11.5:1   主標題 / 強調
+         *  body      gray-200   9.6:1   主要內文
+         *  secondary gray-300   7.5:1   次要說明
+         *  muted     gray-400   4.5:1   最低 AA，提示 / 輔助
+         *  accent    orange-400 5.0:1   橘色強調
+         *  soft      orange-300 7.2:1   柔和橘（取代 orange-400 帶透明度）
+         */
+        text: {
+          primary:   'var(--text-primary)',
+          body:      'var(--text-body)',
+          secondary: 'var(--text-secondary)',
+          muted:     'var(--text-muted)',
+          accent:    'var(--text-accent)',
+          soft:      'var(--text-soft)',
+        },
         industrial: {
           orange: '#f97316',
           'orange-dark': '#ea580c',

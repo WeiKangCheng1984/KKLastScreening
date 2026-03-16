@@ -176,7 +176,7 @@ export default function NpcRightStrip({
           >
             <ChevronRight size={20} />
           </button>
-          <span className="text-[10px] text-white/60 tabular-nums pr-1">
+          <span className="text-[10px] text-gray-400 tabular-nums pr-1">
             {safePageIndex + 1}/{totalPages}
           </span>
         </div>

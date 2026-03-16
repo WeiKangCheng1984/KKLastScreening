@@ -18,7 +18,7 @@ import ItemObtainedNotification from '@/components/ItemObtainedNotification';
 import PuzzleRenderer from '@/components/PuzzleRenderer';
 import PulseClipReader from '@/components/PulseClipReader';
 import UVLightPanel from '@/components/UVLightPanel';
-import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, FlaskConical, Brain, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Package, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Code, Menu, Puzzle, FlaskConical, Brain } from 'lucide-react';
 import Link from 'next/link';
 import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import { chapters } from '@/data/chapters';
@@ -261,8 +261,6 @@ export default function PlayPage() {
   const [showFlagTestPanel, setShowFlagTestPanel] = useState(false);
   /** 旗標測試面板目前分頁 */
   const [flagTestTab, setFlagTestTab] = useState<'flags' | 'interactions' | 'npc' | 'sensitive'>('flags');
-  /** 第一章內心獨白 overlay：完成 4 位 NPC 敏感對話後由按鈕觸發，全章一次 */
-  const [showCh1MonologueOverlay, setShowCh1MonologueOverlay] = useState(false);
   // 場景切換相關狀態
   // 使用 useState 的函數形式確保服務器和客戶端初始狀態一致
   const [showSceneName, setShowSceneName] = useState(() => false);
@@ -383,8 +381,7 @@ export default function PlayPage() {
       activeItemDetail ||
       showCh1ReportEditor ||
       showCh2SentenceCompletion ||
-      sensitiveGate ||
-      showCh1MonologueOverlay
+      sensitiveGate
     );
   });
 
@@ -819,14 +816,6 @@ export default function PlayPage() {
     if (choice.id === 'lin_ch6_branch_1') { closeAndStartBranch('npc_lin_zirui', 'node_lin_ch6_final1_1'); return; }
     if (choice.id === 'lin_ch6_branch_2') { closeAndStartBranch('npc_lin_zirui', 'node_lin_ch6_final2_1'); return; }
   }, [sensitiveGate, buildDialogFromNpcNode, addDialogsToQueue]);
-
-  // 第一章內心獨白 overlay 選擇：套用洞察與 ch1_monologue_done，關閉 overlay
-  const handleCh1MonologueChoice = useCallback((choice: DialogChoice) => {
-    if (!engineRef.current) return;
-    engineRef.current.handleDialogChoice(choice);
-    setShowCh1MonologueOverlay(false);
-    setRefreshKey((prev) => prev + 1);
-  }, []);
 
   // 處理對話選擇
   const handleDialogChoice = useCallback((choice: DialogChoice) => {
@@ -3313,15 +3302,6 @@ export default function PlayPage() {
 
   // 第二章：殘句整理（Q1~Q5）入口改為「阿蘇對話」觸發（不再顯示右下角按鈕）
 
-  // 第一章內心獨白按鈕：完成全部 4 位 NPC 敏感對話後顯示，全章一次
-  const allCh1SensitiveDone =
-    !!ch1Flags.npc_lin_sensitive_done &&
-    !!ch1Flags.npc_ashun_sensitive_done &&
-    !!ch1Flags.npc_xiaozhang_sensitive_done &&
-    !!ch1Flags.npc_zhou_jie_sensitive_done;
-  const showCh1MonologueButton =
-    chapterId === 'ch1' && allCh1SensitiveDone && !ch1Flags.ch1_monologue_done && !showSceneName;
-
   // 獲取相鄰場景（必須在條件返回之前定義）
   const adjacentScenes = getAdjacentScenes(chapterId, sceneId);
   const prevScene = adjacentScenes.prev ? scenes[adjacentScenes.prev] : null;
@@ -3710,8 +3690,7 @@ export default function PlayPage() {
                 activeItemDetail ||
                 showCh1ReportEditor ||
                 showCh2SentenceCompletion ||
-                sensitiveGate ||
-                showCh1MonologueOverlay
+                sensitiveGate
               )}
               onNpcClick={(npcId) => {
                 if (!engineRef.current) return;
@@ -4306,19 +4285,6 @@ export default function PlayPage() {
 
       {/* ch2：入口改由阿蘇對話觸發，不顯示右下角按鈕 */}
 
-      {/* 第一章內心獨白按鈕：完成全部 4 位 NPC 敏感對話後顯示，全章一次 */}
-      {showCh1MonologueButton && (
-        <button
-          type="button"
-          onClick={() => setShowCh1MonologueOverlay(true)}
-          className="fixed bottom-6 right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-indigo-500/90 hover:bg-indigo-500 border-2 border-indigo-400/80 text-white text-sm font-medium shadow-lg hover:scale-105 transition-all"
-          title="內心獨白"
-        >
-          <MessageSquare size={20} />
-          <span>內心獨白</span>
-        </button>
-      )}
-
       {/* 全域互動層：模態優先權與中心/底部佈局 */}
       <div className="fixed inset-0 z-[60] pointer-events-none">
         {/* 推理面板：最高優先，全螢幕模態 */}
@@ -4736,30 +4702,9 @@ export default function PlayPage() {
           )}
         </AnimatePresence>
 
-        {/* 第一章內心獨白：完成 4 位 NPC 敏感對話後由按鈕觸發，全章一次 */}
-        <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !showCh2SentenceCompletion && !sensitiveGate && showCh1MonologueOverlay && (
-            <m.div
-              key="ch1-monologue"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 pointer-events-auto"
-            >
-              <SensitiveGateOverlay
-                text={chapterConfig.ch1MonologueText ?? ''}
-                choices={chapterConfig.ch1MonologueChoices ?? []}
-                onChoiceSelect={handleCh1MonologueChoice}
-                onClose={() => setShowCh1MonologueOverlay(false)}
-              />
-            </m.div>
-          )}
-        </AnimatePresence>
-
         {/* 背包道具詳解：中央詳解卡，優先於 toast */}
         <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !showCh2SentenceCompletion && !sensitiveGate && !showCh1MonologueOverlay && activeItemDetail && (
+          {!showReasoningPanel && !showCh1ReportEditor && !showCh2SentenceCompletion && !sensitiveGate && activeItemDetail && (
             <m.div
               key="item-detail"
               initial={{ opacity: 0 }}

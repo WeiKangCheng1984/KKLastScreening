@@ -119,7 +119,7 @@ export default function CharacterConversationCard({
                 {currentTurn.characterName.replace(/（/g, '\n（')}
               </span>
               {isPlayer && (
-                <span className="text-xs text-gray-500 flex-shrink-0">（你）</span>
+                <span className="text-xs text-gray-400 flex-shrink-0">（你）</span>
               )}
             </div>
             <div

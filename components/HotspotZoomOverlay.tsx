@@ -29,7 +29,7 @@ export default function HotspotZoomOverlay({
   interactionName,
   onClose,
 }: HotspotZoomOverlayProps) {
-  const [phase, setPhase] = useState<'zooming-in' | 'dialog' | 'zooming-out'>('zooming-in');
+  const [phase, setPhase] = useState<'zooming-in' | 'dialog' | 'zooming-out'>('dialog');
   const [queue, setQueue] = useState<Dialog[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -37,22 +37,11 @@ export default function HotspotZoomOverlay({
 
   useEffect(() => {
     if (!visible) return;
-    setPhase('zooming-in');
+    // 直接進入對話階段，不再經過 ZOOM IN 動畫
+    setPhase(dialogs.length ? 'dialog' : 'zooming-out');
     setQueue(dialogs.length ? [...dialogs] : []);
     setCurrentIndex(0);
   }, [visible, dialogs]);
-
-  useEffect(() => {
-    if (!visible || phase !== 'zooming-in') return;
-    const t = setTimeout(() => {
-      if (dialogs.length === 0) {
-        setPhase('zooming-out');
-      } else {
-        setPhase('dialog');
-      }
-    }, ZOOM_IN_DURATION * 1000);
-    return () => clearTimeout(t);
-  }, [visible, phase, dialogs.length]);
 
   const handleDialogClose = useCallback(() => {
     if (currentIndex + 1 < queue.length) {
@@ -86,36 +75,16 @@ export default function HotspotZoomOverlay({
           transition={{ duration: 0.08 }}
           className="fixed inset-0 z-40 pointer-events-auto"
         >
-          {/* 背景圖 + 節奏感 ZOOM IN / ZOOM OUT（兩段式 keyframes） */}
+          {/* 背景圖：暫時關閉 ZOOM IN / OUT，僅保留靜態顯示 */}
           <m.div
             className="absolute inset-0"
             style={{ transformOrigin: originPercent }}
             initial={{ scale: 1 }}
             animate={{
-              scale:
-                phase === 'zooming-in'
-                  ? [1, ZOOM_MID_SCALE, ZOOM_MAX_SCALE]
-                  : phase === 'dialog'
-                    ? ZOOM_MAX_SCALE
-                    : phase === 'zooming-out'
-                      ? [ZOOM_MAX_SCALE, ZOOM_MID_SCALE, 1]
-                      : 1,
+              scale: 1,
             }}
             transition={{
-              scale:
-                phase === 'zooming-in'
-                  ? {
-                      duration: ZOOM_IN_DURATION,
-                      times: [0, 0.4, 1],
-                      ease: ['easeOut', 'easeOut', 'easeOut'],
-                    }
-                  : phase === 'zooming-out'
-                    ? {
-                        duration: ZOOM_OUT_DURATION,
-                        times: [0, 0.45, 1],
-                        ease: ['easeIn', 'easeIn', 'easeIn'],
-                      }
-                    : { duration: 0 },
+              scale: { duration: 0 },
             }}
           >
             <Image

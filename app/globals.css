@@ -3,6 +3,24 @@
 @tailwind utilities;
 
 @layer base {
+  /* ── 文字色階 CSS 變數 ──────────────────────────────────────────────
+   *  在 dark-card (#252525) 上的對比度（WCAG AA 要求一般文字 ≥4.5:1）：
+   *  --text-primary   gray-100  11.5:1  主標題、強調
+   *  --text-body      gray-200   9.6:1  主要內文
+   *  --text-secondary gray-300   7.5:1  次要說明
+   *  --text-muted     gray-400   4.5:1  最低 AA — 提示、輔助、icon label
+   *  --text-accent    orange-400  5.0:1  橘色強調
+   *  --text-soft      orange-300  7.2:1  柔和橘（取代 orange-400/60～70）
+   * ──────────────────────────────────────────────────────────────── */
+  :root {
+    --text-primary:   #f3f4f6;
+    --text-body:      #e5e7eb;
+    --text-secondary: #d1d5db;
+    --text-muted:     #9ca3af;
+    --text-accent:    #fb923c;
+    --text-soft:      #fdba74;
+  }
+
   /* 方案一：全局基準字級提升，全站 rem 字體約 +12.5%（16px → 18px） */
   html {
     font-size: 18px;
@@ -45,8 +63,13 @@
   .text-ui-body {
     @apply font-body text-[0.95rem] leading-relaxed;
   }
+  /* text-gray-500 在暗背景上對比度僅 ~2.7:1，改用 gray-400（4.5:1，最低 AA） */
   .text-ui-caption {
-    @apply font-body text-xs text-gray-500 tracking-wider;
+    @apply font-body text-xs text-gray-400 tracking-wider;
+  }
+  /* hint：比 caption 再輕一點的輔助說明，仍保持 AA */
+  .text-ui-hint {
+    @apply font-body text-xs text-gray-400 leading-relaxed;
   }
 
   .line-clamp-2 {

@@ -717,32 +717,8 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_lin_light_2',
       npcId: 'npc_lin_ruitang',
       text: 'KK：「你說流程正常，但流程正常的人不會死得這麼安靜。」\n\n林瑞堂：「那種調整……上面有上面的考量啦。可能只是、只是服務調整嘛。」\n\nKK：「你急著把它叫成服務。」\n\n林瑞堂（略慌）：「我真的很遺憾……可我也不想看到這裡被毀掉喔。我們能配合的都會配合啦。」\n\nKK：「被毀掉的不是影城，是那個人。」\n\n林瑞堂沉默。',
-      choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
-      next: 'node_lin_light_insight',
-    },
-    'node_lin_light_insight': {
-      id: 'node_lin_light_insight',
-      npcId: 'npc_lin_ruitang',
-      text: '離開對話時，KK 的內心旁白——',
       choices: [
-        {
-          id: 'choice_procedure',
-          label: '「他不是在說謊，他是在把事情塞回流程裡，讓流程替人背鍋。」',
-          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
-        },
-        {
-          id: 'choice_human',
-          label: '「他怕的應該不是兇手，是上面那張看不見的臉，可是這些恐懼會替兇手擦地板。」',
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
-        },
-        {
-          id: 'choice_evidence',
-          label: '「官腔很滑，油槍滑掉，但官腔擋不住痕跡。」',
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
-        },
+        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }] },
       ],
     },
     // === 敏感問題二：他怕誰 ===
@@ -757,32 +733,8 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_lin_fear_2',
       npcId: 'npc_lin_ruitang',
       text: 'KK：「燈晚亮三分鐘，不是小事。誰有權改？」\n\n林瑞堂：「那是……流程上的調整嘛。通常不會追到個人啦，這是制度喔。」\n\nKK：「所以你選擇用流程，保護不知道的誰誰誰？」\n\n林瑞堂沉默。',
-      choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
-      next: 'node_lin_fear_insight',
-    },
-    'node_lin_fear_insight': {
-      id: 'node_lin_fear_insight',
-      npcId: 'npc_lin_ruitang',
-      text: '離開對話時，KK 的內心旁白——',
       choices: [
-        {
-          id: 'choice_procedure',
-          label: '「他不是在說謊，他是在把事情塞回流程裡，讓流程替人背鍋。」',
-          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
-        },
-        {
-          id: 'choice_human',
-          label: '「他怕的不是兇手，是上面那張看不見的臉。恐懼會替兇手擦地板。」',
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
-        },
-        {
-          id: 'choice_evidence',
-          label: '「官腔擋不住痕跡。」',
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
-          effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }],
-        },
+        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }] },
       ],
     },
   },
@@ -793,17 +745,8 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_ashun_window_1',
       npcId: 'npc_ashun',
       text: 'KK：「散場後，你們巡場有空窗嗎？」\n\n阿順：「有啊，散場後那一兩分鐘喔。要先引導人潮出去嘛。」\n\nKK：「那段誰看？」\n\n阿順：「誰都看，又誰都沒看啦。走道像水流，沒人會停的。」\n\nKK（旁白）：大概一兩分鐘，足夠一個熟練的人做很多事。',
-      choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
-      next: 'node_ashun_window_insight',
-    },
-    'node_ashun_window_insight': {
-      id: 'node_ashun_window_insight',
-      npcId: 'npc_ashun',
-      text: '離開對話時，KK 的內心旁白——',
       choices: [
-        { id: 'choice_procedure', label: '「90 秒不是時間，是窗口。窗口一旦被設計，就會變成一條路。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
-        { id: 'choice_evidence', label: '「死角不是看不到人，是看不到動作。我要找『動作留下的結果』。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
-        { id: 'choice_human', label: '「他笑得太用力。越用玩笑掩飾的人，越知道自己看過什麼。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
+        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
       ],
     },
     // === 敏感問題二：監視器死角（哪裡看不到）===
@@ -811,17 +754,8 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_ashun_deadzone_1',
       npcId: 'npc_ashun',
       text: 'KK：「監視器死角在哪？」\n\n阿順：「靠邊的地方總有擋到的啦，柱子、轉角什麼的嘛。」\n\nKK：「你確定？」\n\n阿順：「我每天走同一條路喔。哪裡有問題，心裡有數啦。自己清楚。」\n\nKK（旁白）：死角不是空白，是被允許的盲點。',
-      choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
-      next: 'node_ashun_deadzone_insight',
-    },
-    'node_ashun_deadzone_insight': {
-      id: 'node_ashun_deadzone_insight',
-      npcId: 'npc_ashun',
-      text: '離開對話時，KK 的內心旁白——',
       choices: [
-        { id: 'choice_procedure', label: '「90 秒不是時間，是窗口。窗口一旦被設計，就會變成一條路。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
-        { id: 'choice_evidence', label: '「死角不是看不到人，是看不到動作。我要找『動作留下的結果』。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
-        { id: 'choice_human', label: '「他笑得太用力。越用玩笑掩飾的人，越知道自己看過什麼。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
+        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
       ],
     },
   },
@@ -839,17 +773,8 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_xiaozhang_table_2',
       npcId: 'npc_xiaozhang',
       text: 'KK：「那表格誰能改？」\n\n小張：「那種事要問上面啊。我們只負責照表按嘛。」\n\nKK：「所以燈不是『自然延後』，是『被允許延後』。」\n\n小張沉默。\n\nKK（旁白）：允許，才是這城市最重的鎖。',
-      choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
-      next: 'node_xiaozhang_table_insight',
-    },
-    'node_xiaozhang_table_insight': {
-      id: 'node_xiaozhang_table_insight',
-      npcId: 'npc_xiaozhang',
-      text: '離開對話時，KK 的內心旁白——',
       choices: [
-        { id: 'choice_procedure', label: '「表格就是權力。能改表的人，不一定在現場，但一定在流程上游。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
-        { id: 'choice_evidence', label: '「我不信『想不起來』。我信用詞：像背 SOP 的人，習慣用制度當聲音。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
-        { id: 'choice_human', label: '「他不是不知道，他是怕自己成為下一個被留下的人。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
+        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
       ],
     },
     // === 敏感問題二：口頭指示（誰跟他說過、像背 SOP）===
@@ -864,17 +789,8 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_xiaozhang_oral_2',
       npcId: 'npc_xiaozhang',
       text: 'KK：「你確定表格原本就那樣？」\n\n小張：「表不是自己長字啊。誰改的，不會跟我講嘛。」\n\nKK：「所以你不問。」\n\n小張：「問了又能怎樣？表就是表。我就管放片啊。」\n\nKK（旁白）：允許，才是這城市最重的鎖。',
-      choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
-      next: 'node_xiaozhang_oral_insight',
-    },
-    'node_xiaozhang_oral_insight': {
-      id: 'node_xiaozhang_oral_insight',
-      npcId: 'npc_xiaozhang',
-      text: '離開對話時，KK 的內心旁白——',
       choices: [
-        { id: 'choice_procedure', label: '「表格就是權力。能改表的人，不一定在現場，但一定在流程上游。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
-        { id: 'choice_evidence', label: '「我不信『想不起來』。我信用詞：像背 SOP 的人，習慣用制度當聲音。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
-        { id: 'choice_human', label: '「他不是不知道，他是怕自己成為下一個被留下的人。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
+        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
       ],
     },
   },
@@ -892,20 +808,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_zhou_clean_2',
       npcId: 'npc_zhou_jie',
       text: 'KK：「燈晚亮，你怎麼知道？」\n\n周姊（敲手錶）：「那天就是等得特別久啦……久到有點毛喔。才亮嘛。」\n\nKK（旁白）：體感的時間，比任何表格都殘酷。',
-      choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
-      next: 'node_zhou_clean_insight',
-    },
-    'node_zhou_clean_insight': {
-      id: 'node_zhou_clean_insight',
-      npcId: 'npc_zhou_jie',
-      text: '離開對話時，KK 的內心旁白——',
       choices: [
-        { id: 'choice_procedure', label: '「清潔是流程的最後一段。兇手懂流程，就會把痕跡丟給清潔。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
-        { id: 'choice_evidence', label: '「碎片是最誠實的證人。它不記得誰做的，但它記得『怎麼做的』。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
-        { id: 'choice_human', label: '「她不是迷信，她是看過太多人假裝正常。她在說：別急著收工。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
+        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
       ],
     },
-    // === 敏感問題二：你找到什麼／燈晚亮（黑色碎片三選一 → 燈晚亮 → 內心旁白）===
+    // === 敏感問題二：你找到什麼／燈晚亮（黑色碎片三選一 → 燈晚亮）===
     // 若玩家已從洗手台取得碎片（black_fragment_found），改由此節點進入，避免重複給碎片
     'node_zhou_fragment_1_already_have': {
       id: 'node_zhou_fragment_1_already_have',
@@ -929,17 +836,8 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_zhou_fragment_2',
       npcId: 'npc_zhou_jie',
       text: 'KK：「燈晚亮，你怎麼知道？」\n\n周姊（敲手錶）：「那天就是等得特別久啦……久到有點毛喔。才亮嘛。」\n\nKK（旁白）：體感的時間，比任何表格都殘酷。',
-      choices: [{ id: 'choice_next', label: '繼續', description: '內心旁白' }],
-      next: 'node_zhou_fragment_insight',
-    },
-    'node_zhou_fragment_insight': {
-      id: 'node_zhou_fragment_insight',
-      npcId: 'npc_zhou_jie',
-      text: '離開對話時，KK 的內心旁白——',
       choices: [
-        { id: 'choice_procedure', label: '「清潔是流程的最後一段。兇手懂流程，就會把痕跡丟給清潔。」', insightEffects: [{ target: 'procedure_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
-        { id: 'choice_evidence', label: '「碎片是最誠實的證人。它不記得誰做的，但它記得『怎麼做的』。」', insightEffects: [{ target: 'evidence_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
-        { id: 'choice_human', label: '「她不是迷信，她是看過太多人假裝正常。她在說：別急著收工。」', insightEffects: [{ target: 'human_insight', delta: 1 }], effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
+        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
       ],
     },
   },

@@ -42,7 +42,7 @@
 5. **NPC 敏感話題**：與林瑞堂、阿順、小張、周姊各完成敏感對話（至少 3 人完成後觸發劉隊中段對話；`flowController` 以 `ch1CoreSensitivesDone` 與 `ch1_liu_mid_shown` 判斷）。
 6. **燈延遲線索**：`clue_light_delay_confirmed` 由 gameEngine 在周姊（周雅雯）相關對話結束時設定，用於解鎖「兇手手法」輸入謎題。
 7. **向劉隊報告**：點劉隊選「我想向你報告」→ 開啟報告編輯器（證據桌／時間線／態度宣言）；條件由 `flowController.shouldAllowAction(st, 'ch1', 'show_liu_report_entry')` 控制，需 `ch1_liu_mid_shown` 且 3 人敏感完成、且尚未 `ch1_reasoning_done`。
-8. **報告完成後**：態度宣言等結算後，可進入內心獨白、推理句與第二章解鎖等後續流程。
+8. **報告完成後**：態度宣言等結算後，可進入推理句與第二章解鎖等後續流程。
 
 ---
 

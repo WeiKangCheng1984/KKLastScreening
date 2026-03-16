@@ -107,7 +107,7 @@ export default function ItemObtainedNotification({
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="text-xs text-orange-400/70 mb-1 font-medium uppercase tracking-wider">
+                    <div className="text-xs text-orange-300 mb-1 font-medium uppercase tracking-wider">
                       獲得
                     </div>
                     <div className="text-lg md:text-xl font-semibold text-orange-400">
@@ -134,7 +134,7 @@ export default function ItemObtainedNotification({
                   </div>
                 )}
                 {dismissOnTap && (
-                  <div className="mt-3 text-xs text-orange-400/60">
+                  <div className="mt-3 text-xs text-orange-300">
                     點擊關閉
                   </div>
                 )}

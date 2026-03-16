@@ -40,10 +40,10 @@ export default function Inventory({ itemIds, items, onItemClick, currentSceneId 
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="w-16 h-16 rounded-full bg-dark-card border-2 border-dashed border-dark-border flex items-center justify-center mb-4">
-          <Package size={24} className="text-gray-600" />
+          <Package size={24} className="text-gray-400" />
         </div>
-        <p className="text-sm text-gray-500">背包是空的</p>
-        <p className="text-xs text-gray-600 mt-1">探索場景收集道具</p>
+        <p className="text-sm text-gray-300">背包是空的</p>
+        <p className="text-xs text-gray-400 mt-1">探索場景收集道具</p>
       </div>
     );
   }
@@ -57,7 +57,7 @@ export default function Inventory({ itemIds, items, onItemClick, currentSceneId 
         </div>
         <div>
           <div className="text-sm font-semibold text-gray-200">背包</div>
-          <div className="text-xs text-gray-500">{itemIds.length} 個道具</div>
+          <div className="text-xs text-gray-400">{itemIds.length} 個道具</div>
         </div>
       </div>
 
@@ -97,7 +97,7 @@ export default function Inventory({ itemIds, items, onItemClick, currentSceneId 
                     className="w-full h-full"
                   />
                 ) : (
-                  <Sparkles size={20} className={`transition-colors ${isNew ? 'text-orange-400' : 'text-gray-500'} ${item.usable ? 'group-hover:text-orange-400' : 'group-hover:text-gray-400'}`} />
+                  <Sparkles size={20} className={`transition-colors ${isNew ? 'text-orange-400' : 'text-gray-400'} ${item.usable ? 'group-hover:text-orange-400' : 'group-hover:text-gray-300'}`} />
                 )}
                 {item.usable && (
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full border-2 border-dark-bg flex items-center justify-center z-10">
@@ -118,7 +118,7 @@ export default function Inventory({ itemIds, items, onItemClick, currentSceneId 
                   </div>
                 )}
                 {item.collectible === false && (
-                  <div className="text-xs text-gray-500 mt-1">不可收集</div>
+                  <div className="text-xs text-gray-400 mt-1">不可收集</div>
                 )}
               </div>
             </button>

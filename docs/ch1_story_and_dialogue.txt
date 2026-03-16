@@ -244,11 +244,7 @@
   KK：「被毀掉的不是影城，是那個人。」
   林瑞堂沉默。
 
-  [繼續 → 內心旁白選擇]
-  離開對話時，KK 的內心旁白（三選一，影響 insights）——
-  • 「他不是在說謊，他是在把事情塞回流程裡，讓流程替人背鍋。」（procedure_insight +1）
-  • 「他怕的應該不是兇手，是上面那張看不見的臉，可是這些恐懼會替兇手擦地板。」（human_insight +1）
-  • 「官腔很滑，油槍滑掉，但官腔擋不住痕跡。」（evidence_insight +1）
+  [結束]
 
 【敏感二：他怕誰】（node_lin_fear_1 → node_lin_fear_2 → node_lin_fear_insight）
 

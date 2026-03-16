@@ -83,7 +83,7 @@ export default function AudioControl() {
               <div className="flex items-center gap-2 mb-2">
                 <Volume2 size={16} className="text-gray-400" />
                 <span className="text-xs text-gray-400">總音量</span>
-                <span className="text-xs text-gray-500 ml-auto">{Math.round(volumes.masterVolume * 100)}%</span>
+                <span className="text-xs text-gray-400 ml-auto">{Math.round(volumes.masterVolume * 100)}%</span>
               </div>
               <input
                 type="range"
@@ -100,7 +100,7 @@ export default function AudioControl() {
               <div className="flex items-center gap-2 mb-2">
                 <Headphones size={16} className="text-gray-400" />
                 <span className="text-xs text-gray-400">音效</span>
-                <span className="text-xs text-gray-500 ml-auto">{Math.round(volumes.sfxVolume * 100)}%</span>
+                <span className="text-xs text-gray-400 ml-auto">{Math.round(volumes.sfxVolume * 100)}%</span>
               </div>
               <input
                 type="range"
@@ -117,7 +117,7 @@ export default function AudioControl() {
               <div className="flex items-center gap-2 mb-2">
                 <Music size={16} className="text-gray-400" />
                 <span className="text-xs text-gray-400">環境音</span>
-                <span className="text-xs text-gray-500 ml-auto">{Math.round(volumes.ambientVolume * 100)}%</span>
+                <span className="text-xs text-gray-400 ml-auto">{Math.round(volumes.ambientVolume * 100)}%</span>
               </div>
               <input
                 type="range"

@@ -151,25 +151,25 @@
 
 ### 7.1 目標
 
-play 頁與章節相關元件盡量不直接 import 多個零散 data 檔（如 ch1ReportConfig、ch1Monologue、reasoningByChapter 等），改由「依 chapterId 取得本章設定」的單一入口取得，降低維護成本與重複依賴。
+play 頁與章節相關元件盡量不直接 import 多個零散 data 檔（如 ch1ReportConfig、reasoningByChapter 等），改由「依 chapterId 取得本章設定」的單一入口取得，降低維護成本與重複依賴。
 
 ### 7.2 步驟
 
 | 步驟 | 內容 | 備註 |
 |------|------|------|
-| 5.1 | **擴充** `getChapterData(chapterId)` 或 **新增** `getChapterConfig(chapterId)`。回傳型別增加（可選）欄位：如 `reportConfig`、`monologue`、`reasoning`（劉隊 intro/outro 等）。若某章沒有則為 undefined。各 `gameDataChX` 或獨立的 config 檔 export 該章設定，由 getChapterData / getChapterConfig 組裝後回傳。 | 可先做 ch1、ch2，ch3+ 之後再補。 |
-| 5.2 | 將 page 與章節相關元件（如 Ch1ReportEditor、內心獨白 overlay）改為從 `getChapterData` 或 `getChapterConfig` 取得所需設定，移除對 `ch1ReportConfig`、`ch1Monologue`、`reasoningByChapter` 等的直接 import（或僅保留一處由 getChapterConfig re-export）。 | 需確認 Ch1ReportEditor、reasoningByChapter 的消費方式，避免循環依賴。 |
-| 5.3 | 執行 `npm run build`。確認 ch1 報告編輯器、內心獨白、ch2 劉隊文案與流程仍正常。 | 重點：報告四步驟、劉隊開場／中段／結算文案不變。 |
+| 5.1 | **擴充** `getChapterData(chapterId)` 或 **新增** `getChapterConfig(chapterId)`。回傳型別增加（可選）欄位：如 `reportConfig`、`reasoning`（劉隊 intro/outro 等）。若某章沒有則為 undefined。各 `gameDataChX` 或獨立的 config 檔 export 該章設定，由 getChapterData / getChapterConfig 組裝後回傳。 | 可先做 ch1、ch2，ch3+ 之後再補。 |
+| 5.2 | 將 page 與章節相關元件（如 Ch1ReportEditor）改為從 `getChapterData` 或 `getChapterConfig` 取得所需設定，移除對 `ch1ReportConfig`、`reasoningByChapter` 等的直接 import（或僅保留一處由 getChapterConfig re-export）。 | 需確認 Ch1ReportEditor、reasoningByChapter 的消費方式，避免循環依賴。 |
+| 5.3 | 執行 `npm run build`。確認 ch1 報告編輯器、ch2 劉隊文案與流程仍正常。 | 重點：報告四步驟、劉隊開場／中段／結算文案不變。 |
 
 ### 7.3 產出與驗收
 
 - **產出**：章節設定經由 getChapterData 或 getChapterConfig 統一提供；page 與相關元件減少對零散 data 檔的直接依賴。
-- **驗收**：build 通過；ch1 報告、內心獨白、ch2 劉隊相關流程與文案正常，無 regression。
+- **驗收**：build 通過；ch1 報告、ch2 劉隊相關流程與文案正常，無 regression。
 
 ### 7.4 涉及檔案
 
 - 修改：`data/getChapterData.ts`（或新增 `data/getChapterConfig.ts`）、`app/play/[chapterId]/[sceneId]/page.tsx`、必要時 `components/Ch1ReportEditor.tsx` 等
-- 可能調整：`data/ch1ReportConfig.ts`、`data/ch1Monologue.ts`、`data/reasoningByChapter.ts` 的 export 與被引用處
+- 可能調整：`data/ch1ReportConfig.ts`、`data/reasoningByChapter.ts` 的 export 與被引用處
 
 ---
 

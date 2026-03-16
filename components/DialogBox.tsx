@@ -172,7 +172,7 @@ export default function DialogBox({
       case 'choice':
         return { container: `${baseContainer} border-l-4 border-l-blue-500`, icon: 'text-blue-400', pulse: '' };
       case 'character':
-        return { container: `${baseContainer} border-l-4 border-l-orange-400/80`, icon: 'text-orange-400/90', pulse: '' };
+        return { container: `${baseContainer} border-l-4 border-l-orange-400`, icon: 'text-orange-400', pulse: '' };
       default:
         return { container: `${baseContainer} border-l-4 border-l-slate-400`, icon: 'text-slate-300', pulse: '' };
     }
@@ -248,7 +248,7 @@ export default function DialogBox({
         </div>
 
         {dialog.title && (
-          <div className={`text-ui-caption text-white/70 flex-shrink-0 ${isEmbedded ? 'mb-0.5 md:mb-1 text-[0.65em]' : 'mb-2'}`}>
+          <div className={`text-ui-caption text-gray-300 flex-shrink-0 ${isEmbedded ? 'mb-0.5 md:mb-1 text-[0.65em]' : 'mb-2'}`}>
             {dialog.title}
           </div>
         )}
