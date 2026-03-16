@@ -152,47 +152,29 @@ export default function DialogBox({
 
   // 移除自動關閉功能 - 所有訊息都需要手動關閉
 
+  /* 建議三：統一暗色底 + 左側色條區分類型，減少與場景視覺衝突 */
   const getTypeStyles = () => {
-    // NPC 模式使用特殊樣式
+    const baseContainer = 'bg-gradient-to-br from-slate-950/98 via-slate-900/95 to-slate-950/98 border border-slate-700/50 text-gray-100';
     if (mode === 'npc') {
       return {
-        container: 'bg-gradient-to-br from-indigo-950/95 via-purple-950/90 to-indigo-950/95 border-indigo-700/50 text-indigo-100',
+        container: `${baseContainer} border-l-4 border-l-indigo-500`,
         icon: 'text-indigo-400',
         pulse: ''
       };
     }
-    
     switch (dialog.type) {
       case 'broadcast':
-        return {
-          container: 'bg-gradient-to-br from-red-950/90 via-orange-950/80 to-red-950/90 border-red-700/60 text-orange-100',
-          icon: 'text-orange-400',
-          pulse: 'animate-pulse'
-        };
+        return { container: `${baseContainer} border-l-4 border-l-red-500`, icon: 'text-red-400', pulse: 'animate-pulse' };
       case 'item':
-        return {
-          container: 'bg-gradient-to-br from-orange-950/90 via-amber-950/80 to-orange-950/90 border-orange-700/60 text-orange-100',
-          icon: 'text-amber-400',
-          pulse: ''
-        };
+        return { container: `${baseContainer} border-l-4 border-l-orange-500`, icon: 'text-orange-400', pulse: '' };
       case 'system':
-        return {
-          container: 'bg-gradient-to-br from-amber-950/90 via-orange-950/80 to-amber-950/90 border-amber-700/60 text-amber-100',
-          icon: 'text-amber-400',
-          pulse: ''
-        };
+        return { container: `${baseContainer} border-l-4 border-l-amber-500`, icon: 'text-amber-400', pulse: '' };
       case 'choice':
-        return {
-          container: 'bg-gradient-to-br from-blue-950/90 via-indigo-950/80 to-blue-950/90 border-blue-700/60 text-blue-100',
-          icon: 'text-blue-400',
-          pulse: ''
-        };
+        return { container: `${baseContainer} border-l-4 border-l-blue-500`, icon: 'text-blue-400', pulse: '' };
+      case 'character':
+        return { container: `${baseContainer} border-l-4 border-l-orange-400/80`, icon: 'text-orange-400/90', pulse: '' };
       default:
-        return {
-          container: 'bg-gradient-to-br from-gray-950/95 via-gray-900/90 to-gray-950/95 border-orange-700/30 text-gray-100',
-          icon: 'text-orange-400/70',
-          pulse: ''
-        };
+        return { container: `${baseContainer} border-l-4 border-l-slate-400`, icon: 'text-slate-300', pulse: '' };
     }
   };
 
@@ -218,7 +200,7 @@ export default function DialogBox({
           ? 'bg-gradient-to-br from-gray-950/50 via-gray-900/50 to-gray-950/50 border-orange-700/30 text-gray-100 w-full h-full min-h-0 max-w-full max-h-full rounded-tl-xl rounded-br-none p-2 md:p-4'
           : `${styles.container} w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4`
       } ${
-        isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'
+        isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-4 opacity-0 scale-95'
       }`}
       >
         {/* 標題欄 - 嵌在場景時縮小；手機 0.6em + 更小 padding/gap */}
@@ -349,9 +331,9 @@ export default function DialogBox({
             </div>
           )}
 
-          {/* 對話文字內容 - 嵌在場景時手機 0.82em、桌面 0.9em */}
+          {/* 對話文字內容 - 建議一：手機 text-base 避免溢出，桌面 text-lg；max-h 預留安全區 */}
           <div className={`flex-1 leading-relaxed min-h-[3rem] whitespace-pre-line overflow-y-auto ${
-            isEmbedded ? 'min-h-0 max-h-none text-[0.82em] md:text-[0.9em]' : 'text-lg sm:text-base max-h-[50vh] sm:max-h-none'
+            isEmbedded ? 'min-h-0 max-h-none text-[0.82em] md:text-[0.9em]' : 'text-base md:text-lg max-h-[min(50vh,calc(100vh-8rem-env(safe-area-inset-bottom)))] md:max-h-none'
           } ${dialog.svgImage && (dialog.svgPosition === 'top' || dialog.svgPosition === 'bottom') ? 'order-2' : ''}`}>
           {displayText.split('').map((char, index) => {
             // 高亮顯示當前字符（打字機效果增強）

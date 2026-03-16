@@ -3703,6 +3703,16 @@ export default function PlayPage() {
               variant="inline"
               npcs={scene.npcs}
               activeNpcId={state?.activeNpcDialogId ?? undefined}
+              hideWhenOverlay={!!(
+                currentDialog ||
+                zoomOverlay?.active ||
+                currentPuzzle ||
+                activeItemDetail ||
+                showCh1ReportEditor ||
+                showCh2SentenceCompletion ||
+                sensitiveGate ||
+                showCh1MonologueOverlay
+              )}
               onNpcClick={(npcId) => {
                 if (!engineRef.current) return;
                 const engine = engineRef.current;

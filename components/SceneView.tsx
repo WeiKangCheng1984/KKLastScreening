@@ -209,7 +209,9 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
   }, [clickedHotspot]);
 
   const getHotspotStyle = (hotspot: Hotspot): React.CSSProperties => {
-    // 圓形：coords = [圓心x, 圓心y, 半徑] 比例 0～1，與 rect 同用響應式尺寸
+    // transform 使用 inline style（最高優先權），避免被 gpu-accelerated class 的 transform: translateZ(0) 覆蓋。
+    // scale(var(--hotspot-scale)) 由 globals.css 的 CSS 變數控制：手機 0.82x、桌面 1x。
+    const baseTransform = 'translate(-50%, -50%) scale(var(--hotspot-scale)) translateZ(0)';
     if (hotspot.shape === 'circle' && hotspot.coords.length >= 3) {
       const [cx, cy, r] = hotspot.coords;
       const sizeFactor = 0.6 + (r * 2) * 0.8;
@@ -221,7 +223,7 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
         width: responsiveSize,
         height: responsiveSize,
         borderRadius: '50%',
-        transform: 'translate(-50%, -50%)',
+        transform: baseTransform,
       };
     }
     if (hotspot.shape === 'rect' && hotspot.coords.length >= 4) {
@@ -237,7 +239,7 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
         width: responsiveSize,
         height: responsiveSize,
         borderRadius: '50%',
-        transform: 'translate(-50%, -50%)',
+        transform: baseTransform,
       };
     }
     return {};

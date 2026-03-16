@@ -395,13 +395,24 @@
     will-change: transform, opacity, filter, clip-path;
   }
 
-  /* 移動端性能降級 */
+  /* hotspot 縮放：手機 0.77x、桌面 0.8x（inline style 的 scale(var(--hotspot-scale))） */
+  :root {
+    --hotspot-scale: 0.77;
+  }
+  @media (min-width: 768px) {
+    :root {
+      --hotspot-scale: 0.8;
+    }
+  }
+
+  /* 移動端：基準字級降回 16px，避免對話框文字溢出與被安全區遮擋 */
   @media (max-width: 768px) {
+    html {
+      font-size: 16px;
+    }
     .transition-effect {
       will-change: auto;
     }
-    
-    /* 減少複雜動畫 */
     .animate-optimized {
       transform: none;
       backface-visibility: visible;

@@ -31,6 +31,8 @@ interface NpcRightStripProps {
   activeNpcId?: string | null;
   /** 納入版面流（方案 A）；未指定則為 fixed + Portal */
   variant?: 'fixed' | 'inline';
+  /** 建議五：對話/overlay 開啟時淡出頭像條，避免與選單、對話框重疊 */
+  hideWhenOverlay?: boolean;
 }
 
 export default function NpcRightStrip({
@@ -39,6 +41,7 @@ export default function NpcRightStrip({
   checkAvailability,
   activeNpcId,
   variant = 'fixed',
+  hideWhenOverlay = false,
 }: NpcRightStripProps) {
   const [hoveredNpc, setHoveredNpc] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -91,10 +94,10 @@ export default function NpcRightStrip({
             title={npc.name}
           >
             <div
-              className={`relative w-[3.04rem] h-[3.04rem] md:w-[3.61rem] md:h-[3.61rem] rounded-full overflow-hidden bg-white/10 border-2 transition-colors flex-shrink-0 ${
+              className={`relative w-[2.4rem] h-[2.4rem] md:w-[3.61rem] md:h-[3.61rem] rounded-full overflow-hidden bg-white/10 border-2 transition-colors flex-shrink-0 ${
                 npc.id === activeNpcId
                   ? 'border-orange-400 ring-2 ring-orange-400/60 ring-offset-2 ring-offset-black/60'
-                  : 'border-white/30 group-hover:border-white/50'
+                  : 'border-orange-700/40 group-hover:border-orange-500/60'
               }`}
             >
               {getNpcAvatarSrc(npc) ? (
@@ -192,7 +195,7 @@ export default function NpcRightStrip({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -10, opacity: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className={wrapperClass}
+        className={`${wrapperClass} transition-opacity duration-300 ${hideWhenOverlay ? 'opacity-0 pointer-events-none' : ''}`}
       >
         {stripWithArrows}
       </m.div>
@@ -205,7 +208,9 @@ export default function NpcRightStrip({
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -10, opacity: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="fixed left-1/2 -translate-x-1/2 top-16 z-30 flex flex-row gap-2 pointer-events-none"
+      className={`fixed left-1/2 -translate-x-1/2 top-[5.5rem] md:top-16 z-30 flex flex-row gap-2 pointer-events-none transition-opacity duration-300 ${
+        hideWhenOverlay ? 'opacity-0 pointer-events-none' : ''
+      }`}
     >
       {stripWithArrows}
     </m.div>
