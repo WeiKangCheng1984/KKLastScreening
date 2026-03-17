@@ -126,20 +126,7 @@ const scenes: Record<string, Scene> = {
       { id: 'fun_carpet_stain', name: '地毯污漬', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_carpet_stain' }], effects: [{ type: 'showDialog', dialog: { text: '你蹲下來聞了聞。……你立刻站起來，並決定這一段不會出現在任何正式紀錄裡。可樂。一定是可樂。', type: 'narrator' } }], oneTime: false },
       { id: 'fun_popcorn_bucket', name: '空爆米花桶', description: '無意義互動', requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_fun_popcorn_bucket' }], effects: [{ type: 'showDialog', dialog: { text: '你盯著空桶看了很久。如果兇手當時正在吃爆米花，他會選鹹的還是甜的？……你揉了揉太陽穴。該休息了。', type: 'narrator' } }], oneTime: false },
     ],
-    puzzles: [
-      // 第一章章末：推理題（字詞排列，完成設 ch1_reasoning_done）
-      {
-        id: 'ch1_reasoning_3',
-        type: 'arrangement',
-        solution: ['手套', '碎片', '留在', '洗手台', '下方'],
-        hint: '請將打亂的字詞排成一句與案情有關的完整句子。',
-        requirements: [],
-        config: { distractors: ['可能', '似乎', '廁所', '鏡子', '垃圾桶'] },
-        onSolve: [
-          { type: 'setFlag', flag: 'ch1_reasoning_done', value: true },
-        ],
-      },
-    ],
+    puzzles: [],
     initialDialog: {
       text: '散場後，人群聲很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可那個人死得太安靜。\n\n現場封著。品牌、技術都通知了。看到什麼照實說。',
       type: 'narrator',

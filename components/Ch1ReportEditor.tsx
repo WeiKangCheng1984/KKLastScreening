@@ -466,6 +466,7 @@ export default function Ch1ReportEditor({
     <>
       {step === 3 && useAttitudeFillBlanks && attitudeFillBlankIndex < 5 && attitudeFillBlanks && (
         <ReportFillBlank
+          key={`att-q-${attitudeFillBlankIndex}`}
           config={attitudeFillBlanks[attitudeFillBlankIndex]}
           onComplete={() => setAttitudeFillBlankIndex((i) => i + 1)}
         />
