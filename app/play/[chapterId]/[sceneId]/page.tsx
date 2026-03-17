@@ -11,7 +11,6 @@ import SceneView, { SceneViewRef } from '@/components/SceneView';
 import BottomDock, { DOCK_NARROW_LEFT_RATIO, DOCK_NARROW_WIDTH } from '@/components/BottomDock';
 import DialogBox from '@/components/DialogBox';
 import CharacterConversation from '@/components/CharacterConversation';
-import { characterConversations } from '@/data/characterConversations';
 import Inventory from '@/components/Inventory';
 import SceneNameDisplay from '@/components/SceneNameDisplay';
 import ItemObtainedNotification from '@/components/ItemObtainedNotification';
@@ -39,7 +38,6 @@ import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { m, AnimatePresence } from 'framer-motion';
 import SensitiveGateOverlay from '@/components/SensitiveGateOverlay';
 import { flagTestGroups, ch1ReportCoreFlagIds, npcTestByChapter, sensitiveChoiceGroups, flagToItemIds } from '@/data/flagTestConfig';
-import { CH1_ITEM_ID_TO_DISCOVER_FLAG } from '@/data/ch1ReportConfig';
 // ch2QuestionConfigs / npcDialogs 透過 useChapterData 動態載入，不在此靜態 import
 import { useChapterData } from '@/hooks/useChapterData';
 import { useDialogQueue } from '@/hooks/useDialogQueue';
@@ -553,24 +551,7 @@ export default function PlayPage() {
           conversationId = 'person_conversation';
         }
         
-        // 如果找到對應的對話鏈，使用新系統
-        if (conversationId && characterConversations[conversationId]) {
-          const conversation = characterConversations[conversationId];
-          
-          // 檢查是否已經完成過
-          if (conversation.onComplete?.setFlag) {
-            const flag = conversation.onComplete.setFlag;
-            if (engine.hasFlag(flag)) {
-              return true;
-            }
-          }
-          
-          // 顯示角色對話
-          setCurrentConversation(conversation);
-          setCurrentConversationTurn(conversation.turns[0] ?? null);
-          setRefreshKey(prev => prev + 1);
-          return true;
-        }
+        // 若未配置多輪角色對話資料，暫時不啟動角色對話系統
       }
       
       // 處理對話顯示
@@ -2792,25 +2773,7 @@ export default function PlayPage() {
               conversationId = 'person_conversation';
             }
             
-            // 如果找到對應的對話鏈，使用新系統
-            if (conversationId && characterConversations[conversationId]) {
-              const conversation = characterConversations[conversationId];
-              
-              // 檢查是否已經完成過（如果需要的話）
-              if (conversation.onComplete?.setFlag) {
-                const flag = conversation.onComplete.setFlag;
-                if (engine.hasFlag(flag)) {
-                  // 已經完成過，不重複觸發
-                  return;
-                }
-              }
-              
-              // 顯示角色對話
-              setCurrentConversation(conversation);
-              setCurrentConversationTurn(conversation.turns[0] ?? null);
-              setRefreshKey(prev => prev + 1);
-              return; // 已處理
-            }
+            // 若未配置多輪角色對話資料，暫時不啟動角色對話系統
           } else {
             // 非角色對話：正常觸發單個事件
             const result = engine.triggerEvent(eventId);
@@ -4341,7 +4304,7 @@ export default function PlayPage() {
 
         {/* 第一章報告編輯器：透過 ChapterConclusionOverlay 呈現，完成後導向 ch2 intro */}
         <AnimatePresence>
-          {showCh1ReportEditor && engineRef.current && chapterConfig.ch1ReportConfig && (
+          {showCh1ReportEditor && engineRef.current && (
             <ChapterConclusionOverlay>
               <Ch1ReportEditor
                 engine={{
@@ -4350,7 +4313,6 @@ export default function PlayPage() {
                   handleDialogChoice: (c) => engineRef.current!.handleDialogChoice(c),
                   setReasoningComplete: (ch) => engineRef.current!.setReasoningComplete(ch),
                 }}
-                config={chapterConfig.ch1ReportConfig}
                 onComplete={() => {
                   setShowCh1ReportEditor(false);
                   setRefreshKey((k) => k + 1);
@@ -4467,8 +4429,8 @@ export default function PlayPage() {
                               const engine = engineRef.current;
                               const ch1Scenes = getCurrentChapterScenes('ch1');
                               ch1ReportCoreFlagIds.forEach((f) => engine.applyEffect({ type: 'setFlag', flag: f, value: true }));
-                              Object.values(CH1_ITEM_ID_TO_DISCOVER_FLAG).forEach((flag) =>
-                                engine.applyEffect({ type: 'setFlag', flag, value: true })
+                              ['schedule_modified_found', 'clue_manual_light_control', 'projector_notes_found', 'clue_clean_trash'].forEach(
+                                (flag) => engine.applyEffect({ type: 'setFlag', flag, value: true })
                               );
                               engine.applyEffect({ type: 'markScenesVisited', sceneIds: ch1Scenes });
                               ['item_ticket_stub', 'item_black_plastic_fragment'].forEach((id) =>

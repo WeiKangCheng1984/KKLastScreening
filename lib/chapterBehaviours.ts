@@ -68,7 +68,7 @@ export function getNpcClickBehaviour(chapterId: string, ctx: NpcContext): NpcBeh
     }
 
     if (npcId === 'npc_xiaozhang') {
-      const observed = !!flags.projection_room_observed && !!flags.projection_room_unlocked;
+      const observed = !!flags.projection_room_observed;
       const sensitiveDone = !!flags.npc_xiaozhang_sensitive_done;
       if (sensitiveDone) {
         return { type: 'random_dialog' };

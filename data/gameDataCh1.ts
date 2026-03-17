@@ -90,7 +90,6 @@ const scenes: Record<string, Scene> = {
           },
           { type: 'setFlag', flag: 'observed_victim_seat', value: true },
           { type: 'setFlag', flag: 'observed_any_ch1', value: true },
-          { type: 'setFlag', flag: 'projection_room_unlocked', value: true },
         ],
         oneTime: true,
       },

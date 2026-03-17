@@ -97,6 +97,8 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
 
   // 流程步驟
   const [step, setStep] = useState<FillStep>('blank1_idle');
+  /** 特定錯誤選項觸發的專屬回饋（若存在則覆蓋 wrongFallback） */
+  const [customWrongReply, setCustomWrongReply] = useState<string | null>(null);
 
   // 打散動畫控制
   const [shuffling1, setShuffling1] = useState(false);
@@ -113,29 +115,18 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
   }, [step]);
 
   const handleB1Confirm = useCallback(() => {
+    // 第一格僅鎖定字詞，不立即判定正確與否；等第二格也填完再一起判斷
     if (!b1Selected) return;
     const opt = blank1.options.find((o) => o.id === b1Selected);
-    const correct = blank1.correctIds.includes(b1Selected);
-    setB1Filled(opt?.fullText ?? b1Selected);
-    setB1Correct(correct);
-
-    if (correct) {
-      setStep('blank1_reply');
-    } else {
-      setStep('wrong_reply');
-    }
+    const fill = opt?.fullText ?? b1Selected;
+    setB1Filled(fill);
+    // 先記下是否屬於正解集合，供之後整題一起評估
+    setB1Correct(blank1.correctIds.includes(b1Selected));
+    // 第一格確認後清空上一輪的錯誤回饋，避免殘留
+    setCustomWrongReply(null);
+    // 進入第二格填寫階段
+    setStep('blank2_idle');
   }, [b1Selected, blank1]);
-
-  const handleAfterB1Reply = useCallback(() => {
-    if (b1Correct) {
-      setStep('blank2_idle');
-    } else {
-      // 填錯：重置 B1 繼續嘗試
-      setB1Selected(null);
-      setB1Filled(null);
-      setStep('blank1_idle');
-    }
-  }, [b1Correct]);
 
   // ── 空格2操作 ───────────────────────────────────────────────────
 
@@ -146,27 +137,43 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
   }, [step]);
 
   const handleB2Confirm = useCallback(() => {
+    // 第二格鎖定後，與第一格一起判定本題是否通過
     if (!b2Selected) return;
     const opt = blank2.options.find((o) => o.id === b2Selected);
-    const correct = blank2.correctIds.includes(b2Selected);
-    setB2Filled(opt?.fullText ?? b2Selected);
-    setB2Correct(correct);
+    const fill = opt?.fullText ?? b2Selected;
+    const thisCorrect = blank2.correctIds.includes(b2Selected);
+    setB2Filled(fill);
+    setB2Correct(thisCorrect);
 
-    if (correct && b1Correct) {
+    const bothCorrect = thisCorrect && b1Correct;
+    if (bothCorrect) {
+      setCustomWrongReply(null);
       setStep('both_correct_reply');
     } else {
+      // 任一格錯誤：先看第二格是否有專屬回饋，否則回頭看第一格，最後用共用 wrongFallback
+      const specific =
+        (blank2.wrongRepliesByChoiceId && blank2.wrongRepliesByChoiceId[b2Selected]) ||
+        (b1Selected && blank1.wrongRepliesByChoiceId && blank1.wrongRepliesByChoiceId[b1Selected]) ||
+        null;
+      setCustomWrongReply(specific);
       setStep('wrong_reply');
     }
-  }, [b2Selected, blank2, b1Correct]);
+  }, [b2Selected, blank2, b1Correct, b1Selected, blank1]);
 
-  const handleAfterB2Reply = useCallback(() => {
-    if (b2Correct && b1Correct) {
+  const handleAfterWholeReply = useCallback(() => {
+    // 兩格一起判定後的後續行為
+    if (b1Correct && b2Correct) {
       setStep('done');
     } else {
-      // 填錯：只重置 B2
+      // 任一格錯誤：整題重來，兩格都清空
+      setB1Selected(null);
+      setB1Filled(null);
       setB2Selected(null);
       setB2Filled(null);
-      setStep('blank2_idle');
+      setB1Correct(false);
+      setB2Correct(false);
+      setCustomWrongReply(null);
+      setStep('blank1_idle');
     }
   }, [b1Correct, b2Correct]);
 
@@ -286,12 +293,11 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
 
   const showB1Card  = step === 'blank1_idle' || step === 'blank1_pending';
   const showB2Card  = step === 'blank2_idle' || step === 'blank2_pending';
-  const showReply   = step === 'blank1_reply' || step === 'both_correct_reply' || step === 'wrong_reply' || step === 'done';
+  const showReply   = step === 'both_correct_reply' || step === 'wrong_reply' || step === 'done';
 
   const replyText = (() => {
-    if (step === 'blank1_reply')       return blank1.replyOnCorrect;
     if (step === 'both_correct_reply') return blank2.replyOnCorrect;
-    if (step === 'wrong_reply')        return wrongFallback;
+    if (step === 'wrong_reply')        return customWrongReply ?? wrongFallback;
     return '';
   })();
 
@@ -334,7 +340,13 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
             {progressDot(!!b2Filled, isB2Active)}
             {progressDot(step === 'done', false)}
             <span className="text-xs text-stone-600 ml-1">
-              {step === 'done' ? '完成' : isB1Active ? '填入第一個字詞' : isB2Active ? '填入第二個字詞' : '⋯⋯'}
+              {step === 'done'
+                ? '完成'
+                : isB1Active
+                  ? '先選第一個字詞'
+                  : isB2Active
+                    ? '再選第二個字詞'
+                    : '⋯⋯按送出一起判定'}
             </span>
           </div>
         </m.div>
@@ -388,19 +400,11 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
                   >
                     確認 <ChevronRight size={15} />
                   </button>
-                ) : step === 'blank1_reply' ? (
-                  <button
-                    type="button"
-                    onClick={handleAfterB1Reply}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-stone-700/50 hover:bg-stone-700/70 border border-stone-600/40 text-stone-300 text-sm transition-all"
-                  >
-                    繼續 <ChevronRight size={15} />
-                  </button>
                 ) : (
-                  // wrong_reply
+                  // wrong_reply：整題重來
                   <button
                     type="button"
-                    onClick={b1Correct ? handleAfterB2Reply : handleAfterB1Reply}
+                    onClick={handleAfterWholeReply}
                     className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-stone-700/50 hover:bg-stone-700/70 border border-stone-600/40 text-stone-400 text-sm transition-all"
                   >
                     再想想 <ChevronRight size={15} />

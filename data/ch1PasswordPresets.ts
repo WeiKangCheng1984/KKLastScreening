@@ -38,7 +38,7 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     password: '101758',
     stage: 2,
     label: '觀察完成',
-    flags: ['observed_victim_seat', 'observed_any_ch1', 'projection_room_unlocked'],
+    flags: ['observed_victim_seat', 'observed_any_ch1'],
     inventory: [],
     visitedScenes: [CH1_SCENES[0]],
     currentScene: CH1_SCENES[0],
@@ -47,7 +47,7 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     password: '101293',
     stage: 3,
     label: '取得票根',
-    flags: ['observed_victim_seat', 'observed_any_ch1', 'projection_room_unlocked', 'ticket_stub_collected'],
+    flags: ['observed_victim_seat', 'observed_any_ch1', 'ticket_stub_collected'],
     inventory: ['item_ticket_stub'],
     visitedScenes: [CH1_SCENES[0]],
     currentScene: CH1_SCENES[0],
@@ -59,7 +59,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -75,7 +74,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -93,7 +91,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -112,7 +109,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -134,7 +130,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -158,7 +153,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -184,7 +178,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -211,7 +204,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -239,7 +231,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -269,7 +260,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -301,7 +291,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -333,7 +322,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -365,7 +353,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -398,7 +385,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -432,7 +418,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',
@@ -467,7 +452,6 @@ export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
     flags: [
       'observed_victim_seat',
       'observed_any_ch1',
-      'projection_room_unlocked',
       'ticket_stub_collected',
       'projection_room_observed',
       'schedule_modified_found',

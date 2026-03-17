@@ -89,8 +89,19 @@ export default function CharacterConversation({
     }
   }, [currentIndex, currentTurn, onTurnChange]);
 
-  // 處理下一段對話
+  // 處理下一段對話（兩段式：先補完本句，再往下）
   const handleNext = useCallback(() => {
+    // 還在打字時：先補完本句，不前進
+    if (!isComplete && currentTurn) {
+      if (typewriterIntervalRef.current) {
+        clearInterval(typewriterIntervalRef.current);
+        typewriterIntervalRef.current = null;
+      }
+      setDisplayText(currentTurn.text);
+      setIsComplete(true);
+      return;
+    }
+
     setCurrentIndex(prev => {
       if (prev < conversation.length - 1) {
         return prev + 1;
@@ -102,7 +113,7 @@ export default function CharacterConversation({
         return prev;
       }
     });
-  }, [conversation.length, onComplete]);
+  }, [conversation.length, onComplete, isComplete, currentTurn]);
 
   // 處理選擇
   const handleChoice = (choice: DialogChoice) => {

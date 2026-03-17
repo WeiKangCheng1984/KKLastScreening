@@ -118,6 +118,20 @@ export default function DialogBox({
     isSingleChoiceNext ||
     (showContinue && mode !== 'npc' && !(dialog.choices?.length && isComplete && isLastSegment) && !(npcChoices?.length && isComplete && isLastSegment));
   const handleContentClick = () => {
+    // 還在打字機過程中：先補完本段，再由下一次點擊才推進
+    if (!isComplete) {
+      if (typewriterIntervalRef.current) {
+        clearInterval(typewriterIntervalRef.current);
+        typewriterIntervalRef.current = null;
+      }
+      setDisplayText(currentSegmentText);
+      setIsComplete(true);
+      setShowContinue(true);
+      return;
+    }
+
+    if (!canClickToContinue) return;
+
     if (showSegmentContinue) handleSegmentContinue();
     else if (isSingleChoiceNext && onChoiceSelect) {
       onChoiceSelect(dialog.choices![0]);

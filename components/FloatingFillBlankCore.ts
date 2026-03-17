@@ -35,6 +35,8 @@ export type TwoBlankFillConfig = {
     options: FloatingOption[];
     correctIds: string[];
     replyOnCorrect: string;
+    /** 特定錯誤選項的專屬回饋（優先於 wrongFallback） */
+    wrongRepliesByChoiceId?: Record<string, string>;
   };
 
   /** 空格二：同上結構 */
@@ -43,6 +45,8 @@ export type TwoBlankFillConfig = {
     options: FloatingOption[];
     correctIds: string[];
     replyOnCorrect: string;
+    /** 特定錯誤選項的專屬回饋（優先於 wrongFallback） */
+    wrongRepliesByChoiceId?: Record<string, string>;
   };
 
   /** 兩格都填對後：KK + 劉隊各一句 */

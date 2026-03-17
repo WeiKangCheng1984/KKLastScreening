@@ -20,7 +20,6 @@ export const flagTestGroups: FlagGroup[] = [
     flags: [
       { id: 'observed_victim_seat', label: '觀察過死者座位' },
       { id: 'observed_any_ch1', label: '任一 ch1 觀察' },
-      { id: 'projection_room_unlocked', label: '播映室已解鎖' },
       { id: 'ticket_stub_collected', label: '票根' },
       { id: 'clue_light_delay_confirmed', label: '燈延遲線索' },
       { id: 'security_monitor_viewed', label: '監視器' },
@@ -34,6 +33,10 @@ export const flagTestGroups: FlagGroup[] = [
       { id: 'observed_restroom_ch1', label: '廁所已觀察' },
       { id: 'clue_clean_trash', label: '清潔線索' },
       { id: 'clue_killer_calm', label: '兇手冷靜線索' },
+      { id: 'ch1_clue_1_unlocked', label: '解謎線索 1 已解' },
+      { id: 'ch1_clue_2_unlocked', label: '解謎線索 2 已解' },
+      { id: 'ch1_clue_3_unlocked', label: '解謎線索 3 已解' },
+      { id: 'ch1_last_unlocked_combo', label: '最後解出的組合序號' },
       { id: 'npc_lin_sensitive_done', label: '林瑞堂敏感對話' },
       { id: 'npc_ashun_sensitive_done', label: '阿順敏感對話' },
       { id: 'npc_xiaozhang_sensitive_done', label: '小張敏感對話' },
