@@ -2,545 +2,281 @@
 alwaysApply: true
 ---
 
-# 核心框架
+# KK 流程偵探（現況版）專案規則
 
-- **Next.js 14**（App Router）：章節／場景以路由呈現（`/play/[chapterId]/[sceneId]`）
-- **TypeScript 5**：型別鎖住內容結構（Scene / Hotspot / Event / Requirement / Effect / Dialog / ConversationTurn），避免劇情越改越崩
-- **Tailwind CSS 3**：沉浸式 UI（暗色、霧面、卡片、對話框）
-- **Lucide React**：線索牆、音量、返回、提示、X、ChevronRight、User 等輕量圖示
-- **Framer Motion**：動畫效果（淡入淡出、粒子、AnimatePresence）
-- **部署**：Vercel，靜態資產 + SSR/CSR 混用、快速迭代上線
+此文件是「現在程式碼實際運作」的準則，用來指引：資料怎麼放、UI 怎麼接、哪些地方不要再擴張，避免改一個點爆全章。
 
 ---
 
-# 技術架構與專案結構
+## 核心技術棧（仍有效）
 
-## 路由一覽（App Router）
+- **Next.js 14（App Router）**：章節／場景以路由呈現（`/play/[chapterId]/[sceneId]`）
+- **TypeScript**：以 `types/game.ts` 鎖住資料結構（Scene / Hotspot / Event / Requirement / Effect / Dialog / NpcDialogNode / Puzzle…）
+- **Tailwind CSS**：暗色沉浸式 UI
+- **Framer Motion + Lucide React**：過場與互動視覺
+
+---
+
+## 路由與頁面職責（現況）
 
 | 路徑 | 說明 |
-|------|------|
+|---|---|
 | `/` | 首頁 |
-| `/play` | 遊戲入口（需導向章節／場景） |
 | `/play/prologue` | 序章 |
-| `/play/animation` | 動畫頁 |
-| `/play/[chapterId]/intro` | 章節介紹（標題、導讀影片等） |
-| `/play/[chapterId]/[sceneId]` | 主遊玩頁：場景探索、Hotspot、對話、謎題 |
-| `/play/ch2/hub` | 第二章 Hub（若存在） |
+| `/play/[chapterId]/intro` | 章節介紹（CTA、導讀影片等） |
+| `/play/[chapterId]/[sceneId]` | 主遊玩頁（場景 + Hotspot + 對話 + 謎題 + 章尾 overlay） |
 
-## 目錄與關鍵檔案
-
-| 目錄／檔案 | 用途 |
-|------------|------|
-| `app/` | 頁面與 layout（`layout.tsx`, `page.tsx`, `globals.css`） |
-| `app/play/[chapterId]/[sceneId]/page.tsx` | 場景主頁：SceneView、GameEngine、DialogBox、CharacterConversation、Hotspot、背包、道具取得、NPC 對話 |
-| `components/` | 所有 UI 組件（見下方組件清單） |
-| `lib/` | 遊戲邏輯與工具：`gameEngine.ts`、`characterPortrait.ts`、`audioManager.ts`、`flowController.ts`、`chapterPassword.ts`、`responsiveUtils.ts`、`svgLoader.ts`、`svgPreloader.ts`、`svgDragSystem.ts`、`performanceUtils.ts`、`transitionEffects.ts`、`lightingManager.ts` |
-| `data/` | `gameDataCh1.ts`～`gameDataCh6.ts`（各章場景／道具／事件／npcDialogs）、`getChapterData.ts`、`chapters.ts`、`characterConversations.ts`、`reasoningByChapter.ts`、`flowConfig.ts`；另有 `flagTestConfig.ts`、`ch1PasswordPresets.ts`、`ch1Monologue.ts`、`ch1ReportConfig.ts` 等章節或流程用設定 |
-| `types/game.ts` | 所有 TypeScript 型別（GameState, Scene, Event, Dialog, ConversationTurn, DialogChoice, Item, Puzzle, Npc, InsightsState 等） |
-| `public/` | 靜態資產：背景圖、道具圖、`/images/characters/` 角色頭像 WEBP、`/audio/`、`/videos/`、`/svg/` |
-
-## 關鍵組件與檔案對照
-
-| 功能 | 組件／檔案 |
-|------|------------|
-| 場景主畫面、Hotspot、背景 | `SceneView.tsx` |
-| 一般對話、道具描述、系統訊息 | `DialogBox.tsx` |
-| 角色多段對話（NPC 對話框） | `CharacterConversation.tsx`（邏輯）+ `CharacterConversationCard.tsx`（UI，含繼續／X／選擇題） |
-| 取得道具浮動提示 | `ItemObtainedNotification.tsx` |
-| 背包 | `Inventory.tsx`、`ItemIcon.tsx` |
-| 場景內 NPC 頭像條 | `NpcRightStrip.tsx` |
-| 章節介紹、導讀影片 | `ChapterIntro.tsx`（分層顯示 200/800/1600/2600ms，CTA 按鈕「開始調查」或「觀看影片」） |
-| 謎題 | `ChapterPuzzle.tsx`、各謎題組件（PuzzleInput, CombinationLock, JigsawPuzzle, SlidingPuzzle, WordScramble, WireConnection, RotatingDial, SymbolMatching, MazePath, SequenceMemory, LogicSwitches, VisualSelectionPuzzle, ArrangementPuzzle, PairMatchingPuzzle, PickThreePuzzle 等） |
-| 分數與選擇 | `ScoreDisplay.tsx` |
-| 開發者／Debug | `DeveloperPanel.tsx`（`?dev=1`）、場景 debug（`?debug=1` 顯示 Hotspot） |
-| 其他 UI／效果 | `SceneNameDisplay`、`SceneTransition`、`AudioControl`、`DialogChoice`、`effects/`、`animations/`、`puzzle-svg/` |
+主遊玩頁的核心整合檔仍是 `app/play/[chapterId]/[sceneId]/page.tsx`（高風險超大檔，見下方禁止事項）。
 
 ---
 
-# 玩法概要
+## 資料分章載入（現況真實流程）
 
-- **探索**：在章節內切換場景（左右箭頭、場景選擇器），點擊 Hotspot 觸發事件。
-- **收集**：符合條件時取得道具，僅顯示浮動提示（ItemObtainedNotification），不排入一般對話佇列；背包點擊道具與「首次發現」同呈現（浮動提示＋描述）。
-- **對話**：一般對話（DialogBox）與角色多段對話（CharacterConversation）雙系統；角色對話可帶選擇題、影響分數／洞察。
-- **謎題**：章節謎題與場景內謎題，依條件解鎖，解完可觸發事件／道具。
-- **分數與選擇**：選擇權重寫入 `state.score`、`state.weights`、`state.choices`；洞察三維度（procedure_insight, human_insight, evidence_insight）與偏好變量由 `types/game.ts` 定義。
+### 章節定義
+- **檔案**：`data/chapters.ts`
+- **用途**：章節清單、intro meta、各章 scenes id 列表（routing/intro 依賴它）
 
----
+### 分章資料（scenes/items/npcDialogs）
+- **入口**：`data/getChapterData.ts`
+- **回傳結構**：`{ scenes, items, npcDialogs, ch2QuestionConfigs? }`
+- **載入策略**：依 `chapterId` 動態 import `data/gameDataChX.ts`，縮小首包
 
-## 【1】場景背景圖（BG）
-
-- **固定比例**：1:1（正方形）
-- **固定尺寸**：540×540px
-- **格式**：WebP（優先；需透明或相容性時可用 PNG）
-- **單張大小上限**：≤ 250KB（超過就重壓或降畫質）
-- **命名**：`bg_ch{章}_sc{場}_v{版}.webp`
-- **範例**：`bg_ch1_sc1_v1.webp`（ROOM 1, SPACE 1, 版本1）
-
----
-
-## 【2】物件圖（道具/線索/特寫）
-
-- **尺寸**：長邊 384px（需要更清楚才用 512px）
-- **格式**：需要透明用 PNG，一般用 WebP
-- **單張大小上限**：≤ 80KB（特寫可放寬到 120KB）
-- **命名**：`item_{id}_v{版}.webp`（優先）或 `.png`
-- **範例**：`item_faded_photo_v1.webp`
+### Play 頁如何載入
+- **hook**：`hooks/useChapterData.ts`
+- **流程**：
+  1. `getChapterData(chapterId)` → `engine.loadChapterData(data)`
+  2. `engine.applyEffect({ type: 'changeScene', chapterId, sceneId })`
+  3. 若是 `ch2`，會帶入 `ch2QuestionConfigs` 與 `npcDialogs` 給第二章結算流程用
 
 ---
 
-## 【3】UI 圖
+## GameEngine（現況）
 
-- **圖示**：一律用 Lucide React（SVG），不做 PNG icon
-- **尺寸**：540×540 或更小，大小 ≤ 80KB
-
----
-
-## 【4】Hotspot（透明點選區）
-
-- **座標系統**：一律用比例值（0~1），不要用 px
-- **形狀**：預設使用圓形 `circle`，`coords` 為 `[圓心x, 圓心y, 半徑]`（比例 0～1）；未來新增熱點一律用 circle。特殊需求時可保留 `rect` 或 `poly`
-- **最小可點尺寸**：手機至少等效 44×44px
-- **響應式尺寸**：使用 `clamp(40px, 4vw, 64px)` 確保跨裝置適配
-- **視覺樣式**：白色半透明邊框（`border-white/30`），背景（`bg-white/5`）
-- **提醒效果**：若隱若現的脈衝動畫（`animate-ping`, `animate-pulse`），白色低透明度
-- **預設禁止重疊**（不要做 priority 複雜規則）
-- **必做 debug**：`?debug=1` 顯示 hotspot 框與 id（正常模式透明可點）
-
----
-
-## 【5】一致性規則（避免改圖就崩）
-
-- **背景改版**：只允許調色/光影/霧感，不允許移動可互動物件位置
-- **移動物件**：必須同步更新 hotspots（當作新版本處理）
-
----
-
-## 【6】遊戲引擎系統（GameEngine）
-
-### 核心功能
-- **狀態管理**：`GameState` 包含當前章節、場景、道具、flags、互動記錄、分數、weights、choices、preferences、insights 等
-- **狀態持久化**：使用 `localStorage` 自動保存遊戲狀態
-- **事件系統**：基於 `Requirement` 條件觸發 `Event`，執行 `Effect`
-- **謎題系統**：支援 15+ 種謎題類型，基於條件解鎖
-- **分數系統**：追蹤玩家選擇的權重（`weight`），計算總分數與各維度權重
-
-### 主要方法
-- `checkRequirement(req)`：檢查單個需求條件
-- `checkEventRequirements(event)`：檢查事件所有需求
-- `triggerEvent(eventId)`：觸發事件並應用效果
-- `applyEffect(effect)`：應用效果（添加道具、設置 flag、顯示對話等）
-- `solvePuzzle(puzzleId, solution)`：解決謎題
-- `addChoice(choiceId, weight)`：記錄玩家選擇並更新分數
-
-### 實作位置
 - **檔案**：`lib/gameEngine.ts`
-- **資料**：不直接 import gameData；由 play 頁呼叫 `getChapterData(chapterId)` 取得該章 `scenes`、`items`、`npcDialogs` 後呼叫 `engine.loadChapterData(data)` 合併（ch1～ch6 對應 `data/gameDataCh1.ts`～`gameDataCh6.ts`）。
+- **資料注入**：Engine 不直接 import 章節資料，透過 `loadChapterData()` 合併注入。
+- **狀態**：`GameState` 含 `flags / inventory / interactions / score / weights / insights / preferences / reasoningAnswers / npcCasualTalkCount …`
+- **強約束**：所有章節劇情/互動新增，優先寫進 `data/gameDataChX.ts`（scene.hotspotEventMap + events/effects 或 npcDialogs），不要把章節硬規則塞進 page.tsx。
 
 ---
 
-## 【7】對話系統
+## Hotspot 規格（現況）
 
-### 雙系統架構
+### 座標系統
+- **一律 0~1 比例**（禁止 px）
+- **形狀**：
+  - **主流**：`circle`，`coords: [cx, cy, r]`
+  - `rect/poly` 僅特殊需求保留（新點優先用 circle）
 
-#### 7.1 普通對話系統（DialogBox）
-- **用途**：一般對話、道具描述、系統訊息、旁白
-- **類型**：`narrator` | `broadcast` | `item` | `system` | `choice` | `character`
-- **功能**：打字機效果（可配置速度）、對話歷史、選擇題（2選1或3選1）、SVG 圖片、**標題**（`Dialog.title`）
-- **觸發方式**：通過 `Event` 的 `showDialog` 效果；或由 `addDialogsToQueue(interactionName)` 等排隊顯示
-- **立繪不跳動**：同角色連續兩則時，`handleDialogClose` 不先 `setCurrentDialog(null)`，改為直接 `setCurrentDialog(nextDialog)` 並 `setDialogQueue(prev => prev.slice(1))`；立繪區塊使用 `effectiveDialog = currentDialog ?? dialogQueue[0]` 作為顯示來源，過渡期立繪不卸載。
+### 點擊尺寸與縮放（現況正式值）
+- **基準尺寸**：`clamp(40px, 4vw, 64px)` 乘上 `sizeFactor`
+- **全域縮放**：由 `app/globals.css` 控制 `--hotspot-scale`
+  - **手機**：0.77
+  - **桌機（min-width: 768px）**：0.8
+- **重要**：`components/SceneView.tsx` 用 inline `transform`（`translate(-50%, -50%) scale(var(--hotspot-scale)) translateZ(0)`），避免被 `.gpu-accelerated { transform: translateZ(0) }` 覆蓋。
 
-#### 7.2 角色對話系統（CharacterConversation + CharacterConversationCard）
-- **用途**：角色互動對話，有來有往的多段對話流程
-- **實作分工**：
-  - **CharacterConversation.tsx**：狀態與邏輯（currentIndex、打字機、handleNext、handleChoice），**不使用 JSX**，以 `React.createElement(CharacterConversationCard, props)` 渲染，避免編譯器將 `return (` 後的 `<` 誤判為比較運算符。
-  - **CharacterConversationCard.tsx**：純 UI，接收 props，含人像、對話氣泡、**右上角操作列**、下方選擇題區。
-- **特點**：
-  - 自動連續播放多段對話（`ConversationTurn[]`）
-  - 角色立繪：優先 `lib/characterPortrait.ts` 的 WEBP（`characterId` + `characterExpression`），其次 `characterPortrait`（SVG）
-  - 區分玩家與角色（`speaker: 'player' | 'character'`）
-  - 打字機效果 + 淡入淡出動畫（無位置跳動）
-  - **繼續按鈕**：在**對話框右上角**，位於 **X 關閉鈕左邊**；點 X 呼叫 `onClose`（通常為 `onComplete`）
-  - 最後一段可顯示選擇題（在下方固定高度按鈕區，選項多時區塊內捲動）
-- **配置位置**：`data/characterConversations.ts`
-- **觸發方式**：點擊角色 HOTSPOT，事件 ID 匹配 `talk_to_character_*` 或 `character_*_talk`，自動載入對應對話鏈
+### Debug 顯示
+- `?debug=1`：顯示 hotspot 框與 id（正常模式透明可點）
 
 ---
 
-## 【8】謎題系統
+## 對話系統（現況）
 
-### 支援的謎題類型（15+ 種）
-1. `input` - 文字輸入謎題（PuzzleInput）
-2. `sequence` - 順序謎題
-3. `arrangement` - 排列謎題（ArrangementPuzzle）
-4. `combination` - 組合謎題
-5. `visual_selection` - 視覺選擇（VisualSelectionPuzzle）
-6. `combination_lock` - 密碼鎖（CombinationLock）
-7. `word_scramble` - 拼字（WordScramble）
-8. `wire_connection` - 顏色線對接（WireConnection）
-9. `jigsaw` - 拼圖（JigsawPuzzle）
-10. `rotating_dial` - 旋轉轉盤（RotatingDial）
-11. `sequence_memory` - 序列記憶（SequenceMemory）
-12. `sliding_puzzle` - 滑塊拼圖（SlidingPuzzle）
-13. `symbol_matching` - 符號配對（SymbolMatching）
-14. `maze_path` - 迷宮路徑（MazePath）
-15. `logic_switches` - 邏輯開關（LogicSwitches）
+本專案目前同時存在三種「對話/敘事」來源，請依用途選對，不要混用造成重複旗標或流程卡死。
 
-### 謎題配置
-- **解鎖條件**：透過 `requirements` 定義
-- **解決後效果**：透過 `onSolve` 定義（可觸發事件、添加道具等）
-- **章節謎題**：每章可有一個章節謎題，達到探索進度閾值後解鎖（ChapterPuzzle）
+### 1) 一般對話（DialogBox queue）
+- **來源**：事件 effect `showDialog` 或 page.tsx 內的 `addDialogsToQueue(...)`
+- **用途**：旁白、系統訊息、道具描述、一般選擇題
+
+### 2) NPC 對話樹（NpcDialogNode）
+- **資料**：`data/gameDataChX.ts` 的 `npcDialogs`
+- **結構**：`NpcDialogNode` 內含 `text / choices / next / effects`
+- **用途**：敏感問題、分支追問、結尾設 flag（例如 `npc_*_sensitive_done`）
+
+### 3) 角色多輪對話（CharacterConversation）
+- **檔案**：`components/CharacterConversation.tsx` + `components/CharacterConversationCard.tsx`
+- **用途**：連續多段 turn、打字機、最後一段選擇題
+- **立繪來源**：`lib/characterPortrait.ts`（WEBP 優先，SVG 備援）
 
 ---
 
-## 【9】道具系統
+## 章尾結算／報告系統（現況重點）
 
-### 道具類型
-- **可收集**：`collectible: true`，可加入背包
-- **可使用**：`usable: true`，可在特定場景使用
-- **顯示方式**：支援 PNG/WebP 圖片或 SVG（`item.image`、`item.svgImage`）
+### 第一章：向劉隊報告（5 題雙格填空）
+- **入口**：`components/Ch1ReportEditor.tsx`
+- **配置**：`data/ch1ReportConfig.ts` → `attitude.attitudeFillBlanks`（實體在 `data/ch1AttitudeFillBlanks.ts`）
+- **題型元件**：`components/ReportFillBlank.tsx`
+- **重要規則**：
+  - 一次必須完成 **5 題**（index 0~4）
+  - `ReportFillBlank` 必須帶 `key`（依題號），避免 React 沿用上一題內部 state 造成「只做一題就全過」。
 
-### 道具互動
-- **收集**：點擊 HOTSPOT → 檢查條件 → 添加道具 → **僅顯示浮動提示**（ItemObtainedNotification），不將「獲得：xxx」排入一般對話佇列
-- **取得道具浮動提示**（ItemObtainedNotification）：
-  - **方案 C**：`dismissOnTap: true` 時不自動關閉，顯示道具名稱與**描述**，點擊卡片或 X 關閉；關閉後呼叫 `onComplete`
-  - 傳入 `itemDescription`、`itemImage`/`itemSvgImage`，與「首次發現」一致
-- **查看**：點擊背包中的道具 → 以**與首次發現相同的方式**呈現（浮動提示＋描述），不受場景限制，使用全域 `items[itemId]`
-- **使用**：在特定場景使用道具觸發事件
-
----
-
-## 【10】事件系統
-
-### 事件觸發流程
-1. 玩家點擊 HOTSPOT
-2. 系統查找 `hotspotEventMap` 對應的事件 ID
-3. 檢查事件 `requirements`（道具、flag、互動記錄等）
-4. 條件滿足 → 觸發事件 → 應用 `effects`
-5. 若為 `oneTime: true`，標記為已互動
-
-### 事件效果類型
-- `addItem` - 添加道具
-- `removeItem` - 移除道具
-- `setFlag` - 設置 flag
-- `showDialog` - 顯示對話
-- `playAudio` - 播放音效
-- `triggerEvent` - 觸發其他事件
-- `changeScene` - 切換場景
-
-### 特殊事件：角色對話
-- 事件 ID 匹配：`talk_to_character_*` 或 `character_*_talk`
-- 自動使用 CharacterConversation 系統，從 `data/characterConversations.ts` 載入對話鏈
+### 第二章：劉隊結算（殘句/填答流程）
+- **元件**：`components/Ch2SentenceCompletion.tsx`
+- **資料來源**：`data/gameDataCh2.ts` 的 `ch2QuestionConfigs`（由 `getChapterData('ch2')` 帶出）
 
 ---
 
-## 【11】分數與選擇系統
+## 章 2～6：向劉隊報告（共用模組）創意破關流程提案
 
-### 分數追蹤
-- **總分數**：`state.score`（累加所有選擇的權重）
-- **維度權重**：`state.weights`（如 acceptance, resistance, hesitation）
-- **選擇記錄**：`state.choices`（時間戳與權重）
-- **洞察三維度**：`state.insights`（procedure_insight, human_insight, evidence_insight）
-- **偏好變量**：`state.preferences`（見 types/game.ts PreferencesState）
+> 目標：第二章到第六章的「報告/結算」沿用同一套章尾 overlay 模組（避免每章重新發明 UI），但在互動方式上做差異化：同樣是「向劉隊報告」，每章手感都不一樣、破關邏輯也更貼近該章主題。
 
-### 選擇權重
-- 正權重：接受、承擔等；負權重：拒絕、離開等；零權重：中性
+### 共通規格（所有章節的章尾報告都遵守）
 
-### 顯示組件
-- `ScoreDisplay`：總分、各維度權重、選擇次數，整合在右上角選單
-
----
-
-## 【12】音效系統（AudioManager）
-
-- **檔案**：`lib/audioManager.ts`
-- **音效類型**：環境音（Ambient）、廣播（Broadcast）、恐怖（Horror）、SFX
-- **管理功能**：自動播放/停止環境音、音效音量控制、背景音樂管理
-- **路徑**：`/audio/ambient/`、`/audio/broadcast/`、`/audio/horror/`、`/audio/sfx/`
+- **入口觸發**：
+  - 玩家在章內達成「足夠進度」→ 劉隊頭像對話出現「要不要報告」選項（類似 `ch1_liu_report_now`）
+  - 進度建議採 **里程碑旗標**：`chX_milestone_*`（至少 3 個），或「已完成敏感線索數 >= N」
+- **章尾 overlay 行為**：
+  - overlay 開啟期間：阻擋場景點擊（hotspotBlocked）
+  - 完成後：設 `chX_reasoning_done=true`（或統一 `chapter_reasoning_done[chX]=true`），並導向下一章 intro
+- **回饋原則（寫法一致）**：
+  - 不用紅字說「錯」，而是「劉隊一句冷的」+「KK 旁白一句硬的」，提示玩家**缺了哪種支點**
+  - 容許玩家反覆嘗試，但每次錯誤回饋要「有資訊」：缺時間？缺權限？缺現場痕跡？缺動機？
+- **洞察/偏好加權（選配）**：
+  - 完成時依玩家偏向（流程/證據/人心）給 `insights` 小幅加成，並用 closing text 收尾（類似 ch1 的三維度結語）
 
 ---
 
-## 【13】UI 系統
+### 互動模組庫（同一套 UI 可重用的 4 種章尾玩法）
 
-### 主要 UI 組件
-- **選單系統**：右上角統一選單（退出、音效、背包、開發者模式、分數顯示）
-- **背包**：浮動覆蓋層，不壓縮主畫面（Inventory、ItemIcon）
-- **對話框**：固定尺寸 360×360px，支援打字機效果、標題、角色立繪（DialogBox）
-- **角色對話框**：固定卡片寬高（CharacterConversationCard），右上角繼續＋X，下方固定高度按鈕區（選擇題）
-- **場景 NPC 頭像**：NpcRightStrip，顯示當前場景 NPC，頭像尺寸約 +15% 適配
-- **開發者面板**：`?dev=1` 啟用（DeveloperPanel）
-- **章節介紹**：ChapterIntro — 分層顯示（Layer1 200ms、Layer2 800ms、Layer3 1600ms、按鈕 2600ms）；CTA 按鈕文字：無導讀影片或影片已播完為「開始調查」，有導讀影片且未播放為「觀看影片」；支援背景圖/影片/輪播、導讀影片、預載該章第一景背景圖
+> 章 2～6 以「資料驅動」挑選其中 1～2 種組合。重點是：**同模組、換資料、換回饋語氣**。
 
-### 響應式設計
-- `clamp()` 實現響應式尺寸；HOTSPOT 使用 `clamp(40px, 4vw, 64px)`；手機與桌面統一考量
+#### 模組 A：五題（或三題）雙格浮動填空（延續 ch1）
+- **形式**：每題 2 個空格、浮動選項卡；用 `components/ReportFillBlank.tsx`
+- **適用**：需要「報告語感」的章（流程/權限/動線/人物動機）
+- **過關**：每題兩格都對才算完成；允許多個正解（同義詞）
+- **注意**：每題必須重置 state（`key` 依題號）
 
----
+#### 模組 B：殘句推理（句子完成）+ 劉隊追問回應
+- **形式**：每題選一段短語補句 → 立刻顯示劉隊追問/反問 → 再進下一題（可沿用 `Ch2SentenceCompletion` 的節奏）
+- **適用**：證據量大、需要逐題拆解的章（比較「盤問」而非「填空」）
+- **過關**：答完全部題目，或「正確題數 >= 門檻」（依章難度設定）
 
-## 【14】視覺效果系統
+#### 模組 C：三封套分流（報告 / 私留 / 不寫）
+- **形式**：拖曳卡片到三個容器（沿用 ch1 的拖曳骨架即可）
+  - **警用報告封套**：能交出去、文字中性
+  - **KK 私留備忘**：帶刺、可疑、還不能說死
+  - **不寫**：太早、太薄、會害人（或會被拿去收工）
+- **適用**：主題是「壓力、遮蔽、內部自保」的章
+- **過關**：
+  - 報告封套至少 2 張、私留至少 1 張
+  - 必須把 1 張「關鍵卡」放入私留（避免玩家全上報）
 
-- **場景效果**：環境光調整、場景切換淡入淡出（無閃爍）
-- **動畫**：Framer Motion 用於對話切換、組件進出；角色對話 opacity 動畫（無位置跳動）；打字機效果
-
----
-
-## 【15】章節與場景系統
-
-- **章節結構**：ch1～ch6（見 `data/chapters.ts`），每章含若干場景（scenes 陣列）；敘事上可有 ROOM/SPACE 概念。
-- **章節介紹**：標題、副標題、描述、心理文字、背景圖/影片、導讀影片（`/play/[chapterId]/intro`），分層顯示後顯示「開始調查」或「觀看影片」按鈕。
-- **場景切換**：左右箭頭、場景選擇器、自動保存
-
----
-
-## 【16】開發與調試
-
-- **開發者模式**：`?dev=1` → DeveloperPanel（狀態、快速跳轉、場景選擇器、Flag 管理）
-- **Debug 模式**：`?debug=1` → 顯示所有 HOTSPOT 邊框與 id
+#### 模組 D：動線板（路徑排序／排除）
+- **形式**：玩家在 4～6 個「動線片段」中選出 3 段，組成「最可能路線」
+  - UI 可做：先選 3 張再排序、或點選成串
+- **適用**：主題是「監視器、死角、路徑、時間窗口」的章
+- **過關**：必須覆蓋 3 類支點（入口/轉角/消失點）；少一類就回饋「你這條線會撞鏡頭/撞人潮」
 
 ---
 
-## 【17】資料結構
+## 章別破關流程（ch2～ch6）創意方向
 
-### 主要資料檔案
-- **data/gameDataCh1.ts**～**gameDataCh6.ts**：各章場景、道具、事件、謎題、NPC、npcDialogs；由 `getChapterData(chapterId)` 動態 import 載入（ch1～ch6）。
-- **data/getChapterData.ts**：依 `chapterId` 動態 `import('./gameDataChX')` 回傳 `{ scenes, items, npcDialogs }`。
-- **data/chapters.ts**：輕量章節定義（`chapters`、`prologueSlides`），供 intro / prologue / play 共用。
-- **data/characterConversations.ts**：角色對話鏈（ConversationTurn[]、finalChoices）
-- **data/reasoningByChapter.ts**：章節推理相關
-- **data/flowConfig.ts**：流程設定（含 getChapterIntroContinuePath 等）
-- **data/flagTestConfig.ts**、**ch1PasswordPresets.ts**、**ch1Monologue.ts**、**ch1ReportConfig.ts** 等：章節或流程用設定
-- **types/game.ts**：所有 TypeScript 型別（GameState, Scene, Event, Dialog, DialogChoice, ConversationTurn, CharacterConversation, Item, Puzzle, Npc, InsightsState, PreferencesState 等）
+> 不先綁死劇情細節，先定「報告的破關邏輯」：玩家到底要向劉隊交出哪一種結論。
 
-### 狀態持久化
-- **localStorage**：自動保存 GameState；頁面重新載入時恢復
+### 第二章（ch2）：五題殘句結算（現況延伸）
+- **建議模組**：B（殘句推理）
+- **主題手感**：像盤問口供，一題一題逼近矛盾點
+- **里程碑例**：`ch2_milestone_process`、`ch2_milestone_deadzone`、`ch2_milestone_motive`
+- **結語**：依玩家答題偏向，劉隊只說一句「先留證」，KK 補一句「先留命」
 
----
+### 第三章（ch3）：三題「反證」報告（把錯的說法排掉）
+- **建議模組**：A（雙格填空）但縮成 3 題
+- **題幹模板**（固定可複用）：
+  - 「這不是 __1__，因為 __2__。」
+  - 「要成立 __1__，必須先解釋 __2__。」
+  - 「如果是 __1__，那 __2__ 不會這樣留下。」
+- **過關判定**：至少 2 題雙格全對；第 3 題允許 1 格可接受（嚴肅但錯）→ 劉隊回饋「你方向有了，證據還不夠」
 
-## 【18】gameData 分章與按需載入（新增章節依據）
+### 第四章（ch4）：三封套分流（哪些能上報、哪些要留底）
+- **建議模組**：C（三封套）
+- **主題手感**：你不是在寫作文，你是在決定「哪句話會害死人」
+- **過關判定**：
+  - 報告封套必須涵蓋「時間/權限/痕跡」至少各 1
+  - 私留封套必須包含「壓力/恐懼/遮蔽」類卡（關鍵卡）
 
-本專案採「輕量 chapters + 按章動態載入」架構，首屏與 intro 不載入整份 gameData；遊玩頁依 `chapterId` 動態載入該章資料並與 engine 合併。**新增章節時請依下列結構與流程操作。**
+### 第五章（ch5）：動線板（逃逸路線重建）
+- **建議模組**：D（動線板）
+- **主題手感**：像在看監視器的「缺口」，把缺口拼成路線
+- **過關判定**：必須選到「死角轉角」或「切出鏡頭的點」；否則劉隊回覆：「你這條線，鏡頭會拍到。」
 
-### 18.1 輕量章節定義 `data/chapters.ts`
-
-- 匯出：`prologueSlides`、`chapters`（章節列表與 meta）。
-- **新增章節時**：在 `chapters` 中新增一筆，例如：
-  - `ch2: { id: 'ch2', name: '...', description: '...', scenes: ['scene_ch2_...', ...], intro: { title, subtitle, description, moodText, ambientAudio, introVideo, ... } }`
-- 此檔僅含章節定義與序章文案，供 intro、prologue、play 共用；**不要**在此放 scenes/items/npcDialogs 細部內容。
-
-### 18.2 分章資料檔 `data/getChapterData.ts` 與來源
-
-- **取得章節資料**：`getChapterData(chapterId): Promise<ChapterData | null>` 由 `data/getChapterData.ts` 匯出。
-- 內部依 `chapterId`（ch1～ch6）分別 `import('./gameDataCh1')` … `import('./gameDataCh6')`，回傳該章的 `scenes`、`items`、`npcDialogs`。
-- **新增章節時**：新增對應 `data/gameDataChX.ts`，並在 `getChapterData` 的 if 分支中加入該章。
-
-### 18.3 GameEngine 依賴注入與合併
-
-- **檔案**：`lib/gameEngine.ts`。
-- Engine **不**直接 import 完整 gameData；內部維護 `scenes`、`items`、`npcDialogs`（私有），並有：
-  - `loadChapterData(data: { scenes, items, npcDialogs })`：以 `Object.assign` 與現有資料合併，不覆蓋已有 key。
-  - `getScenes()` / `getItems()`：供 play 頁與需合併後資料的組件使用。
-- **新增章節**：無須改 engine 邏輯，只要 `getChapterData(chX)` 回傳正確結構即可。
-
-### 18.4 Play 頁載入流程 `app/play/[chapterId]/[sceneId]/page.tsx`
-
-- **chapters**：從 `@/data/chapters` import。
-- **scenes / items**：從 `engine.getScenes()` / `engine.getItems()` 取得（須在 `chapterDataReady` 後才有資料）。
-- **載入時機**：`useEffect([chapterId])` 內呼叫 `getChapterData(chapterId)` → 取得後 `engine.loadChapterData(data)` → `setChapterDataReady(true)`。
-- **首次渲染**：未載入前可顯示「載入場景…」，避免 `getCurrentScene()` 或 `scenes[sceneId]` 為空導致錯誤或閃「場景不存在」。
-- **場景切換（箭頭）**：上一景／下一景依 `chapters[chapterId].scenes` 與當前 `sceneId` 計算（`getAdjacentScenes`），不依賴尚未載入的 scenes；箭頭點擊時先顯示大字特效、延遲後再切換 engine 與 URL，大字以 Portal 掛到 body 避免 early return 影響。
-
-### 18.5 依 props 取得資料的組件（不直接 import gameData）
-
-- **Inventory**、**DeveloperPanel**、**PickThreePuzzle**、**PairMatchingPuzzle** 等：由上層（play 頁）傳入 `items`、必要時 `scenes` / `chapters`（來自 engine 合併後或 play 頁 state），**不要**直接從 `@/data/gameDataChX` import。
-- **新增章節**：只要 play 頁依 `getChapterData` 載入並合併，這些組件會自動拿到新章資料，無須改組件 import。
-
-### 18.6 Intro / Prologue 頁
-
-- **intro**：`import { chapters } from '@/data/chapters'`。
-- **prologue**：`import { prologueSlides } from '@/data/chapters'`（或從 gameData 再匯出 chapters 的入口亦可）。
-
-### 18.7 新增章節檢查清單
-
-1. 在 `data/chapters.ts` 的 `chapters` 中新增該章（id、name、scenes 陣列、intro 等）。
-2. 新增 `data/gameDataChX.ts`，export 該章 `scenes`、`items`、`npcDialogs`；並在 `getChapterData` 中對應到該章。
-3. 確認 play 頁在 `chapterId` 為新章時能載入並顯示（載入中 → 場景列表與箭頭、背包、開發者面板皆正常）。
-4. 依 props 取得資料的組件由上層傳入，無須改組件 import。
-5. 跑一次 `npm run build` 與手動測試：進入新章 intro → 場景切換、背包、謎題、NPC 對話（若有）行為正確。
-
-### 18.8 死碼與關閉功能
-
-- 不保留 `ENABLE_SCENE_PUZZLES` 或 `false && showChapterPuzzle` 等死碼；若章節謎題日後啟用，改由流程／選單控制單獨載入，或從版控還原對應區塊。
+### 第六章（ch6）：一頁報告（極簡三句，句句能活）
+- **建議模組**：A（3 題雙格）或 B（3 題殘句），但壓縮成「三句定稿」
+- **三句定位**：
+  1) **可證明的事實**（證據）
+  2) **可追的責任鏈**（流程/權限）
+  3) **最危險的猜測**（人心/動機，但必須寫成「待查」）
+- **過關判定**：第 3 句不要求絕對正確，但要求「寫得能交出去」：用 options 限制措辭，避免玩家寫死結論
 
 ---
 
-## 【19】檔案命名規範
+## 落地寫法建議（讓它真能用同一套模組）
 
-### 場景背景圖
+- **每章一份 report config**（像 `ch1ReportConfig` 一樣）：
+  - `data/chXReportConfig.ts`：宣告本章使用哪個模組（A/B/C/D）+ 題目/卡片資料 + closing text
+- **統一入口**：
+  - `data/getChapterConfig.ts` 可擴充成 `reportConfig?: ChapterReportConfig`（或 `chXReportConfig`），play 頁只管「拿 config → 開 overlay」
+- **旗標命名（建議）**：
+  - `chX_liu_report_ready`：允許「向劉隊報告」選項出現
+  - `chX_liu_report_done`：章尾結算完成
+
+> 重點：章尾玩法做「同模組、不同資料」，避免把章特化邏輯再塞進 `page.tsx`。
+
+
+
+
+
+---
+
+## 道具規則（現況）
+
+- **背包道具**：`collectible: true` 才會進 `inventory`
+- **第一章道具精簡策略**：
+  - 少量進背包（例如票根、黑色碎片）
+  - 其餘採「檢視即發現」：事件只設 flag，不一定 addItem
+  - 報告用證據卡可用條件：背包擁有 **或** 觸發過對應 discover flag（`data/ch1ReportConfig.ts`：`CH1_ITEM_ID_TO_DISCOVER_FLAG`）
+
+---
+
+## 視覺／音效系統（現況）
+
+- **光照**：`lib/lightingManager.ts` + `components/SceneView.tsx`（環境光會隨互動次數做緩慢調整）
+- **音效策略**：`SceneView` 的 hotspot 點擊音效目前停用（保留 BGM 方向），不要在 hotspot click 補回大量 SFX，先確認效能與節奏。
+
+---
+
+## 開發與調試（現況）
+
+- `?dev=1`：DeveloperPanel（旗標/跳轉/測試）
+- `?debug=1`：顯示 hotspots（框 + id）
+
+---
+
+## 高風險檔案與協作規則（請嚴格遵守）
+
+### 絕對禁止
+1. **禁止在 React render 主體呼叫 engine 副作用**
+   - 不可在 render（非 `useEffect/useCallback`）內做 `engine.applyEffect/triggerEvent/...`
+2. **禁止繼續膨脹 `page.tsx` 的章節特化 if-else**
+   - 新互動請走資料驅動：`scene.hotspotEventMap` + `events.effects` 或 `npcDialogs`
+3. **避免新增 `setRefreshKey(prev => prev + 1)`**
+   - 這是 force update 反模式；若真需要，先找出缺少的 state 派生/依賴，或用 ref 鏡像解 stale closure
+
+### 強建議
+- **大型 handler 提取**：不要在 JSX 直接塞超長匿名函式（可讀性與效能都很差）
+- **setTimeout 要可清理**：新增計時器優先放 `useEffect` 並 cleanup
+- **isMobileDevice 統一**：請使用 `lib/performanceUtils.ts` 的版本（避免寬度判斷與 UA 判斷不一致）
+
+---
+
+## 命名與資產規範（仍適用）
+
+### 場景背景
+- 540×540、WebP、≤250KB
 - `bg_ch{章}_sc{場}_v{版}.webp`
 
 ### 道具圖
-- `item_{id}_v{版}.webp`（優先）或 `.png`
+- 長邊 384（必要才 512）、WebP/PNG、≤80KB（特寫可到 120KB）
+- `item_{id}_v{版}.webp`
 
-### 角色立繪／頭像
-- **WEBP（優先）**：`public/images/characters/{characterId}_{1|2|3}.webp`  
-  例：`npc_lin_ruitang_1.webp`、`npc_ashun_2.webp`  
-  由 `lib/characterPortrait.ts` 的 `getNpcPortraitUrl(characterId, expression)` 取得路徑
-- **SVG（備援）**：`/svg/characters/{characterId}.svg`
-
-### 音效
-- 環境音：`/audio/ambient/{name}.mp3`
-- 廣播：`/audio/broadcast/{name}.mp3`
-- 恐怖：`/audio/horror/{name}.mp3`
-- 音效：`/audio/sfx/{name}.mp3`
-
-### 章節影片
-- 導讀：`/videos/intro_ch{章}_animation_v{版}.mp4` 或自訂檔名（如 `木木.mp4`）
-
----
-
-## 【20】重要設計原則
-
-1. **型別安全**：所有遊戲內容透過 TypeScript 型別定義（types/game.ts），避免結構錯誤
-2. **條件驅動**：事件與謎題基於 Requirement 條件系統，邏輯清晰
-3. **狀態管理**：遊戲狀態由 GameEngine 統一管理，localStorage 持久化
-4. **組件化**：UI 組件獨立（components/），邏輯與工具在 lib/，資料在 data/
-5. **響應式優先**：UI 與 Hotspot 考量手機與桌面
-6. **無跳過機制**：角色對話須完整觀看，繼續在右上角、選擇題在下方固定區
-7. **視覺穩定**：淡入淡出動畫、固定卡片高度，避免「繼續」出現時跳動
-8. **編譯相容**：CharacterConversation 主檔不以 JSX 回傳，改以 React.createElement(CharacterConversationCard) 避免部分環境下「Expected jsx identifier」錯誤
-9. **一般對話立繪穩定**：同角色連續一般對話時不先清空 currentDialog，直接換下一則並用 effectiveDialog = currentDialog ?? dialogQueue[0] 驅動立繪，避免立繪先消失再出現
-
----
-
-## 【21】核心檔案實測數據
-
-以下為已審查量測的實際規模，AI 修改前必須意識到這些檔案的複雜度。
-
-### 21.1 超大高風險檔案
-
-| 檔案 | 行數 | 重點數據 |
-|---|---|---|
-| `app/play/[chapterId]/[sceneId]/page.tsx` | **~4,600 行** | 37 個 state、13 個 useEffect、18 個 useCallback、11 個 useRef |
-| `lib/gameEngine.ts` | **~900 行** | 35+ 個公開方法，混入章節特定 hardcode |
-| `data/gameDataCh2.ts` | **~1,900 行** | 含 Ch2 QA 浮動答案卡型別定義（應移到 `types/`） |
-| `data/gameDataCh1.ts` | **~1,225 行** | 正常資料量 |
-| `data/ch1PasswordPresets.ts` | **~639 行** | 純資料，20 組密碼預設 |
-| `data/ch1ReportConfig.ts` | **~437 行** | 型別定義與資料混在一起 |
-
-### 21.2 主遊玩頁 page.tsx 架構快照
-
-```
-URL params (chapterId, sceneId)
-  ↓
-useChapterData（動態 import gameDataChX → engine.loadChapterData → chapterDataReady）
-  ↓ chapterDataReady = true
-useEffect [chapterId, sceneId]（URL 同步 engine + 顯示場景名稱）
-  ↓
-render → engineRef.current.getCurrentScene() → scene
-  ↓
-SceneView.onHotspotClick → handleHotspotClick
-  ├─ hotspotBlockedRef.current 檢查（阻擋 overlay 期間的點擊）
-  ├─ handleItemCollection → setActiveItemDetail（道具詳解卡）
-  ├─ engine.solvePuzzle → setCurrentPuzzle → handlePuzzleSolve
-  ├─ engine.triggerEvent → addDialogsToQueue / setCurrentDialog
-  ├─ NPC 頭像點擊 → sensitive gate / key dialog / random dialog
-  └─ setRefreshKey（觸發 localStorage 儲存 + 進度更新）
-
-handleDialogClose → 下一則對話 / ch2 QA 階段切換 / 章節導航 / 遊戲結束
-```
-
-### 21.3 hooks 依賴現況
-
-三個 hook 全部只被 `app/play/[chapterId]/[sceneId]/page.tsx` 使用：
-
-| Hook | 行數 | 職責 |
-|---|---|---|
-| `useChapterData` | ~55 行 | 封裝章節資料非同步載入 + engine 初始化 |
-| `useDialogQueue` | ~124 行 | 管理 currentDialog + dialogQueue + ch2 QA phase 轉換 |
-| `useInventoryDetail` | ~17 行 | activeItemDetail state（極輕量） |
-
-### 21.4 lib/ 各模組用途速查
-
-| 模組 | 行數 | 被幾個檔案使用 | 主要消費者 |
-|---|---|---|---|
-| `gameEngine.ts` | ~900 | 2 | `page.tsx`、`useChapterData`（type only） |
-| `audioManager.ts` | ~221 | 9 | 廣泛：page、prologue、SceneView、AudioControl 等 |
-| `flowController.ts` | ~123 | 1 | `page.tsx` |
-| `chapterPassword.ts` | ~175 | 1 | `PasswordLoadModal.tsx` |
-| `characterPortrait.ts` | ~59 | 4 | `page.tsx`、`DialogBox`、`CharacterConversation`、`NpcRightStrip` |
-| `svgLoader.ts` | ~144 | 4 | `svgPreloader`、`SVGImage`、`UIIcon`、`page.tsx` |
-| `lightingManager.ts` | ~199 | 1 | `SceneView.tsx` |
-| `transitionEffects.ts` | ~234 | 1 | `SceneTransition.tsx` |
-| `performanceUtils.ts` | ~260 | 3 | `SceneView`、`BeamEffect`、`RippleEffect` |
-| `responsiveUtils.ts` | ~124 | 2 | `UIIcon`、`ItemIcon` |
-
----
-
-## 【22】已知技術債與禁止寫法
-
-AI 協作時**絕對不可**繼續加重以下問題。
-
-### 22.1 絕對禁止
-
-**禁止在 render 函數主體執行副作用：**
-`page.tsx` render body 中有 `engine.applyEffect()` 呼叫（約 2804 行附近），違反 React 純 render 原則。任何新增程式碼不得在 render 函數主體（非 `useEffect`、非 `useCallback`）中呼叫 `engine` 的任何方法。
-
-**禁止新增 `setRefreshKey(prev => prev + 1)`：**
-目前已有 50+ 次呼叫，是 `forceUpdate` 的反模式，掩蓋真正應透過 state 更新或 derived state 解決的問題。若臨時確需強制重渲染，須在 PR 說明原因。
-
-**禁止繼續擴大 `handleHotspotClick`：**
-該 callback 已達 ~870 行（行 1435–2302），內有大量 `if (hotspotId === 'xxx' && scene?.id === 'ch1_sc_y')` 寫死分支。**新的 hotspot 互動邏輯必須透過 `scene.hotspotEventMap` + `event.effects` 資料驅動，寫進對應章節的 `gameDataChX.ts`，不得在 callback 內繼續堆分支。**
-
-### 22.2 應避免的模式
-
-**stale closure（閉包過期）：**
-`useCallback` 依賴陣列必須包含所有函數內讀取的 state 變數，或改用 ref 鏡像模式。
-已有範例（可參考）：
-```typescript
-// 無依賴陣列的 useEffect，每次 render 後同步 ref → callback 讀 ref 取最新值
-useEffect(() => {
-  hotspotBlockedRef.current = !!(currentDialog || zoomOverlay?.active || ...);
-});
-// useCallback 內改讀 ref，不讀 state（避免過期問題）
-if (hotspotBlockedRef.current) return;
-```
-
-**無 cleanup 的 `setTimeout`：**
-目前全檔已有 20+ 處無 cleanup 的 `setTimeout`。新增定時器一律放在 `useEffect` 內並於 cleanup 中 `clearTimeout`：
-```typescript
-useEffect(() => {
-  const t = setTimeout(() => { ... }, delay);
-  return () => clearTimeout(t);
-}, [deps]);
-```
-
-**JSX 層中的匿名複雜函數：**
-NpcRightStrip 的 `onNpcClick` prop 目前是 ~140 行的匿名函數寫在 JSX 中，每次 render 重建。類似的大型 handler 應提取為 `useCallback`。
-
-### 22.3 已存在的死碼（不要繼續使用，應清除）
-
-| 位置 | 死碼 | 處置 |
-|---|---|---|
-| `page.tsx` | `showChapterPuzzle` + `if (false && _isUnlocked...)` | 整段刪除 |
-| `page.tsx` | `handleTutorialComplete = useCallback(() => {}, [])` | 傳 `undefined` 給 `TutorialGuide` |
-| `page.tsx` | `sceneLoading` state（有 set 但從未讀取） | 刪除 state 與所有 `setSceneLoading` |
-| `page.tsx` | `showDoor701Confirm` 的 JSX 渲染了兩次（完整重複貼上） | 合併成一個 |
-
-### 22.4 重複定義警告
-
-`isMobileDevice()` 同時存在於：
-- `lib/responsiveUtils.ts`：僅比較 `window.innerWidth < 768`
-- `lib/performanceUtils.ts`：含 userAgent 檢測，更準確
-
-**呼叫方應統一使用 `lib/performanceUtils.ts` 的版本。** 目前 `UIIcon.tsx`、`ItemIcon.tsx` 用 `responsiveUtils`，`SceneView.tsx`、`BeamEffect.tsx`、`RippleEffect.tsx` 用 `performanceUtils`，不一致。
-
----
-
-## 【23】孤兒檔案與未接入模組
-
-以下檔案**已存在且功能完整，但目前無任何其他檔案 import**。操作前必須確認其接入狀態，避免重複實作相同功能。
-
-| 檔案 | 行數 | 設計意圖 | 建議 |
-|---|---|---|---|
-| `lib/chapterBehaviours.ts` | ~150 行 | 純函式 `getNpcClickBehaviour(chapterId, ctx)` — 依章節與 NPC Context 決定點擊行為（閒聊 vs 敏感入口） | **應儘早接入**：設計意圖是替代 `page.tsx` 中大量分散的 NPC if-else 邏輯 |
-| `lib/svgPreloader.ts` | ~139 行 | 分優先級 SVG 預載（關鍵/次要，含 `requestIdleCallback`） | 接入 `app/play/layout.tsx` 或場景 useEffect，可改善首次場景載入速度 |
-| `lib/svgDragSystem.ts` | ~138 行 | SVG 元素拖曳 Singleton（含 AABB 碰撞檢測） | 確認是否為謎題組件備用；若無具體謎題使用計畫可移除 |
-| `data/characterConversations.ts` | ~9 行 | export 空物件 `{}`，預留角色多輪對話腳本擴充位 | 維持現狀；填入對話資料時遵循 `ConversationTurn[]` 結構 |
+### 角色頭像
+- WEBP 優先：`public/images/characters/{characterId}_{1|2|3}.webp`
+- SVG 備援：`/svg/characters/{characterId}.svg`
