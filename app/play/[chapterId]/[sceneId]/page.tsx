@@ -2175,17 +2175,14 @@ export default function PlayPage() {
 
     if (narrativeHotspots[hotspotId]) {
       const text = narrativeHotspots[hotspotId];
-      if (chapterId === 'ch1') {
-        const hotspot = scene.hotspots.find((h) => h.id === hotspotId);
-        setZoomOverlay({
-          active: true,
-          background: scene.background,
-          zoomCenter: hotspot ? getHotspotCenter(hotspot) : { x: 0.5, y: 0.5 },
-          dialogs: [{ text, type: 'narrator' }],
-        });
-      } else {
-        setCurrentDialog({ text, type: 'narrator' });
-      }
+      const hotspot = scene.hotspots.find((h) => h.id === hotspotId);
+      setZoomOverlay({
+        active: true,
+        background: scene.background,
+        zoomCenter: hotspot ? getHotspotCenter(hotspot) : { x: 0.5, y: 0.5 },
+        dialogs: [{ text, type: 'narrator' }],
+        interactionName: hotspot?.description,
+      });
       setRefreshKey(prev => prev + 1);
       return;
     }
@@ -2855,17 +2852,13 @@ export default function PlayPage() {
                 });
                 if (dialogs.length > 0) {
                   const hotspot = scene.hotspots.find(h => h.id === hotspotId);
-                  if (chapterId === 'ch1') {
-                    setZoomOverlay({
-                      active: true,
-                      background: scene.background,
-                      zoomCenter: hotspot ? getHotspotCenter(hotspot) : { x: 0.5, y: 0.5 },
-                      dialogs,
-                      interactionName: hotspot?.description,
-                    });
-                  } else {
-                    addDialogsToQueue(dialogs, hotspot?.description);
-                  }
+                  setZoomOverlay({
+                    active: true,
+                    background: scene.background,
+                    zoomCenter: hotspot ? getHotspotCenter(hotspot) : { x: 0.5, y: 0.5 },
+                    dialogs,
+                    interactionName: hotspot?.description,
+                  });
                 }
               }
               setRefreshKey(prev => prev + 1);
@@ -2887,17 +2880,13 @@ export default function PlayPage() {
         text: hotspot.hint || hotspot.description || '',
         type: 'narrator',
       };
-      if (chapterId === 'ch1') {
-        setZoomOverlay({
-          active: true,
-          background: scene.background,
-          zoomCenter: getHotspotCenter(hotspot),
-          dialogs: [hintDialog],
-          interactionName: hotspot.description,
-        });
-      } else {
-        setCurrentDialog(hintDialog);
-      }
+      setZoomOverlay({
+        active: true,
+        background: scene.background,
+        zoomCenter: getHotspotCenter(hotspot),
+        dialogs: [hintDialog],
+        interactionName: hotspot.description,
+      });
       setRefreshKey(prev => prev + 1);
     }
   }, [scene, handleItemCollection, addDialogsToQueue, chapterId, ch2QaActive, ch2QaPhase]); // engine 來自 useRef，不需要在依賴中

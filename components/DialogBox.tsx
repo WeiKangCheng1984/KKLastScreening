@@ -22,6 +22,8 @@ interface DialogBoxProps {
   portraitOnScene?: boolean;
   /** 嵌在父層右下角（場景內 50% x 30%）：不佔滿全螢幕，由父層控制位置與大小 */
   embedInParent?: boolean;
+  /** 熱點互動框模式：銀灰玻璃態、細淺色邊框、標題藍灰、內文白，第一～六章統一 */
+  variant?: 'default' | 'hotspot';
 }
 
 export default function DialogBox({ 
@@ -36,6 +38,7 @@ export default function DialogBox({
   reserveBottomSpace = false,
   portraitOnScene = false,
   embedInParent = false,
+  variant = 'default',
 }: DialogBoxProps) {
   const [displayText, setDisplayText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
@@ -166,8 +169,15 @@ export default function DialogBox({
 
   // 移除自動關閉功能 - 所有訊息都需要手動關閉
 
-  /* 建議三：統一暗色底 + 左側色條區分類型，減少與場景視覺衝突 */
+  /* 建議三：統一暗色底 + 左側色條區分類型；variant=hotspot 時改為銀灰玻璃互動框（第一～六章統一） */
   const getTypeStyles = () => {
+    if (variant === 'hotspot') {
+      return {
+        container: 'hotspot-glass text-gray-100 w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4 shadow-2xl',
+        icon: 'text-slate-500',
+        pulse: ''
+      };
+    }
     const baseContainer = 'bg-gradient-to-br from-slate-950/98 via-slate-900/95 to-slate-950/98 border border-slate-700/50 text-gray-100';
     if (mode === 'npc') {
       return {
@@ -209,10 +219,14 @@ export default function DialogBox({
       } ${isVisible ? 'opacity-100' : 'opacity-0'}`}
     >
       <div
-      className={`flex flex-col rounded-lg border-2 backdrop-blur-xl pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${
+      className={`flex flex-col rounded-lg pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${
+        variant === 'hotspot' ? '' : 'border-2 backdrop-blur-xl'
+      } ${
         isEmbedded
           ? 'bg-gradient-to-br from-gray-950/50 via-gray-900/50 to-gray-950/50 border-orange-700/30 text-gray-100 w-full h-full min-h-0 max-w-full max-h-full rounded-tl-xl rounded-br-none p-2 md:p-4'
-          : `${styles.container} w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4`
+          : variant === 'hotspot'
+            ? styles.container
+            : `${styles.container} w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4`
       } ${
         isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-4 opacity-0 scale-95'
       }`}
@@ -262,7 +276,7 @@ export default function DialogBox({
         </div>
 
         {dialog.title && (
-          <div className={`text-ui-caption text-gray-300 flex-shrink-0 ${isEmbedded ? 'mb-0.5 md:mb-1 text-[0.65em]' : 'mb-2'}`}>
+          <div className={`text-ui-caption flex-shrink-0 ${variant === 'hotspot' ? 'text-slate-500' : 'text-gray-300'} ${isEmbedded ? 'mb-0.5 md:mb-1 text-[0.65em]' : 'mb-2'}`}>
             {dialog.title}
           </div>
         )}

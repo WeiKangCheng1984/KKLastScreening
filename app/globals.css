@@ -100,6 +100,18 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
+  /* 銀灰玻璃互動框（Hotspot 點擊後的文案框，第一～六章統一） */
+  .hotspot-glass {
+    background: linear-gradient(
+      to bottom,
+      rgba(220, 220, 230, 0.28),
+      rgba(140, 145, 160, 0.35)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   /* 工業橙紅主題按鈕 */
   .btn-industrial {
     @apply bg-gradient-to-r from-industrial-orange to-industrial-red;
@@ -108,6 +120,30 @@
     @apply transition-all duration-300;
     @apply shadow-lg hover:shadow-xl;
     @apply hover:scale-105 active:scale-95;
+  }
+
+  /* ── Report / 章尾 UI 統一樣式 ──────────────────────────────────────
+   *  目的：把 Ch1 已成熟的「報告/結算」外觀（卡片外框、標題漸層、按鈕層級）
+   *  延伸到 Ch2~Ch6，讓各章章尾視覺一致。
+   */
+  .report-card {
+    @apply bg-dark-card/95 border-2 border-orange-500/30 rounded-2xl shadow-2xl backdrop-blur-md;
+  }
+
+  .report-title {
+    @apply bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent text-xl md:text-2xl font-bold;
+  }
+
+  .report-subtitle {
+    @apply text-xs text-gray-400 mt-1;
+  }
+
+  .btn-report-primary {
+    @apply btn-industrial rounded-lg px-4 py-2 text-sm;
+  }
+
+  .btn-report-secondary {
+    @apply bg-dark-surface/60 hover:bg-dark-surface/80 border border-dark-border hover:border-orange-500/50 text-gray-300 hover:text-white rounded-lg px-4 py-2 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
   /* 警示震動效果 */

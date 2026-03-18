@@ -66,11 +66,11 @@ export default function EndingOverlay({ endingId, onClose, onRestart }: EndingOv
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4">
-      <div className="relative w-full max-w-[720px] rounded-2xl border border-white/10 bg-neutral-950/90 shadow-2xl backdrop-blur">
+      <div className="relative w-full max-w-[720px] report-card">
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 rounded-full border border-white/10 bg-white/5 p-2 text-white/80 hover:bg-white/10 hover:text-white"
+          className="absolute right-3 top-3 rounded-full border border-orange-500/30 bg-orange-500/10 p-2 text-orange-100/80 hover:bg-orange-500/20 hover:border-orange-500/50 hover:text-orange-100 transition-colors"
           aria-label="關閉結局"
         >
           <X className="h-5 w-5" />
@@ -78,15 +78,15 @@ export default function EndingOverlay({ endingId, onClose, onRestart }: EndingOv
 
         <div className="p-6 md:p-8">
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
+            <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-xs text-orange-100/80">
               {ending.toneTag}
             </span>
           </div>
 
-          <h2 className="text-xl font-semibold text-white md:text-2xl">{ending.title}</h2>
-          <p className="mt-2 text-sm text-white/80 md:text-base">{ending.subtitle}</p>
+          <h2 className="report-title">{ending.title}</h2>
+          <p className="mt-2 text-sm text-gray-300 md:text-base">{ending.subtitle}</p>
 
-          <div className="mt-5 space-y-3 text-sm leading-relaxed text-white/85 md:text-base">
+          <div className="mt-5 space-y-3 text-sm leading-relaxed text-gray-100/85 md:text-base">
             {ending.body.map((p, i) => (
               <p key={`${endingId}-p-${i}`}>{p}</p>
             ))}
@@ -97,7 +97,7 @@ export default function EndingOverlay({ endingId, onClose, onRestart }: EndingOv
               <button
                 type="button"
                 onClick={onRestart}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white/85 hover:bg-white/10"
+                className="rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-2 text-orange-100/90 hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors"
               >
                 重新開始
               </button>
@@ -105,7 +105,7 @@ export default function EndingOverlay({ endingId, onClose, onRestart }: EndingOv
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl bg-white px-4 py-2 font-medium text-black hover:bg-white/90"
+              className="btn-report-primary rounded-xl"
             >
               回到遊戲
             </button>

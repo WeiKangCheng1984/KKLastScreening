@@ -139,13 +139,13 @@ export default function Ch2SentenceCompletion({
   if (!currentConfig) return null;
 
   return (
-    <div className="rounded-2xl border border-amber-600/40 bg-gradient-to-br from-slate-950/95 via-slate-900/95 to-slate-950/95 shadow-2xl p-6 md:p-7 flex flex-col">
-      <div className="flex justify-between items-center mb-4 pb-4 border-b border-amber-500/30">
+    <div className="report-card p-6 md:p-7 flex flex-col">
+      <div className="flex justify-between items-center mb-4 pb-4 border-b border-orange-500/30">
         <div className="min-w-0">
-          <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
+          <h2 className="report-title">
             把話補齊
           </h2>
-          <p className="text-xs text-amber-100/70 mt-1">
+          <p className="report-subtitle">
             劉隊把這幾句話攤開，要你把空格補齊，說出你看到的版本。
           </p>
         </div>
@@ -161,10 +161,10 @@ export default function Ch2SentenceCompletion({
 
       <div className="flex-1 min-h-0 overflow-y-auto pr-1">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <div className="text-sm text-amber-100/90 font-medium">{current.title}</div>
+          <div className="text-sm text-gray-200 font-medium">{current.title}</div>
         </div>
 
-        <div className="p-4 rounded-xl bg-black/30 border border-amber-500/20 text-amber-50/90 text-sm whitespace-pre-line mb-4">
+        <div className="p-4 rounded-xl bg-dark-surface/40 border border-orange-500/25 text-gray-100 text-sm whitespace-pre-line mb-4">
           {buildFilledSentence(currentConfig, selectedChoiceId, '______')}
         </div>
 
@@ -179,8 +179,8 @@ export default function Ch2SentenceCompletion({
                 onClick={() => onSelectedChoiceChange(opt.id)}
                 className={`text-left px-3 py-2 rounded-lg border text-xs md:text-sm transition-all ${
                   isSelected
-                    ? 'bg-amber-500/20 border-amber-400 text-amber-50'
-                    : 'bg-black/30 border-amber-500/30 text-amber-100 hover:bg-amber-500/10 hover:border-amber-300'
+                    ? 'bg-orange-500/20 border-orange-400 text-orange-50'
+                    : 'bg-dark-surface/40 border-orange-500/25 text-gray-200 hover:bg-orange-500/10 hover:border-orange-400/50 hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -190,7 +190,7 @@ export default function Ch2SentenceCompletion({
         </div>
 
         {feedback && (
-          <div className="mt-4 p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-50/90 text-xs whitespace-pre-line">
+          <div className="mt-4 p-3 rounded-xl bg-orange-950/30 border border-orange-500/30 text-orange-50/90 text-xs whitespace-pre-line">
             {feedback}
           </div>
         )}
@@ -201,7 +201,7 @@ export default function Ch2SentenceCompletion({
           type="button"
           onClick={handleConfirm}
           disabled={!selectedChoiceId}
-          className="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium"
+          className="btn-report-primary disabled:opacity-40 disabled:cursor-not-allowed"
         >
           就用這個說法
         </button>
@@ -212,7 +212,7 @@ export default function Ch2SentenceCompletion({
           onClick={() => {
             onComplete();
           }}
-          className="px-4 py-2 bg-amber-600/80 hover:bg-amber-500 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium"
+          className="btn-report-primary disabled:opacity-30 disabled:cursor-not-allowed"
           title={canFinish ? '把話說清楚' : '請先把空格補齊'}
         >
           好，這樣就夠了

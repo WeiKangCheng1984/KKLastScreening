@@ -17,10 +17,10 @@ export default function Ch2HubPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg relative overflow-hidden px-4">
-      <h1 className="text-2xl md:text-3xl font-bold text-orange-100/95 mb-2">
+      <h1 className="report-title text-2xl md:text-3xl mb-2">
         第二章：城市碎片
       </h1>
-      <p className="text-orange-200/80 text-sm md:text-base mb-10">
+      <p className="report-subtitle mt-0 text-sm md:text-base mb-10">
         選擇要前往的場景
       </p>
 
@@ -29,7 +29,7 @@ export default function Ch2HubPage() {
           <button
             key={choice.id}
             onClick={() => choice.sceneId && handleChoice(choice.sceneId)}
-            className="w-full px-6 py-4 bg-white/10 hover:bg-white/20 border border-white/30 text-orange-100 rounded-xl text-left font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full px-6 py-4 btn-report-secondary rounded-xl text-left font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             {choice.label}
           </button>

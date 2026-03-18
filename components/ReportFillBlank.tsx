@@ -209,10 +209,10 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
     <span
       className={`inline-block min-w-[4rem] px-1.5 pb-0.5 mx-0.5 rounded transition-all duration-300 ${
         filled
-          ? 'text-amber-300 border-b-2 border-amber-400 font-medium'
+          ? 'text-orange-300 border-b-2 border-orange-400 font-medium'
           : active
-            ? 'text-amber-200/50 border-b-2 border-amber-400/60 animate-pulse'
-            : 'text-stone-500/60 border-b border-stone-600/40'
+            ? 'text-orange-200/50 border-b-2 border-orange-400/60 animate-pulse'
+            : 'text-gray-500/60 border-b border-dark-border/40'
       }`}
     >
       {text ?? (active ? '⋯⋯' : '　　')}
@@ -259,17 +259,17 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
             className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-2.5 rounded-xl text-sm font-medium select-none cursor-pointer
               border transition-colors duration-200 shadow-md
               ${isSelected
-                ? 'bg-stone-700/90 border-amber-400/60 text-amber-200 ring-1 ring-amber-400/40'
+                ? 'bg-orange-500/20 border-orange-400/60 text-orange-100 ring-1 ring-orange-400/40'
                 : active
-                  ? 'bg-stone-900/80 border-stone-700/50 text-stone-300/80 hover:border-amber-700/50 hover:text-stone-200'
-                  : 'bg-stone-900/50 border-stone-800/40 text-stone-600/60 cursor-not-allowed'
+                  ? 'bg-dark-surface/80 border-dark-border/50 text-gray-300/80 hover:border-orange-500/50 hover:text-white'
+                  : 'bg-dark-surface/50 border-dark-border/40 text-gray-600/60 cursor-not-allowed'
               }`}
             disabled={!active}
           >
             {/* 左側標記條 */}
             <span
               className={`absolute left-1.5 top-2 bottom-2 w-0.5 rounded-full transition-colors duration-300 ${
-                isSelected ? 'bg-emerald-400' : 'bg-amber-800/35'
+                isSelected ? 'bg-orange-400' : 'bg-orange-800/35'
               }`}
             />
             {opt.label}
@@ -284,7 +284,7 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
   const progressDot = (filled: boolean, active: boolean) => (
     <span
       className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${
-        filled ? 'bg-amber-400' : active ? 'bg-amber-400/40 animate-pulse' : 'bg-stone-700'
+        filled ? 'bg-orange-400' : active ? 'bg-orange-400/40 animate-pulse' : 'bg-dark-border'
       }`}
     />
   );
@@ -318,15 +318,15 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
         <m.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full bg-stone-900/85 border border-amber-800/40 rounded-2xl px-6 py-5 shadow-xl"
+          className="w-full report-card px-6 py-5"
         >
           {/* 提示標籤 */}
-          <p className="text-xs text-stone-500 mb-3 tracking-wide">
+          <p className="text-xs text-gray-400 mb-3 tracking-wide">
             {showB1Card ? blank1.hintLabel : showB2Card ? blank2.hintLabel : '⋯⋯'}
           </p>
 
           {/* 句子 */}
-          <p className="text-stone-200 text-base leading-relaxed whitespace-pre-wrap">
+          <p className="text-gray-200 text-base leading-relaxed whitespace-pre-wrap">
             {sentenceParts[0]}
             {blankSlot(b1Filled, isB1Active, !!b1Filled)}
             {sentenceParts[1]}
@@ -339,7 +339,7 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
             {progressDot(!!b1Filled, isB1Active)}
             {progressDot(!!b2Filled, isB2Active)}
             {progressDot(step === 'done', false)}
-            <span className="text-xs text-stone-600 ml-1">
+            <span className="text-xs text-gray-600 ml-1">
               {step === 'done'
                 ? '完成'
                 : isB1Active
@@ -359,31 +359,31 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="w-full bg-stone-900/60 border border-stone-700/30 rounded-xl px-5 py-4"
+              className="w-full bg-dark-surface/60 border border-orange-500/25 rounded-xl px-5 py-4"
             >
               {step === 'done' ? (
                 <div className="flex flex-col items-center gap-3">
-                  <p className="text-amber-300/80 text-sm">本題完成。</p>
+                  <p className="text-orange-300/80 text-sm">本題完成。</p>
                   <button
                     type="button"
                     onClick={() => onComplete({ blank1Correct: b1Correct, blank2Correct: b2Correct })}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 text-sm font-medium transition-all"
+                    className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/50 text-orange-100 text-sm font-medium transition-all"
                   >
                     繼續 <ChevronRight size={15} />
                   </button>
                 </div>
               ) : step === 'both_correct_reply' ? (
                 <div className="space-y-2">
-                  <p className="text-amber-300/90 text-sm italic leading-relaxed">
+                  <p className="text-orange-300/90 text-sm italic leading-relaxed">
                     KK：「{bothCorrectDialogue.kk}」
                   </p>
-                  <p className="text-stone-300/80 text-sm leading-relaxed">
+                  <p className="text-gray-300/80 text-sm leading-relaxed">
                     劉隊：「{bothCorrectDialogue.liu}」
                   </p>
                 </div>
               ) : (
                 <p className={`text-sm leading-relaxed italic ${
-                  step === 'wrong_reply' ? 'text-stone-400/70' : 'text-amber-300/80'
+                  step === 'wrong_reply' ? 'text-gray-400/70' : 'text-orange-300/80'
                 }`}>
                   {replyText}
                 </p>
@@ -396,7 +396,7 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
                   <button
                     type="button"
                     onClick={() => setStep('done')}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 text-sm font-medium transition-all"
+                    className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/50 text-orange-100 text-sm font-medium transition-all"
                   >
                     確認 <ChevronRight size={15} />
                   </button>
@@ -405,7 +405,7 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
                   <button
                     type="button"
                     onClick={handleAfterWholeReply}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-stone-700/50 hover:bg-stone-700/70 border border-stone-600/40 text-stone-400 text-sm transition-all"
+                    className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-dark-surface/60 hover:bg-dark-surface/70 border border-dark-border/40 text-gray-400 text-sm transition-all"
                   >
                     再想想 <ChevronRight size={15} />
                   </button>
@@ -459,7 +459,7 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
             onClick={handleShuffle1}
             animate={shuffling1 ? { x: [-6, 6, -5, 5, -3, 3, 0] } : {}}
             transition={{ duration: 0.35 }}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-stone-800/70 hover:bg-stone-700/70 border border-stone-600/40 text-stone-400 text-xs transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-dark-surface/70 hover:bg-dark-surface/80 border border-dark-border/40 text-gray-400 text-xs transition-all hover:border-orange-500/50"
           >
             <m.span animate={shuffling1 ? { rotate: [0, 180, 360] } : {}} transition={{ duration: 0.35 }}>
               <Shuffle size={13} />
@@ -474,7 +474,7 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
             onClick={handleShuffle2}
             animate={shuffling2 ? { x: [-6, 6, -5, 5, -3, 3, 0] } : {}}
             transition={{ duration: 0.35 }}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-stone-800/70 hover:bg-stone-700/70 border border-stone-600/40 text-stone-400 text-xs transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-dark-surface/70 hover:bg-dark-surface/80 border border-dark-border/40 text-gray-400 text-xs transition-all hover:border-orange-500/50"
           >
             <m.span animate={shuffling2 ? { rotate: [0, 180, 360] } : {}} transition={{ duration: 0.35 }}>
               <Shuffle size={13} />
@@ -490,7 +490,7 @@ export default function ReportFillBlank({ config, onComplete }: ReportFillBlankP
             onClick={step === 'blank1_pending' ? handleB1Confirm : handleB2Confirm}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-2 px-5 py-2 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-medium transition-all"
+            className="flex items-center gap-2 px-5 py-2 rounded-full bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/50 text-orange-200 text-xs font-medium transition-all hover:border-orange-500/60"
           >
             確認填入 <ChevronRight size={13} />
           </m.button>

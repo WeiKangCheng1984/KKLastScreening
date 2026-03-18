@@ -145,6 +145,7 @@ export default function HotspotZoomOverlay({
                   dialog={dialogWithTitle}
                   onClose={handleDialogClose}
                   typewriterSpeed={30}
+                  variant="hotspot"
                 />
               </m.div>
             )}
