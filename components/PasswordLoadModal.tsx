@@ -39,7 +39,9 @@ export default function PasswordLoadModal({ open, onClose, onSuccess }: Password
         if (typeof window !== 'undefined') {
           localStorage.setItem('gameState', JSON.stringify(state));
         }
-        onSuccess('ch1', state.currentScene);
+        // 特例：100000 先導到第一章 intro（不帶 sceneId）
+        if (parsed.password === '100000') onSuccess('ch1');
+        else onSuccess('ch1', state.currentScene);
       } else {
         const state = getCanonicalStateForChapter(parsed.chapter);
         if (typeof window !== 'undefined') {

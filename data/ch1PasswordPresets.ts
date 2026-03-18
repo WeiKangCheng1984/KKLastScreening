@@ -26,6 +26,15 @@ const CH1_SCENES = [
 /** 20 組密碼與階段規格（數字不連號、混亂） */
 export const CH1_PASSWORD_PRESETS: Ch1PresetSpec[] = [
   {
+    password: '100000',
+    stage: 1,
+    label: '進入第一章導讀',
+    flags: [],
+    inventory: [],
+    visitedScenes: [CH1_SCENES[0]],
+    currentScene: CH1_SCENES[0],
+  },
+  {
     password: '101042',
     stage: 1,
     label: '剛進場',

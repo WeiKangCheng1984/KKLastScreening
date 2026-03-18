@@ -31,8 +31,13 @@ import ScoreDisplay from '@/components/ScoreDisplay';
 import NpcRightStrip from '@/components/NpcRightStrip';
 import ReasoningPanel from '@/components/ReasoningPanel';
 import Ch1ReportEditor from '@/components/Ch1ReportEditor';
+import Ch3ReportEditor from '@/components/Ch3ReportEditor';
+import Ch4ReportEditor from '@/components/Ch4ReportEditor';
+import Ch5ReportEditor from '@/components/Ch5ReportEditor';
+import Ch6ReportEditor from '@/components/Ch6ReportEditor';
 import Ch2SentenceCompletion from '@/components/Ch2SentenceCompletion';
 import ChapterConclusionOverlay from '@/components/ChapterConclusionOverlay';
+import EndingOverlay from '@/components/EndingOverlay';
 import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { m, AnimatePresence } from 'framer-motion';
@@ -251,6 +256,15 @@ export default function PlayPage() {
   // 第一章章末：報告編輯器（取代解謎／推理舊路徑）
   const [showReasoningPanel, setShowReasoningPanel] = useState(false);
   const [showCh1ReportEditor, setShowCh1ReportEditor] = useState(false);
+  // 第三章章末：向劉隊報告（雙格填空）
+  const [showCh3ReportEditor, setShowCh3ReportEditor] = useState(false);
+  // 第四章章末：向劉隊報告（雙格填空）
+  const [showCh4ReportEditor, setShowCh4ReportEditor] = useState(false);
+  // 第五章章末：向劉隊報告（雙格填空）
+  const [showCh5ReportEditor, setShowCh5ReportEditor] = useState(false);
+  // 第六章章末：向劉隊報告（雙格填空）+ 四結局
+  const [showCh6ReportEditor, setShowCh6ReportEditor] = useState(false);
+  const [ch6EndingId, setCh6EndingId] = useState<import('@/components/Ch6ReportEditor').Ch6EndingId | null>(null);
   // 第二章章末：把話補齊（改為由劉隊結算的 QA overlay）
   const [showCh2SentenceCompletion, setShowCh2SentenceCompletion] = useState(false);
   const [ch2ConclusionIndex, setCh2ConclusionIndex] = useState(0);
@@ -378,8 +392,13 @@ export default function PlayPage() {
       currentPuzzle ||
       activeItemDetail ||
       showCh1ReportEditor ||
+      showCh3ReportEditor ||
+      showCh4ReportEditor ||
+      showCh5ReportEditor ||
+      showCh6ReportEditor ||
       showCh2SentenceCompletion ||
-      sensitiveGate
+      sensitiveGate ||
+      ch6EndingId
     );
   });
 
@@ -833,6 +852,52 @@ export default function PlayPage() {
       setCurrentDialog(null);
       setRefreshKey((prev) => prev + 1);
       setShowCh1ReportEditor(true);
+      return;
+    }
+
+    if (choice.id === 'ch3_liu_keep_exploring') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+    if (choice.id === 'ch3_liu_report_now') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      setShowCh3ReportEditor(true);
+      return;
+    }
+    if (choice.id === 'ch4_liu_keep_exploring') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+    if (choice.id === 'ch4_liu_report_now') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      setShowCh4ReportEditor(true);
+      return;
+    }
+    if (choice.id === 'ch5_liu_keep_exploring') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+    if (choice.id === 'ch5_liu_report_now') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      setShowCh5ReportEditor(true);
+      return;
+    }
+
+    if (choice.id === 'ch6_liu_keep_exploring') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      return;
+    }
+    if (choice.id === 'ch6_liu_report_now') {
+      setCurrentDialog(null);
+      setRefreshKey((prev) => prev + 1);
+      setShowCh6ReportEditor(true);
       return;
     }
 
@@ -1954,14 +2019,15 @@ export default function PlayPage() {
     engineRef.current?.getCurrentScene() ||
     (sceneId && scenes[sceneId] ? scenes[sceneId] : null);
 
-  // 方案一：全遊戲一首 BGM，進入場景時若尚未播放則播放，切場景不中斷
+  // 方案：依章節播放對應 BGM（進入場景時切歌）
   useEffect(() => {
     if (!sceneId) return;
-    if (!audioManager.getCurrentAmbientPath()) {
-      audioManager.playAmbient(GAME_BGM, 0.4);
+    const chapterAmbientPath = chapters[chapterId]?.intro?.ambientAudio ?? GAME_BGM;
+    if (audioManager.getCurrentAmbientPath() !== chapterAmbientPath) {
+      audioManager.playAmbient(chapterAmbientPath, 0.4);
     }
     return () => {};
-  }, [sceneId]);
+  }, [sceneId, chapterId]);
 
   // 觸發劇烈閃爍（廣播時使用）
   const triggerIntenseFlicker = useCallback(() => {
@@ -3791,28 +3857,27 @@ export default function PlayPage() {
                   return;
                 }
 
-                // 第三章：劉隊結算推理 QA（前提是已完成顧乃謙敏感對話）
+                // 第三章：向劉隊報告（ch1 同款章尾雙格填空）
                 if (chapterId === 'ch3' && npcId === 'npc_liu') {
                   const st = engine.getState();
                   const flags = st.flags || {};
-                  const guSensitiveDone = !!flags.npc_gu_naiqian_sensitive_done;
-                  const ch3ReasoningDone = !!flags.ch3_reasoning_done;
-
-                  if (ch3ReasoningDone) {
-                    const rand = engine.triggerRandomNpcDialog('npc_liu');
-                    if (rand) setCurrentDialog(rand);
-                    return;
-                  }
 
                   if (!flags.ch3_task_from_liu) {
                     // 任務還沒接，走 hotspot event 處理（不在此重複）
                     return;
                   }
 
-                  if (!guSensitiveDone) {
+                  if (flags.ch3_reasoning_done || flags.ch3_liu_report_done) {
+                    const rand = engine.triggerRandomNpcDialog('npc_liu');
+                    if (rand) setCurrentDialog(rand);
+                    return;
+                  }
+
+                  if (!flags.ch3_liu_report_ready) {
                     setCurrentDialog({
                       text:
-                        '「先去跟顧乃謙把機房那邊的東西確認完。」\n\n「等你知道那個 log 少了什麼，再回來跟我說。」',
+                        '「先把大廳、應對室、機房都走一遍。」\n\n' +
+                        '「我要你帶回來的不是情緒，是一份能交出去的缺口清單。」',
                       type: 'character',
                       characterId: 'npc_liu',
                       characterName: '劉隊',
@@ -3822,35 +3887,34 @@ export default function PlayPage() {
                     return;
                   }
 
-                  // 顧乃謙已完成 → 開啟推理 QA（Q1 殘句）
                   setCurrentDialog({
                     text:
-                      '劉隊把記錄本翻到某一頁，說：「周姊說白板被擦了兩次。」\n\n「所以我把殘句填了一半：」\n\n「『白板有人擦過兩次。第一次為了______，第二次為了______。』」',
+                      '「好。」\n\n' +
+                      '「你現在說一次：白板、log、跨館、口徑——你看到的是哪一種版本？」',
                     type: 'character',
                     characterId: 'npc_liu',
                     characterName: '劉隊',
                     characterExpression: 1,
                     characterPosition: 'left',
                     choices: [
-                      { id: 'ch3_q1_A', text: 'A. 改內容 / 讓它看起來像沒改過', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'A' }, { type: 'setFlag', flag: 'ch3_q1_main_correct', value: true }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
-                      { id: 'ch3_q1_B', text: 'B. 記錄 / 完成交接', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'B' }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }] },
-                      { id: 'ch3_q1_C', text: 'C. 備忘 / 整理版面', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'C' }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }] },
-                      { id: 'ch3_q1_D', text: 'D. 通報 / 讓更多人知道', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'D' }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }] },
-                      { id: 'ch3_q1_F', text: 'F. 掩飾 / 轉移注意力', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'F' }, { type: 'setFlag', flag: 'ch3_q1_partial_correct', value: true }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 1 }] },
-                      { id: 'ch3_q1_G', text: 'G. 佈達 / 讓流程正式化', effects: [{ type: 'setFlag', flag: 'ch3_q1_answer', value: 'G' }, { type: 'setFlag', flag: 'ch3_q1_done', value: true }] },
+                      { id: 'ch3_liu_keep_exploring', text: '我再回去確認一下。' },
+                      { id: 'ch3_liu_report_now', text: '我想向你報告。' },
                     ],
                   });
                   return;
                 }
 
-                // 第六章：劉隊最終總結（前提是已完成林子睿最終對決）
+                // 第六章：章尾改為「向劉隊報告」（比照第一章雙格填空）+ 四結局
                 if (chapterId === 'ch6' && npcId === 'npc_liu') {
                   const st = engine.getState();
                   const flags = st.flags || {};
                   const linConfrontationDone = !!flags.npc_lin_ch6_confrontation_done;
                   const ch6ReasoningDone = !!flags.ch6_reasoning_done;
+                  const ch6ReportDone = !!flags.ch6_liu_report_done;
+                  const d7Done = !!flags.ch6_d7_done;
+                  const prChoiceMade = !!flags.ch6_pr_accept_edited_brief || !!flags.ch6_pr_insist_remote_line;
 
-                  if (ch6ReasoningDone) {
+                  if (ch6ReasoningDone || ch6ReportDone) {
                     const rand = engine.triggerRandomNpcDialog('npc_liu');
                     if (rand) setCurrentDialog(rand);
                     return;
@@ -3872,37 +3936,59 @@ export default function PlayPage() {
                     return;
                   }
 
-                  // 林子睿最終對決完成 → 開啟最終總結 QA
+                  if (!d7Done) {
+                    setCurrentDialog({
+                      text: '「D7 那段你要看清楚。」\n\n「沒有那一段，你報告只會變成感覺。」',
+                      type: 'character',
+                      characterId: 'npc_liu',
+                      characterName: '劉隊',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                    });
+                    return;
+                  }
+
+                  if (!prChoiceMade) {
+                    setCurrentDialog({
+                      text: '「張景衡那份說帖，你看過了吧？」\n\n「你要先決定：你接受他那個版本，還是堅持把『遠端』那句話留下。」',
+                      type: 'character',
+                      characterId: 'npc_liu',
+                      characterName: '劉隊',
+                      characterExpression: 1,
+                      characterPosition: 'left',
+                    });
+                    return;
+                  }
+
+                  // 前置完成 → 提供「報告入口」
                   setCurrentDialog({
-                    text: '劉隊說：「好。你問完了，我也問你。」\n\n「張景衡把說帖裡的『遠端操作存在可能性』這整句話刪掉了。」\n\n「殘句：『這個刪除，代表的不是公關考量，而是______。』」',
+                    text: '劉隊把筆放在紙上，沒急著寫。\n\n「好。你把關鍵的東西都看過了。」\n\n「你要向我報告，還是再多繞一圈？」',
                     type: 'character',
                     characterId: 'npc_liu',
                     characterName: '劉隊',
                     characterExpression: 1,
                     characterPosition: 'left',
                     choices: [
-                      { id: 'ch6_q1_a', text: 'A. 公關稿的正常處理，技術細節本來就不適合出現在聲明裡', effects: [{ type: 'setFlag', flag: 'ch6_q1_answer', value: 'a' }, { type: 'setFlag', flag: 'ch6_q1_done', value: true }] },
-                      { id: 'ch6_q1_b', text: 'B. 刻意的敘事框架轉換——從「人為操作」變成「系統問題」', effects: [{ type: 'setFlag', flag: 'ch6_q1_answer', value: 'b' }, { type: 'setFlag', flag: 'ch6_q1_partial_correct', value: true }, { type: 'setFlag', flag: 'ch6_q1_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
-                      { id: 'ch6_q1_c', text: 'C. 在替林子睿製造口徑：讓操作者從文字裡消失，讓責任也跟著消失', effects: [{ type: 'setFlag', flag: 'ch6_q1_answer', value: 'c' }, { type: 'setFlag', flag: 'ch6_q1_main_correct', value: true }, { type: 'setFlag', flag: 'ch6_q1_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 2 }] },
+                      { id: 'ch6_liu_keep_exploring', text: '我再去確認一下。' },
+                      { id: 'ch6_liu_report_now', text: '我想向你報告。' },
                     ],
                   });
                   return;
                 }
 
-                // 第五章：劉隊結算推理 QA（前提是已完成高文傑敏感對話）
+                // 第五章：章尾改為「向劉隊報告」（比照第一章雙格填空），入口需完成高文傑敏感對話
                 if (chapterId === 'ch5' && npcId === 'npc_liu') {
                   const st = engine.getState();
                   const flags = st.flags || {};
                   const gaoSensitiveDone = !!flags.npc_gao_sensitive_done;
                   const ch5ReasoningDone = !!flags.ch5_reasoning_done;
+                  const ch5ReportDone = !!flags.ch5_liu_report_done;
 
-                  if (ch5ReasoningDone) {
+                  if (!flags.ch5_task_from_liu) return;
+
+                  if (ch5ReasoningDone || ch5ReportDone) {
                     const rand = engine.triggerRandomNpcDialog('npc_liu');
                     if (rand) setCurrentDialog(rand);
-                    return;
-                  }
-
-                  if (!flags.ch5_task_from_liu) {
                     return;
                   }
 
@@ -3918,44 +4004,40 @@ export default function PlayPage() {
                     return;
                   }
 
-                  // 高文傑已完成 → 開啟推理 QA
                   setCurrentDialog({
-                    text: '劉隊把記錄本翻到某一頁，說：「嫌疑矩陣攤在這裡，高文傑的欄位最滿。」\n\n「殘句填一半：」\n\n「『高文傑的登入紀錄與命案時間「接近但不完全吻合」——這代表他是______，不是______。』」',
+                    text: '劉隊把嫌疑矩陣推到你面前，說：「上面要名單，我要能交出去的版本。」\n\n「你要向我報告，還是再多看一圈？」',
                     type: 'character',
                     characterId: 'npc_liu',
                     characterName: '劉隊',
                     characterExpression: 1,
                     characterPosition: 'left',
                     choices: [
-                      { id: 'ch5_q1_a', text: 'A. 可以押的人 / 真正的操作者', effects: [{ type: 'setFlag', flag: 'ch5_q1_answer', value: 'a' }, { type: 'setFlag', flag: 'ch5_q1_done', value: true }] },
-                      { id: 'ch5_q1_b', text: 'B. 方便的嫌疑人 / 可以確認有罪的人', effects: [{ type: 'setFlag', flag: 'ch5_q1_answer', value: 'b' }, { type: 'setFlag', flag: 'ch5_q1_main_correct', value: true }, { type: 'setFlag', flag: 'ch5_q1_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 2 }] },
-                      { id: 'ch5_q1_c', text: 'C. 被借名的工具 / 主謀本人', effects: [{ type: 'setFlag', flag: 'ch5_q1_answer', value: 'c' }, { type: 'setFlag', flag: 'ch5_q1_partial_correct', value: true }, { type: 'setFlag', flag: 'ch5_q1_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
-                      { id: 'ch5_q1_d', text: 'D. 知情者 / 無辜的人', effects: [{ type: 'setFlag', flag: 'ch5_q1_answer', value: 'd' }, { type: 'setFlag', flag: 'ch5_q1_done', value: true }] },
+                      { id: 'ch5_liu_keep_exploring', text: '我再去確認一下。' },
+                      { id: 'ch5_liu_report_now', text: '我想向你報告。' },
                     ],
                   });
                   return;
                 }
 
-                // 第四章：劉隊結算推理 QA（前提是已完成陳佑誠敏感對話）
+                // 第四章：章尾改為「向劉隊報告」（比照第一章雙格填空），入口需完成陳佑誠敏感對話
                 if (chapterId === 'ch4' && npcId === 'npc_liu') {
                   const st = engine.getState();
                   const flags = st.flags || {};
                   const chenSensitiveDone = !!flags.npc_chen_sensitive_done;
                   const ch4ReasoningDone = !!flags.ch4_reasoning_done;
+                  const ch4ReportDone = !!flags.ch4_liu_report_done;
 
-                  if (ch4ReasoningDone) {
+                  if (!flags.ch4_task_from_liu) return;
+
+                  if (ch4ReasoningDone || ch4ReportDone) {
                     const rand = engine.triggerRandomNpcDialog('npc_liu');
                     if (rand) setCurrentDialog(rand);
                     return;
                   }
 
-                  if (!flags.ch4_task_from_liu) {
-                    return;
-                  }
-
                   if (!chenSensitiveDone) {
                     setCurrentDialog({
-                      text: '「先去跟陳佑誠把控制區的東西確認完。」\n\n「等你知道那份回報是誰擱置的，再回來跟我說。」',
+                      text: '「先去跟陳佑誠把控制區的東西確認完。」\n\n「等你問完那個問題，再回來跟我說你怎麼看。」',
                       type: 'character',
                       characterId: 'npc_liu',
                       characterName: '劉隊',
@@ -3965,19 +4047,16 @@ export default function PlayPage() {
                     return;
                   }
 
-                  // 陳佑誠已完成 → 開啟推理 QA（Q1 殘句）
                   setCurrentDialog({
-                    text: '劉隊把記錄本翻到某一頁，說：「梁以安說那次黑得太早。」\n\n「殘句填一半：」\n\n「『節能燈提前切換的那 3 分鐘，對兇手來說是______，不是______。』」',
+                    text: '劉隊合上記錄本，說：「好。你現在可以講一次完整的版本。」\n\n「你要向我報告，還是再多走一圈？」',
                     type: 'character',
                     characterId: 'npc_liu',
                     characterName: '劉隊',
                     characterExpression: 1,
                     characterPosition: 'left',
                     choices: [
-                      { id: 'ch4_q1_a', text: 'A. 失誤 / 計畫', effects: [{ type: 'setFlag', flag: 'ch4_q1_answer', value: 'a' }, { type: 'setFlag', flag: 'ch4_q1_done', value: true }] },
-                      { id: 'ch4_q1_b', text: 'B. 窗口 / 意外', effects: [{ type: 'setFlag', flag: 'ch4_q1_answer', value: 'b' }, { type: 'setFlag', flag: 'ch4_q1_main_correct', value: true }, { type: 'setFlag', flag: 'ch4_q1_done', value: true }], insightEffects: [{ target: 'evidence_insight', delta: 1 }] },
-                      { id: 'ch4_q1_c', text: 'C. 測試 / 正式操作', effects: [{ type: 'setFlag', flag: 'ch4_q1_answer', value: 'c' }, { type: 'setFlag', flag: 'ch4_q1_partial_correct', value: true }, { type: 'setFlag', flag: 'ch4_q1_done', value: true }], insightEffects: [{ target: 'human_insight', delta: 1 }] },
-                      { id: 'ch4_q1_d', text: 'D. 節能設定 / 人為操作', effects: [{ type: 'setFlag', flag: 'ch4_q1_answer', value: 'd' }, { type: 'setFlag', flag: 'ch4_q1_done', value: true }] },
+                      { id: 'ch4_liu_keep_exploring', text: '我再去確認一下。' },
+                      { id: 'ch4_liu_report_now', text: '我想向你報告。' },
                     ],
                   });
                   return;
@@ -4286,6 +4365,7 @@ export default function PlayPage() {
                     navigate_to_ch3_intro: 'ch3',
                     navigate_to_ch4_intro: 'ch4',
                     navigate_to_ch5_intro: 'ch5',
+                    navigate_to_ch6_intro: 'ch6',
                   };
                   const stateAfter = engineRef.current.getState();
                   for (const [flag, nextId] of Object.entries(nextChapterMap)) {
@@ -4326,6 +4406,114 @@ export default function PlayPage() {
             </ChapterConclusionOverlay>
           )}
         </AnimatePresence>
+
+        {/* 第三章報告編輯器：ch1 同款雙格填空，完成後導向 ch4 intro */}
+        <AnimatePresence>
+          {showCh3ReportEditor && engineRef.current && (
+            <ChapterConclusionOverlay>
+              <Ch3ReportEditor
+                engine={{
+                  getState: () => engineRef.current!.getState(),
+                  applyEffect: (e) => engineRef.current!.applyEffect(e),
+                  setReasoningComplete: (ch) => engineRef.current!.setReasoningComplete(ch),
+                }}
+                onComplete={() => {
+                  setShowCh3ReportEditor(false);
+                  setRefreshKey((k) => k + 1);
+                  if (engineRef.current?.getState().flags?.navigate_to_ch4_intro) {
+                    engineRef.current.applyEffect({ type: 'setFlag', flag: 'navigate_to_ch4_intro', value: false });
+                    setTimeout(() => router.push('/play/ch4/intro'), 300);
+                  }
+                }}
+                onClose={() => setShowCh3ReportEditor(false)}
+              />
+            </ChapterConclusionOverlay>
+          )}
+        </AnimatePresence>
+
+        {/* 第四章報告編輯器：ch1 同款雙格填空，完成後導向 ch5 intro */}
+        <AnimatePresence>
+          {showCh4ReportEditor && engineRef.current && (
+            <ChapterConclusionOverlay>
+              <Ch4ReportEditor
+                engine={{
+                  getState: () => engineRef.current!.getState(),
+                  applyEffect: (e) => engineRef.current!.applyEffect(e),
+                  setReasoningComplete: (ch) => engineRef.current!.setReasoningComplete(ch),
+                }}
+                onComplete={() => {
+                  setShowCh4ReportEditor(false);
+                  setRefreshKey((k) => k + 1);
+                  if (engineRef.current?.getState().flags?.navigate_to_ch5_intro) {
+                    engineRef.current.applyEffect({ type: 'setFlag', flag: 'navigate_to_ch5_intro', value: false });
+                    setTimeout(() => router.push('/play/ch5/intro'), 300);
+                  }
+                }}
+                onClose={() => setShowCh4ReportEditor(false)}
+              />
+            </ChapterConclusionOverlay>
+          )}
+        </AnimatePresence>
+
+        {/* 第五章報告編輯器：ch1 同款雙格填空，完成後導向 ch6 intro */}
+        <AnimatePresence>
+          {showCh5ReportEditor && engineRef.current && (
+            <ChapterConclusionOverlay>
+              <Ch5ReportEditor
+                engine={{
+                  getState: () => engineRef.current!.getState(),
+                  applyEffect: (e) => engineRef.current!.applyEffect(e),
+                  setReasoningComplete: (ch) => engineRef.current!.setReasoningComplete(ch),
+                }}
+                onComplete={() => {
+                  setShowCh5ReportEditor(false);
+                  setRefreshKey((k) => k + 1);
+                  if (engineRef.current?.getState().flags?.navigate_to_ch6_intro) {
+                    engineRef.current.applyEffect({ type: 'setFlag', flag: 'navigate_to_ch6_intro', value: false });
+                    setTimeout(() => router.push('/play/ch6/intro'), 300);
+                  }
+                }}
+                onClose={() => setShowCh5ReportEditor(false)}
+              />
+            </ChapterConclusionOverlay>
+          )}
+        </AnimatePresence>
+
+        {/* 第六章報告編輯器：ch1 同款雙格填空，完成後顯示四結局 */}
+        <AnimatePresence>
+          {showCh6ReportEditor && engineRef.current && (
+            <ChapterConclusionOverlay>
+              <Ch6ReportEditor
+                engine={{
+                  getState: () => engineRef.current!.getState(),
+                  applyEffect: (e) => engineRef.current!.applyEffect(e),
+                  setReasoningComplete: (ch) => engineRef.current!.setReasoningComplete(ch),
+                }}
+                onComplete={(endingId) => {
+                  setShowCh6ReportEditor(false);
+                  setCh6EndingId(endingId);
+                  setRefreshKey((k) => k + 1);
+                }}
+                onClose={() => setShowCh6ReportEditor(false)}
+              />
+            </ChapterConclusionOverlay>
+          )}
+        </AnimatePresence>
+
+        {ch6EndingId && (
+          <EndingOverlay
+            endingId={ch6EndingId}
+            onClose={() => {
+              setCh6EndingId(null);
+              setRefreshKey((k) => k + 1);
+            }}
+            onRestart={() => {
+              // 最快交付：不清 localStorage，僅導回序章或首頁由你自行重置
+              setCh6EndingId(null);
+              router.push('/');
+            }}
+          />
+        )}
 
         {/* 第二章 QA 結算：由劉隊啟動的章尾 overlay */}
         <AnimatePresence>
@@ -4645,7 +4833,7 @@ export default function PlayPage() {
 
         {/* 敏感抉擇：次優先，中央對話框 */}
         <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !showCh2SentenceCompletion && sensitiveGate && (
+          {!showReasoningPanel && !showCh1ReportEditor && !showCh3ReportEditor && !showCh4ReportEditor && !showCh5ReportEditor && !showCh6ReportEditor && !showCh2SentenceCompletion && !ch6EndingId && sensitiveGate && (
             <m.div
               key="sensitive-gate"
               initial={{ opacity: 0 }}
@@ -4666,7 +4854,7 @@ export default function PlayPage() {
 
         {/* 背包道具詳解：中央詳解卡，優先於 toast */}
         <AnimatePresence>
-          {!showReasoningPanel && !showCh1ReportEditor && !showCh2SentenceCompletion && !sensitiveGate && activeItemDetail && (
+          {!showReasoningPanel && !showCh1ReportEditor && !showCh3ReportEditor && !showCh4ReportEditor && !showCh5ReportEditor && !showCh6ReportEditor && !showCh2SentenceCompletion && !ch6EndingId && !sensitiveGate && activeItemDetail && (
             <m.div
               key="item-detail"
               initial={{ opacity: 0 }}

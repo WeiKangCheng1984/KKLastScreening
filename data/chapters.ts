@@ -28,6 +28,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '死在散場之後的人',
       description: '散場後人群聲很吵。塑膠杯、手機光、鞋底黏住地毯的聲音。可這個人死得太安靜。',
       moodText: '散場後最暗的不是影廳。是每個人都想快點回到「正常」。而兇手，似乎就是在正常裡動手。',
+      ambientAudio: '/audio/bgm/kk_bgm_title_ch1.mp3',
     },
   },
   ch2: {
@@ -40,6 +41,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '手機裡的線索',
       description: '警方技術組阿蘇把解完密的手機資料接上終端，要你一起看懂死者留下的訊息、草稿、錄音和行蹤。\n\n你要查的，不只是他的身分，還有他正在追的那條線。',
       moodText: '你習慣先看現場，再看名字。這一次，名字藏在手機裡。\n\n一則訊息、一段錄音、一份沒寫完的草稿，都像在把案件往外拉。',
+      ambientAudio: '/audio/bgm/kk_bgm_title_ch2.mp3',
     },
   },
   ch3: {
@@ -52,6 +54,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '誰能動整個場館',
       description: '死者手機裡的線索指向三間影城、一套系統。\n\n現在，城市影城的大廳被封鎖了，品牌方和技術組都來了，各自準備好一個版本的說法。',
       moodText: '「你要整理版，今天就能結案。你要原始檔，今晚很多人睡不好。」\n\nlog 能被整理。問題是，你願不願意讓它繼續被整理下去。',
+      ambientAudio: '/audio/bgm/kk_bgm_title_ch3.mp3',
     },
   },
   ch4: {
@@ -64,6 +67,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '未遂的事故',
       description: '第二起事故沒有人死，所以沒有人認真記錄。\n\n但樓梯間的燈比應該亮的時間早了 3 分鐘，有人差點在黑暗裡摔下去。\n\n陳佑誠說他早就回報過漏洞。你要找到那份回報去了哪裡。',
       moodText: '我開始討厭「差一點」這三個字。\n\n它們通常只是下次的預告。',
+      ambientAudio: '/audio/bgm/kk_bgm_title_ch4.mp3',
     },
   },
   ch5: {
@@ -76,6 +80,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '誰是手、誰是腦',
       description: '嫌疑名單攤在桌上，高文傑的欄位填得最滿，林子睿的欄位填得最少。\n\n你要弄清楚：高文傑是手，還是被借來的手。而那個借了他名字的人，在哪個層級。',
       moodText: '動機能被剪裁。\n\n問題不是誰看起來最可疑，而是誰需要另一個人看起來最可疑。',
+      ambientAudio: '/audio/bgm/kk_bgm_title_ch5.mp3',
     },
   },
   ch6: {
@@ -88,6 +93,7 @@ export const chapters: Record<string, Chapter> = {
       subtitle: '敘事決戰',
       description: '第三起事故正在發生。記者會在 15 分鐘後開始。\n\n原始 log 還在中控室，林子睿在後台某個地方，張景衡正在把你花了五章找到的那些字一個個改掉。\n\n你要先做什麼？',
       moodText: '你也能被剪裁。\n\n問題不是真相在不在——問題是誰先說出去、說了什麼版本。',
+      ambientAudio: '/audio/bgm/kk_bgm_title_ch6.mp3',
     },
   },
 };

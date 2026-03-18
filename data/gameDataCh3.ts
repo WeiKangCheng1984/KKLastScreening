@@ -249,6 +249,8 @@ const scenes: Record<string, Scene> = {
             },
           },
           { type: 'setFlag', flag: 'ch3_whiteboard_viewed', value: true },
+          { type: 'setFlag', flag: 'ch3_milestone_whiteboard', value: true },
+          { type: 'triggerEvent', eventId: 'ch3_check_report_ready' },
         ],
         oneTime: true,
       },
@@ -349,6 +351,18 @@ const scenes: Record<string, Scene> = {
           },
           { type: 'setFlag', flag: 'ch3_zhou_jie_talked', value: true },
         ],
+        oneTime: true,
+      },
+      {
+        id: 'ch3_check_report_ready',
+        name: '檢查是否可向劉隊報告',
+        description: '第三章里程碑達成後，解鎖向劉隊報告入口。',
+        requirements: [
+          { type: 'hasFlag', flag: 'ch3_milestone_whiteboard', value: true },
+          { type: 'hasFlag', flag: 'ch3_milestone_brand_script', value: true },
+          { type: 'hasFlag', flag: 'ch3_milestone_cross_venue', value: true },
+        ],
+        effects: [{ type: 'setFlag', flag: 'ch3_liu_report_ready', value: true }],
         oneTime: true,
       },
     ],
@@ -467,7 +481,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '宋雅甄說：「現在最重要的是穩定。真相太急著上桌，通常會打翻。」\n\n「一間影城出事是事故，三間一起被聯想，就是品牌問題。」\n\n她停了一下，語氣反而更輕了：「我不是阻止你查。我只是希望你查得像個成年人。」',
+              text: '宋雅甄說：「現在最重要的是穩定。真相太急著上桌，通常會打翻。」\n\n「一間影城出事是事故，三間一起被聯想，就是品牌問題。」\n\n她停了一下，語氣反而更輕了：「我不是阻止你查。我只是希望你查得像個成年人。」\n\n「你要真相，我要明天還能開門。」',
               type: 'character',
               characterId: 'npc_song_yazhen',
               characterName: '宋雅甄（品牌長）',
@@ -488,7 +502,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '張景衡說：「我整理了一份，你會比較好讀。」\n\n「原始資料不是不能看，是看了也未必比這份更真。」\n\n他把那份 log 往你這邊推了一點：「警方要的是可說明，不是可敬畏。」',
+              text: '張景衡說：「我整理了一份，你會比較好讀。」\n\n「原始資料不是不能看，是看了也未必比這份更真。」\n\n他把那份 log 往你這邊推了一點：「警方要的是可說明，不是可敬畏。」\n\n他補了一句，像是在交代流程：「先發出去的那份，就會比較像真的。」',
               type: 'character',
               characterId: 'npc_zhang_jingheng',
               characterName: '張景衡（品牌特助）',
@@ -509,7 +523,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '顧乃謙說：「我只看得到系統做了什麼，看不到誰在撒謊。」\n\n「你要整理版，今天就能結案。你要原始檔，今晚很多人睡不好。」\n\n他低頭看了一眼桌面：「機房那邊有東西要讓你看。先把這裡看完，再去找我。」',
+              text: '顧乃謙說：「我只看得到系統做了什麼，看不到誰在撒謊。」\n\n「你要整理版，今天就能結案。你要原始檔，今晚很多人睡不好。」\n\n他低頭看了一眼桌面：「機房那邊有東西要讓你看。先把這裡看完，再去找我。」\n\n他像是在報欄位：「你到時候別問我『誰』——你先問我『缺哪一欄』。」',
               type: 'character',
               characterId: 'npc_gu_naiqian',
               characterName: '顧乃謙（系統工程）',
@@ -554,6 +568,8 @@ const scenes: Record<string, Scene> = {
             },
           },
           { type: 'setFlag', flag: 'ch3_press_draft_viewed', value: true },
+          { type: 'setFlag', flag: 'ch3_milestone_brand_script', value: true },
+          { type: 'triggerEvent', eventId: 'ch3_check_report_ready' },
         ],
         oneTime: true,
       },
@@ -573,6 +589,18 @@ const scenes: Record<string, Scene> = {
           },
           { type: 'setFlag', flag: 'ch3_brand_report_viewed', value: true },
         ],
+        oneTime: true,
+      },
+      {
+        id: 'ch3_check_report_ready',
+        name: '檢查是否可向劉隊報告',
+        description: '第三章里程碑達成後，解鎖向劉隊報告入口。',
+        requirements: [
+          { type: 'hasFlag', flag: 'ch3_milestone_whiteboard', value: true },
+          { type: 'hasFlag', flag: 'ch3_milestone_brand_script', value: true },
+          { type: 'hasFlag', flag: 'ch3_milestone_cross_venue', value: true },
+        ],
+        effects: [{ type: 'setFlag', flag: 'ch3_liu_report_ready', value: true }],
         oneTime: true,
       },
     ],
@@ -649,7 +677,7 @@ const scenes: Record<string, Scene> = {
         available: true,
       },
       {
-        id: 'npc_xiazhang',
+        id: 'npc_xiaozhang',
         name: '小張（放映員）',
         portraitExpression: 1,
         randomDialogs: [
@@ -719,6 +747,8 @@ const scenes: Record<string, Scene> = {
             },
           },
           { type: 'setFlag', flag: 'ch3_cross_venue_viewed', value: true },
+          { type: 'setFlag', flag: 'ch3_milestone_cross_venue', value: true },
+          { type: 'triggerEvent', eventId: 'ch3_check_report_ready' },
         ],
         oneTime: true,
       },
@@ -759,6 +789,18 @@ const scenes: Record<string, Scene> = {
         oneTime: true,
       },
       {
+        id: 'ch3_check_report_ready',
+        name: '檢查是否可向劉隊報告',
+        description: '第三章里程碑達成後，解鎖向劉隊報告入口。',
+        requirements: [
+          { type: 'hasFlag', flag: 'ch3_milestone_whiteboard', value: true },
+          { type: 'hasFlag', flag: 'ch3_milestone_brand_script', value: true },
+          { type: 'hasFlag', flag: 'ch3_milestone_cross_venue', value: true },
+        ],
+        effects: [{ type: 'setFlag', flag: 'ch3_liu_report_ready', value: true }],
+        oneTime: true,
+      },
+      {
         id: 'talk_xiazhang_ch3',
         name: '問小張',
         description: '詢問放映員小張。',
@@ -769,7 +811,7 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text: '小張說：「大廳牆上寫自動，機房裡還是要人去碰。」\n\n「表上怎麼寫，我就怎麼放。問題是，表不是自己長字。」\n\n他看了看那份維護單：「那種設定不是一般操作員能做的，得有一定的系統權限才行。」',
               type: 'character',
-              characterId: 'npc_xiazhang',
+              characterId: 'npc_xiaozhang',
               characterName: '小張（放映員）',
               characterExpression: 1,
               characterPosition: 'right',

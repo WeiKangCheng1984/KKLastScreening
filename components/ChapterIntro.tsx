@@ -55,8 +55,9 @@ export default function ChapterIntro({ chapter, firstSceneBackground }: ChapterI
 
   // 分層顯示動畫 - 各章節一致
   useEffect(() => {
-    if (!audioManager.getCurrentAmbientPath()) {
-      audioManager.playAmbient(GAME_BGM, 0.5);
+    const targetAmbientPath = chapter.intro.ambientAudio ?? GAME_BGM;
+    if (audioManager.getCurrentAmbientPath() !== targetAmbientPath) {
+      audioManager.playAmbient(targetAmbientPath, 0.5);
     }
 
     const timers = [
@@ -69,7 +70,7 @@ export default function ChapterIntro({ chapter, firstSceneBackground }: ChapterI
     return () => {
       timers.forEach(clearTimeout);
     };
-  }, []);
+  }, [chapter.id, chapter.intro.ambientAudio]);
 
   const handleContinue = () => {
     // 如果有導讀影片且尚未播放，先播放影片

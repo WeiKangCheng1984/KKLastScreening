@@ -1,7 +1,7 @@
 // 音效管理器
 
-/** 全遊戲統一 BGM：從開頭到結局同一首輪播，置於 public/audio/bgm/kk_bgm_title.mp3 */
-export const GAME_BGM = '/audio/bgm/kk_bgm_title.mp3';
+/** 全遊戲預設 BGM（第 1 章沿用原始 kk_bgm_title 的音檔但改檔名） */
+export const GAME_BGM = '/audio/bgm/kk_bgm_title_ch1.mp3';
 
 export class AudioManager {
   private ambientAudio: HTMLAudioElement | null = null;

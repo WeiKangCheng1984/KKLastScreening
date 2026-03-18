@@ -645,6 +645,22 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text: '張景衡把初稿改了三個地方：\n\n「操作異常」改成「系統故障」——讓它看起來是硬體問題，不是人為操作。\n「遠端操作存在可能性」這整句話不見了——這句話是顧乃謙和陳佑誠花了三章才說清楚的東西。\n「高文傑配合調查中」改成「技術維護人員配合調查中」——讓名字從文字裡消失。\n\n他改掉的，就是你花了五章找到的那些字。',
               type: 'narrator',
+              choices: [
+                {
+                  id: 'ch6_pr_accept_edited_brief_choice',
+                  text: '接受張景衡版本（先讓記者會撐過去）',
+                  effects: [
+                    { type: 'setFlag', flag: 'ch6_pr_accept_edited_brief', value: true },
+                  ],
+                },
+                {
+                  id: 'ch6_pr_insist_remote_line_choice',
+                  text: '堅持保留「遠端操作可能性」一句（不讓主語消失）',
+                  effects: [
+                    { type: 'setFlag', flag: 'ch6_pr_insist_remote_line', value: true },
+                  ],
+                },
+              ],
             },
           },
           { type: 'setFlag', flag: 'ch6_zhang_brief_viewed', value: true },
