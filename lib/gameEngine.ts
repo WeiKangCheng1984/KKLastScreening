@@ -16,9 +16,6 @@ export class GameEngine {
       interactions: [],
       visitedScenes: [],
       explorationProgress: {},
-      chapterPuzzleUnlocked: {},
-      score: 0,
-      weights: {},
       choices: [],
       preferences: {
         preference_system_intervention: 0,
@@ -40,15 +37,6 @@ export class GameEngine {
     // 確保新字段存在（向後兼容）
     if (!this.state.explorationProgress) {
       this.state.explorationProgress = {};
-    }
-    if (!this.state.chapterPuzzleUnlocked) {
-      this.state.chapterPuzzleUnlocked = {};
-    }
-    if (this.state.score === undefined) {
-      this.state.score = 0;
-    }
-    if (!this.state.weights) {
-      this.state.weights = {};
     }
     if (!this.state.choices) {
       this.state.choices = [];
@@ -239,37 +227,6 @@ export class GameEngine {
     return {
       effects: event.effects,
       dialog: dialogEffect?.dialog,
-    };
-  }
-
-  // 注意：interactWithHotspot 已廢棄，道具獲取現在統一通過 handleItemCollection 處理
-  // 此方法保留作為後備，但不再自動檢測和添加道具
-  interactWithHotspot(hotspotId: string): { events: any[]; item?: Item } | null {
-    const scene = this.getCurrentScene();
-    if (!scene) return null;
-
-    const hotspot = scene.hotspots.find(h => h.id === hotspotId);
-    if (!hotspot) return null;
-
-    // 先將 hotspot 加入到 interactions（這樣 hasInteracted 檢查才能通過）
-    this.addInteraction(hotspotId);
-
-    const triggeredEvents: any[] = [];
-
-    // 檢查所有事件（但不自動添加道具，道具獲取由事件系統處理）
-    scene.events.forEach(event => {
-      const result = this.triggerEvent(event.id);
-      if (result) {
-        triggeredEvents.push({
-          eventId: event.id,
-          ...result,
-        });
-      }
-    });
-
-    return {
-      events: triggeredEvents,
-      item: undefined, // 不再自動檢測道具
     };
   }
 
@@ -525,42 +482,6 @@ export class GameEngine {
     return this.state.explorationProgress[sceneId];
   }
 
-  // 檢查章節謎題是否解鎖
-  checkChapterPuzzleUnlock(chapterId: string): boolean {
-    const chapter = chapters[chapterId];
-    if (!chapter || !chapter.chapterPuzzle) return false;
-
-    if (!this.state.chapterPuzzleUnlocked) {
-      this.state.chapterPuzzleUnlocked = {};
-    }
-
-    // 如果已經解鎖，直接返回
-    if (this.state.chapterPuzzleUnlocked[chapterId]) {
-      return true;
-    }
-
-    // 計算章節總進度
-    let totalProgress = 0;
-    let sceneCount = 0;
-
-    chapter.scenes.forEach(sceneId => {
-      const progress = this.calculateExplorationProgress(sceneId);
-      totalProgress += progress;
-      sceneCount++;
-    });
-
-    const averageProgress = sceneCount > 0 ? totalProgress / sceneCount : 0;
-    const threshold = chapter.puzzleUnlockThreshold || 75;
-
-    // 達到閾值則解鎖
-    if (averageProgress >= threshold) {
-      this.state.chapterPuzzleUnlocked[chapterId] = true;
-      return true;
-    }
-
-    return false;
-  }
-
   // 記錄玩家選擇
   addChoice(choiceId: string, weight: number = 0): void {
     if (!this.state.choices) {
@@ -574,19 +495,6 @@ export class GameEngine {
     };
 
     this.state.choices.push(choice);
-    
-    // 更新總分數
-    this.state.score = (this.state.score || 0) + weight;
-
-    // 更新權重（根據選擇ID推斷維度）
-    // 例如：choice_rule_follower -> rule_follower 維度
-    const dimension = this.extractDimensionFromChoiceId(choiceId);
-    if (dimension) {
-      if (!this.state.weights) {
-        this.state.weights = {};
-      }
-      this.state.weights[dimension] = (this.state.weights[dimension] || 0) + weight;
-    }
   }
 
   /** 寫入本章推理分析答案（Q1/Q2/Q3），會自動 persist */
@@ -610,32 +518,6 @@ export class GameEngine {
     this.applyEffect({ type: 'setFlag', flag: doneFlag, value: true });
     const navFlag = flagMap[chapterId];
     if (navFlag) this.applyEffect({ type: 'setFlag', flag: navFlag, value: true });
-  }
-
-  // 從選擇ID提取維度名稱
-  private extractDimensionFromChoiceId(choiceId: string): string | null {
-    // 簡單的提取邏輯，可以根據實際需求調整
-    const patterns = [
-      /rule_follower/i,
-      /risk_taker/i,
-      /careful/i,
-      /bold/i,
-      /compassionate/i,
-      /pragmatic/i,
-    ];
-
-    for (const pattern of patterns) {
-      if (pattern.test(choiceId)) {
-        return pattern.source.replace(/[\/i]/g, '').toLowerCase();
-      }
-    }
-
-    return null;
-  }
-
-  // 獲取玩家檔案（各維度權重）
-  getPlayerProfile(): Record<string, number> {
-    return { ...(this.state.weights ?? {}) };
   }
 
   // 處理對話選擇
@@ -824,11 +706,6 @@ export class GameEngine {
     
     this.state.activeNpcDialogId = undefined;
     this.state.activeNpcDialogNodeId = undefined;
-  }
-
-  // 檢查 NPC 是否已訪談
-  hasNpcBeenInterviewed(npcId: string): boolean {
-    return this.hasFlag(`npc_${npcId}_interviewed`);
   }
 
   // === NPC 隨機對話系統 ===

@@ -60,18 +60,10 @@
   .text-ui-title {
     @apply font-heading font-semibold text-base;
   }
-  .text-ui-body {
-    @apply font-body text-[0.95rem] leading-relaxed;
-  }
   /* text-gray-500 在暗背景上對比度僅 ~2.7:1，改用 gray-400（4.5:1，最低 AA） */
   .text-ui-caption {
     @apply font-body text-xs text-gray-400 tracking-wider;
   }
-  /* hint：比 caption 再輕一點的輔助說明，仍保持 AA */
-  .text-ui-hint {
-    @apply font-body text-xs text-gray-400 leading-relaxed;
-  }
-
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -86,18 +78,6 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
-  }
-
-  /* 平滑過渡 */
-  .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* 玻璃態效果 */
-  .glass {
-    background: rgba(26, 26, 26, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
   }
 
   /* 銀灰玻璃互動框（Hotspot 點擊後的文案框，第一～六章統一） */
@@ -196,22 +176,6 @@
     animation: blink 1s step-end infinite;
   }
 
-  /* 從下方滑入動畫 */
-  @keyframes slide-up {
-    from {
-      opacity: 0;
-      transform: translate(-50%, 20px);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.4s ease-out;
-  }
-
   /* 道具獲取動畫 */
   @keyframes item-fly-in {
     0% {
@@ -252,18 +216,6 @@
     animation: puzzle-success 0.6s ease-out;
   }
 
-  /* 粒子擴散效果 */
-  @keyframes particle-burst {
-    0% {
-      transform: scale(0) translate(0, 0);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(1) translate(var(--tx), var(--ty));
-      opacity: 0;
-    }
-  }
-
   /* 閃光效果 */
   @keyframes flash {
     0%, 100% {
@@ -289,20 +241,6 @@
     20%, 40%, 60%, 80% {
       transform: translateX(5px);
     }
-  }
-
-  /* 懸停發光效果 */
-  @keyframes glow-pulse {
-    0%, 100% {
-      box-shadow: 0 0 5px rgba(251, 146, 60, 0.3);
-    }
-    50% {
-      box-shadow: 0 0 20px rgba(251, 146, 60, 0.6);
-    }
-  }
-
-  .animate-glow-pulse {
-    animation: glow-pulse 2s ease-in-out infinite;
   }
 
   /* 淡入淡出過渡 */
@@ -347,20 +285,6 @@
     animation: slide-fade-in 0.4s ease-out;
   }
 
-  /* 電流特效動畫 */
-  @keyframes electric-shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
-  }
-
-  .animate-electric-shimmer {
-    animation: electric-shimmer 0.5s linear;
-  }
-
   /* 浮動提示動畫 */
   @keyframes fade-float {
     0% {
@@ -383,70 +307,10 @@
     animation: fade-float 0.3s ease-out;
   }
 
-  /* 閃電效果動畫 */
-  @keyframes lightning-flash {
-    0% {
-      opacity: 0;
-    }
-    10% {
-      opacity: 1;
-    }
-    20% {
-      opacity: 0.3;
-    }
-    30% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  /* 道具使用動畫 */
-  @keyframes item-use {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(0.9) rotate(-5deg);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-
-  .animate-item-use {
-    animation: item-use 0.3s ease-out;
-  }
-
-  /* 道具品質邊框 */
-  .item-quality-common {
-    border-color: rgba(156, 163, 175, 0.5);
-  }
-
-  .item-quality-rare {
-    border-color: rgba(59, 130, 246, 0.5);
-  }
-
-  .item-quality-epic {
-    border-color: rgba(147, 51, 234, 0.5);
-  }
-
-  .item-quality-legendary {
-    border-color: rgba(251, 146, 60, 0.5);
-  }
-
   /* GPU 加速優化 */
   .gpu-accelerated {
     transform: translateZ(0);
     will-change: transform, opacity;
-  }
-
-  /* 動畫性能優化 */
-  .animate-optimized {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
   }
 
   /* 過渡效果樣式 */
@@ -471,11 +335,6 @@
     }
     .transition-effect {
       will-change: auto;
-    }
-    .animate-optimized {
-      transform: none;
-      backface-visibility: visible;
-      perspective: none;
     }
   }
 }
