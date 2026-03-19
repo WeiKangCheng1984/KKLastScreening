@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import DigitWheel from './DigitWheel';
 
 interface PasswordWheelInputProps {
@@ -10,52 +10,28 @@ interface PasswordWheelInputProps {
 
 const DEFAULT_DIGITS: [number, number, number, number, number, number] = [1, 0, 1, 0, 4, 2];
 
+function parseValueToDigits(value: string): [number, number, number, number, number, number] {
+  return [
+    Number(value[0]),
+    Number(value[1]),
+    Number(value[2]),
+    Number(value[3]),
+    Number(value[4]),
+    Number(value[5]),
+  ] as [number, number, number, number, number, number];
+}
+
 export default function PasswordWheelInput({ value, onChange }: PasswordWheelInputProps) {
-  const [digits, setDigits] = useState<[number, number, number, number, number, number]>(() => {
-    if (value && /^\d{6}$/.test(value)) {
-      return [
-        Number(value[0]),
-        Number(value[1]),
-        Number(value[2]),
-        Number(value[3]),
-        Number(value[4]),
-        Number(value[5]),
-      ] as [number, number, number, number, number, number];
-    }
+  const digits = useMemo<[number, number, number, number, number, number]>(() => {
+    if (value && /^\d{6}$/.test(value)) return parseValueToDigits(value);
     return DEFAULT_DIGITS;
-  });
-
-  const emit = useCallback(
-    (d: [number, number, number, number, number, number]) => {
-      onChange(d.map(String).join(''));
-    },
-    [onChange]
-  );
-
-  const setDigit = useCallback(
-    (index: number, n: number) => {
-      setDigits((prev) => {
-        const next: [number, number, number, number, number, number] = [...prev];
-        next[index] = n;
-        emit(next);
-        return next;
-      });
-    },
-    [emit]
-  );
-
-  useEffect(() => {
-    if (value && value !== digits.map(String).join('') && /^\d{6}$/.test(value)) {
-      setDigits([
-        Number(value[0]),
-        Number(value[1]),
-        Number(value[2]),
-        Number(value[3]),
-        Number(value[4]),
-        Number(value[5]),
-      ] as [number, number, number, number, number, number]);
-    }
   }, [value]);
+
+  const setDigit = useCallback((index: number, n: number) => {
+    const next: [number, number, number, number, number, number] = [...digits];
+    next[index] = n;
+    onChange(next.map(String).join(''));
+  }, [digits, onChange]);
 
   return (
     <div className="rounded-xl border border-white/10 bg-dark-surface/40 p-4 shadow-[inset_0_0_32px_rgba(0,0,0,0.3)] ring-1 ring-white/5 sm:p-5">
