@@ -8,7 +8,7 @@ export interface ChapterConclusionOverlayProps {
 }
 
 /**
- * 章尾結算共用外層：負責遮罩與置中的容器，實際內容交由內部卡片（例如 Ch1ReportEditor、Ch2SentenceCompletion）決定。
+ * 章尾結算共用外層：負責遮罩與置中的容器，實際內容交由內部卡片（例如 Ch1ReportEditor、Ch2ReportEditor、Ch3ReportEditor）決定。
  */
 export default function ChapterConclusionOverlay({ children }: ChapterConclusionOverlayProps) {
   return (

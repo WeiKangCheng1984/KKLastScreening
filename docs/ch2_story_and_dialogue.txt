@@ -2,7 +2,7 @@
   第二章：死者是誰 — 劇情、線索、台詞（與程式一致）
 ================================================================================
 
-  資料來源：data/chapters.ts（ch2 intro）、data/gameDataCh2.ts（場景 scene_ch2_asu_car、道具、事件、阿蘇／劉隊 NPC、ch2QuestionConfigs）、data/getChapterData.ts（getChapterData('ch2') 動態載入）、data/reasoningByChapter.ts（ch2 police introLine、outroStandard、outroPlayerLines）、lib/flowController.ts（show_asu_discuss_case_entry）、app/play/[chapterId]/[sceneId]/page.tsx、components/Ch2SentenceCompletion.tsx（五題填空 modal）。
+  資料來源：data/chapters.ts（ch2 intro）、data/gameDataCh2.ts（場景 scene_ch2_asu_car、道具、事件、阿蘇／劉隊 NPC）、data/ch2ReportConfig.ts（章尾 ch2ReportFillBlanks）、data/getChapterData.ts（getChapterData('ch2') 動態載入）、data/reasoningByChapter.ts（ch2 police introLine、outroStandard、outroPlayerLines）、lib/flowController.ts（show_asu_discuss_case_entry）、app/play/[chapterId]/[sceneId]/page.tsx、components/Ch2ReportEditor.tsx（五題雙格填空 overlay）。
 
 
 --------------------------------------------------------------------------------
@@ -14,9 +14,9 @@
   • 道具取得：點擊 hotspot → handleItemCollection 觸發 examine_* 事件 → addItem + showDialog；取得時顯示道具浮動卡並將阿蘇／旁白 showDialog 排入 dialogQueue。已取得後再次點擊同一 hotspot 觸發 replay_* 事件（僅 showDialog），重新播放說明。
   • 阿蘇閒聊：點阿蘇頭像觸發隨機 randomDialogs。敏感對話為 npc_asu 對話樹（二選一：樓梯間／三起事故來源），走完或關閉對話框時設 npc_asu_sensitive_done；flowController.shouldAllowAction(..., 'show_asu_discuss_case_entry') 為 true 時才顯示「談案情」選項。
   • 談案情（ch2_asu_discuss_case）：玩家選「談案情」後僅顯示敘事提示——「這些話，你之後可以跟劉隊講一次。」「他會想知道你現在看到的是哪一個版本。」不啟動五題 QA；QA 改由劉隊結算入口進入。
-  • 劉隊結算：點劉隊頭像。若尚未 npc_asu_sensitive_done → 劉隊：「先去跟阿蘇把那些話講完。等她講清楚，你再回來跟我說。」若已完成敏感對話 → 劉隊：「好，來說一次你現在看到的版本。」「我們把那幾句話排在一起，看它們指向哪裡。」選項：「我再多看一下現場。」／「好，現在就試著說一次。」選後者 → setShowCh2SentenceCompletion(true)，開啟 Ch2SentenceCompletion 全螢幕模態。
-  • 五題 QA（Ch2SentenceCompletion）：標題「把話補齊」，劉隊把五句殘句攤開，玩家依序選答案。題目來源 ch2QuestionConfigs（q1～q5）與 npc_asu_q1～q5 的 choices 一致；答對寫入 ch2_q*_done / ch2_q*_answer 並顯示阿蘇回應，答錯顯示 wrongFallback。五題全部完成後可關閉 modal，ch2 章末流程依 flag ch2_reasoning_done 等決定。
-  • 場景與對話保留：ch2 僅一景；若 ch2QaActive 為 true（舊版浮動卡流程用），場景切換 effect 不清 currentDialog／dialogQueue、不顯示場景名。目前實際使用為「劉隊 → Ch2SentenceCompletion modal」，不經 ch2QaActive 浮動卡。
+  • 劉隊結算：點劉隊頭像。若尚未 npc_asu_sensitive_done → 劉隊：「先去跟阿蘇把那些話講完。等她講清楚，你再回來跟我說。」若已完成敏感對話 → 劉隊：「好，來說一次你現在看到的版本。」「我們把那幾句話排在一起，看它們指向哪裡。」選項：「我再多看一下現場。」／「好，現在就試著說一次。」選後者 → setShowCh2ReportEditor(true)，開啟 Ch2ReportEditor（ReportFillBlank 雙格五題）全螢幕 overlay。
+  • 五題 QA（Ch2ReportEditor）：題目與浮動選項見 ch2ReportFillBlanks；每題兩格皆選對才進下一題；每題完成時設 ch2_q1_done～ch2_q5_done。五題跑完後設 ch2_qa_reviewed_with_liu、ch2_reasoning_done、navigate_to_ch3_intro，並導向 ch3 intro（與 ch3～ch6 章尾同款流程）。
+  • 場景與對話：ch2 車內為主流程景；章尾為「劉隊 → Ch2ReportEditor」。舊版殘句單選與 npc_asu_q* 對話樹已移除。
 
 
 --------------------------------------------------------------------------------
@@ -304,11 +304,10 @@ KK：「這句『用三起事故來揭』，你覺得誰寫的？」
     • 若尚未完成阿蘇敏感對話（!npc_asu_sensitive_done）：劉隊：「先去跟阿蘇把那些話講完。等她講清楚，你再回來跟我說。」不提供選項，關閉對話後玩家需先與阿蘇完成敏感對話再來。
     • 若已完成阿蘇敏感對話：劉隊：「好，來說一次你現在看到的版本。」「我們把那幾句話排在一起，看它們指向哪裡。」
       選項一：「我再多看一下現場。」（ch2_liu_keep_exploring）→ 關閉對話，繼續探索。
-      選項二：「好，現在就試著說一次。」（ch2_liu_open_qa_conclusion）→ 關閉對話，setShowCh2SentenceCompletion(true)，開啟 Ch2SentenceCompletion 全螢幕模態（五題填空）。
+      選項二：「好，現在就試著說一次。」（ch2_liu_open_qa_conclusion）→ 關閉對話，setShowCh2ReportEditor(true)，開啟 Ch2ReportEditor 全螢幕 overlay（五題雙格填空）。
 
-  五題 QA（Ch2SentenceCompletion）：
-    標題「把話補齊」，副標「劉隊把這幾句話攤開，要你把空格補齊，說出你看到的版本。」
-    q1～q5 依 ch2QuestionConfigs 與 npc_asu_q1～q5 的 choices；答對寫入 ch2_q*_done / ch2_q*_answer、顯示阿蘇回應，答錯顯示 wrongFallback。五題全部完成後可關閉 modal；章末 ch2_reasoning_done 等旗標由 modal 完成流程寫入。
+  五題 QA（Ch2ReportEditor）：
+    題幹與選項定義於 data/ch2ReportConfig.ts（ch2ReportFillBlanks）；每題兩格 correctIds 可多個同義項；兩格都對才寫入該題 ch2_q*_done。五題完成後寫入 ch2_qa_reviewed_with_liu、setReasoningComplete('ch2')（含 ch2_reasoning_done、navigate_to_ch3_intro），頁面導向 ch3 intro。
 
 【劉隊標準結論與玩家補句（reasoningByChapter.ch2.police）】
 

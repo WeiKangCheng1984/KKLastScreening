@@ -1,5 +1,6 @@
 'use client';
 
+import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { Dialog } from '@/types/game';
 import { m, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -15,11 +16,7 @@ export interface HotspotZoomOverlayProps {
   onClose: () => void;
 }
 
-const ZOOM_IN_DURATION = 0.24;
 const ZOOM_OUT_DURATION = 0.19;
-/** 兩段放大：第一段中繼倍率、第二段最終倍率 */
-const ZOOM_MID_SCALE = 1.4;
-const ZOOM_MAX_SCALE = 2.6;
 
 export default function HotspotZoomOverlay({
   visible,
@@ -130,7 +127,7 @@ export default function HotspotZoomOverlay({
             transition={{ duration: 0.2 }}
           />
 
-          {/* 對話框層：僅在 dialog 階段顯示 */}
+          {/* 對話 + 場景立繪：與 play 頁 BottomDock 一致，立繪不畫在對話框內（全螢幕 overlay 需自繪一層） */}
           <AnimatePresence mode="wait">
             {phase === 'dialog' && dialogWithTitle && (
               <m.div
@@ -139,14 +136,40 @@ export default function HotspotZoomOverlay({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="absolute inset-0 flex items-end justify-center p-4 md:items-center md:p-8"
+                className="absolute inset-0"
               >
-                <DialogBox
-                  dialog={dialogWithTitle}
-                  onClose={handleDialogClose}
-                  typewriterSpeed={30}
-                  variant="hotspot"
-                />
+                {dialogWithTitle.characterId ? (
+                  <div
+                    className={`pointer-events-none absolute inset-0 z-[6] flex items-end ${
+                      dialogWithTitle.characterPosition === 'right' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    <img
+                      src={getNpcPortraitUrl(
+                        dialogWithTitle.characterId,
+                        dialogWithTitle.characterExpression ?? 1
+                      )}
+                      alt={dialogWithTitle.characterName ?? ''}
+                      className={`h-[38%] w-auto max-w-[42%] object-contain object-bottom drop-shadow-2xl select-none ${
+                        dialogWithTitle.characterPosition === 'right' ? 'mr-0' : 'ml-0'
+                      }`}
+                      style={
+                        dialogWithTitle.characterPosition === 'right'
+                          ? { marginRight: '1%' }
+                          : { marginLeft: '1%' }
+                      }
+                    />
+                  </div>
+                ) : null}
+                <div className="absolute inset-0 z-20 flex items-end justify-center p-4 md:items-center md:p-8">
+                  <DialogBox
+                    dialog={dialogWithTitle}
+                    onClose={handleDialogClose}
+                    typewriterSpeed={30}
+                    variant="hotspot"
+                    portraitOnScene={!!dialogWithTitle.characterId}
+                  />
+                </div>
               </m.div>
             )}
           </AnimatePresence>

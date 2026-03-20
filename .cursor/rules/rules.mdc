@@ -38,7 +38,7 @@ alwaysApply: true
 
 ### 分章資料（scenes/items/npcDialogs）
 - **入口**：`data/getChapterData.ts`
-- **回傳結構**：`{ scenes, items, npcDialogs, ch2QuestionConfigs? }`
+- **回傳結構**：`{ scenes, items, npcDialogs }`
 - **載入策略**：依 `chapterId` 動態 import `data/gameDataChX.ts`，縮小首包
 
 ### Play 頁如何載入
@@ -46,7 +46,7 @@ alwaysApply: true
 - **流程**：
   1. `getChapterData(chapterId)` → `engine.loadChapterData(data)`
   2. `engine.applyEffect({ type: 'changeScene', chapterId, sceneId })`
-  3. 若是 `ch2`，會帶入 `ch2QuestionConfigs` 與 `npcDialogs` 給第二章結算流程用
+  3. `ch2` 與其他章相同，僅注入 `scenes/items/npcDialogs`；章尾雙格題讀 `data/ch2ReportConfig.ts`
 
 ---
 
@@ -109,9 +109,9 @@ alwaysApply: true
   - 一次必須完成 **5 題**（index 0~4）
   - `ReportFillBlank` 必須帶 `key`（依題號），避免 React 沿用上一題內部 state 造成「只做一題就全過」。
 
-### 第二章：劉隊結算（殘句/填答流程）
-- **元件**：`components/Ch2SentenceCompletion.tsx`
-- **資料來源**：`data/gameDataCh2.ts` 的 `ch2QuestionConfigs`（由 `getChapterData('ch2')` 帶出）
+### 第二章：向劉隊報告（5 題雙格填空）
+- **元件**：`components/Ch2ReportEditor.tsx`（`ReportFillBlank`）
+- **配置**：`data/ch2ReportConfig.ts` → `ch2ReportFillBlanks`
 
 ---
 
@@ -146,7 +146,7 @@ alwaysApply: true
 - **注意**：每題必須重置 state（`key` 依題號）
 
 #### 模組 B：殘句推理（句子完成）+ 劉隊追問回應
-- **形式**：每題選一段短語補句 → 立刻顯示劉隊追問/反問 → 再進下一題（可沿用 `Ch2SentenceCompletion` 的節奏）
+- **形式**：每題選一段短語補句 → 立刻顯示劉隊追問/反問 → 再進下一題（章節可自訂節奏；ch2 已改為雙格填空）
 - **適用**：證據量大、需要逐題拆解的章（比較「盤問」而非「填空」）
 - **過關**：答完全部題目，或「正確題數 >= 門檻」（依章難度設定）
 
@@ -172,11 +172,10 @@ alwaysApply: true
 
 > 不先綁死劇情細節，先定「報告的破關邏輯」：玩家到底要向劉隊交出哪一種結論。
 
-### 第二章（ch2）：五題殘句結算（現況延伸）
-- **建議模組**：B（殘句推理）
-- **主題手感**：像盤問口供，一題一題逼近矛盾點
-- **里程碑例**：`ch2_milestone_process`、`ch2_milestone_deadzone`、`ch2_milestone_motive`
-- **結語**：依玩家答題偏向，劉隊只說一句「先留證」，KK 補一句「先留命」
+### 第二章（ch2）：五題雙格填空（現況）
+- **實作**：`Ch2ReportEditor` + `data/ch2ReportConfig.ts`（`ReportFillBlank`，與 ch3～ch6 同款）
+- **主題手感**：把手機裡的句子補成「能對劉隊說的版本」，兩格對齊才算一題過關
+- **旗標**：`ch2_q1_done`～`ch2_q5_done`、`ch2_qa_reviewed_with_liu`、`ch2_reasoning_done`
 
 ### 第三章（ch3）：三題「反證」報告（把錯的說法排掉）
 - **建議模組**：A（雙格填空）但縮成 3 題

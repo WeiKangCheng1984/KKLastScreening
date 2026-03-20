@@ -72,12 +72,16 @@ export function shouldAllowAction(
     case 'open_report_editor':
       if (chapterId !== 'ch1') return false;
       // 已經結算過 ch1 的話，不再顯示報告入口
-      return milestones.ch1.canEnterReport && !milestones.ch1.reasoningDone;
+      if (milestones.ch1.reasoningDone) return false;
+      if (!!getFlags(state).dev_unlock_liu_report) return true;
+      return milestones.ch1.canEnterReport;
 
     case 'show_asu_discuss_case_entry':
       if (chapterId !== 'ch2') return false;
       // 只有阿蘇敏感對話完成後，才顯示「談案情」入口；完成整章後就不再出現
-      return !!getFlags(state).npc_asu_sensitive_done && !milestones.ch2.reasoningDone;
+      if (milestones.ch2.reasoningDone) return false;
+      if (!!getFlags(state).dev_unlock_liu_report) return true;
+      return !!getFlags(state).npc_asu_sensitive_done;
 
     case 'start_ch2_qa':
       if (chapterId !== 'ch2') return false;

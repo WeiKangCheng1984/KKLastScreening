@@ -2,7 +2,8 @@
 
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { DialogChoice, ConversationTurn } from '@/types/game';
-import React, { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { dialogTextToEffectiveSegments } from '@/lib/dialogSegmentUtils';
 import CharacterConversationCard from './CharacterConversationCard';
 
 export interface CharacterConversationProps {
@@ -25,13 +26,30 @@ export default function CharacterConversation({
   className = '',
 }: CharacterConversationProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [segmentIndex, setSegmentIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const typewriterIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const currentTurn = conversation[currentIndex];
 
-  // 打字機效果
+  const turnSegments = useMemo(
+    () => dialogTextToEffectiveSegments(currentTurn?.text, undefined),
+    [currentTurn?.text]
+  );
+  const typewriterSourceText = useMemo(() => {
+    if (!currentTurn) return '';
+    if (turnSegments && turnSegments.length > 0) {
+      return turnSegments[Math.min(segmentIndex, turnSegments.length - 1)] ?? '';
+    }
+    return currentTurn.text;
+  }, [currentTurn, turnSegments, segmentIndex]);
+
+  useEffect(() => {
+    setSegmentIndex(0);
+  }, [currentIndex, currentTurn?.text]);
+
+  // 打字機效果（支援同 turn 內 \n\n 多段，與 DialogBox 規則一致）
   useEffect(() => {
     if (!currentTurn) return;
 
@@ -48,12 +66,13 @@ export default function CharacterConversation({
     const delay = currentTurn.delay || 0;
     
     const startTypewriter = () => {
-      let currentIndex = 0;
+      let charIndex = 0;
+      const full = typewriterSourceText;
 
       const typeInterval = setInterval(() => {
-        if (currentIndex < currentTurn.text.length) {
-          setDisplayText(currentTurn.text.slice(0, currentIndex + 1));
-          currentIndex++;
+        if (charIndex < full.length) {
+          setDisplayText(full.slice(0, charIndex + 1));
+          charIndex++;
         } else {
           setIsComplete(true);
           clearInterval(typeInterval);
@@ -80,7 +99,7 @@ export default function CharacterConversation({
         clearInterval(typewriterIntervalRef.current);
       }
     };
-  }, [currentTurn, typewriterSpeed, conversation.length]);
+  }, [currentTurn, typewriterSourceText, typewriterSpeed, conversation.length]);
 
   // 通知父層當前 turn（供 play 頁在場景上繪製立繪）；用 useLayoutEffect 在繪製前更新，避免閃爍
   useLayoutEffect(() => {
@@ -91,14 +110,21 @@ export default function CharacterConversation({
 
   // 處理下一段對話（兩段式：先補完本句，再往下）
   const handleNext = useCallback(() => {
-    // 還在打字時：先補完本句，不前進
+    // 還在打字時：先補完本段，不前進
     if (!isComplete && currentTurn) {
       if (typewriterIntervalRef.current) {
         clearInterval(typewriterIntervalRef.current);
         typewriterIntervalRef.current = null;
       }
-      setDisplayText(currentTurn.text);
+      setDisplayText(typewriterSourceText);
       setIsComplete(true);
+      return;
+    }
+
+    const hasMoreSegments =
+      turnSegments && turnSegments.length > 1 && segmentIndex < turnSegments.length - 1;
+    if (hasMoreSegments) {
+      setSegmentIndex((s) => s + 1);
       return;
     }
 
@@ -113,7 +139,15 @@ export default function CharacterConversation({
         return prev;
       }
     });
-  }, [conversation.length, onComplete, isComplete, currentTurn]);
+  }, [
+    conversation.length,
+    onComplete,
+    isComplete,
+    currentTurn,
+    turnSegments,
+    segmentIndex,
+    typewriterSourceText,
+  ]);
 
   // 處理選擇
   const handleChoice = (choice: DialogChoice) => {
@@ -131,9 +165,18 @@ export default function CharacterConversation({
 
   const isPlayer = currentTurn.speaker === 'player';
   const isLastTurn = currentIndex === conversation.length - 1;
-  const showChoices = Boolean(isLastTurn && finalChoices && finalChoices.length > 0);
-  // 繼續按鈕顯示條件：對話完成 + 不是最後一段 + 沒有選擇題
-  const showContinue = isComplete && !isLastTurn && !showChoices;
+  const isLastSegmentOfTurn =
+    !turnSegments || segmentIndex >= turnSegments.length - 1;
+  const showChoices = Boolean(
+    isLastTurn && isLastSegmentOfTurn && isComplete && finalChoices && finalChoices.length > 0
+  );
+  const hasMoreSegmentsInTurn =
+    Boolean(turnSegments && turnSegments.length > 1 && segmentIndex < turnSegments.length - 1);
+  // 同 turn 還有下一段，或已完成本 turn 且還有下一 turn，且未進入最終選擇題
+  const showContinue =
+    isComplete &&
+    !showChoices &&
+    (hasMoreSegmentsInTurn || (!isLastTurn && isLastSegmentOfTurn));
 
   // 優先使用 WEBP（characterId + characterExpression），其次 characterPortrait（SVG）
   const portraitWebpUrl = currentTurn.characterId

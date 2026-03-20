@@ -132,10 +132,10 @@ export function getNpcClickBehaviour(chapterId: string, ctx: NpcContext): NpcBeh
           type: 'sensitive_gate',
           payload: {
             npcId,
-            text: '妳覺得氣氛已經沉到一個程度，可以試著往深一點問。',
+            text: '阿蘇敲了一下機殼，像在問你：今晚要當記者，還是當共犯。你可以把話往深裡捅一次。',
             choices: [
-              { id: 'asu_sensitive_ask', text: '我想問一些比較敏感的問題。' },
-              { id: 'asu_sensitive_skip', text: '先看資料就好，暫時不問。' },
+              { id: 'asu_sensitive_ask', text: '我想把話問深一點。' },
+              { id: 'asu_sensitive_skip', text: '先消化資料，暫時不碰。' },
             ],
           },
         };

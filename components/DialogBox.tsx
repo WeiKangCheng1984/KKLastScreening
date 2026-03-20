@@ -3,7 +3,8 @@
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { Dialog, DialogChoice, NpcDialogChoice } from '@/types/game';
 import { X, SkipForward } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { dialogTextToEffectiveSegments } from '@/lib/dialogSegmentUtils';
 import SVGImage from './SVGImage';
 import DialogChoiceComponent from './DialogChoice';
 
@@ -48,15 +49,27 @@ export default function DialogBox({
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const typewriterIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const textSegments = dialog.textSegments && dialog.textSegments.length > 0 ? dialog.textSegments : null;
-  const currentSegmentText = textSegments
-    ? textSegments[Math.min(currentSegmentIndex, textSegments.length - 1)]
-    : dialog.text;
+  /** 以內容為鍵，避免父層每次 render 傳新 textSegments 陣列參考導致 useMemo 失效、索引被重置 */
+  const explicitSegmentsKey =
+    dialog.textSegments && dialog.textSegments.length > 0
+      ? dialog.textSegments.join('\u0001')
+      : null;
+
+  const effectiveTextSegments = useMemo(
+    () => dialogTextToEffectiveSegments(dialog.text, dialog.textSegments),
+    [dialog.text, explicitSegmentsKey]
+  );
+  const currentSegmentText = effectiveTextSegments
+    ? effectiveTextSegments[Math.min(currentSegmentIndex, effectiveTextSegments.length - 1)]
+    : (dialog.text ?? '');
+
+  /** 多段分頁閱讀時單段通常較短，不必再限制內文區高度造成雙重捲動 */
+  const isPagedParagraphs = Boolean(effectiveTextSegments && effectiveTextSegments.length > 1);
 
   // 對話節點變更時重置分段索引
   useEffect(() => {
     setCurrentSegmentIndex(0);
-  }, [dialog.text, dialog.textSegments?.[0]]);
+  }, [dialog.text, explicitSegmentsKey]);
 
   useEffect(() => {
     setIsVisible(true);
@@ -103,8 +116,10 @@ export default function DialogBox({
     };
   }, [currentSegmentText, typewriterSpeed]);
 
-  const isLastSegment = !textSegments || currentSegmentIndex >= textSegments.length - 1;
-  const showSegmentContinue = Boolean(textSegments && textSegments.length > 1 && isComplete && !isLastSegment);
+  const isLastSegment = !effectiveTextSegments || currentSegmentIndex >= effectiveTextSegments.length - 1;
+  const showSegmentContinue = Boolean(
+    effectiveTextSegments && effectiveTextSegments.length > 1 && isComplete && !isLastSegment
+  );
 
   const handleSegmentContinue = () => {
     setCurrentSegmentIndex((prev) => prev + 1);
@@ -172,8 +187,10 @@ export default function DialogBox({
   /* 建議三：統一暗色底 + 左側色條區分類型；variant=hotspot 時改為銀灰玻璃互動框（第一～六章統一） */
   const getTypeStyles = () => {
     if (variant === 'hotspot') {
+      const glass =
+        portraitOnScene && dialog.characterId ? 'hotspot-glass-npc' : 'hotspot-glass';
       return {
-        container: 'hotspot-glass text-gray-100 w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4 shadow-2xl',
+        container: `${glass} text-gray-100 w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4 shadow-2xl`,
         icon: 'text-slate-500',
         pulse: ''
       };
@@ -205,12 +222,20 @@ export default function DialogBox({
   const styles = getTypeStyles();
 
   const isEmbedded = embedInParent;
+  /** Hotspot 全螢幕框 + 立繪在場景上：與 play 頁 BottomDock 同寬度縮排，避免框與立繪重疊 */
+  const hotspotScenePortraitLayout =
+    variant === 'hotspot' && portraitOnScene && !!dialog.characterId && !embedInParent;
+  const portraitSide: 'left' | 'right' = dialog.characterPosition === 'right' ? 'right' : 'left';
 
   return (
     <div 
       className={`transition-opacity duration-500 ${
         isEmbedded
           ? 'w-full h-full flex items-end justify-end p-2 md:p-3 pointer-events-none'
+          : hotspotScenePortraitLayout
+          ? `fixed inset-0 z-50 flex items-end pointer-events-none p-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-6 md:pb-8 ${
+              portraitSide === 'left' ? 'justify-end' : 'justify-start'
+            }`
           : `fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8 md:pb-8 ${
               reserveBottomSpace
                 ? 'pb-[calc(3.5rem+max(1rem,env(safe-area-inset-bottom)))] md:pb-8'
@@ -230,6 +255,14 @@ export default function DialogBox({
       } ${
         isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-4 opacity-0 scale-95'
       }`}
+      style={
+        hotspotScenePortraitLayout
+          ? {
+              /* 預留一側給場景立繪（約 38vw），與 play 頁 BottomDock 視覺一致 */
+              maxWidth: 'min(360px, calc(100vw - 38vw - 1.25rem))',
+            }
+          : undefined
+      }
       >
         {/* 標題欄 - 嵌在場景時縮小；手機 0.6em + 更小 padding/gap */}
         <div className={`flex justify-between items-center border-b border-white/10 flex-shrink-0 gap-2 ${
@@ -298,7 +331,7 @@ export default function DialogBox({
           title={canClickToContinue ? '點擊繼續' : undefined}
           onClick={canClickToContinue ? handleContentClick : undefined}
           onKeyDown={canClickToContinue ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleContentClick(); } } : undefined}
-          className={`flex gap-3 min-h-0 flex-1 overflow-y-auto ${isEmbedded ? 'gap-1.5 mb-0.5 md:gap-2 md:mb-1' : 'mb-3'} ${canClickToContinue ? 'cursor-pointer' : ''} ${
+          className={`flex gap-3 min-h-0 flex-1 ${isPagedParagraphs && !isEmbedded ? 'overflow-y-visible' : 'overflow-y-auto'} ${isEmbedded ? 'gap-1.5 mb-0.5 md:gap-2 md:mb-1' : 'mb-3'} ${canClickToContinue ? 'cursor-pointer' : ''} ${
           portraitShownInline ? (
             dialog.characterPosition === 'right' ? 'flex-row-reverse' : 'flex-row'
           ) : (
@@ -360,8 +393,12 @@ export default function DialogBox({
           )}
 
           {/* 對話文字內容 - 建議一：手機 text-base 避免溢出，桌面 text-lg；max-h 預留安全區 */}
-          <div className={`flex-1 leading-relaxed min-h-[3rem] whitespace-pre-line overflow-y-auto ${
-            isEmbedded ? 'min-h-0 max-h-none text-[0.82em] md:text-[0.9em]' : 'text-base md:text-lg max-h-[min(50vh,calc(100vh-8rem-env(safe-area-inset-bottom)))] md:max-h-none'
+          <div className={`flex-1 leading-relaxed min-h-[3rem] whitespace-pre-line ${
+            isEmbedded
+              ? 'min-h-0 max-h-none overflow-y-auto text-[0.82em] md:text-[0.9em]'
+              : isPagedParagraphs
+                ? 'text-base md:text-lg max-h-none overflow-visible md:max-h-none'
+                : 'text-base md:text-lg overflow-y-auto max-h-[min(65vh,calc(100vh-7rem-env(safe-area-inset-bottom)))] md:max-h-none'
           } ${dialog.svgImage && (dialog.svgPosition === 'top' || dialog.svgPosition === 'bottom') ? 'order-2' : ''}`}>
           {displayText.split('').map((char, index) => {
             // 高亮顯示當前字符（打字機效果增強）

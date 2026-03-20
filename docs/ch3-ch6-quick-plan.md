@@ -20,12 +20,10 @@
 - **資料結構**：`TwoBlankFillConfig`（`components/FloatingFillBlankCore.ts`）
 - **過關**：兩格都在各自 `correctIds` 內才算過；可多組正解；可針對特定錯誤選項顯示專屬回饋（`wrongRepliesByChoiceId`）。
 
-### 模組 B：殘句推理（ch2 版本）
-- **元件**：`components/Ch2SentenceCompletion.tsx`
-- **資料來源**：`ch2QuestionConfigs`（由 `getChapterData('ch2')` 帶出）
-- **節奏**：一題一題補句 → 回饋 → 下一題。
+### 模組 B：殘句推理（選配／舊 ch2 節奏）
+- **說明**：ch2 章尾已改為與 ch1/ch3 相同的**雙格填空**（`Ch2ReportEditor` + `ch2ReportConfig`）。若某章要「單格殘句 + 一題一回饋」，可另做小型元件 + config，不必再綁 `getChapterData` 額外欄位。
 
-> 快速策略：ch3～ch6 章尾只要選用 A 或 B（必要時縮成 3 題），就能在不擴張 page.tsx 的前提下做出「像 ch1 / ch2」的順暢體驗。
+> 快速策略：ch3～ch6 章尾以模組 A（雙格）為主；必要時縮成 3 題。
 
 ---
 
@@ -56,13 +54,13 @@
 - `reportConfig` 指向上述 `ch3ReportConfig`…`ch6ReportConfig`。
 
 ### 3) Play 頁只做「打開對應章尾 overlay」
-維持現況的開關 state（類似 ch1 用 `showCh1ReportEditor`、ch2 用 `showCh2SentenceCompletion`）。
+維持現況的開關 state（類似 ch1 用 `showCh1ReportEditor`、ch2 用 `showCh2ReportEditor`）。
 
 快速交付版本建議：
 - ch3～ch6 先做 **一個共用 overlay**：`components/ChapterReportOverlay.tsx`
   - 讀 `reportConfig.reportMode`
   - `two_blank`：用 `ReportFillBlank` 逐題跑（3 題或 5 題）
-  - `sentence_completion`：可直接沿用 `Ch2SentenceCompletion` 的流程（但把資料改成來自 reportConfig）
+  - `sentence_completion`：若需殘句節奏可另做專用元件（資料來自 reportConfig）
   - 完成後設 `doneFlagId=true`，呼叫 `onComplete()`（導向下一章 intro）
 
 > 若你想更快：可以先不做共用 overlay，先複製 ch1/ch2 的章尾元件各做一份 ch3～ch6；但長期會膨脹。這份規劃以「最少新增但避免複製爆炸」為主。

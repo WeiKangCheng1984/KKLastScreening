@@ -11,7 +11,7 @@
 - **主遊玩頁** `app/play/[chapterId]/[sceneId]/page.tsx` 約 4900+ 行、56 個 import、60+ 個 useState/useCallback/useEffect，職責過重。
 - **章節／NPC 邏輯** 以 `chapterId === 'ch1'`、`npcId === 'npc_lin_ruitang'` 等硬編碼散落在 page 多處（約 15+ 處）。
 - **謎題渲染** 為一長串 `currentPuzzle.type === 'xxx' ? <XxxPuzzle ... /> : ...`，新增謎題類型需改動主頁。
-- **填空 UI**：`Ch2SentenceCompletion`（劉隊結算）、`ReportFillBlank`（ch1 態度五題雙格填空）等，題目來源依章節設定。
+- **填空 UI**：`Ch2ReportEditor`／`Ch3ReportEditor`…（章尾雙格）、`ReportFillBlank`（共用題型），題目來源為各章 `*ReportConfig.ts`。
 - **資料檔** 分散：play 頁直接 import 多個 data 檔，缺少「依 chapterId 取得本章設定」的單一入口。
 
 ### 1.2 本計畫涵蓋項目
@@ -31,7 +31,7 @@
 | 步驟 | 內容 |
 |------|------|
 | 0.1 | 執行 `npm run build`，確認目前專案可成功建置。 |
-| 0.2 | 手動跑一輪 ch1（進入場景、NPC 閒聊、敏感對話、劉隊報告入口、Ch1ReportEditor 完成）與 ch2（車內線索、阿蘇敏感、劉隊結算、Ch2SentenceCompletion 五題），確認主線行為正常。 |
+| 0.2 | 手動跑一輪 ch1（進入場景、NPC 閒聊、敏感對話、劉隊報告入口、Ch1ReportEditor 完成）與 ch2（車內線索、阿蘇敏感、劉隊結算、Ch2ReportEditor 五題雙格），確認主線行為正常。 |
 | 0.3 | 建議為 `app/play/[chapterId]/[sceneId]/page.tsx` 建立 git 分支或標籤，方便比對與還原。 |
 
 **完成標準**：build 通過、主線 ch1/ch2 流程可完整跑通。
@@ -69,25 +69,25 @@
 
 ### 4.1 目標
 
-讓 `Ch2SentenceCompletion`（劉隊結算、五題）與 `ReportFillBlank`（ch1 態度雙格填空等）共用同一套「題目 + 選項 + 對錯回饋」的 UI 與狀態邏輯，差別僅由 props（題目來源、是否寫 engine、完成回調）控制。（註：獨立填空測試按鈕與 `TestFloatingFillBlank` 已移除。）
+ch1／ch2／ch3～ch6 章尾已統一走 `ReportFillBlank` + 各章 `*ReportEditor`；本階段目標改為：避免再新增平行填空實作、新章僅加 config。（註：獨立填空測試按鈕與 `TestFloatingFillBlank` 已移除。）
 
 ### 4.2 步驟
 
 | 步驟 | 內容 | 備註 |
 |------|------|------|
 | 2.1 | **共用元件**：沿用既有 `FloatingFillBlankCore.ts` 型別與 `ReportFillBlank` 雙格填空 UI。必要時擴充為 Ch2 五題輪流可複用。 | 介面需滿足 Ch2 五題與 ch1 態度五題雙格填空等用法。 |
-| 2.2 | **改寫** `components/Ch2SentenceCompletion.tsx`。改為使用共用填空核心，外殼負責：五題輪流、寫入旗標／engine、進度、onComplete 關閉與導向。 | 保持對 `ch2QuestionConfigs`、完成後 setReasoningComplete 等行為。 |
-| 2.3 | 執行 `npm run build`。測試 ch2 劉隊結算完成五題、ch1 報告態度五題填空，確認無 regression。 | 可對照 `ch2QuestionConfigs` 與 ch1AttitudeFillBlanks 逐題檢查。 |
+| 2.2 | **（已完成）** `components/Ch2ReportEditor.tsx` + `data/ch2ReportConfig.ts`，與 ch1/ch3 同款雙格流程。 | 旗標 `ch2_q*_done`、`ch2_qa_reviewed_with_liu`、`setReasoningComplete('ch2')`。 |
+| 2.3 | 執行 `npm run build`。測試 ch2 劉隊結算完成五題、ch1 報告態度五題填空，確認無 regression。 | 可對照 `ch2ReportFillBlanks` 與 ch1AttitudeFillBlanks 逐題檢查。 |
 
 ### 4.3 產出與驗收
 
-- **產出**：填空核心由 Ch2SentenceCompletion、ReportFillBlank 等共用，邏輯不重複。
+- **產出**：章尾填空以 ReportFillBlank 為單一核心，各章 *ReportEditor 為薄包裝。
 - **驗收**：build 通過；ch2 五題流程與 ch1 態度填空流程皆正常。
 
 ### 4.4 涉及檔案
 
 - 沿用：`components/FloatingFillBlankCore.ts`、`components/ReportFillBlank.tsx`
-- 修改：`components/Ch2SentenceCompletion.tsx`（視需要）
+- 沿用：`components/Ch2ReportEditor.tsx`、`data/ch2ReportConfig.ts`
 
 ---
 
@@ -103,7 +103,7 @@
 |------|------|------|
 | 3.1 | **新增** `lib/chapterBehaviours.ts`（或 `data/chapterBehaviours.ts`）。導出函式如 `getNpcClickBehaviour(chapterId, npcId, context)`，其中 context 至少包含：engine state（或 getState() 的關鍵欄位：flags、inventory、npcCasualTalkCount 等）。回傳型別可為：`{ type: 'random_dialog' | 'sensitive_gate' | 'liu_report' | 'ch2_liu_qa' | 'ch2_asu_*' | ... ; payload?: { dialog?, gate?, ... } }`，供 page 依 type 執行對應動作（setCurrentDialog、setSensitiveGate、開啟報告／QA 等）。 | 先以 ch1 四 NPC + ch2 阿蘇、劉隊為實作範圍；其餘章節可後補或回傳 default。 |
 | 3.2 | 將 page 內 **ch1 四名 NPC**（林瑞堂、阿順、小張、周姊）的點擊分支改為：呼叫 `getNpcClickBehaviour(chapterId, npcId, context)`，再根據回傳的 type 與 payload 執行 setCurrentDialog / setSensitiveGate / incrementNpcCasualTalk 等。 | 保持現有「閒聊次數 ≥ 3、觀察旗標、敏感對話完成」等條件不變，僅將判斷與結果集中到行為表。 |
-| 3.3 | 將 page 內 **ch2 阿蘇、劉隊** 的點擊分支同樣改為依 `getNpcClickBehaviour` 回傳結果處理。 | 含阿蘇敏感門檻、談案情入口、劉隊「先去跟阿蘇講完」／「好，來說一次」與開啟 Ch2SentenceCompletion 等。 |
+| 3.3 | 將 page 內 **ch2 阿蘇、劉隊** 的點擊分支同樣改為依 `getNpcClickBehaviour` 回傳結果處理。 | 含阿蘇敏感門檻、談案情入口、劉隊「先去跟阿蘇講完」／「好，來說一次」與開啟 Ch2ReportEditor 等。 |
 | 3.4 | 視需要將「劉隊開場」「敏感完成後劉隊中段問候」等邏輯一併收納到同一模組（或同檔的 helper），避免仍散落在 page 的 useEffect／回調中。 | 若目前由 reasoningByChapter + 旗標驅動，可改為由 chapterBehaviours 導出「該不該播劉隊開場／中段」的判斷。 |
 | 3.5 | 執行 `npm run build`。手動跑 ch1 全 NPC（閒聊、敏感門檻、敏感對話、劉隊中段、報告入口）與 ch2（阿蘇閒聊、敏感、劉隊結算），確認行為與改動前一致。 | 重點：敏感 gate 出現時機、報告／QA 入口出現時機、對話內容不變。 |
 

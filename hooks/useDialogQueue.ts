@@ -1,18 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Dialog } from '@/types/game';
 
 export interface UseDialogQueueOptions {
   sceneViewRef?: React.RefObject<{ triggerFlicker: (mode: 'light' | 'strong' | 'intense') => void } | null>;
-  ch2QaActive?: boolean;
-  ch2QaPhase?: 'idle' | 'prompt' | 'choices' | 'feedback';
-  setCh2QaPhase?: (phase: 'idle' | 'prompt' | 'choices' | 'feedback') => void;
-  onShowNextQaPrompt?: () => void;
 }
 
 export function useDialogQueue(options: UseDialogQueueOptions = {}) {
-  const { sceneViewRef, ch2QaActive, ch2QaPhase, setCh2QaPhase, onShowNextQaPrompt } = options;
+  const { sceneViewRef } = options;
 
   const [currentDialog, setCurrentDialog] = useState<Dialog | null>(null);
   const [dialogQueue, setDialogQueue] = useState<Dialog[]>([]);
@@ -61,14 +57,6 @@ export function useDialogQueue(options: UseDialogQueueOptions = {}) {
     [sceneViewRef],
   );
 
-  useEffect(() => {
-    if (!ch2QaActive || ch2QaPhase !== 'prompt') return;
-    if (currentDialog != null || dialogQueue.length > 0) return;
-    if (!setCh2QaPhase) return;
-    const t = setTimeout(() => setCh2QaPhase('choices'), 150);
-    return () => clearTimeout(t);
-  }, [ch2QaActive, ch2QaPhase, currentDialog, dialogQueue.length, setCh2QaPhase]);
-
   const handleDialogCloseBase = useCallback(
     (onQueueEmpty?: () => void) => {
       if (currentDialog?.characterId && dialogQueue.length > 0) {
@@ -98,18 +86,11 @@ export function useDialogQueue(options: UseDialogQueueOptions = {}) {
           return prev.slice(1);
         } else {
           if (onQueueEmpty) onQueueEmpty();
-          if (ch2QaActive && setCh2QaPhase) {
-            if (ch2QaPhase === 'prompt') {
-              setCh2QaPhase('choices');
-            } else if (ch2QaPhase === 'feedback' && onShowNextQaPrompt) {
-              onShowNextQaPrompt();
-            }
-          }
           return prev;
         }
       });
     },
-    [currentDialog, dialogQueue, sceneViewRef, ch2QaActive, ch2QaPhase, setCh2QaPhase, onShowNextQaPrompt],
+    [currentDialog, dialogQueue, sceneViewRef],
   );
 
   return {

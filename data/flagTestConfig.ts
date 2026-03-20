@@ -15,6 +15,16 @@ export interface FlagGroup {
 
 export const flagTestGroups: FlagGroup[] = [
   {
+    chapterId: 'dev',
+    chapterName: '測試／全域',
+    flags: [
+      {
+        id: 'dev_unlock_liu_report',
+        label: '【測試】各章可直接向劉隊報告（略過報告前置與敏感門檻）',
+      },
+    ],
+  },
+  {
     chapterId: 'ch1',
     chapterName: '第一章',
     flags: [

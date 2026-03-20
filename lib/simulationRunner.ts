@@ -85,13 +85,12 @@ function checkSceneGate(
       return { blocked: true, reason: '需先與劉隊談過任務 (ch2_task_from_liu)' };
     }
     if (targetSceneId === 'scene_ch2_asu_desktop') {
-      const coreHotspots = [
-        'hotspot_car_unknown_chat', 'hotspot_car_notepad',
-        'hotspot_car_recording', 'hotspot_car_location',
-      ];
-      const interactedCount = coreHotspots.filter((id) => engine.hasInteracted(id)).length;
-      if (!flags.ch2_task_from_liu || interactedCount < 3) {
-        return { blocked: true, reason: `需接劉隊任務且與車上≥3互動點互動 (目前${interactedCount})` };
+      const carProgress = engine.calculateExplorationProgress('scene_ch2_asu_car');
+      if (!flags.ch2_task_from_liu || carProgress < 80) {
+        return {
+          blocked: true,
+          reason: `需接劉隊任務且車內探索≥80% (目前${Math.round(carProgress)}%)`,
+        };
       }
     }
   }
@@ -802,7 +801,15 @@ export class SimulationRunner {
 
     // 補足互動紀錄（ch2）
     if (sceneId === 'scene_ch2_asu_desktop') {
-      const hotspots = ['hotspot_car_unknown_chat', 'hotspot_car_notepad', 'hotspot_car_recording', 'hotspot_car_location'];
+      const hotspots = [
+        'hotspot_car_unknown_chat',
+        'hotspot_car_notepad',
+        'hotspot_car_recording',
+        'hotspot_car_location',
+        'hotspot_car_toolbox',
+        'hotspot_car_coffee',
+        'hotspot_car_charm',
+      ];
       hotspots.forEach((h) => {
         if (!engine.getState().interactions.includes(h)) {
           engine.getState().interactions.push(h);
