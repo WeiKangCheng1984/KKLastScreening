@@ -1,7 +1,7 @@
 'use client';
 
 import { Scene, Hotspot } from '@/types/game';
-import { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { audioManager } from '@/lib/audioManager';
 import { lightingManager, LightSource } from '@/lib/lightingManager';
@@ -40,6 +40,24 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
   const ambientLightIdRef = useRef('scene_ambient');
   const lightningLightIdRef = useRef('scene_lightning');
   const animationQualityRef = useRef(getAnimationQuality());
+  const effectTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      effectTimersRef.current.forEach(clearTimeout);
+      effectTimersRef.current = [];
+    };
+  }, []);
+  const safeTimeout = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(() => {
+      effectTimersRef.current = effectTimersRef.current.filter((t) => t !== id);
+      if (mountedRef.current) fn();
+    }, ms);
+    effectTimersRef.current.push(id);
+    return id;
+  }, []);
 
   // 初始化環境光照
   useEffect(() => {
@@ -94,59 +112,45 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
         setFlickerType('red');
         setRedFlicker(true);
         setFlickerKey(prev => prev + 1);
-        setTimeout(() => setRedFlicker(false), durations[intensity]);
+        safeTimeout(() => setRedFlicker(false), durations[intensity]);
       } else if (intensity === 'electric') {
         setFlickerType('electric');
         setFlickerKey(prev => prev + 1);
-        // 電流特效：快速閃爍多次
         let flashCount = 0;
         const electricFlash = () => {
           setElectricFlicker(prev => {
             flashCount++;
-            if (flashCount >= 6) {
-              return false;
-            }
+            if (flashCount >= 6) return false;
             return !prev;
           });
-          if (flashCount < 6) {
-            setTimeout(electricFlash, 50);
-          }
+          if (flashCount < 6) safeTimeout(electricFlash, 50);
         };
         electricFlash();
       } else {
         setFlickerType('white');
         setLightFlicker(true);
         setFlickerKey(prev => prev + 1);
-        setTimeout(() => setLightFlicker(false), durations[intensity]);
+        safeTimeout(() => setLightFlicker(false), durations[intensity]);
       }
     },
     triggerLightning: () => {
       setLightningActive(true);
-      // 啟用閃電光源
       lightingManager.setLightEnabled(lightningLightIdRef.current, true);
-      lightingManager.updateLight(lightningLightIdRef.current, {
-        intensity: 1.5,
-      });
+      lightingManager.updateLight(lightningLightIdRef.current, { intensity: 1.5 });
       
-      // 觸發強烈閃爍（不再播放音效）
       setFlickerType('white');
       setLightFlicker(true);
       setFlickerKey(prev => prev + 1);
       
-      // 快速衰減
-      setTimeout(() => {
-        lightingManager.updateLight(lightningLightIdRef.current, {
-          intensity: 0.8,
-        });
+      safeTimeout(() => {
+        lightingManager.updateLight(lightningLightIdRef.current, { intensity: 0.8 });
       }, 50);
       
-      setTimeout(() => {
-        lightingManager.updateLight(lightningLightIdRef.current, {
-          intensity: 0.3,
-        });
+      safeTimeout(() => {
+        lightingManager.updateLight(lightningLightIdRef.current, { intensity: 0.3 });
       }, 150);
       
-      setTimeout(() => {
+      safeTimeout(() => {
         lightingManager.setLightEnabled(lightningLightIdRef.current, false);
         setLightningActive(false);
         setLightFlicker(false);
@@ -190,13 +194,8 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
     
     // 保留原有的 clickedHotspot 狀態用於其他邏輯
     setClickedHotspot(hotspot.id);
-    setTimeout(() => setClickedHotspot(null), 300);
-    
-    // 波紋動畫完成後重置
-    setTimeout(() => {
-      setShowRipple(false);
-      setRipplePosition(null);
-    }, 600);
+    safeTimeout(() => setClickedHotspot(null), 300);
+    safeTimeout(() => { setShowRipple(false); setRipplePosition(null); }, 600);
     
     onHotspotClick(hotspot.id);
   };
@@ -254,10 +253,7 @@ const SceneView = forwardRef<SceneViewRef, SceneViewProps>(
     setRipplePosition({ x, y, hotspotId: '__empty__' });
     setShowRipple(true);
 
-    setTimeout(() => {
-      setShowRipple(false);
-      setRipplePosition(null);
-    }, 600);
+    safeTimeout(() => { setShowRipple(false); setRipplePosition(null); }, 600);
   };
 
   return (

@@ -77,7 +77,7 @@ export default function ProloguePage() {
               <div className="bg-dark-surface/80 border border-dark-border/50 rounded-xl p-6 shadow-xl text-left space-y-4 min-h-[280px] flex flex-col justify-between">
                 <div className="space-y-4">
                   {currentParagraphs.map((line, i) => (
-                    <p key={i} className="text-gray-200 leading-relaxed text-base">
+                    <p key={i} className="text-gray-200 leading-relaxed text-base md:text-lg">
                       {line}
                     </p>
                   ))}

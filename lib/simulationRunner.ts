@@ -86,10 +86,10 @@ function checkSceneGate(
     }
     if (targetSceneId === 'scene_ch2_asu_desktop') {
       const carProgress = engine.calculateExplorationProgress('scene_ch2_asu_car');
-      if (!flags.ch2_task_from_liu || carProgress < 80) {
+      if (!flags.ch2_task_from_liu || carProgress < 66) {
         return {
           blocked: true,
-          reason: `需接劉隊任務且車內探索≥80% (目前${Math.round(carProgress)}%)`,
+          reason: `需接劉隊任務且車內探索≥66% (目前${Math.round(carProgress)}%)`,
         };
       }
     }

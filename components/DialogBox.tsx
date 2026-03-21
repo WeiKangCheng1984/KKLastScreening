@@ -3,8 +3,11 @@
 import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { Dialog, DialogChoice, NpcDialogChoice } from '@/types/game';
 import { X, SkipForward } from 'lucide-react';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo, useId } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { dialogTextToEffectiveSegments } from '@/lib/dialogSegmentUtils';
+import { stripRedundantSpeakerPrefix } from '@/lib/stripCharacterDialogAttribution';
+import { formatNpcDisplayName } from '@/lib/formatNpcDisplayName';
 import SVGImage from './SVGImage';
 import DialogChoiceComponent from './DialogChoice';
 
@@ -25,6 +28,11 @@ interface DialogBoxProps {
   embedInParent?: boolean;
   /** 熱點互動框模式：銀灰玻璃態、細淺色邊框、標題藍灰、內文白，第一～六章統一 */
   variant?: 'default' | 'hotspot';
+  /**
+   * 為 true 時外層改為 absolute inset-0 z-10（相對於已定位父層），供 HotspotZoomOverlay 等使用，
+   * 讓同層的 NpcScenePortrait（較高 z）能穩定疊在對話框之上；預設 false 維持 fixed z-50 全螢幕。
+   */
+  containedInOverlay?: boolean;
 }
 
 export default function DialogBox({ 
@@ -40,7 +48,10 @@ export default function DialogBox({
   portraitOnScene = false,
   embedInParent = false,
   variant = 'default',
+  containedInOverlay = false,
 }: DialogBoxProps) {
+  const dialogTitleId = useId();
+  const reduceMotion = useReducedMotion();
   const [displayText, setDisplayText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const [showContinue, setShowContinue] = useState(false);
@@ -48,6 +59,10 @@ export default function DialogBox({
   const [isSkipping, setIsSkipping] = useState(false);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const typewriterIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const continueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearContinueTimer = useCallback(() => {
+    if (continueTimerRef.current !== null) { clearTimeout(continueTimerRef.current); continueTimerRef.current = null; }
+  }, []);
 
   /** 以內容為鍵，避免父層每次 render 傳新 textSegments 陣列參考導致 useMemo 失效、索引被重置 */
   const explicitSegmentsKey =
@@ -59,12 +74,46 @@ export default function DialogBox({
     () => dialogTextToEffectiveSegments(dialog.text, dialog.textSegments),
     [dialog.text, explicitSegmentsKey]
   );
-  const currentSegmentText = effectiveTextSegments
-    ? effectiveTextSegments[Math.min(currentSegmentIndex, effectiveTextSegments.length - 1)]
-    : (dialog.text ?? '');
+
+  /** 場景立繪時抬頭已顯示角色名，略過內文開頭重複的「某某說：」等 */
+  const displaySegmentsOrText = useMemo(() => {
+    const shouldStrip =
+      portraitOnScene &&
+      dialog.type === 'character' &&
+      Boolean(dialog.characterName?.trim());
+    const name = dialog.characterName ?? '';
+    if (!shouldStrip) {
+      return { segments: effectiveTextSegments as string[] | null, singleText: null as string | null };
+    }
+    if (effectiveTextSegments && effectiveTextSegments.length > 0) {
+      const copy = [...effectiveTextSegments];
+      copy[0] = stripRedundantSpeakerPrefix(copy[0], name);
+      return { segments: copy, singleText: null };
+    }
+    const single = stripRedundantSpeakerPrefix(dialog.text ?? '', name);
+    return { segments: null, singleText: single };
+  }, [
+    effectiveTextSegments,
+    explicitSegmentsKey,
+    portraitOnScene,
+    dialog.type,
+    dialog.characterName,
+    dialog.text,
+  ]);
+
+  const effectiveTextSegmentsForDisplay = displaySegmentsOrText.segments;
+  const singleTextForDisplay = displaySegmentsOrText.singleText;
+
+  const currentSegmentText = effectiveTextSegmentsForDisplay
+    ? effectiveTextSegmentsForDisplay[
+        Math.min(currentSegmentIndex, effectiveTextSegmentsForDisplay.length - 1)
+      ]
+    : (singleTextForDisplay ?? dialog.text ?? '');
 
   /** 多段分頁閱讀時單段通常較短，不必再限制內文區高度造成雙重捲動 */
-  const isPagedParagraphs = Boolean(effectiveTextSegments && effectiveTextSegments.length > 1);
+  const isPagedParagraphs = Boolean(
+    effectiveTextSegmentsForDisplay && effectiveTextSegmentsForDisplay.length > 1
+  );
 
   // 對話節點變更時重置分段索引
   useEffect(() => {
@@ -96,7 +145,8 @@ export default function DialogBox({
         currentIndex++;
       } else {
         setIsComplete(true);
-        setTimeout(() => setShowContinue(true), 300);
+        clearContinueTimer();
+        continueTimerRef.current = setTimeout(() => setShowContinue(true), 300);
         clearInterval(typeInterval);
         typewriterIntervalRef.current = null;
       }
@@ -113,12 +163,18 @@ export default function DialogBox({
         typewriterIntervalRef.current = null;
       }
       clearInterval(skipCheckInterval);
+      clearContinueTimer();
     };
   }, [currentSegmentText, typewriterSpeed]);
 
-  const isLastSegment = !effectiveTextSegments || currentSegmentIndex >= effectiveTextSegments.length - 1;
+  const isLastSegment =
+    !effectiveTextSegmentsForDisplay ||
+    currentSegmentIndex >= effectiveTextSegmentsForDisplay.length - 1;
   const showSegmentContinue = Boolean(
-    effectiveTextSegments && effectiveTextSegments.length > 1 && isComplete && !isLastSegment
+    effectiveTextSegmentsForDisplay &&
+      effectiveTextSegmentsForDisplay.length > 1 &&
+      isComplete &&
+      !isLastSegment
   );
 
   const handleSegmentContinue = () => {
@@ -166,7 +222,8 @@ export default function DialogBox({
     }
     setDisplayText(currentSegmentText);
     setIsComplete(true);
-    setTimeout(() => setShowContinue(true), 100);
+    clearContinueTimer();
+    continueTimerRef.current = setTimeout(() => setShowContinue(true), 100);
   };
 
   const handleSkipRelease = () => {
@@ -184,14 +241,18 @@ export default function DialogBox({
 
   // 移除自動關閉功能 - 所有訊息都需要手動關閉
 
+  /** 淺色銀灰玻璃（系統／道具／旁白等）；有場景立繪 NPC 時改深底 hotspot-glass-npc */
+  const isHotspotLightGlass =
+    variant === 'hotspot' && !(portraitOnScene && dialog.characterId);
+
   /* 建議三：統一暗色底 + 左側色條區分類型；variant=hotspot 時改為銀灰玻璃互動框（第一～六章統一） */
   const getTypeStyles = () => {
     if (variant === 'hotspot') {
       const glass =
         portraitOnScene && dialog.characterId ? 'hotspot-glass-npc' : 'hotspot-glass';
       return {
-        container: `${glass} text-gray-100 w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4 shadow-2xl`,
-        icon: 'text-slate-500',
+        container: `${glass} text-white w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4 shadow-2xl`,
+        icon: isHotspotLightGlass ? 'text-white' : 'text-slate-500',
         pulse: ''
       };
     }
@@ -221,22 +282,51 @@ export default function DialogBox({
 
   const styles = getTypeStyles();
 
+  const outerMotionClass = reduceMotion
+    ? ''
+    : 'transition-opacity duration-500 motion-safe-dialog-transition';
+  const cardMotionClass = reduceMotion
+    ? ''
+    : 'transition-all duration-500 motion-safe-dialog-transition';
+  const cardEnterClass = reduceMotion
+    ? isVisible
+      ? 'opacity-100 scale-100'
+      : 'opacity-0 scale-100'
+    : isVisible
+      ? 'translate-y-0 opacity-100 scale-100'
+      : 'translate-y-4 opacity-0 scale-95';
+
   const isEmbedded = embedInParent;
+  const hotspotGlassShell =
+    variant === 'hotspot' && portraitOnScene && dialog.characterId ? 'hotspot-glass-npc' : 'hotspot-glass';
   /** Hotspot 全螢幕框 + 立繪在場景上：與 play 頁 BottomDock 同寬度縮排，避免框與立繪重疊 */
   const hotspotScenePortraitLayout =
     variant === 'hotspot' && portraitOnScene && !!dialog.characterId && !embedInParent;
-  const portraitSide: 'left' | 'right' = dialog.characterPosition === 'right' ? 'right' : 'left';
+  const portraitSide: 'left' | 'right' = dialog.characterPosition === 'left' ? 'left' : 'right';
+
+  const fullscreenShellClass = containedInOverlay
+    ? 'absolute inset-0 z-10'
+    : 'fixed inset-0 z-50';
+
+  const embeddedCardClass =
+    isEmbedded && variant === 'hotspot'
+      ? `${hotspotGlassShell} text-white w-full h-full min-h-0 max-w-full max-h-full rounded-tl-xl rounded-br-none p-2 md:p-4 shadow-2xl`
+      : isEmbedded
+        ? 'bg-gradient-to-br from-gray-950/50 via-gray-900/50 to-gray-950/50 border-orange-700/30 text-gray-100 w-full h-full min-h-0 max-w-full max-h-full rounded-tl-xl rounded-br-none p-2 md:p-4'
+        : variant === 'hotspot'
+          ? styles.container
+          : `${styles.container} w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4`;
 
   return (
     <div 
-      className={`transition-opacity duration-500 ${
+      className={`${outerMotionClass} ${
         isEmbedded
           ? 'w-full h-full flex items-end justify-end p-2 md:p-3 pointer-events-none'
           : hotspotScenePortraitLayout
-          ? `fixed inset-0 z-50 flex items-end pointer-events-none p-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-6 md:pb-8 ${
+          ? `${fullscreenShellClass} flex items-end pointer-events-none p-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-6 md:pb-8 ${
               portraitSide === 'left' ? 'justify-end' : 'justify-start'
             }`
-          : `fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8 md:pb-8 ${
+          : `${fullscreenShellClass} flex items-end justify-center p-4 pointer-events-none md:items-center md:p-8 md:pb-8 ${
               reserveBottomSpace
                 ? 'pb-[calc(3.5rem+max(1rem,env(safe-area-inset-bottom)))] md:pb-8'
                 : 'pb-[max(1rem,env(safe-area-inset-bottom))]'
@@ -244,17 +334,12 @@ export default function DialogBox({
       } ${isVisible ? 'opacity-100' : 'opacity-0'}`}
     >
       <div
-      className={`flex flex-col rounded-lg pointer-events-auto shadow-2xl transform transition-all duration-500 gpu-accelerated overflow-hidden ${
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={dialogTitleId}
+      className={`flex flex-col rounded-lg pointer-events-auto shadow-2xl transform gpu-accelerated overflow-hidden ${cardMotionClass} ${
         variant === 'hotspot' ? '' : 'border-2 backdrop-blur-xl'
-      } ${
-        isEmbedded
-          ? 'bg-gradient-to-br from-gray-950/50 via-gray-900/50 to-gray-950/50 border-orange-700/30 text-gray-100 w-full h-full min-h-0 max-w-full max-h-full rounded-tl-xl rounded-br-none p-2 md:p-4'
-          : variant === 'hotspot'
-            ? styles.container
-            : `${styles.container} w-[min(360px,calc(100vw-2rem))] max-h-[min(85vh,calc(100vh-2rem-env(safe-area-inset-bottom)))] min-h-[200px] rounded-lg p-3 md:p-4`
-      } ${
-        isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-4 opacity-0 scale-95'
-      }`}
+      } ${embeddedCardClass} ${cardEnterClass}`}
       style={
         hotspotScenePortraitLayout
           ? {
@@ -264,13 +349,28 @@ export default function DialogBox({
           : undefined
       }
       >
-        {/* 標題欄 - 嵌在場景時縮小；手機 0.6em + 更小 padding/gap */}
-        <div className={`flex justify-between items-center border-b border-white/10 flex-shrink-0 gap-2 ${
-          isEmbedded ? 'pb-1 mb-1 gap-1.5 text-[0.6em] md:pb-1.5 md:mb-1.5 md:gap-2' : 'mb-4 pb-3'
-        }`}>
-          <div className={`text-ui-title uppercase tracking-widest ${styles.icon} flex items-center gap-2 min-w-0 flex-1 ${
-            isEmbedded ? 'whitespace-nowrap overflow-hidden text-ellipsis' : 'text-xs break-words'
-          }`}>
+        {/* 標題欄：hotspot 字級由 dialog-hotspot-title 統一；舊版 default 嵌入仍用父層 em 縮放 */}
+        <div
+          className={`flex justify-between items-center border-b flex-shrink-0 gap-2 ${
+            isHotspotLightGlass ? 'border-white/15' : 'border-white/10'
+          } ${
+            isEmbedded
+              ? variant !== 'hotspot'
+                ? 'pb-1 mb-1 gap-1.5 text-[0.6em] md:pb-1.5 md:mb-1.5 md:gap-2'
+                : 'pb-1 mb-1 gap-1.5 md:pb-1.5 md:mb-1.5 md:gap-2'
+              : 'mb-4 pb-3'
+          }`}
+        >
+          <div
+            id={dialogTitleId}
+            className={`${styles.icon} flex items-center gap-2 min-w-0 flex-1 ${
+              variant === 'hotspot'
+                ? 'dialog-hotspot-title'
+                : `text-ui-title uppercase tracking-widest ${
+                    isEmbedded ? 'line-clamp-2 break-words' : 'text-xs break-words'
+                  }`
+            }`}
+          >
             {dialog.type === 'broadcast' && (
               <span className={`w-2 h-2 bg-red-400 rounded-full ${styles.pulse}`}></span>
             )}
@@ -280,7 +380,9 @@ export default function DialogBox({
             {mode !== 'npc' && dialog.type === 'system' && '系統'}
             {mode !== 'npc' && dialog.type === 'choice' && '選擇'}
             {mode !== 'npc' && dialog.type === 'character' && (
-              <span>{isEmbedded ? (dialog.characterName || '角色') : (dialog.characterName || '角色').replace(/（/g, '\n（')}</span>
+              <span className="line-clamp-2 break-words whitespace-pre-line min-w-0">
+                {formatNpcDisplayName(dialog.characterName || '角色')}
+              </span>
             )}
             {mode !== 'npc' && !dialog.type && '旁白'}
           </div>
@@ -288,28 +390,55 @@ export default function DialogBox({
             {/* 快速跳過按鈕 */}
             {!isComplete && (
               <button
+                type="button"
                 onMouseDown={handleSkip}
                 onMouseUp={handleSkipRelease}
                 onMouseLeave={handleSkipRelease}
                 onTouchStart={handleSkip}
                 onTouchEnd={handleSkipRelease}
-                className="text-gray-400 hover:text-orange-400 transition-all duration-200 p-1 hover:bg-white/10 rounded"
+                className={
+                  isHotspotLightGlass
+                    ? 'text-white/75 hover:text-orange-400 transition-all duration-200 motion-reduce:transition-none p-1 hover:bg-white/10 rounded'
+                    : 'text-gray-400 hover:text-orange-400 transition-all duration-200 motion-reduce:transition-none p-1 hover:bg-white/10 rounded'
+                }
+                aria-label="按住略過文字"
                 title="按住快速跳過"
               >
-                <SkipForward size={16} />
+                <SkipForward size={16} aria-hidden />
               </button>
             )}
             <button
+              type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-all duration-200 p-1 hover:bg-white/10 rounded hover:rotate-90"
+              className={
+                isHotspotLightGlass
+                  ? 'text-white/75 hover:text-white transition-all duration-200 motion-reduce:transition-none p-1 hover:bg-white/10 rounded hover:rotate-90 motion-reduce:hover:rotate-0'
+                  : 'text-gray-400 hover:text-white transition-all duration-200 motion-reduce:transition-none p-1 hover:bg-white/10 rounded hover:rotate-90 motion-reduce:hover:rotate-0'
+              }
+              aria-label="關閉對話"
+              title="關閉"
             >
-              <X size={18} />
+              <X size={18} aria-hidden />
             </button>
           </div>
         </div>
 
         {dialog.title && (
-          <div className={`text-ui-caption flex-shrink-0 ${variant === 'hotspot' ? 'text-slate-500' : 'text-gray-300'} ${isEmbedded ? 'mb-0.5 md:mb-1 text-[0.65em]' : 'mb-2'}`}>
+          <div
+            className={`text-ui-caption flex-shrink-0 ${
+              variant === 'hotspot'
+                ? isHotspotLightGlass
+                  ? 'text-white/85'
+                  : 'text-slate-500'
+                : 'text-gray-300'
+            } ${
+              variant === 'hotspot'
+                ? 'mb-1 md:mb-2 text-[0.6875rem] min-[380px]:text-xs sm:text-sm'
+                : isEmbedded
+                  ? 'mb-0.5 md:mb-1 text-[0.65em]'
+                  : 'mb-2'
+            }`}
+          >
             {dialog.title}
           </div>
         )}
@@ -333,7 +462,7 @@ export default function DialogBox({
           onKeyDown={canClickToContinue ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleContentClick(); } } : undefined}
           className={`flex gap-3 min-h-0 flex-1 ${isPagedParagraphs && !isEmbedded ? 'overflow-y-visible' : 'overflow-y-auto'} ${isEmbedded ? 'gap-1.5 mb-0.5 md:gap-2 md:mb-1' : 'mb-3'} ${canClickToContinue ? 'cursor-pointer' : ''} ${
           portraitShownInline ? (
-            dialog.characterPosition === 'right' ? 'flex-row-reverse' : 'flex-row'
+            dialog.characterPosition === 'left' ? 'flex-row' : 'flex-row-reverse'
           ) : (
             dialog.svgImage && dialog.svgPosition === 'left' ? 'flex-row' :
             dialog.svgImage && dialog.svgPosition === 'right' ? 'flex-row-reverse' :
@@ -393,13 +522,23 @@ export default function DialogBox({
           )}
 
           {/* 對話文字內容 - 建議一：手機 text-base 避免溢出，桌面 text-lg；max-h 預留安全區 */}
-          <div className={`flex-1 leading-relaxed min-h-[3rem] whitespace-pre-line ${
-            isEmbedded
-              ? 'min-h-0 max-h-none overflow-y-auto text-[0.82em] md:text-[0.9em]'
-              : isPagedParagraphs
-                ? 'text-base md:text-lg max-h-none overflow-visible md:max-h-none'
-                : 'text-base md:text-lg overflow-y-auto max-h-[min(65vh,calc(100vh-7rem-env(safe-area-inset-bottom)))] md:max-h-none'
-          } ${dialog.svgImage && (dialog.svgPosition === 'top' || dialog.svgPosition === 'bottom') ? 'order-2' : ''}`}>
+          <div
+            className={`flex-1 leading-relaxed min-h-[3rem] whitespace-pre-line ${
+              variant === 'hotspot'
+                ? `dialog-hotspot-body ${
+                    isEmbedded
+                      ? 'min-h-0 max-h-none overflow-y-auto'
+                      : isPagedParagraphs
+                        ? 'max-h-none overflow-visible md:max-h-none'
+                        : 'overflow-y-auto max-h-[min(65vh,calc(100vh-7rem-env(safe-area-inset-bottom)))] md:max-h-none'
+                  }`
+                : isEmbedded
+                  ? 'min-h-0 max-h-none overflow-y-auto text-[0.82em] md:text-[0.9em]'
+                  : isPagedParagraphs
+                    ? 'text-base md:text-lg max-h-none overflow-visible md:max-h-none'
+                    : 'text-base md:text-lg overflow-y-auto max-h-[min(65vh,calc(100vh-7rem-env(safe-area-inset-bottom)))] md:max-h-none'
+            } ${dialog.svgImage && (dialog.svgPosition === 'top' || dialog.svgPosition === 'bottom') ? 'order-2' : ''}`}
+          >
           {displayText.split('').map((char, index) => {
             // 高亮顯示當前字符（打字機效果增強）
             const isCurrentChar = index === displayText.length - 1 && !isComplete;
@@ -446,9 +585,9 @@ export default function DialogBox({
                 }}
                 className="w-full text-left p-3 bg-gradient-to-r from-blue-950/80 to-indigo-950/80 border border-blue-700/50 hover:border-blue-500 rounded-lg text-blue-100 hover:text-white transition-all duration-200 group"
               >
-                <div className="font-semibold text-sm mb-1">{choice.label}</div>
+                <div className="font-semibold text-sm text-blue-100 group-hover:text-white mb-1">{choice.label}</div>
                 {choice.description && (
-                  <div className="text-xs text-blue-200/70 group-hover:text-blue-100">
+                  <div className="text-[0.6875rem] min-[380px]:text-xs text-blue-200/70 group-hover:text-blue-100 leading-snug">
                     {choice.description}
                   </div>
                 )}
@@ -458,16 +597,18 @@ export default function DialogBox({
         ) : dialog.choices && dialog.choices.length > 0 && isComplete && isLastSegment ? (
           // 僅單一「繼續」選項時不顯示按鈕，改為點擊內文繼續（見 canClickToContinue）
           isSingleChoiceNext ? null : (
-          <DialogChoiceComponent
-            choices={dialog.choices}
-            onSelect={(choice) => {
-              if (onChoiceSelect) {
-                onChoiceSelect(choice);
-              }
-              onClose();
-            }}
-            className="mt-3"
-          />
+          <div className={isHotspotLightGlass ? 'hotspot-glass-choices' : undefined}>
+            <DialogChoiceComponent
+              choices={dialog.choices}
+              onSelect={(choice) => {
+                if (onChoiceSelect) {
+                  onChoiceSelect(choice);
+                }
+                onClose();
+              }}
+              className="mt-3"
+            />
+          </div>
           )
         ) : showContinue && mode !== 'npc' ? null : null}
         </div>

@@ -102,7 +102,7 @@ export default function ChapterIntro({ chapter, firstSceneBackground }: ChapterI
     
     // 不停止 BGM，讓音樂持續到結局
     
-    // 由流程設定決定：ch1 進第一景，ch2 進 hub 等
+    // 由 flowConfig 決定（通常為該章 scene_explore 的第一個場景）
     const nextPath = getChapterIntroContinuePath(chapter.id) || `/play/${chapter.id}/${chapter.scenes[0]}`;
     setTimeout(() => {
       router.push(nextPath);

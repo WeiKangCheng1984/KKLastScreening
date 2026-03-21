@@ -27,7 +27,7 @@ export default function DialogChoice({ choices, onSelect, className = '' }: Dial
           
           {/* 內容 */}
           <div className="relative flex items-center justify-between">
-            <span className="text-gray-200 group-hover:text-white transition-colors text-sm leading-relaxed">
+            <span className="dialog-hotspot-choice text-gray-200 group-hover:text-white transition-colors">
               {choice.text}
             </span>
             <Check 

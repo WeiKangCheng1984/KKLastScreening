@@ -71,6 +71,35 @@
     overflow: hidden;
   }
 
+  /**
+   * Hotspot 對話（variant=hotspot）：BottomDock 嵌入與 Zoom 覆蓋層共用字級，
+   * 僅 padding／寬度／max-h 在 DialogBox 依 embed 分支調整。
+   *
+   * 字級策略：
+   * - 不用 md:text-lg 當「桌機預設」：play 頁在 md 仍可能是窄版手機框，lg 會讓內文顯得過大。
+   * - 極窄寬度略縮內文；380px 起回到 base；寬螢幕全畫面對話再微幅加大（min-[900px]）。
+   * - 選項與正文同階，避免「有的略大／有的小一號」。
+   */
+  .dialog-hotspot-title {
+    @apply font-heading font-semibold uppercase tracking-widest leading-tight;
+    @apply text-[0.75rem] min-[380px]:text-xs sm:text-sm;
+  }
+  .dialog-hotspot-body {
+    @apply font-body leading-relaxed;
+    @apply text-[0.9375rem] min-[380px]:text-base min-[900px]:text-[1.0625rem];
+  }
+  .dialog-hotspot-choice {
+    @apply font-body leading-relaxed;
+    @apply text-[0.9375rem] min-[380px]:text-base min-[900px]:text-[1.0625rem];
+  }
+
+  /* 對話框等：僅在「未要求減少動態」時保留長 transition（與 DialogBox 搭配） */
+  @media (prefers-reduced-motion: reduce) {
+    .motion-safe-dialog-transition {
+      transition: none !important;
+    }
+  }
+
   /* 隱藏滾動條（密碼轉盤等） */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -80,16 +109,32 @@
     display: none;
   }
 
-  /* 銀灰玻璃互動框（Hotspot 點擊後的文案框，第一～六章統一） */
+  /* 銀灰玻璃互動框（Hotspot 點擊後的文案框：系統／道具／旁白等；NPC 立繪版見 hotspot-glass-npc） */
   .hotspot-glass {
     background: linear-gradient(
       to bottom,
-      rgba(220, 220, 230, 0.28),
-      rgba(140, 145, 160, 0.35)
+      rgba(128, 128, 154, 0.72),
+      rgba(65, 69, 80, 0.72)
     );
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(251, 146, 60, 0.48);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* 淺色玻璃：內文白字 */
+  .hotspot-glass .dialog-hotspot-title {
+    @apply text-white;
+  }
+  .hotspot-glass .dialog-hotspot-body {
+    @apply text-white;
+  }
+  /* 一般選擇題列（不含 NPC 藍底按鈕） */
+  .hotspot-glass .hotspot-glass-choices .dialog-hotspot-choice {
+    @apply text-white;
+  }
+  .hotspot-glass .hotspot-glass-choices .group:hover .dialog-hotspot-choice {
+    @apply text-white;
   }
 
   /* Hotspot 對話 + 場景立繪：提高不透明度，避免立繪與文字疊在一起難以閱讀 */

@@ -1261,7 +1261,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '桌布是一張城市夜景，構圖歪了一點，街口有個模糊人影，臉被移動殘影拉長，看不出是誰。',
                 '解鎖後，聯絡人卡片浮出名字「吳亞」，備註欄寫著「烏鴉」。',
@@ -1287,7 +1287,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '桌布是一張城市夜景，構圖歪了一點，街口有個模糊人影，臉被移動殘影拉長，看不出是誰。',
                 '解鎖後，聯絡人卡片浮出名字「吳亞」，備註欄寫著「烏鴉」。',
@@ -1319,7 +1319,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '留下來的只有兩行：「……用三起事故來揭……」「……她也在場，你確定要這樣寫？」',
                 '真正的話在刪掉的地方。',
@@ -1344,7 +1344,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '留下來的只有兩行：「……用三起事故來揭……」「……她也在場，你確定要這樣寫？」',
                 '真正的話在刪掉的地方。',
@@ -1375,7 +1375,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '這個 An 大概是他慌的時候會找的人。',
                 '「算了」對她來說是結案，對我們來說只是噪音。'
@@ -1407,7 +1407,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '標題寫著：「節能設備，誰省了電，誰省了責任？」',
                 '內文把遠端照明、散場節奏、疏散流程列成一串「可能」，像在整理別人的簡報。',
@@ -1433,7 +1433,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '標題寫著：「節能設備，誰省了電，誰省了責任？」',
                 '內文把遠端照明、散場節奏、疏散流程列成一串「可能」，像在整理別人的簡報。',
@@ -1466,7 +1466,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '播放鍵按下去，車內多了一個被刻意壓低處理過的男聲，像戴著面具說話：',
                 '「……他們一直說那是個案。可是結案報告有兩個版本，一個給內部、一個給外面……」',
@@ -1492,7 +1492,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '播放鍵按下去，車內多了一個被刻意壓低處理過的男聲，像戴著面具說話：',
                 '「……他們一直說那是個案。可是結案報告有兩個版本，一個給內部、一個給外面……」',
@@ -1525,7 +1525,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '通訊錄裡有幾個特別的聯絡人：',
                 '「城市影城W」——備註：「影廳見」；「聯合影城C」——備註：「表單／審查」；「光芒影城R」——備註：「梯間／試行」。',
@@ -1551,7 +1551,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '通訊錄裡有幾個特別的聯絡人：',
                 '「城市影城W」——備註：「影廳見」；「聯合影城C」——備註：「表單／審查」；「光芒影城R」——備註：「梯間／試行」。',
@@ -1584,7 +1584,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '定位紀錄像一張被螢光筆畫滿的地圖。',
                 '命案前一週，他在住家、三家影城、一棟設備公司商辦和一棟老式商務大樓之間來回，那棟老樓 GPS 一直跳點，像系統也不太想記住那裡。',
@@ -1611,7 +1611,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '定位紀錄像一張被螢光筆畫滿的地圖。',
                 '命案前一週，他在住家、三家影城、一棟設備公司商辦和一棟老式商務大樓之間來回，那棟老樓 GPS 一直跳點，像系統也不太想記住那裡。',
@@ -1643,7 +1643,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '這句不是我寫的，是以前一個同事送我的。',
                 '他後來轉去做行銷了，從此之後就不再相信線路。',
@@ -1675,7 +1675,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 'A 是案主，K 是你，不是嫌犯。',
                 '我一整天在處理有人把 A 寫成 K 的世界，就怕自己也搞混。',
@@ -1707,7 +1707,7 @@ export const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（工程師）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '這個本來是朋友做的 NFT，失敗得很徹底，我就把它拆回來當吊飾。',
                 '你看，電路板晃來晃去，很像城市的配電圖。',

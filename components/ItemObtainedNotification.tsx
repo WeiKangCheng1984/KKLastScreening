@@ -19,6 +19,8 @@ interface ItemObtainedNotificationProps {
   dismissOnTap?: boolean;
   /** 為 true 時卡片垂直置中於容器；為 false 時貼底 */
   center?: boolean;
+  /** hotspot：與 play 頁 DialogBox（熱點玻璃）同家族；default：舊版橘邊深色卡 */
+  visualVariant?: 'hotspot' | 'default';
 }
 
 export default function ItemObtainedNotification({
@@ -32,6 +34,7 @@ export default function ItemObtainedNotification({
   onComplete,
   dismissOnTap = false,
   center = false,
+  visualVariant = 'hotspot',
 }: ItemObtainedNotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -78,7 +81,11 @@ export default function ItemObtainedNotification({
             tabIndex={dismissOnTap ? 0 : undefined}
             onClick={dismissOnTap ? handleDismiss : undefined}
             onKeyDown={dismissOnTap ? (e) => e.key === 'Enter' && handleDismiss() : undefined}
-            className={`bg-dark-card/95 backdrop-blur-md border-2 border-orange-500/50 rounded-xl px-6 py-5 md:px-8 md:py-6 shadow-2xl max-w-sm w-full mx-4 ${center ? '' : 'mb-4'} ${dismissOnTap ? 'cursor-pointer' : ''}`}
+            className={`relative rounded-xl px-6 py-5 md:px-8 md:py-6 shadow-2xl max-w-sm w-full mx-4 ${center ? '' : 'mb-4'} ${dismissOnTap ? 'cursor-pointer' : ''} ${
+              visualVariant === 'hotspot'
+                ? 'hotspot-glass text-white'
+                : 'bg-dark-card/95 backdrop-blur-md border-2 border-orange-500/50'
+            }`}
           >
             <div className="flex items-start gap-4">
               {/* 道具圖示 */}
@@ -97,8 +104,17 @@ export default function ItemObtainedNotification({
                     className="w-16 h-16 md:w-20 md:h-20 object-contain"
                   />
                 ) : (
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-dark-surface/50 rounded-lg flex items-center justify-center border border-dark-border">
-                    <Package size={32} className="text-orange-400" />
+                  <div
+                    className={`w-16 h-16 md:w-20 md:h-20 rounded-lg flex items-center justify-center ${
+                      visualVariant === 'hotspot'
+                        ? 'bg-slate-900/6 border border-slate-800/15'
+                        : 'bg-dark-surface/50 border border-dark-border'
+                    }`}
+                  >
+                    <Package
+                      size={32}
+                      className={visualVariant === 'hotspot' ? 'text-white/75' : 'text-orange-400'}
+                    />
                   </div>
                 )}
               </div>
@@ -107,10 +123,18 @@ export default function ItemObtainedNotification({
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="text-xs text-orange-300 mb-1 font-medium uppercase tracking-wider">
+                    <div
+                      className={`text-xs mb-1 font-medium uppercase tracking-wider ${
+                        visualVariant === 'hotspot' ? 'text-white/80' : 'text-orange-300'
+                      }`}
+                    >
                       獲得
                     </div>
-                    <div className="text-lg md:text-xl font-semibold text-orange-400">
+                    <div
+                      className={`text-lg md:text-xl font-semibold ${
+                        visualVariant === 'hotspot' ? 'text-white' : 'text-orange-400'
+                      }`}
+                    >
                       {itemName}
                     </div>
                   </div>
@@ -121,7 +145,11 @@ export default function ItemObtainedNotification({
                         e.stopPropagation();
                         handleDismiss();
                       }}
-                      className="flex-shrink-0 p-1 rounded hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                      className={
+                        visualVariant === 'hotspot'
+                          ? 'flex-shrink-0 p-1 rounded text-white/75 hover:text-orange-400 hover:bg-white/10 transition-colors'
+                          : 'flex-shrink-0 p-1 rounded hover:bg-white/10 text-white/70 hover:text-white transition-colors'
+                      }
                       aria-label="關閉"
                     >
                       <X size={20} />
@@ -129,12 +157,20 @@ export default function ItemObtainedNotification({
                   )}
                 </div>
                 {dismissOnTap && itemDescription && (
-                  <div className="mt-3 text-xs text-white/80 whitespace-pre-line max-h-48 overflow-hidden pr-1">
+                  <div
+                    className={`mt-3 text-xs whitespace-pre-line max-h-48 overflow-hidden pr-1 ${
+                      visualVariant === 'hotspot' ? 'text-white/90' : 'text-white/80'
+                    }`}
+                  >
                     {itemDescription}
                   </div>
                 )}
                 {dismissOnTap && (
-                  <div className="mt-3 text-xs text-orange-300">
+                  <div
+                    className={`mt-3 text-xs ${
+                      visualVariant === 'hotspot' ? 'text-white/70' : 'text-orange-300'
+                    }`}
+                  >
                     點擊關閉
                   </div>
                 )}

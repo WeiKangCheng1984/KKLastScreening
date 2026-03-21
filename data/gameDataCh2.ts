@@ -43,10 +43,12 @@ const scenes: Record<string, Scene> = {
       '夜晚的城市影城門口，人潮已經散得差不多，只剩清潔人員和幾個還不想回家的影迷。霓虹招牌閃個不停，地上是被踩扁的爆米花和飲料杯，像一場還沒被收拾完的道具。警戒線在門邊拉出一個奇怪的框，提醒你這裡本來不是犯罪現場，卻突然被改成了。',
     background: '/images/bg_ch2_gate_v1.webp',
     hotspots: [
-      { id: 'hotspot_gate_liu', shape: 'circle', coords: [0.7, 0.5, 0.1], description: '劉隊', hint: '劉隊站在門邊，手上還拿著剛才的簡報資料夾。' },
-      { id: 'hotspot_gate_popcorn', shape: 'circle', coords: [0.3, 0.85, 0.1], description: '爆米花殘骸', hint: '散場後留下來的碎屑。' },
-      { id: 'hotspot_gate_poster', shape: 'circle', coords: [0.2, 0.3, 0.1], description: '電影海報牆', hint: '幾張還沒來得及換掉的舊海報。' },
-      { id: 'hotspot_gate_neon', shape: 'circle', coords: [0.55, 0.15, 0.1], description: '霓虹招牌', hint: '亮度有點不穩的「CITY CINEMA」字樣。' },
+      { id: 'hotspot_gate_liu', shape: 'circle', coords: [0.4, 0.7, 0.8], description: '劉隊', hint: '劉隊站在門邊，手上還拿著剛才的簡報資料夾。' },
+      { id: 'hotspot_gate_popcorn', shape: 'circle', coords: [0.7, 0.85, 0.3], description: '爆米花殘骸', hint: '散場後留下來的碎屑。' },
+      { id: 'hotspot_gate_poster', shape: 'circle', coords: [0.13, 0.7, 0.3], description: '電影海報牆', hint: '幾張還沒來得及換掉的舊海報。' },
+      { id: 'hotspot_gate_neon', shape: 'circle', coords: [0.55, 0.37, 0.9], description: '霓虹招牌', hint: '亮度有點不穩的「CITY CINEMA」字樣。' },
+      { id: 'hotspot_gate_cordon', shape: 'circle', coords: [0.28, 0.62, 0.22], description: '門口警戒線', hint: '黃黑膠帶把「散場」框成另一種開場。' },
+      { id: 'hotspot_gate_ticket_machine', shape: 'circle', coords: [0.88, 0.52, 0.2], description: '自助取票機', hint: '螢幕還亮著，像在加班證明自己很有用。' },
     ],
     items: [],
     hotspotEventMap: {
@@ -54,6 +56,8 @@ const scenes: Record<string, Scene> = {
       hotspot_gate_popcorn: 'inspect_gate_popcorn',
       hotspot_gate_poster: 'inspect_gate_poster',
       hotspot_gate_neon: 'inspect_gate_neon',
+      hotspot_gate_cordon: 'inspect_gate_cordon',
+      hotspot_gate_ticket_machine: 'inspect_gate_ticket_machine',
     },
     events: [
       {
@@ -75,7 +79,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_liu',
               characterName: '劉隊（偵查隊）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
             },
           },
           { type: 'setFlag', flag: 'ch2_task_from_liu', value: true },
@@ -135,6 +139,46 @@ const scenes: Record<string, Scene> = {
           },
         ],
       },
+      {
+        id: 'inspect_gate_cordon',
+        name: '門口警戒線',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_gate_cordon' }],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text:
+                '黃黑膠帶在風裡微微顫，像某種低成本紅毯。\n\n' +
+                '你突然想到：如果命案是電影，這條線大概就是預告片——\n' +
+                '「本週限定：真實案件，謝絕拍照，但歡迎在心裡重播。」\n\n' +
+                '遠處清潔人員推著垃圾桶經過，腳步比圍觀的路人還鎮定。\n' +
+                '城市很習慣把荒謬拉成日常；你只是剛好站在框線裡面而已。',
+              type: 'narrator',
+            },
+          },
+        ],
+      },
+      {
+        id: 'inspect_gate_ticket_machine',
+        name: '自助取票機',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_gate_ticket_machine' }],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text:
+                '取票機螢幕還亮著，廣告輪播：「今晚加場，座位有限。」\n\n' +
+                '你瞄了一眼時間——早就過了末場。\n' +
+                '機器卻仍敬業地閃「請取票」，像一個被留在崗位上的臨演，劇本寫完了還在念台詞。\n\n' +
+                '你沒按任何鍵。你只是在心裡幫它補一句旁白：\n' +
+                '「H 排 12 號已售出，恕不退款，亦不提供人生重來。」',
+              type: 'narrator',
+            },
+          },
+        ],
+      },
     ],
     puzzles: [],
     initialDialog: undefined,
@@ -150,7 +194,7 @@ const scenes: Record<string, Scene> = {
       },
     ],
   },
-  // 車內熱點 7 個、無背包道具 → 探索 80% 需至少互動 6 個熱點（見 play 頁 handleSceneNavigation）
+  // 車內熱點 9 個、無背包道具 → play 頁以探索進度解鎖電腦場（門檻與 6/9 互動對齊，見 handleSceneNavigation）
   'scene_ch2_asu_car': {
     id: 'scene_ch2_asu_car',
     chapterId: 'ch2',
@@ -159,13 +203,15 @@ const scenes: Record<string, Scene> = {
     background: '/images/bg_ch2_park_v1.webp',
     hotspots: [
       // 僅保留四個「還在破譯中」的手機相關互動，其餘完整內容移至電腦場景
-      { id: 'hotspot_car_unknown_chat', shape: 'circle', coords: [0.225, 0.43, 0.11], description: '通訊紀錄 Unknown', hint: '阿蘇：「這通訊紀錄我還在跑還原，看有沒有機會還原。」' },
-      { id: 'hotspot_car_notepad', shape: 'circle', coords: [0.79, 0.19, 0.11], description: '烏鴉的記事本筆記', hint: '烏鴉的記事本正在同步到終端，畫面上只解碼的進度條。' },
-      { id: 'hotspot_car_recording', shape: 'circle', coords: [0.79, 0.73, 0.11], description: '錄音備忘_事故', hint: '錄音檔還在做降噪處理，波形抖得亂七八糟。' },
-      { id: 'hotspot_car_location', shape: 'circle', coords: [0.19, 0.73, 0.11], description: '系統定位紀錄', hint: '定位資料還在重建軌跡，地圖一片馬賽克。' },
-      { id: 'hotspot_car_toolbox', shape: 'circle', coords: [0.825, 0.91, 0.09], description: '後座工具箱', hint: '用不著也打不開，看了一眼上面的貼紙，寫著「線路是誠實的」。' },
-      { id: 'hotspot_car_coffee', shape: 'circle', coords: [0.5, 0.88, 0.08], description: '便利商店咖啡杯', hint: '杯子上用油性筆寫著「A」和「S」。' },
-      { id: 'hotspot_car_charm', shape: 'circle', coords: [0.54, 0.14, 0.09], description: '車上吊飾', hint: '後視鏡上掛著一個像素風電路板造型吊飾，很有工程師的幽默感。' },
+      { id: 'hotspot_car_unknown_chat', shape: 'circle', coords: [0.5, 0.85, 0.3], description: '通訊紀錄 Unknown', hint: '阿蘇：「這通訊紀錄我還在跑還原，看有沒有機會還原。」' },
+      { id: 'hotspot_car_notepad', shape: 'circle', coords: [0.6, 0.85, 0.3], description: '烏鴉的記事本筆記', hint: '烏鴉的記事本正在同步到終端，畫面上只解碼的進度條。' },
+      { id: 'hotspot_car_recording', shape: 'circle', coords: [0.7, 0.85, 0.3], description: '錄音備忘_事故', hint: '錄音檔還在做降噪處理，波形抖得亂七八糟。' },
+      { id: 'hotspot_car_location', shape: 'circle', coords: [0.8, 0.85, 0.3], description: '系統定位紀錄', hint: '定位資料還在重建軌跡，地圖一片馬賽克。' },
+      { id: 'hotspot_car_toolbox', shape: 'circle', coords: [0.07, 0.8, 0.3], description: '後座工具箱', hint: '用不著也打不開，看了一眼上面的貼紙，寫著「線路是誠實的」。' },
+      { id: 'hotspot_car_coffee', shape: 'circle', coords: [0.2, 0.94, 0.3], description: '便利商店咖啡杯', hint: '杯子上用油性筆寫著「A」和「S」。' },
+      { id: 'hotspot_car_charm', shape: 'circle', coords: [0.95, 0.14, 0.3], description: '車上吊飾', hint: '後視鏡上掛著一個像素風電路板造型吊飾，很有工程師的幽默感。' },
+      { id: 'hotspot_car_seatbelt', shape: 'circle', coords: [0.4, 0.9, 0.26], description: '副駕安全帶', hint: '卡扣在暗處，像故意躲年終考績。' },
+      { id: 'hotspot_car_air_freshener', shape: 'circle', coords: [0.16, 0.2, 0.2], description: '出風口香氛夾', hint: '包裝寫「晨霧森林」，實際比較像「機房換新濾網」。' },
     ],
     // 案件相關道具改由電腦場景取得，車內僅作為「還在破譯中」的過場
     items: [],
@@ -177,6 +223,8 @@ const scenes: Record<string, Scene> = {
       'hotspot_car_toolbox': 'examine_car_toolbox',
       'hotspot_car_coffee': 'examine_car_coffee',
       'hotspot_car_charm': 'examine_car_charm',
+      'hotspot_car_seatbelt': 'examine_car_seatbelt',
+      'hotspot_car_air_freshener': 'examine_car_air_freshener',
     },
     events: [
       {
@@ -210,7 +258,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '「這通訊紀錄我先讓它自己跑。」',
                 '阿蘇伸手在螢幕上點了一下那個 Unknown 的頭像。',
@@ -252,7 +300,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '「解碼資料和草稿很多，我先讓它們去終端排隊。」',
                 '「等一下在電腦上看，你會比較有全貌。」',
@@ -292,7 +340,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '「這段我先讓系統把聲音拉乾淨。」',
                 '「等等你在電腦上看逐字稿，比在車裡硬聽清楚多了。」',
@@ -342,7 +390,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '「定位我先丟去終端算軌跡。」',
                 '「但應該只會得到一些亂繞的定位座標。」',
@@ -391,7 +439,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '這句不是我寫的，是以前一個同事送我的。',
                 '他後來轉去做行銷了，從此之後就不再相信線路。',
@@ -423,7 +471,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 'A和S是什麼意思?猜不透。',
                 '有那麼多心思，不如直接說。',
@@ -455,7 +503,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '這個本來是朋友做的 NFT，失敗得很徹底，我就把它拆回來當吊飾。',
                 '你看，電路板晃來晃去，很像城市的配電圖。',
@@ -465,6 +513,74 @@ const scenes: Record<string, Scene> = {
           },
         ],
         oneTime: true,
+      },
+      {
+        id: 'examine_car_seatbelt',
+        name: '副駕安全帶',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_seatbelt' }],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text:
+                '副駕那條安全帶的扣具躲在陰影裡，你摸兩下才對準。\n\n' +
+                '它卡住的方式很眼熟——跟某些「流程上沒問題、實務上就是過不了」的表單一樣，\n' +
+                '明明該保護你，卻先考驗你的耐心。',
+              type: 'narrator',
+            },
+          },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '',
+              type: 'character',
+              characterId: 'npc_asu',
+              characterName: '阿蘇（警方技術組）',
+              characterExpression: 1,
+              characterPosition: 'right',
+              textSegments: [
+                '「別硬扯，那條跟我的耐心一樣，拉太多次就回不去了。」',
+                '她眼睛仍黏在筆電上。',
+                '「而且你如果真的需要保護，先保護好自己的睡眠。你眼下黑得跟 log 一樣。」',
+              ],
+            },
+          },
+        ],
+      },
+      {
+        id: 'examine_car_air_freshener',
+        name: '出風口香氛夾',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_air_freshener' }],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text:
+                '出風口夾著一顆標榜「晨霧森林」的香氛膠囊，包裝印著過度快樂的綠葉。\n\n' +
+                '但車內主味仍是隔夜咖啡與塑膠線材——兩種氣味在鼻腔裡開會，\n' +
+                '結論大概是：「大自然輸給了加班。」',
+              type: 'narrator',
+            },
+          },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '',
+              type: 'character',
+              characterId: 'npc_asu',
+              characterName: '阿蘇（警方技術組）',
+              characterExpression: 1,
+              characterPosition: 'right',
+              textSegments: [
+                '「我本來買它是要蓋咖啡味。」',
+                '「結果現在聞起來像——森林裡有人邊慢跑邊幫伺服器換風扇。」',
+                '她嘴角抽一下：「至少比『命案現場』好聞一點點。真的，只有一點點。」',
+              ],
+            },
+          },
+        ],
       },
     ],
     puzzles: [],
@@ -513,37 +629,51 @@ const scenes: Record<string, Scene> = {
       {
         id: 'hotspot_pc_overview',
         shape: 'circle',
-        coords: [0.5, 0.15, 0.1],
+        coords: [0.25, 0.25, 0.4],
         description: '總覽看板',
         hint: '把車上四塊螢幕殘影對回終端：這裡是起點。',
       },
       {
         id: 'hotspot_pc_unknown_chat',
         shape: 'circle',
-        coords: [0.25, 0.375, 0.125],
+        coords: [0.13, 0.6, 0.4],
         description: 'Unknown 對話（還原版）',
         hint: '還原後的對話殘本。',
       },
       {
         id: 'hotspot_pc_column_draft',
         shape: 'circle',
-        coords: [0.75, 0.375, 0.125],
+        coords: [0.72, 0.18, 0.4],
         description: '專欄草稿（全文）',
         hint: '烏鴉還沒發出去的完整論述與刪改痕。',
       },
       {
         id: 'hotspot_pc_recording',
         shape: 'circle',
-        coords: [0.25, 0.675, 0.125],
+        coords: [0.85, 0.58, 0.5],
         description: '錄音逐字稿',
         hint: '「備忘_事故」拉乾淨後的一字一句。',
       },
       {
         id: 'hotspot_pc_location',
         shape: 'circle',
-        coords: [0.75, 0.675, 0.125],
+        coords: [0.85, 0.2, 0.4] ,
         description: '行蹤重建圖',
         hint: 'W／C／R 與老商辦之間繞不出來的軌跡。',
+      },
+      {
+        id: 'hotspot_pc_monitor_sticky',
+        shape: 'circle',
+        coords: [0.48, 0.08, 0.14],
+        description: '螢幕上方攝影機',
+        hint: '攝影機很小，很不起眼。',
+      },
+      {
+        id: 'hotspot_pc_taskbar_trash',
+        shape: 'circle',
+        coords: [0.92, 0.92, 0.12],
+        description: '工作列回收筒圖示',
+        hint: '空空的，卻莫名有壓力。',
       },
     ],
     items: [items.item_encrypted_messages, items.item_column_draft],
@@ -553,6 +683,8 @@ const scenes: Record<string, Scene> = {
       hotspot_pc_column_draft: 'pc_view_column_draft',
       hotspot_pc_recording: 'pc_view_recording',
       hotspot_pc_location: 'pc_view_location',
+      hotspot_pc_monitor_sticky: 'inspect_pc_monitor_sticky',
+      hotspot_pc_taskbar_trash: 'inspect_pc_taskbar_trash',
     },
     events: [
       {
@@ -584,7 +716,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
             },
           },
           {
@@ -629,7 +761,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '阿蘇把「三起事故」那行字用螢光筆圈起來，又圈「她也在場」。',
                 '「你有看見結構嗎?」',
@@ -687,7 +819,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '阿蘇指著「散場節奏」四個字：「你以為他在寫影評？」',
                 '「他在寫『現場怎麼被管理』。」',
@@ -742,7 +874,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '阿蘇把「兩個版本」反白：「這不是八卦，是工作流程。」',
                 '「外面要好看，內部要能扛稽核。兩份都合法，又不能太矛盾，拼起來也太合理。」',
@@ -796,7 +928,7 @@ const scenes: Record<string, Scene> = {
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
               characterExpression: 1,
-              characterPosition: 'left',
+              characterPosition: 'right',
               textSegments: [
                 '阿蘇把時間軸拉到命案當晚：「他提前很久到 W 附近。」',
                 '「不是趕場，是在等。」',
@@ -823,6 +955,64 @@ const scenes: Record<string, Scene> = {
           { type: 'setFlag', flag: 'ch2_pc_location_viewed', value: true },
         ],
         oneTime: true,
+      },
+      {
+        id: 'inspect_pc_monitor_sticky',
+        name: '螢幕上緣便利貼',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_pc_monitor_sticky' }],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text:
+                '螢幕上緣貼了一張螢光黃便利貼，邊角捲起，像被鍵盤熱氣烘過。\n\n' +
+                '上面字體很阿蘇：\n' +
+                '「① 終端不是給你跳過車上那段用的——是給你看完的。」\n' +
+                '「② 劉隊若打來，先問他要口頭版還是要可存檔版。」\n' +
+                '「③ 泡麵禁止。上次湯灑在鍵盤上，鑑定說那是『不明黏性檢體』。」\n\n' +
+                '第三條後面有人用鉛筆補了小字：「……其實是我。」\n' +
+                '你決定當作沒看見，免得阿蘇今晚多一個滅口名單。',
+              type: 'narrator',
+            },
+          },
+        ],
+      },
+      {
+        id: 'inspect_pc_taskbar_trash',
+        name: '工作列回收筒',
+        description: '',
+        requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_pc_taskbar_trash' }],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text:
+                '游標移到回收筒圖示上，系統提示跳出：「垃圾桶是空的。」\n\n' +
+                '你盯著那行字，腦中自動跑過另一套翻譯：\n' +
+                '「尚未刪除的版本」不在這裡；「對外說法」也不在這裡；\n' +
+                '甚至「你以為可以一鍵清掉的尷尬」——通常都清不掉。\n\n' +
+                '你默默把游標移開，像怕驚動某個負責稽核的幽靈程序。',
+              type: 'narrator',
+            },
+          },
+          {
+            type: 'showDialog',
+            dialog: {
+              text: '',
+              type: 'character',
+              characterId: 'npc_asu',
+              characterName: '阿蘇（警方技術組）',
+              characterExpression: 1,
+              characterPosition: 'right',
+              textSegments: [
+                '「別點『永久刪除』，那只是UI在安慰你。」',
+                '「真的想讓東西消失，得走流程、寫申請、留紀錄——很諷刺吧？」',
+                '她沒抬頭：「跟結案報告一樣，刪得掉的通常是桌面；刪不掉的是附件。」',
+              ],
+            },
+          },
+        ],
       },
     ],
     puzzles: [],

@@ -93,16 +93,6 @@ export const flowConfig: FlowConfig = {
       chapterId: 'ch6',
       sceneIds: ['scene_ch6_screening_hall', 'scene_ch6_control_room', 'scene_ch6_press_corridor'],
     },
-    ch2_hub: {
-      id: 'ch2_hub',
-      type: 'chapter_hub',
-      chapterId: 'ch2',
-      choices: [
-        { id: 'scene_ch2_cinema_entrance', label: '電影院大門口', sceneId: 'scene_ch2_cinema_entrance' },
-        { id: 'scene_ch2_asu_car', label: '阿蘇的車裡', sceneId: 'scene_ch2_asu_car' },
-        { id: 'scene_ch2_asu_desktop', label: '阿蘇的電腦', sceneId: 'scene_ch2_asu_desktop' },
-      ],
-    },
   },
 };
 
@@ -116,25 +106,13 @@ export function getNextStep(id: string): FlowStep | null {
   return getStep(step.next);
 }
 
-export function getHubChoices(stepId: string): FlowStep['choices'] {
-  const step = getStep(stepId);
-  if (step?.type !== 'chapter_hub' || !step.choices) return undefined;
-  return step.choices;
-}
-
 /**
  * 依流程步驟回傳對應的 Next.js 路徑（用於 router.push）。
  * @param stepId 當前步驟 id
- * @param sceneId 可選：當 step 為 chapter_hub 時，傳入選擇的 sceneId 則回傳 /play/{chapterId}/{sceneId}
  */
-export function getNextPath(stepId: string, sceneId?: string): string {
+export function getNextPath(stepId: string, _sceneId?: string): string {
   const step = getStep(stepId);
   if (!step) return '/';
-
-  // Hub 頁選擇場景後直接導向該場景
-  if (step.type === 'chapter_hub' && step.chapterId && sceneId) {
-    return `/play/${step.chapterId}/${sceneId}`;
-  }
 
   const nextId = step.next;
   if (!nextId) return '/';
@@ -151,16 +129,13 @@ export function getNextPath(stepId: string, sceneId?: string): string {
     case 'scene_explore':
       if (next.chapterId && next.sceneIds?.length) return `/play/${next.chapterId}/${next.sceneIds[0]}`;
       return '/';
-    case 'chapter_hub':
-      if (next.chapterId) return `/play/${next.chapterId}/hub`;
-      return '/';
     default:
       return '/';
   }
 }
 
 /**
- * 從章節 id 取得 intro 頁「繼續」按鈕應導向的路徑（由 flow 決定進場景或 hub）。
+ * 從章節 id 取得 intro 頁「繼續」按鈕應導向的路徑（通常為該章第一個探索場景）。
  */
 export function getChapterIntroContinuePath(chapterId: string): string {
   const step = Object.values(flowConfig.steps).find(

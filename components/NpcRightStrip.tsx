@@ -7,15 +7,11 @@ import { User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import SVGImage from './SVGImage';
+import { formatNpcDisplayName } from '@/lib/formatNpcDisplayName';
 
 function getNpcAvatarSrc(npc: Npc): string | null {
   if (npc.portraitWebp) return npc.portraitWebp;
   return getNpcPortraitUrl(npc.id, npc.portraitExpression ?? 1);
-}
-
-/** 人名與職稱斷行：在「（」前換行，例如 "林瑞堂（副理）" → 兩行顯示 */
-function formatNpcNameWithBreak(name: string): string {
-  return name.replace(/（/g, '\n（');
 }
 
 /** 一頁最多顯示 5 個頭像；頭像縮小 5% 以配合版面 */
@@ -126,7 +122,7 @@ export default function NpcRightStrip({
               )}
             </div>
             <span className="text-[10px] text-white/80 group-hover:text-white text-center min-w-[6em] max-w-[5.5rem] leading-tight line-clamp-2 break-words whitespace-pre-line">
-              {formatNpcNameWithBreak(npc.name)}
+              {formatNpcDisplayName(npc.name)}
             </span>
             {hoveredNpc === npc.id && (
               <m.div
@@ -135,7 +131,7 @@ export default function NpcRightStrip({
                 className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 flex flex-col items-center pointer-events-none z-10"
               >
                 <div className="bg-black/90 text-white text-xs font-medium px-2 py-1 rounded whitespace-pre-line text-center shadow-lg min-w-[6em]">
-                  {formatNpcNameWithBreak(npc.name)}
+                  {formatNpcDisplayName(npc.name)}
                 </div>
                 <div className="text-[10px] text-white/80 px-1.5 py-0.5 rounded bg-black/70 whitespace-nowrap">
                   點擊對話

@@ -16,6 +16,7 @@ export const DOCK_CONTENT_MAX_WIDTH = 0.92;
 export const DOCK_NARROW_LEFT_RATIO = 0.22;
 export const DOCK_NARROW_WIDTH = 0.8;
 
+/** 外殼 z-30，低於場景內 {@link NpcScenePortrait} 預設 z-40，立繪疊在 Dock 對話框之上。 */
 export default function BottomDock({ children, align = 'center' }: BottomDockProps) {
   const justifyClass =
     align === 'left' ? 'justify-start' : align === 'right' ? 'justify-end' : 'justify-center';

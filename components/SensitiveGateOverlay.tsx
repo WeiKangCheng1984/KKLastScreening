@@ -3,7 +3,6 @@
 import type { DialogChoice } from '@/types/game';
 import { X } from 'lucide-react';
 import { m } from 'framer-motion';
-import OverlayCard from './OverlayCard';
 
 export interface SensitiveGateOverlayProps {
   /** 旁白／提示文字 */
@@ -30,16 +29,12 @@ export default function SensitiveGateOverlay({
       transition={{ duration: 0.2 }}
       className="w-full max-w-[640px] max-h-[65vh] pointer-events-auto"
     >
-      <OverlayCard
-        tone="decision"
-        size="sm"
-        className="w-full max-h-[65vh] flex flex-col relative"
-      >
+      <div className="hotspot-glass rounded-xl shadow-2xl w-full max-h-[65vh] flex flex-col relative px-5 py-4 text-white">
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-3 right-3 p-1.5 rounded text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="absolute top-3 right-3 p-1.5 rounded text-white/75 hover:text-orange-400 hover:bg-white/10 transition-colors"
             aria-label="關閉"
           >
             <X size={20} />
@@ -47,24 +42,24 @@ export default function SensitiveGateOverlay({
         )}
 
         <div className="flex-1 min-h-0 overflow-y-auto pr-2">
-          <p className="text-center text-sm md:text-base leading-relaxed mb-5 pr-6 whitespace-pre-line">
+          <p className="text-center text-sm md:text-base text-white leading-relaxed mb-5 pr-6 whitespace-pre-line">
             {text}
           </p>
         </div>
 
-        <div className="mt-2 flex flex-col gap-2.5">
+        <div className="mt-2 flex flex-col gap-2.5 hotspot-glass-choices">
           {choices.map((choice) => (
             <button
               key={choice.id}
               type="button"
               onClick={() => onChoiceSelect(choice)}
-              className="w-full text-left px-3.5 py-3 rounded-lg border border-orange-600/60 bg-orange-950/40 hover:bg-orange-900/60 hover:border-orange-400/80 text-orange-100 transition-colors text-xs md:text-sm leading-snug"
+              className="group w-full text-left px-3.5 py-3 rounded-lg border border-white/20 bg-black/30 hover:bg-black/45 hover:border-orange-400/50 transition-colors text-xs md:text-sm leading-snug"
             >
-              {choice.text}
+              <span className="dialog-hotspot-choice">{choice.text}</span>
             </button>
           ))}
         </div>
-      </OverlayCard>
+      </div>
     </m.div>
   );
 }

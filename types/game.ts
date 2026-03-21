@@ -4,12 +4,17 @@ export type HotspotShape = 'rect' | 'poly' | 'circle';
 
 export type HotspotKind = 'object' | 'clue' | 'npc';
 
+/** showDialog／熱點 hint 呈現：全螢幕 zoom 層或底部 Dock */
+export type DialogPresentation = 'zoom' | 'dock';
+
 export interface Hotspot {
   id: string;
   shape: HotspotShape;
   coords: number[]; // 比例座標 (0-1)
   description?: string;
   hint?: string;
+  /** 僅有 hint 時：覆寫場景預設呈現方式 */
+  hintPresentation?: DialogPresentation;
   svgOverlay?: string;   // 新增：hover 時顯示的 SVG 預覽
   // 新增：用來區分 NPC / 道具 / 線索 類型
   kind?: HotspotKind;
@@ -41,6 +46,8 @@ export interface Effect {
   flag?: string;
   value?: any;
   dialog?: Dialog;
+  /** 僅 type==='showDialog'：覆寫場景預設；未指定時維持既有預設（zoom） */
+  dialogPresentation?: DialogPresentation;
   audio?: string;
   eventId?: string;
   sceneId?: string;
@@ -82,10 +89,12 @@ export interface Dialog {
   choices?: DialogChoice[]; // 新增：對話選擇（2選1或3選1）
   // 角色立繪相關
   characterId?: string;  // 角色 ID（與 WEBP 命名 {characterId}_1.webp 對應）
-  characterName?: string; // 角色名稱（顯示在對話框標題）
+  /** 角色名稱（對話框抬頭）；建議「姓名（職稱）」全形括號、無多餘空白，內文避免重複全名起句（交給 strip 規則） */
+  characterName?: string;
   characterPortrait?: string; // 角色立繪圖片/SVG 路徑（棄用：改用 WEBP，見 characterExpression）
   characterExpression?: 1 | 2 | 3; // 頭像表情編號，對應 /images/characters/{characterId}_1|2|3.webp
-  characterPosition?: 'left' | 'right'; // 立繪位置（左側或右側）
+  /** 場景／Dock 立繪錨點；未指定時 UI 預設為右側（對話框靠左、文字區較寬） */
+  characterPosition?: 'left' | 'right';
 }
 
 // === KK 洞察系統（三維度） ===
@@ -144,32 +153,6 @@ export interface NpcDialogNode {
   choices: NpcDialogChoice[];
   // 根據當前偏好決定下一個節點
   next?: string | ((state: GameState) => string | null);
-}
-
-// 角色對話系統：對話回合
-export interface ConversationTurn {
-  id: string;
-  text: string;
-  characterId: string;
-  characterName: string;
-  characterPortrait?: string; // 棄用：改用 WEBP，見 characterExpression
-  characterExpression?: 1 | 2 | 3; // 頭像表情，對應 /images/characters/{characterId}_1|2|3.webp
-  characterPosition?: 'left' | 'right';
-  speaker?: 'character' | 'player'; // 說話者是角色還是玩家
-  delay?: number; // 這段對話的延遲時間（毫秒）
-  autoAdvance?: boolean; // 是否自動推進到下一段（默認 true）
-  autoAdvanceDelay?: number; // 自動推進的延遲時間（毫秒，默認 2000）
-}
-
-// 角色對話鏈配置
-export interface CharacterConversation {
-  id: string; // 對話鏈 ID（例如 'character_1_conversation'）
-  turns: ConversationTurn[]; // 對話回合列表
-  finalChoices?: DialogChoice[]; // 最後的選擇題（可選）
-  onComplete?: {
-    setFlag?: string; // 完成後設置的 flag
-    triggerEvent?: string; // 完成後觸發的事件
-  };
 }
 
 // === NPC 隨機對話系統 ===
@@ -262,6 +245,8 @@ export interface Scene {
   name: string;
   description: string;
   background: string; // 背景圖路徑
+  /** 本場景線索對話／hint 未另指定時的呈現方式 */
+  defaultDialogPresentation?: DialogPresentation;
   hotspots: Hotspot[];
   items: Item[];
   events: Event[];
@@ -342,7 +327,6 @@ export type FlowStepType =
   | 'prologue_text'
   | 'chapter_intro'
   | 'scene_explore'
-  | 'chapter_hub'
   | 'scene_single';
 
 export interface FlowStepChoice {
@@ -367,5 +351,31 @@ export interface FlowStep {
 export interface FlowConfig {
   steps: Record<string, FlowStep>;
   firstStepId: string;
+}
+
+// --- Chapter Behaviour Configs (data-driven NPC gates & Liu report flow) ---
+
+export interface NpcSensitiveGateConfig {
+  npcId: string;
+  doneFlag: string;
+  allowedScenes?: string[];
+  observedFlags: string[];
+  minObservedCount?: number;
+  casualTalkThreshold: number;
+  gateText: string;
+  choices: {
+    ask: { id: string; text: string };
+    skip: { id: string; text: string };
+  };
+}
+
+export interface LiuReportFlowConfig {
+  noopUnlessFlags?: string[];
+  doneFlags: string[];
+  steps: Array<{
+    blockIfMissing?: string[];
+    text: string;
+    choices?: Array<{ id: string; text: string }>;
+  }>;
 }
 

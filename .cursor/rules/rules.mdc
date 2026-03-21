@@ -92,10 +92,9 @@ alwaysApply: true
 - **結構**：`NpcDialogNode` 內含 `text / choices / next / effects`
 - **用途**：敏感問題、分支追問、結尾設 flag（例如 `npc_*_sensitive_done`）
 
-### 3) 角色多輪對話（CharacterConversation）
-- **檔案**：`components/CharacterConversation.tsx` + `components/CharacterConversationCard.tsx`
-- **用途**：連續多段 turn、打字機、最後一段選擇題
-- **立繪來源**：`lib/characterPortrait.ts`（WEBP 優先，SVG 備援）
+### 3) 角色多段台詞（已併入 DialogBox）
+- **呈現**：play 頁一律 `DialogBox`（`variant="hotspot"`）+ `text`／`textSegments` 分段（與 `buildDialogFromNpcNode`、熱點 `showDialog` 相同管道）
+- **立繪**：場景上 `components/NpcScenePortrait.tsx`；Dock 路徑 z-40 高於 `BottomDock` z-30；`HotspotZoomOverlay` 內立繪 z-20 高於 `DialogBox` `containedInOverlay` z-10
 
 ---
 
@@ -103,7 +102,7 @@ alwaysApply: true
 
 ### 第一章：向劉隊報告（5 題雙格填空）
 - **入口**：`components/Ch1ReportEditor.tsx`
-- **配置**：`data/ch1ReportConfig.ts` → `attitude.attitudeFillBlanks`（實體在 `data/ch1AttitudeFillBlanks.ts`）
+- **配置**：`data/ch1ReportConfig.ts`（`ch1ReportFillBlanks` + 證據／時間線／態度等；`attitude.attitudeFillBlanks` 指向同檔匯出）
 - **題型元件**：`components/ReportFillBlank.tsx`
 - **重要規則**：
   - 一次必須完成 **5 題**（index 0~4）
@@ -211,8 +210,10 @@ alwaysApply: true
 
 - **每章一份 report config**（像 `ch1ReportConfig` 一樣）：
   - `data/chXReportConfig.ts`：宣告本章使用哪個模組（A/B/C/D）+ 題目/卡片資料 + closing text
-- **統一入口**：
-  - `data/getChapterConfig.ts` 可擴充成 `reportConfig?: ChapterReportConfig`（或 `chXReportConfig`），play 頁只管「拿 config → 開 overlay」
+- **統一入口（現況已接線）**：
+  - `data/getChapterConfig.ts` 的 `ChapterConfig.report`：`postComplete`（章尾完成後導向下一章 intro 的旗標與 href）。向劉隊回報以章尾 overlay 為主，已移除浮動 ReasoningPanel。
+  - 章尾 overlay 元件集中於 `components/ChapterReportEditorHost.tsx`；劉隊點擊邏輯見 `lib/liuReportFlow.ts`，ch3～ch6 劉隊殘句 QA 見 `lib/liuQaDialogChoice.ts`。
+- **對話呈現（可選）**：`types/game.ts` 的 `Effect.dialogPresentation` / `Scene.defaultDialogPresentation` / `Hotspot.hintPresentation`（`zoom` | `dock`）供資料層切換全螢幕層與 Dock。
 - **旗標命名（建議）**：
   - `chX_liu_report_ready`：允許「向劉隊報告」選項出現
   - `chX_liu_report_done`：章尾結算完成

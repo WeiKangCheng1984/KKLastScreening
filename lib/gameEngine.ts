@@ -6,6 +6,10 @@ export class GameEngine {
   private scenes: Record<string, Scene> = {};
   private items: Record<string, Item> = {};
   private npcDialogs: Record<string, Record<string, NpcDialogNode>> = {};
+  private onChangeCallback?: () => void;
+
+  setOnChange(fn: (() => void) | undefined): void { this.onChangeCallback = fn; }
+  private notify(): void { this.onChangeCallback?.(); }
 
   constructor(initialState?: GameState) {
     this.state = initialState || {
@@ -194,6 +198,7 @@ export class GameEngine {
         }
         break;
     }
+    this.notify();
   }
 
   triggerEvent(eventId: string): { effects: Effect[]; dialog?: any } | null {
@@ -381,10 +386,10 @@ export class GameEngine {
 
     if (solved && puzzle.onSolve && puzzle.type !== 'pick_three') {
       puzzle.onSolve.forEach(effect => this.applyEffect(effect));
-      // 標記謎題已解決
       this.state.flags[solvedFlag] = true;
     }
 
+    if (solved) this.notify();
     return solved;
   }
 
@@ -398,10 +403,9 @@ export class GameEngine {
       return { success: false };
     }
 
-    // 特殊道具使用邏輯
     if (itemId === 'pulse_clip') {
-      // 標記為已使用，打開脈搏夾面板
       this.state.flags['pulse_clip_used'] = true;
+      this.notify();
       return { success: true, openPanel: 'pulse_clip' };
     }
 
@@ -419,7 +423,6 @@ export class GameEngine {
     }
   }
 
-  // 設置 UV 燈狀態
   setUVLightState(on: boolean): void {
     this.state.flags['uv_light_on'] = on;
     if (on) {
@@ -431,23 +434,25 @@ export class GameEngine {
         }
       }
     }
+    this.notify();
   }
 
   addInteraction(id: string): void {
     if (!this.state.interactions.includes(id)) {
       this.state.interactions.push(id);
+      this.notify();
     }
   }
 
-  /** 移除單一互動記錄（測試用） */
   removeInteraction(id: string): void {
     this.state.interactions = this.state.interactions.filter((x) => x !== id);
+    this.notify();
   }
 
-  /** 設定某 NPC 的閒聊次數（測試用，用於解鎖敏感話題門檻） */
   setNpcCasualTalkCount(npcId: string, count: number): void {
     if (!this.state.npcCasualTalkCount) this.state.npcCasualTalkCount = {};
     this.state.npcCasualTalkCount[npcId] = Math.max(0, count);
+    this.notify();
   }
 
   // 計算場景探索進度
@@ -532,7 +537,6 @@ export class GameEngine {
       choice.effects.forEach(effect => this.applyEffect(effect));
     }
 
-    // 應用 KK 洞察三維度影響
     if (choice.insightEffects?.length) {
       if (!this.state.insights) {
         this.state.insights = { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
@@ -545,6 +549,7 @@ export class GameEngine {
         }
       });
     }
+    this.notify();
   }
 
   // 獲取當前章節的探索進度
@@ -578,6 +583,7 @@ export class GameEngine {
     if (firstNodeId && dialogTree[firstNodeId]) {
       this.state.activeNpcDialogId = dialogId;
       this.state.activeNpcDialogNodeId = firstNodeId;
+      this.notify();
     } else {
       console.warn(`[NPC 對話] 無法找到節點: ${firstNodeId ?? 'first'} (對話樹: ${dialogId})`);
     }
@@ -590,6 +596,7 @@ export class GameEngine {
   incrementNpcCasualTalk(npcId: string): void {
     if (!this.state.npcCasualTalkCount) this.state.npcCasualTalkCount = {};
     this.state.npcCasualTalkCount[npcId] = (this.state.npcCasualTalkCount[npcId] ?? 0) + 1;
+    this.notify();
   }
 
   // 獲取當前 NPC 對話節點
@@ -667,10 +674,8 @@ export class GameEngine {
       });
     }
 
-    // 設置選擇 flag（用於後續節點判斷）
     this.state.flags[`npc_${this.state.activeNpcDialogId}_choice_${choiceId}`] = true;
 
-    // 決定下一個節點
     if (currentNode.next) {
       let nextNodeId: string | null = null;
       
@@ -683,13 +688,12 @@ export class GameEngine {
       if (nextNodeId) {
         this.state.activeNpcDialogNodeId = nextNodeId;
       } else {
-        // 沒有下一個節點，結束對話
         this.endNpcDialog();
       }
     } else {
-      // 沒有 next，結束對話
       this.endNpcDialog();
     }
+    this.notify();
   }
 
   // 結束 NPC 對話
@@ -706,6 +710,7 @@ export class GameEngine {
     
     this.state.activeNpcDialogId = undefined;
     this.state.activeNpcDialogNodeId = undefined;
+    this.notify();
   }
 
   // === NPC 隨機對話系統 ===
@@ -770,7 +775,7 @@ export class GameEngine {
       characterName: npc.name,
       characterExpression: npc.portraitExpression ?? 1,
       characterPortrait: npc.portrait,
-      characterPosition: 'left',
+      characterPosition: 'right',
       choices: dialog.choices, // 傳遞選項
     };
   }

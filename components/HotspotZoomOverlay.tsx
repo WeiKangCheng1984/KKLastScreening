@@ -1,11 +1,25 @@
 'use client';
 
-import { getNpcPortraitUrl } from '@/lib/characterPortrait';
 import { Dialog } from '@/types/game';
+import NpcScenePortrait from './NpcScenePortrait';
 import { m, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import DialogBox from './DialogBox';
+
+/** 熱點說明與角色抬頭重複時不顯示灰字 caption，避免「問林瑞堂」+ 標題列「林瑞堂（…）」雙重身分提示 */
+function zoomCaptionDuplicatesCharacter(d: Dialog, caption: string): boolean {
+  if (d.type !== 'character' || !d.characterName?.trim()) return false;
+  const rawName = d.characterName.trim();
+  const short = rawName.split('（')[0].trim().replace(/\s/g, '');
+  const compactName = rawName.replace(/\s/g, '');
+  const cap = caption.trim().replace(/\s/g, '');
+  if (!cap || !short) return false;
+  if (cap === compactName || cap === short) return true;
+  if ((cap.startsWith('問') || cap.startsWith('與')) && cap.includes(short)) return true;
+  if (cap.startsWith('詢問') && (cap.includes(short) || compactName.includes(short))) return true;
+  return false;
+}
 
 export interface HotspotZoomOverlayProps {
   visible: boolean;
@@ -59,7 +73,9 @@ export default function HotspotZoomOverlay({
   const currentDialog = queue[currentIndex];
   const dialogWithTitle =
     currentDialog && interactionName && currentIndex === 0
-      ? { ...currentDialog, title: interactionName }
+      ? zoomCaptionDuplicatesCharacter(currentDialog, interactionName)
+        ? currentDialog
+        : { ...currentDialog, title: interactionName }
       : currentDialog;
 
   return (
@@ -127,7 +143,7 @@ export default function HotspotZoomOverlay({
             transition={{ duration: 0.2 }}
           />
 
-          {/* 對話 + 場景立繪：與 play 頁 BottomDock 一致，立繪不畫在對話框內（全螢幕 overlay 需自繪一層） */}
+          {/* 圖層（由低到高）：DialogBox containedInOverlay z-10 → NpcScenePortrait z-20，立繪永遠在對話框之上 */}
           <AnimatePresence mode="wait">
             {phase === 'dialog' && dialogWithTitle && (
               <m.div
@@ -138,38 +154,23 @@ export default function HotspotZoomOverlay({
                 transition={{ duration: 0.15 }}
                 className="absolute inset-0"
               >
+                <DialogBox
+                  dialog={dialogWithTitle}
+                  onClose={handleDialogClose}
+                  typewriterSpeed={30}
+                  variant="hotspot"
+                  portraitOnScene={!!dialogWithTitle.characterId}
+                  containedInOverlay
+                />
                 {dialogWithTitle.characterId ? (
-                  <div
-                    className={`pointer-events-none absolute inset-0 z-[6] flex items-end ${
-                      dialogWithTitle.characterPosition === 'right' ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
-                    <img
-                      src={getNpcPortraitUrl(
-                        dialogWithTitle.characterId,
-                        dialogWithTitle.characterExpression ?? 1
-                      )}
-                      alt={dialogWithTitle.characterName ?? ''}
-                      className={`h-[38%] w-auto max-w-[42%] object-contain object-bottom drop-shadow-2xl select-none ${
-                        dialogWithTitle.characterPosition === 'right' ? 'mr-0' : 'ml-0'
-                      }`}
-                      style={
-                        dialogWithTitle.characterPosition === 'right'
-                          ? { marginRight: '1%' }
-                          : { marginLeft: '1%' }
-                      }
-                    />
-                  </div>
-                ) : null}
-                <div className="absolute inset-0 z-20 flex items-end justify-center p-4 md:items-center md:p-8">
-                  <DialogBox
-                    dialog={dialogWithTitle}
-                    onClose={handleDialogClose}
-                    typewriterSpeed={30}
-                    variant="hotspot"
-                    portraitOnScene={!!dialogWithTitle.characterId}
+                  <NpcScenePortrait
+                    characterId={dialogWithTitle.characterId}
+                    expression={dialogWithTitle.characterExpression ?? 1}
+                    name={dialogWithTitle.characterName}
+                    position={dialogWithTitle.characterPosition ?? 'right'}
+                    zClassName="z-20"
                   />
-                </div>
+                ) : null}
               </m.div>
             )}
           </AnimatePresence>

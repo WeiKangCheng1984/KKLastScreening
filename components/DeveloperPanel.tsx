@@ -1,10 +1,8 @@
 'use client';
 
 import type { Scene, Chapter } from '@/types/game';
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Code, MapPin, Puzzle } from 'lucide-react';
-import PuzzleTestPanel from './PuzzleTestPanel';
+import { X, Code, MapPin } from 'lucide-react';
 
 interface DeveloperPanelProps {
   onClose: () => void;
@@ -17,9 +15,6 @@ interface DeveloperPanelProps {
 
 export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapterId, currentSceneId, scenes, chapters }: DeveloperPanelProps) {
   const router = useRouter();
-  const [isVisible, setIsVisible] = useState(true);
-  const [showPuzzleTest, setShowPuzzleTest] = useState(false);
-
   const allScenes = Object.values(scenes);
 
   const handleSceneJump = (chapterId: string, sceneId: string) => {
@@ -27,12 +22,9 @@ export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapt
     onClose();
   };
 
-  if (!isVisible) return null;
-
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div className="bg-gradient-to-br from-dark-card to-dark-surface border-2 border-industrial-orange/50 rounded-2xl p-6 md:p-8 max-w-4xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
-        {/* 標題欄 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-industrial-orange/20 rounded-lg">
@@ -61,11 +53,10 @@ export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapt
           </div>
         </div>
 
-        {/* 場景列表 */}
         <div className="space-y-4">
           {Object.values(chapters).map((chapter) => {
             const chapterScenes = allScenes.filter(s => s.chapterId === chapter.id);
-            
+
             return (
               <div key={chapter.id} className="border border-dark-border rounded-lg p-4">
                 <div className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
@@ -75,7 +66,7 @@ export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapt
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {chapterScenes.map((scene) => {
                     const isCurrentScene = currentChapterId === scene.chapterId && currentSceneId === scene.id;
-                    
+
                     return (
                       <button
                         key={scene.id}
@@ -106,27 +97,15 @@ export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapt
           })}
         </div>
 
-        {/* 工具按鈕 */}
-        <div className="mt-6 mb-4">
-          <button
-            onClick={() => setShowPuzzleTest(true)}
-            className="w-full px-4 py-3 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-          >
-            <Puzzle size={18} />
-            測試謎題組件
-          </button>
-        </div>
-
-        {/* 提示和設置 */}
         <div className="mt-6 space-y-3">
           <div className="p-3 bg-yellow-950/20 border border-yellow-700/50 rounded-lg">
             <p className="text-xs text-yellow-300">
-              💡 提示：按 <kbd className="px-2 py-1 bg-dark-surface rounded text-xs">Ctrl+D</kbd> 或 <kbd className="px-2 py-1 bg-dark-surface rounded text-xs">Cmd+D</kbd> 快速開啟/關閉開發者模式
+              提示：按 <kbd className="px-2 py-1 bg-dark-surface rounded text-xs">Ctrl+D</kbd> 或 <kbd className="px-2 py-1 bg-dark-surface rounded text-xs">Cmd+D</kbd> 快速開啟/關閉開發者模式
             </p>
           </div>
           <div className="p-3 bg-orange-950/20 border border-orange-700/50 rounded-lg">
             <p className="text-xs text-orange-300 mb-2">
-              ⚙️ 設置：隱藏開發者模式按鈕（可在 URL 中添加 ?dev=1 重新啟用）
+              設置：隱藏開發者模式按鈕（可在 URL 中添加 ?dev=1 重新啟用）
             </p>
             <button
               onClick={() => {
@@ -143,12 +122,6 @@ export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapt
           </div>
         </div>
       </div>
-
-      {/* 謎題測試面板 */}
-      {showPuzzleTest && (
-        <PuzzleTestPanel onClose={() => setShowPuzzleTest(false)} />
-      )}
     </div>
   );
 }
-
