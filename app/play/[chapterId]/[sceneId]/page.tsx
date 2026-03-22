@@ -43,6 +43,7 @@ import { useInventoryDetail } from '@/hooks/useInventoryDetail';
 import { getChapterConfig, CHOICE_ID_TO_REPORT_CHAPTER, type ReportChapterId } from '@/data/getChapterConfig';
 import { tryHandleLiuQaDialogChoice } from '@/lib/liuQaDialogChoice';
 import { resolveLiuNpcClick } from '@/lib/liuReportFlow';
+import { getCh3PortraitIntroEventId } from '@/lib/ch3PortraitIntroEvents';
 import { buildDialogFromNpcNode } from '@/lib/dialogUtils';
 
 // 獲取當前章節的所有場景
@@ -1890,6 +1891,17 @@ export default function PlayPage() {
                 if (!engineRef.current) return;
                 const engine = engineRef.current;
                 const st = engine.getState();
+
+                if (chapterId === 'ch3') {
+                  const introEventId = getCh3PortraitIntroEventId(sceneId, npcId);
+                  if (introEventId) {
+                    const introResult = engine.triggerEvent(introEventId);
+                    if (introResult?.dialog) {
+                      setCurrentDialog(introResult.dialog);
+                      return;
+                    }
+                  }
+                }
 
                 const behaviour = getNpcClickBehaviour(chapterId, {
                   state: st,
