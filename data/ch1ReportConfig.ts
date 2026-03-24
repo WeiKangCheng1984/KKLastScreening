@@ -1,89 +1,17 @@
 import type { TwoBlankFillConfig } from '@/components/FloatingFillBlankCore';
 
 /**
- * 第一章章尾：向劉隊報告（證據／時間線／版本／態度等完整設定）
+ * 第一章章尾：向劉隊報告（現況僅使用「時間線時刻」＋「五題雙格態度填空」＋結語）
  * - 雙格填空與 ch2～ch6 對齊命名：ch1ReportFillBlanks
  */
 
-export type Ch1EvidenceCategory = 'TimeAnchor' | 'ProcessAnchor' | 'PhysicalTrace';
-
-export type Ch1AttitudeWordCategory = 'procedure' | 'evidence' | 'human';
-
-export interface Ch1EvidenceCard {
-  itemId: string;
-  category: Ch1EvidenceCategory;
-  titleShort: string;
-  reportLine: string;
-  kkComment: string;
-}
-
-export interface Ch1TimelineEvent {
-  id: string;
-  label: string;
-}
-
-export interface Ch1ReportEvidenceConfig {
-  evidenceCards: Ch1EvidenceCard[];
-  missingCategoryHints: Record<Ch1EvidenceCategory, string>;
-  evidenceSlots?: { count: number };
-}
-
 export interface Ch1ReportTimelineConfig {
-  events: Ch1TimelineEvent[];
-  correctOrder: string[];
   errorMessages: string[];
   crimeTimeRange: { startMinutes: number; endMinutes: number };
 }
 
-export interface Ch1ReportVersionConfig {
-  playerLineOptions: { id: string; text: string }[];
-}
-
-export interface Ch1AttitudeChoice {
-  id: string;
-  text: string;
-  insightTarget: 'procedure_insight' | 'human_insight' | 'evidence_insight';
-  insightDelta: number;
-  insightTarget2?: 'procedure_insight' | 'human_insight' | 'evidence_insight';
-  insightDelta2?: number;
-}
-
-export interface Ch1AttitudeContainer {
-  id: string;
-  label: string;
-}
-
-export interface Ch1AttitudeWord {
-  id: string;
-  text: string;
-  category: Ch1AttitudeWordCategory;
-}
-
-export interface Ch1AttitudePhraseSlot {
-  slotId: string;
-  correctWordIds: string[];
-  acceptableWordIds?: string[];
-}
-
-export interface Ch1AttitudePhraseStructure {
-  id: string;
-  template: string;
-  slots: Ch1AttitudePhraseSlot[];
-  candidateWordIds?: string[];
-}
-
-export interface Ch1AttitudePhrasePuzzleConfig {
-  structures: Ch1AttitudePhraseStructure[];
-  wordBank: Ch1AttitudeWord[];
-}
-
 export interface Ch1ReportAttitudeConfig {
-  attitudeContainers: Ch1AttitudeContainer[];
-  attitudeContentCards: Ch1AttitudeChoice[];
-  choices: Ch1AttitudeChoice[];
-  requireInMemoCardId?: string;
-  phrasePuzzle?: Ch1AttitudePhrasePuzzleConfig;
-  attitudeFillBlanks?: TwoBlankFillConfig[];
+  attitudeFillBlanks: TwoBlankFillConfig[];
   closingInferenceByDimension: {
     procedure_insight: string;
     human_insight: string;
@@ -92,27 +20,16 @@ export interface Ch1ReportAttitudeConfig {
 }
 
 export interface Ch1ReportConfig {
-  evidence: Ch1ReportEvidenceConfig;
   timeline: Ch1ReportTimelineConfig;
-  version: Ch1ReportVersionConfig;
   attitude: Ch1ReportAttitudeConfig;
 }
 
-export const CH1_EVIDENCE_CATEGORIES: Record<string, Ch1EvidenceCategory> = {
-  item_ticket_stub: 'TimeAnchor',
-  item_schedule_modified: 'TimeAnchor',
-  item_light_control_note: 'ProcessAnchor',
-  item_projector_notes: 'ProcessAnchor',
-  item_black_plastic_fragment: 'PhysicalTrace',
-  item_cleaning_note: 'PhysicalTrace',
-};
-
-export const CH1_ITEM_ID_TO_DISCOVER_FLAG: Record<string, string> = {
-  item_schedule_modified: 'schedule_modified_found',
-  item_light_control_note: 'clue_manual_light_control',
-  item_projector_notes: 'projector_notes_found',
-  item_cleaning_note: 'clue_clean_trash',
-};
+/** 開啟報告 overlay 時寫入 `ch1_report_evidence` 旗標（相容舊存檔／測試預設）；非玩家互動選擇。 */
+export const CH1_REPORT_DEFAULT_EVIDENCE_IDS: string[] = [
+  'item_ticket_stub',
+  'item_schedule_modified',
+  'item_light_control_note',
+];
 
 export const ch1ReportFillBlanks: TwoBlankFillConfig[] = [
   {
@@ -443,73 +360,7 @@ export const ch1ReportFillBlanks: TwoBlankFillConfig[] = [
 ];
 
 export const ch1ReportConfig: Ch1ReportConfig = {
-  evidence: {
-    evidenceCards: [
-      {
-        itemId: 'item_ticket_stub',
-        category: 'TimeAnchor',
-        titleShort: '電影票根',
-        reportLine: '座位 H 排 12 號，場次 22:40，與死亡時間及場次吻合。',
-        kkComment: '票根不會說謊，會說謊的是排程表。',
-      },
-      {
-        itemId: 'item_schedule_modified',
-        category: 'TimeAnchor',
-        titleShort: '播映時間表（塗改）',
-        reportLine: '亮燈時間遭塗改，延後約三分鐘，與案發時間窗口相符。',
-        kkComment: '改表的人知道那三分鐘值多少。',
-      },
-      {
-        itemId: 'item_light_control_note',
-        category: 'ProcessAnchor',
-        titleShort: '燈控紀錄',
-        reportLine: '當日燈控採手動模式，需有人親自操作，具備接觸權限者即可決定亮燈時點。',
-        kkComment: '流程這次站在兇手那邊。',
-      },
-      {
-        itemId: 'item_projector_notes',
-        category: 'ProcessAnchor',
-        titleShort: '放映員的筆記',
-        reportLine: '便條記載「燈不用急著開」等口頭指示，未署名。',
-        kkComment: '有人說，有人做，報告裡只會剩下「疏失」。',
-      },
-      {
-        itemId: 'item_black_plastic_fragment',
-        category: 'PhysicalTrace',
-        titleShort: '黑色塑膠碎片',
-        reportLine: '洗手台下方採得，邊緣不規則，疑似手套殘留，位置隱蔽。',
-        kkComment: '急著乾淨的人，多半有東西不能留。',
-      },
-      {
-        itemId: 'item_cleaning_note',
-        category: 'PhysicalTrace',
-        titleShort: '清潔備忘',
-        reportLine: '廁所區域垃圾桶被刻意清空，與常態清潔節奏不符。',
-        kkComment: '這種「乾淨」本身就很可疑。',
-      },
-    ],
-    missingCategoryHints: {
-      TimeAnchor: '你還缺一種能寫進報告的支點：時間。',
-      ProcessAnchor: '你還缺一種能寫進報告的支點：權限或流程。',
-      PhysicalTrace: '你還缺一種能寫進報告的支點：殘留或現場痕跡。',
-    },
-    evidenceSlots: { count: 3 },
-  },
   timeline: {
-    events: [
-      { id: 'T1_movie_start_2240', label: '22:40 電影開演' },
-      { id: 'T2_normal_lights_0015', label: '00:15 原訂散場亮燈（排程表）' },
-      { id: 'T3_modified_lights_0018', label: '00:18 實際亮燈（延後約三分鐘）' },
-      { id: 'T4_cctv_shadow_001630', label: '00:16～00:30 監視器陰影區無有效畫面' },
-      { id: 'T5_call_0039', label: '00:39 報案電話' },
-    ],
-    correctOrder: [
-      'T1_movie_start_2240',
-      'T2_normal_lights_0015',
-      'T3_modified_lights_0018',
-      'T4_cctv_shadow_001630',
-      'T5_call_0039',
-    ],
     errorMessages: [
       '時間線對不上，再排一次。',
       '順序錯了——先想誰能控制燈、誰在黑暗裡。',
@@ -517,222 +368,7 @@ export const ch1ReportConfig: Ch1ReportConfig = {
     ],
     crimeTimeRange: { startMinutes: 14, endMinutes: 17 },
   },
-  version: {
-    playerLineOptions: [
-      { id: 'none', text: '先不用，就照你寫的版本。' },
-      {
-        id: 'ch1_summary_flow',
-        text: '燈不是自然晚，是被人改過。表格、手動模式、口頭指示……流程這次站在兇手那邊。',
-      },
-      {
-        id: 'ch1_summary_human',
-        text: '我想知道誰在遮蔽，遮蔽的原因。',
-      },
-      {
-        id: 'ch1_summary_evidence',
-        text: '現場乾淨得太刻意。有人花力氣把痕跡擦掉，卻忘了碎片比血跡難處理。',
-      },
-      {
-        id: 'ch1_extra_report',
-        text: '至少寫進去：這樣的燈光調整與清場節奏，未來若不被檢討，仍可能致人於死。',
-      },
-    ],
-  },
   attitude: {
-    attitudeContainers: [
-      { id: 'ch1_report_envelope', label: '警用報告封套' },
-      { id: 'ch1_kk_memo', label: 'KK 私人備忘錄' },
-    ],
-    attitudeContentCards: [
-      {
-        id: 'ch1_attitude_procedure',
-        text: '「體制要查就查到底。別讓他們用『疏失』兩個字收工。」',
-        insightTarget: 'procedure_insight',
-        insightDelta: 1,
-      },
-      {
-        id: 'ch1_attitude_evidence',
-        text: '「先別打草驚蛇。誰能碰燈、誰在黑暗裡，我先畫出來再說。」',
-        insightTarget: 'evidence_insight',
-        insightDelta: 1,
-      },
-      {
-        id: 'ch1_attitude_human',
-        text: '「我想知道是誰在幫兇手擦地板。恐懼比刀子還好使。」',
-        insightTarget: 'human_insight',
-        insightDelta: 1,
-      },
-      {
-        id: 'ch1_attitude_both',
-        text: '「上報歸上報，我自己的備忘可不會只寫『疏失』。兩邊都留。」',
-        insightTarget: 'procedure_insight',
-        insightDelta: 1,
-        insightTarget2: 'evidence_insight',
-        insightDelta2: 1,
-      },
-    ],
-    choices: [
-      {
-        id: 'ch1_attitude_procedure',
-        text: '「體制要查就查到底。別讓他們用『疏失』兩個字收工。」',
-        insightTarget: 'procedure_insight',
-        insightDelta: 1,
-      },
-      {
-        id: 'ch1_attitude_evidence',
-        text: '「先別打草驚蛇。誰能碰燈、誰在黑暗裡，我先畫出來再說。」',
-        insightTarget: 'evidence_insight',
-        insightDelta: 1,
-      },
-      {
-        id: 'ch1_attitude_human',
-        text: '「我想知道是誰在幫兇手擦地板。恐懼比刀子還好使。」',
-        insightTarget: 'human_insight',
-        insightDelta: 1,
-      },
-      {
-        id: 'ch1_attitude_both',
-        text: '「上報歸上報，我自己的備忘可不會只寫『疏失』。兩邊都留。」',
-        insightTarget: 'procedure_insight',
-        insightDelta: 1,
-        insightTarget2: 'evidence_insight',
-        insightDelta2: 1,
-      },
-    ],
-    requireInMemoCardId: 'ch1_attitude_both',
-    phrasePuzzle: {
-      structures: [
-        {
-          id: 'att_s2',
-          template: '誰能__0__、誰在__1__，我先把__2__理出來。',
-          slots: [
-            { slotId: 's2_0', correctWordIds: ['att_kongdeng'] },
-            { slotId: 's2_1', correctWordIds: ['att_heianli'], acceptableWordIds: ['att_mangqu'] },
-            { slotId: 's2_2', correctWordIds: ['att_dongxian'] },
-          ],
-          candidateWordIds: [
-            'att_kongdeng', 'att_heianli', 'att_dongxian', 'att_pengdeng', 'att_guandeng', 'att_mangqu',
-            'att_chixiaoye', 'att_maixiaoye', 'att_cesuoli', 'att_jianshiqi', 'att_paichengbao',
-            'att_yigeyanshen', 'att_caodiban', 'att_baomihuaji', 'att_piaogen', 'att_koutouzhishi',
-            'att_liucheng', 'att_biandangxie', 'att_liangdengshijian', 'att_kongdang',
-          ],
-        },
-        {
-          id: 'att_s3',
-          template: '我想知道是誰在__0__。__1__。',
-          slots: [
-            { slotId: 's3_0', correctWordIds: ['att_tixiongshou_shouwei'], acceptableWordIds: ['att_banxiongshou_caodiban', 'att_caodiban'] },
-            { slotId: 's3_1', correctWordIds: ['att_kongju_bidao'] },
-          ],
-          candidateWordIds: [
-            'att_tixiongshou_shouwei', 'att_kongju_bidao', 'att_banxiongshou_caodiban', 'att_caodiban', 'att_chenmo_bidao',
-            'att_baomihua', 'att_biandangxie', 'att_chixiaoye', 'att_maixiaoye', 'att_yigeyanshen', 'att_biandang',
-            'att_xiaodongxi', 'att_guanqiang', 'att_henji', 'att_shushi', 'att_liucheng', 'att_piaogen', 'att_jianshiqi',
-          ],
-        },
-        {
-          id: 'att_s5',
-          template: '__0__遭塗改，__1__反而替兇手留出了__2__。',
-          slots: [
-            { slotId: 's5_0', correctWordIds: ['att_liangdengshijian'], acceptableWordIds: ['att_paichengbao'] },
-            { slotId: 's5_1', correctWordIds: ['att_liucheng'], acceptableWordIds: ['att_shoudongmoshi'] },
-            { slotId: 's5_2', correctWordIds: ['att_kongdang'] },
-          ],
-          candidateWordIds: [
-            'att_liangdengshijian', 'att_liucheng', 'att_kongdang', 'att_paichengbao', 'att_shoudongmoshi', 'att_boyingshijian', 'att_shushi',
-            'att_pengdeng', 'att_koutouzhishi', 'att_jianshiqi', 'att_baomihuaji', 'att_piaogen', 'att_heianli',
-            'att_biandangxie', 'att_guanqiang', 'att_henji', 'att_xiaodongxi',
-          ],
-        },
-        {
-          id: 'att_s6',
-          template: '現場__0__，有人把__1__擦掉，但__2__卻沒有帶走。',
-          slots: [
-            { slotId: 's6_0', correctWordIds: ['att_ganjing_tayikeyi'], acceptableWordIds: ['att_ganjing_defaliang'] },
-            { slotId: 's6_1', correctWordIds: ['att_henji'], acceptableWordIds: ['att_jizheng', 'att_zhiwen'] },
-            { slotId: 's6_2', correctWordIds: ['att_suipian'], acceptableWordIds: ['att_jizheng', 'att_maofa'] },
-          ],
-          candidateWordIds: [
-            'att_ganjing_tayikeyi', 'att_ganjing_defaliang', 'att_henji', 'att_suipian', 'att_jizheng', 'att_zhiwen', 'att_maofa',
-            'att_guanqiang', 'att_xiaodongxi', 'att_jianshiqi', 'att_piaogen', 'att_biandangxie', 'att_baomihuaji', 'att_caodiban',
-            'att_yigeyanshen', 'att_pozhan', 'att_jiekou',
-          ],
-        },
-        {
-          id: 'att_s7',
-          template: '亮燈不是自然延後，而是人為調整，__0__與__1__都可能影響亮燈時點。',
-          slots: [
-            { slotId: 's7_0', correctWordIds: ['att_shoudongmoshi'], acceptableWordIds: ['att_liucheng'] },
-            { slotId: 's7_1', correctWordIds: ['att_koutouzhishi'] },
-          ],
-          candidateWordIds: [
-            'att_shoudongmoshi', 'att_koutouzhishi', 'att_liucheng', 'att_yigebanniu', 'att_yijuhua',
-            'att_paichengbao', 'att_pengdeng', 'att_liangdengshijian', 'att_jianshiqi', 'att_yigeyanshen', 'att_biandang',
-            'att_baomihuaji', 'att_piaogen', 'att_shushi', 'att_guanqiang', 'att_henji', 'att_xiaodongxi',
-          ],
-        },
-        {
-          id: 'att_s8',
-          template: '__0__的官腔很滑，但__1__會留下來，找一個他沒想到的__2__他就會破。',
-          slots: [
-            { slotId: 's8_0', correctWordIds: ['att_linfuli'] },
-            { slotId: 's8_1', correctWordIds: ['att_henji'], acceptableWordIds: ['att_jizheng'] },
-            { slotId: 's8_2', correctWordIds: ['att_xiaodongxi'], acceptableWordIds: ['att_babing'] },
-          ],
-          candidateWordIds: [
-            'att_linfuli', 'att_guanqiang', 'att_henji', 'att_xiaodongxi', 'att_jiekou', 'att_jizheng', 'att_pozhan', 'att_suipian', 'att_babing',
-            'att_shushi', 'att_yijuhua', 'att_jianshiqi', 'att_piaogen', 'att_biandangxie', 'att_baomihua', 'att_liucheng',
-            'att_koutouzhishi', 'att_yigeyanshen',
-          ],
-        },
-      ],
-      wordBank: [
-        { id: 'att_pengdeng', text: '碰燈', category: 'procedure' },
-        { id: 'att_kongdeng', text: '控燈', category: 'procedure' },
-        { id: 'att_dongxian', text: '動線', category: 'procedure' },
-        { id: 'att_liangdengshijian', text: '亮燈時間', category: 'procedure' },
-        { id: 'att_liucheng', text: '流程', category: 'procedure' },
-        { id: 'att_shoudongmoshi', text: '手動模式', category: 'procedure' },
-        { id: 'att_koutouzhishi', text: '口頭指示', category: 'procedure' },
-        { id: 'att_paichengbao', text: '排程表', category: 'procedure' },
-        { id: 'att_baomihuaji', text: '爆米花機', category: 'procedure' },
-        { id: 'att_guandeng', text: '關燈', category: 'procedure' },
-        { id: 'att_boyingshijian', text: '播映時間', category: 'procedure' },
-        { id: 'att_shushi', text: '疏失', category: 'procedure' },
-        { id: 'att_yigebanniu', text: '一個按鈕', category: 'procedure' },
-        { id: 'att_kongdang', text: '空檔', category: 'procedure' },
-        { id: 'att_heianli', text: '黑暗裡', category: 'evidence' },
-        { id: 'att_ganjing_tayikeyi', text: '乾淨得太刻意', category: 'evidence' },
-        { id: 'att_henji', text: '痕跡', category: 'evidence' },
-        { id: 'att_suipian', text: '碎片', category: 'evidence' },
-        { id: 'att_guanqiang', text: '官腔', category: 'evidence' },
-        { id: 'att_xiaodongxi', text: '小東西', category: 'evidence' },
-        { id: 'att_jianshiqi', text: '監視器', category: 'evidence' },
-        { id: 'att_piaogen', text: '票根', category: 'evidence' },
-        { id: 'att_mangqu', text: '盲區', category: 'evidence' },
-        { id: 'att_ganjing_defaliang', text: '乾淨得發亮', category: 'evidence' },
-        { id: 'att_jizheng', text: '跡證', category: 'evidence' },
-        { id: 'att_zhiwen', text: '指紋', category: 'evidence' },
-        { id: 'att_maofa', text: '毛髮', category: 'evidence' },
-        { id: 'att_jiekou', text: '藉口', category: 'evidence' },
-        { id: 'att_pozhan', text: '破綻', category: 'evidence' },
-        { id: 'att_banxiongshou_caodiban', text: '幫兇手擦地板', category: 'human' },
-        { id: 'att_kongju_bidao', text: '恐懼比刀子還管用', category: 'human' },
-        { id: 'att_baomihua', text: '爆米花', category: 'human' },
-        { id: 'att_biandangxie', text: '便當屑', category: 'human' },
-        { id: 'att_caodiban', text: '擦地板', category: 'human' },
-        { id: 'att_chixiaoye', text: '吃宵夜', category: 'human' },
-        { id: 'att_maixiaoye', text: '買宵夜', category: 'human' },
-        { id: 'att_cesuoli', text: '廁所裡', category: 'human' },
-        { id: 'att_yigeyanshen', text: '一個眼神', category: 'human' },
-        { id: 'att_biandang', text: '便當', category: 'human' },
-        { id: 'att_tixiongshou_shouwei', text: '替兇手收尾', category: 'human' },
-        { id: 'att_chenmo_bidao', text: '沉默比刀子還可怕', category: 'human' },
-        { id: 'att_yijuhua', text: '一句話', category: 'human' },
-        { id: 'att_babing', text: '把柄', category: 'human' },
-        { id: 'att_linfuli', text: '林副理', category: 'human' },
-      ],
-    },
     attitudeFillBlanks: ch1ReportFillBlanks,
     closingInferenceByDimension: {
       procedure_insight:

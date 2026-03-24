@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import ChapterClosingRewardStep from '@/components/ChapterClosingRewardStep';
 import ChapterConclusionOverlay from '@/components/ChapterConclusionOverlay';
 import Ch1ReportEditor from '@/components/Ch1ReportEditor';
@@ -59,13 +59,22 @@ export default function ChapterReportEditorHost({
     finishStandardChapter();
   }, [chapterId, finishStandardChapter, onCh6Ending, onDismiss, pendingCh6Ending]);
 
-  const engineApi = {
-    getState: () => getEngine().getState(),
-    applyEffect: (e: Parameters<GameEngine['applyEffect']>[0]) => getEngine().applyEffect(e),
-    handleDialogChoice: (c: Parameters<GameEngine['handleDialogChoice']>[0]) =>
-      getEngine().handleDialogChoice(c),
-    setReasoningComplete: (ch: string) => getEngine().setReasoningComplete(ch),
-  };
+  // Play 頁傳入的 getEngine 常為 inline `() => ref.current`，每次 render 參考都不同；
+  // 若子元件 useEffect 依賴 engine 物件，applyEffect → notify → setRefreshKey 會無限迴圈。
+  const getEngineRef = useRef(getEngine);
+  getEngineRef.current = getEngine;
+
+  const engineApi = useMemo(
+    () => ({
+      getState: () => getEngineRef.current().getState(),
+      applyEffect: (e: Parameters<GameEngine['applyEffect']>[0]) =>
+        getEngineRef.current().applyEffect(e),
+      handleDialogChoice: (c: Parameters<GameEngine['handleDialogChoice']>[0]) =>
+        getEngineRef.current().handleDialogChoice(c),
+      setReasoningComplete: (ch: string) => getEngineRef.current().setReasoningComplete(ch),
+    }),
+    []
+  );
 
   return (
     <ChapterConclusionOverlay>
@@ -115,11 +124,7 @@ export default function ChapterReportEditorHost({
           )}
           {chapterId === 'ch6' && (
             <Ch6ReportEditor
-              engine={{
-                getState: () => getEngine().getState(),
-                applyEffect: (e) => getEngine().applyEffect(e),
-                setReasoningComplete: (ch) => getEngine().setReasoningComplete(ch),
-              }}
+              engine={engineApi}
               onComplete={(endingId) => {
                 setPendingCh6Ending(endingId);
                 setPhase('reward');

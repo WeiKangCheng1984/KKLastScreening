@@ -100,9 +100,9 @@ alwaysApply: true
 
 ## 章尾結算／報告系統（現況重點）
 
-### 第一章：向劉隊報告（5 題雙格填空）
+### 第一章：向劉隊報告（時間線翻牌 + 5 題雙格填空）
 - **入口**：`components/Ch1ReportEditor.tsx`
-- **配置**：`data/ch1ReportConfig.ts`（`ch1ReportFillBlanks` + 證據／時間線／態度等；`attitude.attitudeFillBlanks` 指向同檔匯出）
+- **配置**：`data/ch1ReportConfig.ts`（`timeline`：`crimeTimeRange` + `errorMessages`；`attitude.attitudeFillBlanks` → `ch1ReportFillBlanks`；`closingInferenceByDimension`；`CH1_REPORT_DEFAULT_EVIDENCE_IDS` 僅供開 overlay 時寫入 `ch1_report_evidence` 旗標，無證據桌 UI）
 - **題型元件**：`components/ReportFillBlank.tsx`
 - **重要規則**：
   - 一次必須完成 **5 題**（index 0~4）
@@ -150,7 +150,7 @@ alwaysApply: true
 - **過關**：答完全部題目，或「正確題數 >= 門檻」（依章難度設定）
 
 #### 模組 C：三封套分流（報告 / 私留 / 不寫）
-- **形式**：拖曳卡片到三個容器（沿用 ch1 的拖曳骨架即可）
+- **形式**：拖曳卡片到三個容器（自建拖曳 UI；ch1 現況未使用此模組）
   - **警用報告封套**：能交出去、文字中性
   - **KK 私留備忘**：帶刺、可疑、還不能說死
   - **不寫**：太早、太薄、會害人（或會被拿去收工）
@@ -232,7 +232,7 @@ alwaysApply: true
 - **第一章道具精簡策略**：
   - 少量進背包（例如票根、黑色碎片）
   - 其餘採「檢視即發現」：事件只設 flag，不一定 addItem
-  - 報告用證據卡可用條件：背包擁有 **或** 觸發過對應 discover flag（`data/ch1ReportConfig.ts`：`CH1_ITEM_ID_TO_DISCOVER_FLAG`）
+  - 第一章章尾**無**證據桌互動；現場線索仍以場景事件旗標／背包為準（見 `gameDataCh1.ts`）
 
 ---
 

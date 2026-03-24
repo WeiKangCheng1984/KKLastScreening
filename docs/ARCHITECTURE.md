@@ -78,7 +78,7 @@ public/                 # 靜態資產（背景、立繪 WEBP、SVG 等）
 
 ### 5.3 場景與事件（各章檔案）
 
-- **`data/gameDataCh1.ts` … `gameDataCh6.ts`**（另 **`data/gameData.ts`** 承載部分共用或歷史結構，實際以分章檔＋載入邏輯為準）。
+- **`data/gameDataCh1.ts` … `gameDataCh6.ts`**：劇情與互動的單一來源（已移除舊版整包 `gameData.ts`，避免與分章檔重複、分叉）。
 - 典型結構：`Scene` 含 `hotspots`、`hotspotEventMap`、`events`、`puzzles`、`npcs`、`initialDialog` 等。
 - **對話呈現（資料可選）**：
   - `Effect.dialogPresentation`：`zoom` | `dock`

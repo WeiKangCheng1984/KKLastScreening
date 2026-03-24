@@ -342,7 +342,7 @@ export class SimulationRunner {
               severity: 'error',
               chapter: chId,
               location: `chapters.ts > ${chId}.scenes`,
-              message: `場景 "${sceneId}" 在 chapters.ts 中宣告，但在 gameData 中找不到`,
+              message: `場景 "${sceneId}" 在 chapters.ts 中宣告，但在該章 getChapterData 資料中找不到`,
             });
           }
         }
