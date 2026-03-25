@@ -66,6 +66,7 @@ export function getChapterConfig(chapterId: string): ChapterConfig {
 export const CHOICE_ID_TO_REPORT_CHAPTER: Record<string, ReportChapterId> = {
   ch1_liu_report_now: 'ch1',
   ch2_liu_open_qa_conclusion: 'ch2',
+  ch2_liu_report_finalize: 'ch2',
   ch3_liu_report_now: 'ch3',
   ch4_liu_report_now: 'ch4',
   ch5_liu_report_now: 'ch5',

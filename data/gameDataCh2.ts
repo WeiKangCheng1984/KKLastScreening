@@ -17,6 +17,16 @@ const items: Record<string, Item> = {
     svgSize: 'medium',
     collectible: true,
   },
+  'item_ch2_phone_decoder': {
+    id: 'item_ch2_phone_decoder',
+    name: '技術組備忘：草稿手機（解碼用）',
+    description:
+      '阿蘇從終端匯出的「草稿手機」互動備忘：畫面可切換省電顯影，讀出被表層文字蓋住的關鍵詞。\n' +
+      '她說：「這不是給你當玩具，是給你對卷。」',
+    svgImage: '/svg/items/projector_notes.svg',
+    svgSize: 'medium',
+    collectible: true,
+  },
   'item_column_draft': {
     id: 'item_column_draft',
     name: '專欄草稿（節能設備／未發表）',
@@ -675,8 +685,15 @@ const scenes: Record<string, Scene> = {
         description: '工作列回收筒圖示',
         hint: '空空的，卻莫名有壓力。',
       },
+      {
+        id: 'hotspot_pc_phone_decoder',
+        shape: 'circle',
+        coords: [0.38, 0.88, 0.14],
+        description: '技術組備忘（草稿手機）',
+        hint: '阿蘇留在終端旁的備忘：對完第一輪報告後才能領取。',
+      },
     ],
-    items: [items.item_encrypted_messages, items.item_column_draft],
+    items: [items.item_encrypted_messages, items.item_column_draft, items.item_ch2_phone_decoder],
     hotspotEventMap: {
       hotspot_pc_overview: 'inspect_pc_overview',
       hotspot_pc_unknown_chat: 'pc_view_unknown_chat',
@@ -685,6 +702,7 @@ const scenes: Record<string, Scene> = {
       hotspot_pc_location: 'pc_view_location',
       hotspot_pc_monitor_sticky: 'inspect_pc_monitor_sticky',
       hotspot_pc_taskbar_trash: 'inspect_pc_taskbar_trash',
+      hotspot_pc_phone_decoder: 'pc_grant_phone_decoder',
     },
     events: [
       {
@@ -732,6 +750,31 @@ const scenes: Record<string, Scene> = {
             },
           },
         ],
+      },
+      {
+        id: 'pc_grant_phone_decoder',
+        name: '領取技術組草稿手機備忘',
+        description: '',
+        requirements: [{ type: 'hasFlag', flag: 'ch2_report_fill_done' }],
+        effects: [
+          {
+            type: 'showDialog',
+            dialog: {
+              text:
+                '阿蘇把一支小型測試機推到備忘夾旁邊，螢幕還停在「未完成同步」的草稿頁。\n\n' +
+                '阿蘇：「劉隊說你第一輪句子對上了，這個才能給你。」\n' +
+                '「省電顯影那層不開，你會以為自己在猜字謎。」',
+              type: 'character',
+              characterId: 'npc_asu',
+              characterName: '阿蘇（警方技術組）',
+              characterExpression: 1,
+              characterPosition: 'right',
+            },
+          },
+          { type: 'addItem', itemId: 'item_ch2_phone_decoder' },
+          { type: 'setFlag', flag: 'ch2_pc_phone_decoder_taken', value: true },
+        ],
+        oneTime: true,
       },
       {
         id: 'pc_view_unknown_chat',

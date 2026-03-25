@@ -46,7 +46,7 @@ alwaysApply: true
 - **流程**：
   1. `getChapterData(chapterId)` → `engine.loadChapterData(data)`
   2. `engine.applyEffect({ type: 'changeScene', chapterId, sceneId })`
-  3. `ch2` 與其他章相同，僅注入 `scenes/items/npcDialogs`；章尾雙格題讀 `data/ch2ReportConfig.ts`
+  3. `ch2` 與其他章相同，僅注入 `scenes/items/npcDialogs`；章尾填空與背包手機謎讀 `data/ch2ReportConfig.ts`
 
 ---
 
@@ -108,9 +108,9 @@ alwaysApply: true
   - 一次必須完成 **5 題**（index 0~4）
   - `ReportFillBlank` 必須帶 `key`（依題號），避免 React 沿用上一題內部 state 造成「只做一題就全過」。
 
-### 第二章：向劉隊報告（5 題雙格填空）
+### 第二章：向劉隊報告（兩段：第一輪 2 題雙格填空 → 背包手機謎 → 第二輪結案）
 - **元件**：`components/Ch2ReportEditor.tsx`（`ReportFillBlank`）
-- **配置**：`data/ch2ReportConfig.ts` → `ch2ReportFillBlanks`（2 題）＋ `ch2PhoneRiddle`（手機省電謎）
+- **配置**：`data/ch2ReportConfig.ts` → `ch2ReportFillBlanks`（2 題）＋ `ch2PhoneRiddle`（背包道具 `item_ch2_phone_decoder` 內手機省電謎）；旗標含 `ch2_report_fill_done`（第一輪結束）、兩輪劉隊選項 `ch2_liu_open_qa_conclusion`／`ch2_liu_report_finalize`
 
 ---
 
@@ -171,10 +171,10 @@ alwaysApply: true
 
 > 不先綁死劇情細節，先定「報告的破關邏輯」：玩家到底要向劉隊交出哪一種結論。
 
-### 第二章（ch2）：兩題雙格填空＋手機省電謎（現況）
-- **實作**：`Ch2ReportEditor` + `data/ch2ReportConfig.ts`（`ReportFillBlank` 2 題 + `Ch2CrowPhoneRiddle`）
-- **主題手感**：先補兩句能對卷的報告句；再於手機草稿用「省電顯影」讀出關鍵詞並輸入過關
-- **旗標**：`ch2_q1_done`、`ch2_q2_done`、`ch2_phone_riddle_done`、`ch2_qa_reviewed_with_liu`、`ch2_reasoning_done`（舊存檔五題填空全滿仍視為 QA 完成，見 `flowController`）
+### 第二章（ch2）：兩段章尾＋背包內手機謎（現況）
+- **實作**：`Ch2ReportEditor`（第一輪僅 `ReportFillBlank` 2 題；第二輪簡短結案）+ `data/ch2ReportConfig.ts`；手機謎於背包道具 `item_ch2_phone_decoder`（`Ch2PhoneDecoderItemView`），阿蘇電腦事件 `pc_grant_phone_decoder`（需 `ch2_report_fill_done`）
+- **主題手感**：先補兩句能對卷的報告句；回終端領備忘後，在背包內用「省電顯影」讀出關鍵詞並輸入；再向劉隊第二輪結案
+- **旗標**：`ch2_q1_done`、`ch2_q2_done`、`ch2_report_fill_done`、`ch2_phone_riddle_done`、`ch2_qa_reviewed_with_liu`、`ch2_reasoning_done`（舊存檔五題填空全滿仍視為 QA 完成，見 `flowController`）
 
 ### 第三章（ch3）：三題「反證」報告（把錯的說法排掉）
 - **建議模組**：A（雙格填空）但縮成 3 題

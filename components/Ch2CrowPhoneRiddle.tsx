@@ -14,11 +14,13 @@ function normalizeCh2Answer(raw: string): string {
 export interface Ch2CrowPhoneRiddleProps {
   config: Ch2PhoneRiddleConfig;
   onSuccess: () => void;
+  /** 內嵌於背包道具卡時：不占滿視窗、不重疊全螢幕底層 */
+  embedded?: boolean;
 }
 
 type WrongKind = 'noReveal' | 'badAnswer' | null;
 
-export default function Ch2CrowPhoneRiddle({ config, onSuccess }: Ch2CrowPhoneRiddleProps) {
+export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2CrowPhoneRiddleProps) {
   const {
     draftSurfaceLines,
     draftRevealLines,
@@ -119,15 +121,23 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess }: Ch2CrowPhoneRi
     batteryDialog === 'disable' ? powerOffCancelLabel : powerSaveCancelLabel;
 
   return (
-    <div className="fixed inset-0 z-[85] flex flex-col items-center justify-center overflow-hidden px-3">
-      <div
-        className="absolute inset-0 bg-black/88"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 35%, rgba(27,16,6,0.96) 0%, rgba(6,6,8,0.98) 100%)',
-        }}
-      />
+    <div
+      className={
+        embedded
+          ? 'relative z-10 w-full flex flex-col items-stretch gap-3 px-1 py-1 max-h-[min(78vh,600px)] overflow-y-auto'
+          : 'fixed inset-0 z-[85] flex flex-col items-center justify-center overflow-hidden px-3'
+      }
+    >
+      {!embedded && (
+        <div
+          className="absolute inset-0 bg-black/88"
+          style={{
+            background: 'radial-gradient(ellipse at 50% 35%, rgba(27,16,6,0.96) 0%, rgba(6,6,8,0.98) 100%)',
+          }}
+        />
+      )}
 
-      <div className="relative z-10 w-full max-w-sm flex flex-col gap-3">
+      <div className={`relative z-10 w-full max-w-sm flex flex-col gap-3 ${embedded ? 'mx-auto' : ''}`}>
         <p className="text-center text-xs text-gray-500 tracking-wide">手機草稿（未完成同步）</p>
 
         {/* 外框深色；內螢幕：一般＝白底黑字，低耗＝黑底白字（顯影層浮出） */}
@@ -340,7 +350,7 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess }: Ch2CrowPhoneRi
       <AnimatePresence>
         {batteryDialog && (
           <m.div
-            className="fixed inset-0 z-[90] flex items-center justify-center px-6 bg-black/60"
+            className={`fixed inset-0 flex items-center justify-center px-6 bg-black/60 ${embedded ? 'z-[100]' : 'z-[90]'}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

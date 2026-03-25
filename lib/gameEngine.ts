@@ -70,6 +70,18 @@ export class GameEngine {
     if (!this.state.npcCasualTalkCount) {
       this.state.npcCasualTalkCount = {};
     }
+
+    // ch2 兩段報告：舊存檔曾於同一章尾完成手機謎但無 ch2_report_fill_done 時補齊
+    const ch2Flags = this.state.flags;
+    if (
+      ch2Flags &&
+      ch2Flags.ch2_phone_riddle_done &&
+      !ch2Flags.ch2_report_fill_done
+    ) {
+      ch2Flags.ch2_report_fill_done = true;
+      ch2Flags.ch2_q1_done = true;
+      ch2Flags.ch2_q2_done = true;
+    }
   }
 
   getState(): GameState {

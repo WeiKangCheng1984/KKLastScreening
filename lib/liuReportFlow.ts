@@ -48,6 +48,59 @@ export function resolveLiuNpcClick(params: {
     };
   }
 
+  // ch2：兩段報告（第一輪填空 → 阿蘇電腦／背包手機謎 → 第二輪結案）
+  if (chapterId === 'ch2') {
+    const asuBlock = cfg.steps.find((s) => s.blockIfMissing?.includes('npc_asu_sensitive_done'));
+    if (!flags.npc_asu_sensitive_done && !devLiu && asuBlock) {
+      return {
+        kind: 'dialog',
+        dialog: { ...LIU_BASE_DIALOG, text: asuBlock.text },
+      };
+    }
+    if (flags.ch2_reasoning_done) {
+      return { kind: 'random_liu' };
+    }
+    if (!flags.ch2_report_fill_done) {
+      const reportStep = cfg.steps.find((s) => !s.blockIfMissing?.length);
+      return {
+        kind: 'dialog',
+        dialog: {
+          ...LIU_BASE_DIALOG,
+          text: reportStep?.text ?? cfg.steps[cfg.steps.length - 1]?.text ?? '',
+          choices: [
+            { id: 'ch2_liu_keep_exploring', text: '我再多看一下現場。' },
+            { id: 'ch2_liu_open_qa_conclusion', text: '好，現在就試著說一次。' },
+          ],
+        },
+      };
+    }
+    if (!flags.ch2_phone_riddle_done) {
+      return {
+        kind: 'dialog',
+        dialog: {
+          ...LIU_BASE_DIALOG,
+          text:
+            '劉隊：「你剛那版先放在這。」\n\n' +
+            '「去阿蘇終端邊，把技術組備忘裡那支『草稿手機』對完——省電顯影那層不對齊，你後面會被自己卡死。」\n\n' +
+            '「對完再回來。」',
+        },
+      };
+    }
+    return {
+      kind: 'dialog',
+      dialog: {
+        ...LIU_BASE_DIALOG,
+        text:
+          '劉隊：「草稿裡那個關鍵詞對上了？」\n\n' +
+          '「行。把這版收進能交差的句子裡，我們把這章結掉。」',
+        choices: [
+          { id: 'ch2_liu_keep_exploring', text: '我再多確認一下。' },
+          { id: 'ch2_liu_report_finalize', text: '我想申請結案。' },
+        ],
+      },
+    };
+  }
+
   // noop guard: 若前置旗標不滿足且非 dev 模式
   if (cfg.noopUnlessFlags && cfg.noopUnlessFlags.length > 0) {
     const hasAny = cfg.noopUnlessFlags.some((f) => !!flags[f]);

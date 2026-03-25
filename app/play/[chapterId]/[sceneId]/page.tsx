@@ -30,6 +30,7 @@ import MuteAllButton from '@/components/MuteAllButton';
 import { preloadSVGBatch } from '@/lib/svgLoader';
 import NpcRightStrip from '@/components/NpcRightStrip';
 import ChapterReportEditorHost from '@/components/ChapterReportEditorHost';
+import Ch2PhoneDecoderItemView from '@/components/Ch2PhoneDecoderItemView';
 import type { Ch6EndingId } from '@/components/Ch6ReportEditor';
 import EndingOverlay from '@/components/EndingOverlay';
 import HotspotZoomOverlay from '@/components/HotspotZoomOverlay';
@@ -2376,17 +2377,32 @@ export default function PlayPage() {
               className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-sm px-4 pointer-events-auto"
             >
               <div className="w-full max-w-md md:max-w-lg">
-                <ItemObtainedNotification
-                  itemId={activeItemDetail.id}
-                  itemName={activeItemDetail.name}
-                  itemImage={activeItemDetail.image}
-                  itemSvgImage={activeItemDetail.svgImage}
-                  itemDescription={activeItemDetail.description}
-                  show
-                  duration={0}
-                  dismissOnTap
-                  onComplete={() => setActiveItemDetail(null)}
-                />
+                {activeItemDetail.id === 'item_ch2_phone_decoder' && !state.flags?.ch2_phone_riddle_done ? (
+                  <Ch2PhoneDecoderItemView
+                    onClose={() => setActiveItemDetail(null)}
+                    onSuccess={() => {
+                      if (!engineRef.current) return;
+                      engineRef.current.applyEffect({
+                        type: 'setFlag',
+                        flag: 'ch2_phone_riddle_done',
+                        value: true,
+                      });
+                      setActiveItemDetail(null);
+                    }}
+                  />
+                ) : (
+                  <ItemObtainedNotification
+                    itemId={activeItemDetail.id}
+                    itemName={activeItemDetail.name}
+                    itemImage={activeItemDetail.image}
+                    itemSvgImage={activeItemDetail.svgImage}
+                    itemDescription={activeItemDetail.description}
+                    show
+                    duration={0}
+                    dismissOnTap
+                    onComplete={() => setActiveItemDetail(null)}
+                  />
+                )}
               </div>
             </m.div>
           )}
@@ -2768,7 +2784,9 @@ export default function PlayPage() {
               'ch2_q3_done',
               'ch2_q4_done',
               'ch2_q5_done',
+              'ch2_report_fill_done',
               'ch2_phone_riddle_done',
+              'ch2_pc_phone_decoder_taken',
               'ch2_qa_reviewed_with_liu',
               'ch2_reasoning_done',
               'navigate_to_ch3_intro',

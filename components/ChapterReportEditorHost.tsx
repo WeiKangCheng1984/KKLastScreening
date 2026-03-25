@@ -98,7 +98,7 @@ export default function ChapterReportEditorHost({
             <Ch2ReportEditor
               engine={engineApi}
               onComplete={() => setPhase('reward')}
-              onClose={onDismiss}
+              onRound1Dismiss={onDismiss}
             />
           )}
           {chapterId === 'ch3' && (
