@@ -2,18 +2,28 @@
 
 import type { Scene, Chapter } from '@/types/game';
 import { useRouter } from 'next/navigation';
-import { X, Code, MapPin } from 'lucide-react';
+import { X, Code, MapPin, FileText } from 'lucide-react';
 
 interface DeveloperPanelProps {
   onClose: () => void;
   onDisableDevMode?: () => void;
+  /** 直接開啟第二章章尾（雙格填空＋手機謎），供本機測試 */
+  onTestCh2Report?: () => void;
   currentChapterId: string;
   currentSceneId: string;
   scenes: Record<string, Scene>;
   chapters: Record<string, Chapter>;
 }
 
-export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapterId, currentSceneId, scenes, chapters }: DeveloperPanelProps) {
+export default function DeveloperPanel({
+  onClose,
+  onDisableDevMode,
+  onTestCh2Report,
+  currentChapterId,
+  currentSceneId,
+  scenes,
+  chapters,
+}: DeveloperPanelProps) {
   const router = useRouter();
   const allScenes = Object.values(scenes);
 
@@ -96,6 +106,28 @@ export default function DeveloperPanel({ onClose, onDisableDevMode, currentChapt
             );
           })}
         </div>
+
+        {onTestCh2Report && (
+          <div className="mt-6 border border-cyan-800/40 rounded-lg p-4 bg-cyan-950/15">
+            <div className="text-sm font-semibold text-cyan-200/90 mb-2 flex items-center gap-2">
+              <FileText size={16} />
+              章節環節測試
+            </div>
+            <p className="text-xs text-gray-500 mb-3">
+              會重置第二章報告相關旗標並開啟章尾 overlay（兩題填空 → 手機省電謎）。需已載入遊戲引擎（任意 play 場景）。
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                onTestCh2Report();
+                onClose();
+              }}
+              className="w-full px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors"
+            >
+              第二章：向劉隊報告（填空＋手機）
+            </button>
+          </div>
+        )}
 
         <div className="mt-6 space-y-3">
           <div className="p-3 bg-yellow-950/20 border border-yellow-700/50 rounded-lg">

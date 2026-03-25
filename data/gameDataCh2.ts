@@ -318,7 +318,7 @@ const scenes: Record<string, Scene> = {
           },
         ],
       },
-      // 原阿蘇 Q1~Q5 主線已併入 ch2ReportConfig（雙格五題）；此處僅保留現場檢視敘事。
+      // 原阿蘇 QA 主線已併入 ch2ReportConfig（雙格兩題＋手機省電謎）；此處僅保留現場檢視敘事。
       {
         id: 'examine_car_recording',
         name: '錄音備忘_事故',

@@ -110,7 +110,7 @@ alwaysApply: true
 
 ### 第二章：向劉隊報告（5 題雙格填空）
 - **元件**：`components/Ch2ReportEditor.tsx`（`ReportFillBlank`）
-- **配置**：`data/ch2ReportConfig.ts` → `ch2ReportFillBlanks`
+- **配置**：`data/ch2ReportConfig.ts` → `ch2ReportFillBlanks`（2 題）＋ `ch2PhoneRiddle`（手機省電謎）
 
 ---
 
@@ -171,10 +171,10 @@ alwaysApply: true
 
 > 不先綁死劇情細節，先定「報告的破關邏輯」：玩家到底要向劉隊交出哪一種結論。
 
-### 第二章（ch2）：五題雙格填空（現況）
-- **實作**：`Ch2ReportEditor` + `data/ch2ReportConfig.ts`（`ReportFillBlank`，與 ch3～ch6 同款）
-- **主題手感**：把手機裡的句子補成「能對劉隊說的版本」，兩格對齊才算一題過關
-- **旗標**：`ch2_q1_done`～`ch2_q5_done`、`ch2_qa_reviewed_with_liu`、`ch2_reasoning_done`
+### 第二章（ch2）：兩題雙格填空＋手機省電謎（現況）
+- **實作**：`Ch2ReportEditor` + `data/ch2ReportConfig.ts`（`ReportFillBlank` 2 題 + `Ch2CrowPhoneRiddle`）
+- **主題手感**：先補兩句能對卷的報告句；再於手機草稿用「省電顯影」讀出關鍵詞並輸入過關
+- **旗標**：`ch2_q1_done`、`ch2_q2_done`、`ch2_phone_riddle_done`、`ch2_qa_reviewed_with_liu`、`ch2_reasoning_done`（舊存檔五題填空全滿仍視為 QA 完成，見 `flowController`）
 
 ### 第三章（ch3）：三題「反證」報告（把錯的說法排掉）
 - **建議模組**：A（雙格填空）但縮成 3 題

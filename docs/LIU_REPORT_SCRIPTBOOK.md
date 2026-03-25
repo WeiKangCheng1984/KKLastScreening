@@ -11,7 +11,8 @@
 | 章節 | 主要資料檔 | 形式 |
 |------|------------|------|
 | 第一章 | `data/ch1ReportConfig.ts`（`ch1ReportFillBlanks`） | 五題雙格填空；章尾另依玩家「流程／證據／人心」傾向給**維度結語** |
-| 第二章～第六章 | `data/ch2ReportConfig.ts` … `ch6ReportConfig.ts` | 各五題雙格填空（`ReportFillBlank`） |
+| 第二章 | `data/ch2ReportConfig.ts`（`ch2ReportFillBlanks`＋`ch2PhoneRiddle`） | 兩題雙格填空（`ReportFillBlank`）＋手機省電顯影與字詞輸入 |
+| 第三章～第六章 | `data/ch3ReportConfig.ts` … `data/ch6ReportConfig.ts` | 各五題雙格填空（`ReportFillBlank`） |
 
 **判定規則（共通）**：每一題須**兩格皆選中**任一組 `correctIds` 內的選項，該題才算通過；同格常有多個「語意等價」正解。錯選可能觸發專屬吐槽（KUSO 誤導），否則走該題的 `wrongFallback`。
 
@@ -102,17 +103,20 @@
 
 ## 三、第二章：死者是誰——手機裡的版本
 
-**句式與正解（每格任擇一個列出的詞即可）**
+### 3.1 雙格填空（共 2 題）
+
+**判定**：每題兩格皆選中 `correctIds` 內選項後，依 `bothCorrectDialogue` 顯示 KK／劉隊銜接；詳見 `data/ch2ReportConfig.ts` 之 `ch2ReportFillBlanks`。
 
 | 題 | 句式摘要 | 格一正解（語意組） | 格二正解（語意組） |
 |----|----------|-------------------|-------------------|
-| 1 | 草稿寫的不是設備……連〔　〕都會被寫成可省；真正想省的是〔　〕 | 連帶責任、維修工時、可以說清楚的那段 | 責任、問責鏈、可追溯的環節 |
-| 2 | 兩年前她也在〔　〕；一旦〔　〕被寫進去…… | 那次事故裡、早期驗收流程裡、那個不該再被叫出名字的地方 | 事故位置、她的名字與現場的對應、紀錄裡的節點 |
-| 3 | 先放三個〔　〕，再比對同一套〔　〕 | 獨立節點、事故樣本、能暫時放住懷疑的抽屜 | 錯誤、痕跡、系統性的東西 |
-| 4 | 定位繞圈等〔　〕先咬合；發生在〔　〕的時間窗 | 甜蜜時點、燈控排程、那個會讓所有人看起來都合理的瞬間 | 燈光與散場節奏、流程表、控制面板上的動作 |
-| 5 | 出事後熟練地立刻〔　〕——不像〔　〕 | 亂講、切割、補紀錄 | 第一次、臨時反應、手忙腳亂 |
+| 1 | 卷宗認戶籍；城市用抬頭／署名／口頭稱呼。圈內有人喊他烏鴉——報告「對外名字」與「職能」 | 烏鴉、專欄抬頭那個名字、調查欄固定署名、讀者／圈內先認得的那個稱呼 | 寫公共流程／外包驗證敘事的人、把事故寫成議題的人、調查型專欄書寫者、監督欄位與對外敘事的人 |
+| 2 | 私訊太「順」通常是什麼；與冷座標疊在一起的是 | 像被先剪過情緒、表層故事被排好順序、讀起來像劇本而非生活殘渣、最好吞的解釋被放最前面 | 幾個館的代號／縮寫、跨館節點與轉折點、兩年前樓梯間那套說法的殘影、舊傷在流程圖上的接點 |
 
-每題兩格皆對後，均有 **KK** 與 **劉隊** 各一段銜接第三章的對白（見原始檔 `bothCorrectDialogue`）。
+### 3.2 手機省電謎（`ch2PhoneRiddle`）
+
+- **流程**：狀態列**低電量電池**可開啟「低耗顯示」確認 → 草稿區顯影（`draftRevealLines`，文案含蓄、不直寫答案詞）→ 可再點電池關閉低耗；**曾至少開啟過一次低耗**後，即使關閉仍可憑記憶輸入。Wi‑Fi／藍牙／勿擾／還原等為假目標。
+- **可接受答案**（正規化後比對）：**烏鴉**（簡體「乌鸦」可同義）；與顯影文案需玩家自行對齊前兩題填空語境。
+- **旗標**：`ch2_phone_riddle_done`（與 `ch2_q1_done`、`ch2_q2_done` 一併納入里程碑；舊存檔曾完成五題填空者仍相容，見 `lib/flowController.ts`）。
 
 ---
 
@@ -264,7 +268,7 @@
 ## 九、附錄：與本書對照的原始檔
 
 - `data/ch1ReportConfig.ts` — 第一章填空＋`closingInferenceByDimension`  
-- `data/ch2ReportConfig.ts` … `ch6ReportConfig.ts` — 各章 `*ReportFillBlanks`  
+- `data/ch2ReportConfig.ts` — `ch2ReportFillBlanks`＋`ch2PhoneRiddle`；`data/ch3ReportConfig.ts` … `data/ch6ReportConfig.ts` — 各章 `*ReportFillBlanks`  
 - `data/getChapterConfig.ts` — 章尾導航 `postComplete`  
 - `components/EndingOverlay.tsx` — 第六章四結局正文（填空路徑）  
 - `components/Ch6ReportEditor.tsx` — 結局 ID 計算邏輯  

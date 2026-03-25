@@ -40,8 +40,19 @@ export function getMilestones(state: GameState): ChapterMilestones {
   const ch1CanEnterReport = ch1CoreSensitivesDone && !!flags.ch1_liu_mid_shown;
   const ch1ReasoningDone = !!flags.ch1_reasoning_done;
 
-  const ch2QaDoneFlags = ['ch2_q1_done', 'ch2_q2_done', 'ch2_q3_done', 'ch2_q4_done', 'ch2_q5_done'];
-  const ch2QaAllDone = ch2QaDoneFlags.every((key) => !!flags[key]);
+  /**
+   * ch2 章尾：兩題雙格填空 + 手機省電謎。
+   * 新規則：ch2_q1_done && ch2_q2_done && ch2_phone_riddle_done
+   * 舊存檔相容：曾以「五題全滿」通關者，仍視為 QA 段落已完成。
+   */
+  const ch2NewQaDone =
+    !!flags.ch2_q1_done && !!flags.ch2_q2_done && !!flags.ch2_phone_riddle_done;
+  const ch2LegacyFiveDone = ['ch2_q3_done', 'ch2_q4_done', 'ch2_q5_done'].every((k) => !!flags[k]);
+  const ch2LegacyAllFiveFill =
+    !!flags.ch2_q1_done &&
+    !!flags.ch2_q2_done &&
+    ch2LegacyFiveDone;
+  const ch2QaAllDone = ch2NewQaDone || ch2LegacyAllFiveFill;
 
   const ch2CanLeaveWithAsu = ch2QaAllDone && !!flags.ch2_qa_reviewed_with_liu;
   const ch2ReasoningDone = !!flags.ch2_reasoning_done;

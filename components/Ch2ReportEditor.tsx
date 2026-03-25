@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import ReportFillBlank from '@/components/ReportFillBlank';
-import { ch2ReportFillBlanks } from '@/data/ch2ReportConfig';
+import Ch2CrowPhoneRiddle from '@/components/Ch2CrowPhoneRiddle';
+import { ch2ReportConfig } from '@/data/ch2ReportConfig';
 import type { Effect, GameState, DialogChoice } from '@/types/game';
 
 export interface Ch2ReportEditorProps {
@@ -16,35 +17,35 @@ export interface Ch2ReportEditorProps {
   onClose: () => void;
 }
 
-const CH2_Q_DONE_FLAGS = [
-  'ch2_q1_done',
-  'ch2_q2_done',
-  'ch2_q3_done',
-  'ch2_q4_done',
-  'ch2_q5_done',
-] as const;
-
 export default function Ch2ReportEditor({ engine, onComplete }: Ch2ReportEditorProps) {
+  const [phase, setPhase] = useState<'fill' | 'phone'>('fill');
   const [index, setIndex] = useState(0);
-  const configs = useMemo(() => ch2ReportFillBlanks, []);
+  const configs = useMemo(() => ch2ReportConfig.ch2ReportFillBlanks, []);
+  const phoneConfig = ch2ReportConfig.ch2PhoneRiddle;
   const current = configs[index];
 
   const handleQuestionComplete = useCallback(() => {
-    setIndex((i) => {
-      const n = i + 1;
-      if (n >= 1 && n <= CH2_Q_DONE_FLAGS.length) {
-        engine.applyEffect({ type: 'setFlag', flag: CH2_Q_DONE_FLAGS[n - 1], value: true } as Effect);
-      }
-      return i + 1;
-    });
-  }, [engine]);
+    if (index === 0) {
+      engine.applyEffect({ type: 'setFlag', flag: 'ch2_q1_done', value: true } as Effect);
+      setIndex(1);
+      return;
+    }
+    if (index === 1) {
+      engine.applyEffect({ type: 'setFlag', flag: 'ch2_q2_done', value: true } as Effect);
+      setPhase('phone');
+    }
+  }, [engine, index]);
 
-  useEffect(() => {
-    if (index < configs.length) return;
+  const handlePhoneSuccess = useCallback(() => {
+    engine.applyEffect({ type: 'setFlag', flag: 'ch2_phone_riddle_done', value: true } as Effect);
     engine.applyEffect({ type: 'setFlag', flag: 'ch2_qa_reviewed_with_liu', value: true } as Effect);
     engine.setReasoningComplete('ch2');
     onComplete();
-  }, [index, configs.length, engine, onComplete]);
+  }, [engine, onComplete]);
+
+  if (phase === 'phone') {
+    return <Ch2CrowPhoneRiddle config={phoneConfig} onSuccess={handlePhoneSuccess} />;
+  }
 
   if (!current) return null;
 

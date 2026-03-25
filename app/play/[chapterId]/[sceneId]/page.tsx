@@ -2759,6 +2759,25 @@ export default function PlayPage() {
             setDevModeAndPersist(false);
             setShowDeveloperPanel(false);
           }}
+          onTestCh2Report={() => {
+            const engine = engineRef.current;
+            if (!engine) return;
+            const ch2ReportResetFlags = [
+              'ch2_q1_done',
+              'ch2_q2_done',
+              'ch2_q3_done',
+              'ch2_q4_done',
+              'ch2_q5_done',
+              'ch2_phone_riddle_done',
+              'ch2_qa_reviewed_with_liu',
+              'ch2_reasoning_done',
+              'navigate_to_ch3_intro',
+            ] as const;
+            ch2ReportResetFlags.forEach((flag) =>
+              engine.applyEffect({ type: 'setFlag', flag, value: false }),
+            );
+            setActiveReportChapterId('ch2');
+          }}
           currentChapterId={chapterId}
           currentSceneId={sceneId}
           scenes={scenes}

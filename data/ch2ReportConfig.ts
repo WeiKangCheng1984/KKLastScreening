@@ -2,13 +2,55 @@ import type { TwoBlankFillConfig } from '@/components/FloatingFillBlankCore';
 
 /**
  * 第二章章尾：向劉隊報告
- * - 雙格填空資料結構與 ch1 的 `ch1ReportFillBlanks` 相同（`TwoBlankFillConfig[]`）
- * - 呈現元件：`ReportFillBlank`（與 ch3～ch6 同款）
- * - 文案邏輯：己＋深化版——資訊偏模糊、KK 冷幽默；烏鴉等在脈絡中呈現，每格允許多個語意正解（correctIds）
+ * - 雙格填空：`ReportFillBlank`（僅 2 題）
+ * - 手機省電謎：`Ch2CrowPhoneRiddle`（電池→省電→顯影→字詞輸入）
  */
+
+/** 假目標：僅本地切換，不觸發過關 */
+export interface Ch2PhoneDecoy {
+  id: string;
+  label: string;
+  ariaLabel: string;
+  feedbackWhenOff: string;
+  feedbackWhenOn: string;
+}
+
+export interface Ch2PhoneWrongFeedback {
+  kk: string;
+  liu: string;
+  /** 尚未讀過顯影層就送出時的含蓄提示（可選） */
+  hintWhenNoReveal?: string;
+}
+
+export interface Ch2PhoneRiddleConfig {
+  /** 草稿區：表層（亂碼／混淆字） */
+  draftSurfaceLines: string[];
+  /** 草稿區：省電顯影後可讀線索（語意上應呼應 `acceptableAnswers`，宜含蓄） */
+  draftRevealLines: string[];
+  /** 輸入框標籤／提示 */
+  inputLabel: string;
+  inputPlaceholder: string;
+  /** 可接受字詞（比對前會 trim、全形半形簡化） */
+  acceptableAnswers: string[];
+  /** 狀態列電池：開啟省電確認 */
+  powerSaveDialogTitle: string;
+  powerSaveDialogMessage: string;
+  powerSaveConfirmLabel: string;
+  powerSaveCancelLabel: string;
+  /** 關閉省電確認 */
+  powerOffDialogTitle: string;
+  powerOffDialogMessage: string;
+  powerOffConfirmLabel: string;
+  powerOffCancelLabel: string;
+  /** 省電模式開啟後狀態列顯示 */
+  statusBarPowerSaveHint: string;
+  decoys: Ch2PhoneDecoy[];
+  wrongFeedback: Ch2PhoneWrongFeedback;
+}
 
 export interface Ch2ReportConfig {
   ch2ReportFillBlanks: TwoBlankFillConfig[];
+  ch2PhoneRiddle: Ch2PhoneRiddleConfig;
 }
 
 export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
@@ -165,199 +207,70 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
     wrongFallback:
       'KK：第一格處理「誰幫你把故事變好讀」；第二格才落地。別用八卦當釘子，釘子會歪。',
   },
-  {
-    id: 'ch2_report_q3',
-    sentenceParts: [
-      '「三起」若是隨口氣話應該會飄走；它卻穩得像被釘在「',
-      '」上。錄音與草稿讓你聽見版本：對外說法更像經過「',
-      '」，而不是單純說錯。',
-    ],
-    blank1: {
-      hintLabel: 'KK：它穩得像哪種語言？',
-      options: [
-        { id: 'ch2r3_1a', label: '欄位或表頭語言', fullText: '欄位或表頭語言', x: 0.22, y: 0.18, rotation: -8 },
-        { id: 'ch2r3_1b', label: '可比對的格子', fullText: '可比對的格子', x: 0.5, y: 0.14, rotation: 7 },
-        { id: 'ch2r3_1c', label: '流程節點感', fullText: '流程節點感', x: 0.74, y: 0.2, rotation: -6 },
-        { id: 'ch2r3_1d', label: '報表式用語', fullText: '報表式用語', x: 0.28, y: 0.34, rotation: 9 },
-        { id: 'ch2r3_1k1', label: '三部曲片名', fullText: '三部曲片名', x: 0.2, y: 0.58, rotation: -11 },
-        { id: 'ch2r3_1k2', label: '便當三格配菜', fullText: '便當三格配菜', x: 0.52, y: 0.62, rotation: 8 },
-        {
-          id: 'ch2r3_1k3',
-          label: '恐嚇信排版（也很整齊）',
-          fullText: '恐嚇信排版（也很整齊）',
-          x: 0.76,
-          y: 0.58,
-          rotation: -7,
-        },
-      ],
-      correctIds: ['ch2r3_1a', 'ch2r3_1b', 'ch2r3_1c', 'ch2r3_1d'],
-      replyOnCorrect: '對。髒情緒很少排成三格；會排成三格的，通常是表。',
-      wrongRepliesByChoiceId: {
-        ch2r3_1k3: '恐嚇信也能排得很整齊——但整齊的目的通常是讓你怕，不是讓你好對帳。',
-      },
-    },
-    blank2: {
-      hintLabel: 'KK：對外版本更像經過什麼處理？',
-      options: [
-        { id: 'ch2r3_2a', label: '修整與刪剪', fullText: '修整與刪剪', x: 0.24, y: 0.18, rotation: -7 },
-        { id: 'ch2r3_2b', label: '換皮敘事', fullText: '換皮敘事', x: 0.5, y: 0.12, rotation: 8 },
-        { id: 'ch2r3_2c', label: '把責任邊界磨薄', fullText: '把責任邊界磨薄', x: 0.74, y: 0.2, rotation: -6 },
-        { id: 'ch2r3_2d', label: '讓句子變好結案', fullText: '讓句子變好結案', x: 0.3, y: 0.34, rotation: 10 },
-        { id: 'ch2r3_2k1', label: '校對改錯字', fullText: '校對改錯字', x: 0.2, y: 0.58, rotation: -10 },
-        { id: 'ch2r3_2k2', label: '美編加字體', fullText: '美編加字體', x: 0.52, y: 0.62, rotation: 9 },
-        { id: 'ch2r3_2k3', label: '加字幕而已', fullText: '加字幕而已', x: 0.8, y: 0.58, rotation: -8 },
-      ],
-      correctIds: ['ch2r3_2a', 'ch2r3_2b', 'ch2r3_2c', 'ch2r3_2d'],
-      replyOnCorrect: '對。你聽見的不一定是謊言，可能是責任被提前搬運。',
-      wrongRepliesByChoiceId: {
-        ch2r3_2k2: '字體再美，也美不過「責任變薄」這件事。',
-      },
-    },
-    bothCorrectDialogue: {
-      kk: '表不會哭，只會讓你簽名。',
-      liu: '寫「疑似敘事修整」。第二章別審判剪刀手。',
-    },
-    wrongFallback:
-      'KK：先判斷它是不是「格式語言」，再判斷「薄掉的是哪一塊責任」。別急著找兇手，先找版型。',
-  },
-  {
-    id: 'ch2_report_q4',
-    sentenceParts: [
-      '「An」這種暱稱會讓大腦自動補感情戲——讀成「',
-      '」，人就容易太早點頭。對齊 Unknown 的節奏後，比較像「',
-      '」在接手：私人語氣被排成公開結論的走道。',
-    ],
-    blank1: {
-      hintLabel: 'KK：哪種讀法會讓你太快點頭？',
-      options: [
-        { id: 'ch2r4_1a', label: '舊帳／吃醋／威脅感', fullText: '舊帳／吃醋／威脅感', x: 0.2, y: 0.17, rotation: -8 },
-        { id: 'ch2r4_1b', label: '執念敘事', fullText: '執念敘事', x: 0.46, y: 0.13, rotation: 7 },
-        { id: 'ch2r4_1c', label: '把對方讀成「還在意」', fullText: '把對方讀成「還在意」', x: 0.72, y: 0.19, rotation: -5 },
-        {
-          id: 'ch2r4_1d',
-          label: '交換條件的籌碼線',
-          fullText: '交換條件的籌碼線',
-          x: 0.28,
-          y: 0.33,
-          rotation: 9,
-        },
-        { id: 'ch2r4_1k1', label: '限動小劇場', fullText: '限動小劇場', x: 0.2, y: 0.57, rotation: -11 },
-        { id: 'ch2r4_1k2', label: '感情諮商罐頭句', fullText: '感情諮商罐頭句', x: 0.52, y: 0.61, rotation: 8 },
-        { id: 'ch2r4_1k3', label: '已讀不回競技', fullText: '已讀不回競技', x: 0.78, y: 0.57, rotation: -7 },
-      ],
-      correctIds: ['ch2r4_1a', 'ch2r4_1b', 'ch2r4_1c', 'ch2r4_1d'],
-      replyOnCorrect: '對。舒服常常是別人替你剪過。',
-      wrongRepliesByChoiceId: {
-        ch2r4_1k2: '罐頭句很安慰人，但安慰通常不是證據，是服務業。',
-      },
-    },
-    blank2: {
-      hintLabel: 'KK：Unknown 像哪種機制在接手？',
-      options: [
-        { id: 'ch2r4_2a', label: '口徑', fullText: '口徑', x: 0.26, y: 0.18, rotation: -7 },
-        { id: 'ch2r4_2b', label: '代操或排版感', fullText: '代操或排版感', x: 0.52, y: 0.12, rotation: 8 },
-        { id: 'ch2r4_2c', label: '清欄位', fullText: '清欄位', x: 0.76, y: 0.2, rotation: -6 },
-        { id: 'ch2r4_2d', label: '像工單不像聊天', fullText: '像工單不像聊天', x: 0.3, y: 0.34, rotation: 10 },
-        { id: 'ch2r4_2k1', label: '對方理工腦', fullText: '對方理工腦', x: 0.22, y: 0.58, rotation: -10 },
-        { id: 'ch2r4_2k2', label: '客服 SOP', fullText: '客服 SOP', x: 0.52, y: 0.62, rotation: 9 },
-        { id: 'ch2r4_2k3', label: '正式模板', fullText: '正式模板', x: 0.78, y: 0.58, rotation: -8 },
-      ],
-      correctIds: ['ch2r4_2a', 'ch2r4_2b', 'ch2r4_2c', 'ch2r4_2d'],
-      replyOnCorrect: '對。匿名可以是面具，也可以是工單。',
-      wrongRepliesByChoiceId: {
-        ch2r4_2k2: 'SOP 也能談戀愛——跟你的耐心談。',
-      },
-    },
-    bothCorrectDialogue: {
-      kk: '最像人的那句，有時最不像活人聊天；這不是浪漫，這是警訊。',
-      liu: '動機寫待查。備註寫：「語氣像誰在寫」。',
-    },
-    wrongFallback: 'KK：別用「他還愛不愛」結案。你要問的是：誰讓這句話變得好結案。',
-  },
-  {
-    id: 'ch2_report_q5',
-    sentenceParts: [
-      '三件事並排，腦中會自動上演「',
-      '」——省事愛巧合。可現場更像在追「誰能把故事變短」：那隻手把東西丟進「',
-      '」，讓簽核變順，而不是讓劇情變刺激。',
-    ],
-    blank1: {
-      hintLabel: 'KK：先拆掉哪一種懶敘事？',
-      options: [
-        {
-          id: 'ch2r5_1a',
-          label: '一宗命案加兩次巧合',
-          fullText: '一宗命案加兩次巧合',
-          x: 0.2,
-          y: 0.17,
-          rotation: -8,
-        },
-        { id: 'ch2r5_1b', label: '三個無關個案排隊', fullText: '三個無關個案排隊', x: 0.48, y: 0.13, rotation: 7 },
-        {
-          id: 'ch2r5_1c',
-          label: '單一兇手加兩次倒楣',
-          fullText: '單一兇手加兩次倒楣',
-          x: 0.74,
-          y: 0.19,
-          rotation: -5,
-        },
-        { id: 'ch2r5_1k1', label: '電影宇宙彩蛋', fullText: '電影宇宙彩蛋', x: 0.28, y: 0.33, rotation: 9 },
-        { id: 'ch2r5_1k2', label: '行銷三部曲', fullText: '行銷三部曲', x: 0.52, y: 0.33, rotation: -6 },
-        { id: 'ch2r5_1k3', label: '都市傳說合集', fullText: '都市傳說合集', x: 0.22, y: 0.56, rotation: -11 },
-      ],
-      correctIds: ['ch2r5_1a', 'ch2r5_1b', 'ch2r5_1c'],
-      replyOnCorrect: '對。巧合堆疊是故事的便宜；流程表是案件的貴。',
-      wrongRepliesByChoiceId: {
-        ch2r5_1k2: '三部曲很會賣票，但命案不買套票。',
-      },
-    },
-    blank2: {
-      hintLabel: 'KK：那隻「整理的手」更像在做什麼？',
-      options: [
-        {
-          id: 'ch2r5_2a',
-          label: '分類風險、整理事故',
-          fullText: '分類風險、整理事故',
-          x: 0.2,
-          y: 0.16,
-          rotation: -7,
-        },
-        { id: 'ch2r5_2b', label: '修剪對外說法', fullText: '修剪對外說法', x: 0.48, y: 0.12, rotation: 8 },
-        {
-          id: 'ch2r5_2c',
-          label: '讓責任變薄、簽核變順',
-          fullText: '讓責任變薄、簽核變順',
-          x: 0.72,
-          y: 0.18,
-          rotation: -5,
-        },
-        {
-          id: 'ch2r5_2d',
-          label: '會讓結案變順的機制',
-          fullText: '會讓結案變順的機制',
-          x: 0.28,
-          y: 0.32,
-          rotation: 10,
-        },
-        { id: 'ch2r5_2k1', label: '懶人包產線', fullText: '懶人包產線', x: 0.22, y: 0.56, rotation: -10 },
-        { id: 'ch2r5_2k2', label: '演算法推薦', fullText: '演算法推薦', x: 0.52, y: 0.6, rotation: 9 },
-        { id: 'ch2r5_2k3', label: '魔術方塊第三層', fullText: '魔術方塊第三層', x: 0.78, y: 0.56, rotation: -8 },
-      ],
-      correctIds: ['ch2r5_2a', 'ch2r5_2b', 'ch2r5_2c', 'ch2r5_2d'],
-      replyOnCorrect: '你寫的不是陰謀論；你寫的是表格怎麼把人變成可結案數字。',
-      wrongRepliesByChoiceId: {
-        ch2r5_2k1: '懶人包很善良，善良到常把「誰該扛」懶掉。',
-      },
-    },
-    bothCorrectDialogue: {
-      kk: '刺激是給觀眾的；SOP 是給長官的。你選哪一邊，就會寫出哪一種世界。',
-      liu: '模型寫到權限假設。別寫成破案宣言。',
-    },
-    wrongFallback:
-      'KK：先讓巧合退場，再讓流程上場。順序反了，你會以為自己在寫編劇指南。',
-  },
 ];
+
+export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
+  draftSurfaceLines: [
+    '■□◇※＃＠ 同步失敗 0x7F2A · 重試排隊中',
+    '備忘：欄位抬頭／署名欄／讀者口徑（多線並存）',
+    '路由片段：▓▓▓ → ▒▒▒ → （此列僅索引）',
+    '系統提示：長稿可折行；短稿請對齊欄位。',
+  ],
+  draftRevealLines: [
+    '備忘（低耗對比）：',
+    '對外欄位先填「圈內先喊開的那個稱呼」——與卷宗抬頭能對上的寫法。',
+    '館名與代號往後排；這一筆只負責讓人知道你在寫誰。',
+  ],
+  inputLabel: '依備忘可讀線索，輸入對外稱呼（詞）',
+  inputPlaceholder: '輸入詞語',
+  acceptableAnswers: ['烏鴉', '乌鸦'],
+  powerSaveDialogTitle: '低耗顯示',
+  powerSaveDialogMessage: '電量偏低。是否改為低耗顯示？對比會調整，較省電。',
+  powerSaveConfirmLabel: '確定',
+  powerSaveCancelLabel: '取消',
+  powerOffDialogTitle: '關閉低耗顯示',
+  powerOffDialogMessage: '恢復一般顯示。備忘的另一層會先隱藏。',
+  powerOffConfirmLabel: '關閉',
+  powerOffCancelLabel: '保留',
+  statusBarPowerSaveHint: '低耗',
+  decoys: [
+    {
+      id: 'wifi',
+      label: 'Wi‑Fi',
+      ariaLabel: '切換 Wi‑Fi',
+      feedbackWhenOff: 'Wi‑Fi 已關。',
+      feedbackWhenOn: 'Wi‑Fi 已開，連線正常。',
+    },
+    {
+      id: 'bt',
+      label: '藍牙',
+      ariaLabel: '切換藍牙',
+      feedbackWhenOff: '藍牙已關。',
+      feedbackWhenOn: '藍牙已開。',
+    },
+    {
+      id: 'dnd',
+      label: '勿擾',
+      ariaLabel: '切換勿擾模式',
+      feedbackWhenOff: '勿擾已關。',
+      feedbackWhenOn: '勿擾已開。',
+    },
+    {
+      id: 'fake_restore',
+      label: '還原',
+      ariaLabel: '嘗試還原',
+      feedbackWhenOff: '無可用備份還原。',
+      feedbackWhenOn: '仍無可用版本。',
+    },
+  ],
+  wrongFeedback: {
+    kk: '欄位對了，字才上得了紙。你剛剛那句，卷宗不認。',
+    liu: '報告用詞要能和系統對上。再想。',
+    hintWhenNoReveal: '草稿好像還有一層沒對齊；對照備忘再看一次。',
+  },
+};
 
 export const ch2ReportConfig: Ch2ReportConfig = {
   ch2ReportFillBlanks,
+  ch2PhoneRiddle,
 };
