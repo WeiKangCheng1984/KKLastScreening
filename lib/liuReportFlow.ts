@@ -81,8 +81,7 @@ export function resolveLiuNpcClick(params: {
           ...LIU_BASE_DIALOG,
           text:
             '劉隊：「你剛那版先放在這。」\n\n' +
-            '「去阿蘇終端邊，把技術組備忘裡那支『草稿手機』對完——省電顯影那層不對齊，你後面會被自己卡死。」\n\n' +
-            '「對完再回來。」',
+            '「阿蘇那邊還有東西沒給齊。等她肯給了，你再回來跟我收尾。」',
         },
       };
     }
@@ -91,8 +90,8 @@ export function resolveLiuNpcClick(params: {
       dialog: {
         ...LIU_BASE_DIALOG,
         text:
-          '劉隊：「草稿裡那個關鍵詞對上了？」\n\n' +
-          '「行。把這版收進能交差的句子裡，我們把這章結掉。」',
+          '劉隊：「備忘那邊，你看完了？」\n\n' +
+          '「行。抬頭別空著。對上了，我們就收。」',
         choices: [
           { id: 'ch2_liu_keep_exploring', text: '我再多確認一下。' },
           { id: 'ch2_liu_report_finalize', text: '我想申請結案。' },

@@ -11,7 +11,7 @@ const items: Record<string, Item> = {
       '「……用三起事故來揭，讀者才會信。」\n' +
       '「……她也在場，你確定要這樣寫？」\n' +
       '「……先把節能那篇壓住，別讓他們拿『改善』當結案。」\n\n' +
-      '時間戳愈靠近案發愈密、語氣愈像命令；格式近似烏鴉打字習慣，節奏卻異常乾淨。\n' +
+      '時間戳愈靠近案發愈密、語氣愈像命令；格式近似他平時打字習慣，節奏卻異常乾淨。\n' +
       '研判：可能混有「代寫／代斷句」或刻意模仿；「三起」像欄位名而非情緒字。',
     svgImage: '/svg/items/projector_notes.svg',
     svgSize: 'medium',
@@ -21,8 +21,7 @@ const items: Record<string, Item> = {
     id: 'item_ch2_phone_decoder',
     name: '技術組備忘：草稿手機（解碼用）',
     description:
-      '阿蘇從終端匯出的「草稿手機」互動備忘：畫面可切換省電顯影，讀出被表層文字蓋住的關鍵詞。\n' +
-      '她說：「這不是給你當玩具，是給你對卷。」',
+      '內測備忘機，同步永遠慢半拍。她只說：「別在這裡猜，回去對紙。」',
     svgImage: '/svg/items/projector_notes.svg',
     svgSize: 'medium',
     collectible: true,
@@ -72,7 +71,7 @@ const scenes: Record<string, Scene> = {
     events: [
       {
         id: 'talk_liu_ch2_intro',
-        name: '與劉隊交談（第二章任務）',
+        name: '門口簡報',
         description: '',
         requirements: [],
         effects: [
@@ -198,7 +197,7 @@ const scenes: Record<string, Scene> = {
         name: '劉隊（偵查隊）',
         portraitExpression: 1,
         randomDialogs: [
-          { id: 'ch2_liu_gate_idle_1', text: '「先去跟阿蘇看資料。她處理技術，你協助推理。」', type: 'hint', weight: 1 },
+          { id: 'ch2_liu_gate_idle_1', text: '「車上有人在等你。別讓她等太久。」', type: 'hint', weight: 1 },
         ],
         available: true,
       },
@@ -214,7 +213,7 @@ const scenes: Record<string, Scene> = {
     hotspots: [
       // 僅保留四個「還在破譯中」的手機相關互動，其餘完整內容移至電腦場景
       { id: 'hotspot_car_unknown_chat', shape: 'circle', coords: [0.5, 0.85, 0.3], description: '通訊紀錄 Unknown', hint: '阿蘇：「這通訊紀錄我還在跑還原，看有沒有機會還原。」' },
-      { id: 'hotspot_car_notepad', shape: 'circle', coords: [0.6, 0.85, 0.3], description: '烏鴉的記事本筆記', hint: '烏鴉的記事本正在同步到終端，畫面上只解碼的進度條。' },
+      { id: 'hotspot_car_notepad', shape: 'circle', coords: [0.6, 0.85, 0.3], description: '記事本筆記（同步中）', hint: '畫面上只解碼的進度條。' },
       { id: 'hotspot_car_recording', shape: 'circle', coords: [0.7, 0.85, 0.3], description: '錄音備忘_事故', hint: '錄音檔還在做降噪處理，波形抖得亂七八糟。' },
       { id: 'hotspot_car_location', shape: 'circle', coords: [0.8, 0.85, 0.3], description: '系統定位紀錄', hint: '定位資料還在重建軌跡，地圖一片馬賽克。' },
       { id: 'hotspot_car_toolbox', shape: 'circle', coords: [0.07, 0.8, 0.3], description: '後座工具箱', hint: '用不著也打不開，看了一眼上面的貼紙，寫著「線路是誠實的」。' },
@@ -291,7 +290,7 @@ const scenes: Record<string, Scene> = {
       // 章尾五題改在劉隊結算的 Ch2ReportEditor（雙格填空）進行；探索期不再從場景事件啟動舊問答樹。
       {
         id: 'examine_car_notepad',
-        name: '烏鴉的記事本筆記',
+        name: '記事本筆記（同步中）',
         description: '',
         requirements: [{ type: 'hasInteracted', hotspotId: 'hotspot_car_notepad' }],
         effects: [
@@ -600,15 +599,6 @@ const scenes: Record<string, Scene> = {
     },
     npcs: [
       {
-        id: 'npc_liu',
-        name: '劉隊（偵查隊）',
-        portraitExpression: 1,
-        randomDialogs: [
-          { id: 'ch2_liu_briefing', text: '「手機資料在這。她處理技術，你協助推理。」', type: 'hint', weight: 1 },
-        ],
-        available: true,
-      },
-      {
         id: 'npc_asu',
         name: '阿蘇（警方技術組）',
         portrait: '/svg/characters/asu.svg',
@@ -641,7 +631,7 @@ const scenes: Record<string, Scene> = {
         shape: 'circle',
         coords: [0.25, 0.25, 0.4],
         description: '總覽看板',
-        hint: '把車上四塊螢幕殘影對回終端：這裡是起點。',
+        hint: '四塊殘影疊成一面亮的桌面。',
       },
       {
         id: 'hotspot_pc_unknown_chat',
@@ -655,7 +645,7 @@ const scenes: Record<string, Scene> = {
         shape: 'circle',
         coords: [0.72, 0.18, 0.4],
         description: '專欄草稿（全文）',
-        hint: '烏鴉還沒發出去的完整論述與刪改痕。',
+        hint: '還沒發出去的完整論述與刪改痕。',
       },
       {
         id: 'hotspot_pc_recording',
@@ -690,7 +680,7 @@ const scenes: Record<string, Scene> = {
         shape: 'circle',
         coords: [0.38, 0.88, 0.14],
         description: '技術組備忘（草稿手機）',
-        hint: '阿蘇留在終端旁的備忘：對完第一輪報告後才能領取。',
+        hint: '夾在備忘夾旁邊，螢幕還停在草稿頁。',
       },
     ],
     items: [items.item_encrypted_messages, items.item_column_draft, items.item_ch2_phone_decoder],
@@ -729,7 +719,7 @@ const scenes: Record<string, Scene> = {
                 '阿蘇：「盡力還原了。」\n' +
                 '「這些算是他生前最後一次，試著把碎片排成故事。」\n\n' +
                 '阿蘇：「四個視窗不是四份證物，是一條線：誰在跟他說話、他打算寫什麼、他私下怕什麼、他的腳實際踩過哪裡。」\n' +
-                '烏鴉究竟是什麼樣的人?」',
+                '「那個寫專欄的，究竟是什麼樣的人？」',
               type: 'character',
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
@@ -741,7 +731,7 @@ const scenes: Record<string, Scene> = {
             type: 'showDialog',
             dialog: {
               text:
-                '看板置頂欄替你補齊身分：死者吳亞，筆名與圈內綽號「烏鴉」，專欄長期寫城市基建、外包驗收與公共安全。\n\n' +
+                '看板置頂欄替你補齊身分：死者吳亞；公開稿與署名欄慣用一組筆名，口頭流傳的稱呼是另一套。\n\n' +
                 '關鍵字在終端里被自動標色：節能設備、散場節奏、逃生動線亮度、log寫入權限、改善提案。\n' +
                 '這些全是那種「聽起來很行政」的詞，堆在一起卻像有人在替事故編目錄。\n\n' +
                 '你想起車裡那杯咖啡杯上的「A」「S」，與後視鏡上晃來晃去的電路板吊飾：\n' +
@@ -762,8 +752,8 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text:
                 '阿蘇把一支小型測試機推到備忘夾旁邊，螢幕還停在「未完成同步」的草稿頁。\n\n' +
-                '阿蘇：「劉隊說你第一輪句子對上了，這個才能給你。」\n' +
-                '「省電顯影那層不開，你會以為自己在猜字謎。」',
+                '阿蘇：「劉隊點頭了，我才敢給這支。」\n' +
+                '「別在這裡跟螢幕搏感情。對完紙再說。」',
               type: 'character',
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',

@@ -3,8 +3,18 @@ import type { TwoBlankFillConfig } from '@/components/FloatingFillBlankCore';
 /**
  * 第二章章尾：向劉隊報告
  * - 雙格填空：`ReportFillBlank`（僅 2 題）
- * - 手機省電謎：`Ch2CrowPhoneRiddle`（電池→省電→顯影→字詞輸入）
+ * - 手機省電謎：`Ch2CrowPhoneRiddle`（電池→省電→顯影→「已讀」確認；關鍵詞於第二輪章尾輸入）
+ *
+ * 謎底「黑羽」＝專欄／對外稿署名欄慣用筆名；口頭綽號「烏鴉」僅劇情稱呼，非第二輪輸入答案。
  */
+
+/** 與 `acceptableAnswers` 比對前使用（trim、全形半形、去空白） */
+export function normalizeCh2KeywordAnswer(raw: string): string {
+  return raw
+    .trim()
+    .replace(/[\uFF01-\uFF5E]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
+    .replace(/\s+/g, '');
+}
 
 /** 假目標：僅本地切換，不觸發過關 */
 export interface Ch2PhoneDecoy {
@@ -16,21 +26,27 @@ export interface Ch2PhoneDecoy {
 }
 
 export interface Ch2PhoneWrongFeedback {
-  kk: string;
-  liu: string;
-  /** 尚未讀過顯影層就送出時的含蓄提示（可選） */
-  hintWhenNoReveal?: string;
+  /** 尚未開啟低耗顯影就按「已讀」時 */
+  hintWhenNoReveal: string;
 }
 
 export interface Ch2PhoneRiddleConfig {
+  /** 裝置頂部一行（背包內預覽） */
+  deviceScreenTitle: string;
   /** 草稿區：表層（亂碼／混淆字） */
   draftSurfaceLines: string[];
-  /** 草稿區：省電顯影後可讀線索（語意上應呼應 `acceptableAnswers`，宜含蓄） */
+  /** 草稿區：省電顯影後可讀線索（宜含蓄；不直寫關鍵詞答案） */
   draftRevealLines: string[];
-  /** 輸入框標籤／提示 */
-  inputLabel: string;
-  inputPlaceholder: string;
-  /** 可接受字詞（比對前會 trim、全形半形簡化） */
+  /** 顯影後主按鈕（確認已讀備忘） */
+  confirmReadLabel: string;
+  /** 按鈕上方一句補充（可選） */
+  confirmReadHint?: string;
+  /** 第二輪章尾：關鍵詞輸入標籤 */
+  round2KeywordLabel: string;
+  round2KeywordPlaceholder: string;
+  /** 第二輪關鍵詞與 `acceptableAnswers` 不符時 */
+  round2KeywordWrongHint: string;
+  /** 可接受字詞（第二輪輸入；比對用 `normalizeCh2KeywordAnswer`） */
   acceptableAnswers: string[];
   /** 狀態列電池：開啟省電確認 */
   powerSaveDialogTitle: string;
@@ -48,21 +64,35 @@ export interface Ch2PhoneRiddleConfig {
   wrongFeedback: Ch2PhoneWrongFeedback;
 }
 
+/** 第二輪章尾 overlay 文案（與驗證字無關） */
+export interface Ch2ReportRound2PanelCopy {
+  liuClosing: string;
+  supplement: string;
+  finalizeButtonLabel: string;
+}
+
+/** 第一輪完成後、尚未讀畢手機時的提示 */
+export interface Ch2ReportInterstitialCopy {
+  afterRound1NeedPhone: string;
+}
+
 export interface Ch2ReportConfig {
   ch2ReportFillBlanks: TwoBlankFillConfig[];
   ch2PhoneRiddle: Ch2PhoneRiddleConfig;
+  ch2ReportRound2Panel: Ch2ReportRound2PanelCopy;
+  ch2ReportInterstitial: Ch2ReportInterstitialCopy;
 }
 
 export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
   {
     id: 'ch2_report_q1',
     sentenceParts: [
-      '卷宗很乖，只認戶籍那兩個字；城市不乖，會用抬頭、署名、讀者口頭的稱呼。（圈內有人喊他烏鴉——你不必跟風，但耳朵要聽見。）你要寫進報告的「對外名字」是「',
+      '卷宗很乖，只認戶籍那兩個字；城市不乖，抬頭、署名、口徑可以多線並存。（口頭流傳的那套先不進卷。）你要寫進報告、能對上對外稿與署名欄的「那一格」是「',
       '」；把它折成職能，他是拿筆去撞流程的人——也就是「',
       '」。',
     ],
     blank1: {
-      hintLabel: 'KK：大家先認得的，是哪一種「對外名字」？',
+      hintLabel: 'KK：紙上先認得的，是哪一個名字？',
       options: [
         { id: 'ch2r1_1a', label: '烏鴉', fullText: '烏鴉', x: 0.22, y: 0.18, rotation: -8 },
         { id: 'ch2r1_1b', label: '專欄抬頭那個名字', fullText: '專欄抬頭那個名字', x: 0.48, y: 0.14, rotation: 7 },
@@ -87,7 +117,7 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
       },
     },
     blank2: {
-      hintLabel: 'KK：把名字折成職能——他拿筆尖去撞哪一類現場？',
+      hintLabel: 'KK：筆尖撞的是哪一類現場？',
       options: [
         {
           id: 'ch2r1_2a',
@@ -126,10 +156,10 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
     },
     bothCorrectDialogue: {
       kk: '名字像門牌。門牌越多，越要問：他到底想讓誰開門。',
-      liu: '寫能對卷的。別把綽號當成就。',
+      liu: '寫能對卷的。嘴上的不算。',
     },
     wrongFallback:
-      'KK：先對「外面怎麼叫他」，再對「他拿這個叫法幹嘛」。順序亂了，你會以為自己在寫粉絲應援。',
+      'KK：風裡喊的、紙上印的，別混成同一個人。',
   },
   {
     id: 'ch2_report_q2',
@@ -139,7 +169,7 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
       '」疊在一起。',
     ],
     blank1: {
-      hintLabel: 'KK：太順、太完整，通常不是生活，是——',
+      hintLabel: 'KK：太順的，多半是什麼？',
       options: [
         { id: 'ch2r2_1a', label: '像被先剪過情緒', fullText: '像被先剪過情緒', x: 0.22, y: 0.18, rotation: -8 },
         { id: 'ch2r2_1b', label: '表層故事被排好順序', fullText: '表層故事被排好順序', x: 0.48, y: 0.14, rotation: 7 },
@@ -170,7 +200,7 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
       },
     },
     blank2: {
-      hintLabel: 'KK：跟那條冷線疊在一起的硬座標是——',
+      hintLabel: 'KK：冷的那條，會跟什麼疊在一起？',
       options: [
         { id: 'ch2r2_2a', label: '幾個館的代號／縮寫', fullText: '幾個館的代號／縮寫', x: 0.2, y: 0.16, rotation: -7 },
         { id: 'ch2r2_2b', label: '跨館節點與轉折點', fullText: '跨館節點與轉折點', x: 0.48, y: 0.12, rotation: 8 },
@@ -205,27 +235,31 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
       liu: '動機欄留空。先把代號與舊案寫成能對的。',
     },
     wrongFallback:
-      'KK：第一格處理「誰幫你把故事變好讀」；第二格才落地。別用八卦當釘子，釘子會歪。',
+      'KK：故事好讀，地圖未必好走。別用醋意去釘權限。',
   },
 ];
 
 export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
+  deviceScreenTitle: '草稿同步岔路 · 內測',
   draftSurfaceLines: [
-    '■□◇※＃＠ 同步失敗 0x7F2A · 重試排隊中',
-    '備忘：欄位抬頭／署名欄／讀者口徑（多線並存）',
-    '路由片段：▓▓▓ → ▒▒▒ → （此列僅索引）',
-    '系統提示：長稿可折行；短稿請對齊欄位。',
+    '◇※＃ 同步岔路 0x7F2A · 佇列在風裡發抖',
+    '節能，他們要的是『改善』，不是『承認』',
+    '我是不是偏執，像羽毛散落：▓→▒→（此列不負責）',
+    '提示僅一行：不能寄。寄了就是幫他們把故事收乾淨。',
   ],
   draftRevealLines: [
-    '備忘（低耗對比）：',
-    '對外欄位先填「圈內先喊開的那個稱呼」——與卷宗抬頭能對上的寫法。',
-    '館名與代號往後排；這一筆只負責讓人知道你在寫誰。',
+    '集團為了節能，為了得獎，罔顧民眾安全。',
+    '我想告訴大家，不要被包裝過後的仁義道德騙了。',
+    '我得和他攤牌，不能再像兩年前一樣妥協。',
   ],
-  inputLabel: '依備忘可讀線索，輸入對外稱呼（詞）',
-  inputPlaceholder: '輸入詞語',
-  acceptableAnswers: ['烏鴉', '乌鸦'],
+  confirmReadLabel: '已讀',
+  confirmReadHint: '備忘只到這裡；紙上怎麼落款，回桌邊再說。',
+  round2KeywordLabel: '署名欄（對外稿）',
+  round2KeywordPlaceholder: '筆名',
+  round2KeywordWrongHint: '這一格對不上劉隊手邊那份抬頭。',
+  acceptableAnswers: ['黑羽'],
   powerSaveDialogTitle: '低耗顯示',
-  powerSaveDialogMessage: '電量偏低。是否改為低耗顯示？對比會調整，較省電。',
+  powerSaveDialogMessage: '電量臨界。是否切換低耗？對比將重排，耗電較低。',
   powerSaveConfirmLabel: '確定',
   powerSaveCancelLabel: '取消',
   powerOffDialogTitle: '關閉低耗顯示',
@@ -264,13 +298,24 @@ export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
     },
   ],
   wrongFeedback: {
-    kk: '欄位對了，字才上得了紙。你剛剛那句，卷宗不認。',
-    liu: '報告用詞要能和系統對上。再想。',
-    hintWhenNoReveal: '草稿好像還有一層沒對齊；對照備忘再看一次。',
+    hintWhenNoReveal: '對比不足，備忘拒絕封存。',
   },
+};
+
+export const ch2ReportRound2Panel: Ch2ReportRound2PanelCopy = {
+  liuClosing: '劉隊把筆記本闔上。\n\n「這些資訊很夠了。」',
+  supplement: '劉隊指尖在空白欄敲了一下：「抬頭對不對，你自己填。」',
+  finalizeButtonLabel: '就這版，往上送',
+};
+
+export const ch2ReportInterstitial: Ch2ReportInterstitialCopy = {
+  afterRound1NeedPhone:
+    '阿蘇終端邊還有東西沒到你手上。等那支備忘機可開了，再來跟劉隊收尾。',
 };
 
 export const ch2ReportConfig: Ch2ReportConfig = {
   ch2ReportFillBlanks,
   ch2PhoneRiddle,
+  ch2ReportRound2Panel,
+  ch2ReportInterstitial,
 };

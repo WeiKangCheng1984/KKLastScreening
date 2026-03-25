@@ -1,15 +1,16 @@
 'use client';
 
-import { useCallback, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
+import { Bluetooth, Moon, RotateCcw, Wifi } from 'lucide-react';
 import type { Ch2PhoneRiddleConfig } from '@/data/ch2ReportConfig';
 
-function normalizeCh2Answer(raw: string): string {
-  return raw
-    .trim()
-    .replace(/[\uFF01-\uFF5E]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
-    .replace(/\s+/g, '');
-}
+const DECOY_ICONS: Record<string, typeof Wifi> = {
+  wifi: Wifi,
+  bt: Bluetooth,
+  dnd: Moon,
+  fake_restore: RotateCcw,
+};
 
 export interface Ch2CrowPhoneRiddleProps {
   config: Ch2PhoneRiddleConfig;
@@ -18,15 +19,13 @@ export interface Ch2CrowPhoneRiddleProps {
   embedded?: boolean;
 }
 
-type WrongKind = 'noReveal' | 'badAnswer' | null;
-
 export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2CrowPhoneRiddleProps) {
   const {
+    deviceScreenTitle,
     draftSurfaceLines,
     draftRevealLines,
-    inputLabel,
-    inputPlaceholder,
-    acceptableAnswers,
+    confirmReadLabel,
+    confirmReadHint,
     powerSaveDialogTitle,
     powerSaveDialogMessage,
     powerSaveConfirmLabel,
@@ -47,14 +46,7 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
     Object.fromEntries(decoys.map((d) => [d.id, false])),
   );
   const [decoyFeedbackId, setDecoyFeedbackId] = useState<string | null>(null);
-  const [input, setInput] = useState('');
-  const [wrongShown, setWrongShown] = useState(false);
-  const [wrongKind, setWrongKind] = useState<WrongKind>(null);
-
-  const normalizedAccept = useMemo(
-    () => acceptableAnswers.map((a) => normalizeCh2Answer(a)),
-    [acceptableAnswers],
-  );
+  const [wrongNoReveal, setWrongNoReveal] = useState(false);
 
   const toggleDecoy = useCallback((id: string) => {
     setDecoyOn((prev) => {
@@ -82,26 +74,14 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
     setBatteryDialog(null);
   }, []);
 
-  const handleSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault();
-      const n = normalizeCh2Answer(input);
-      if (!hasRevealedWithPowerSave) {
-        setWrongKind('noReveal');
-        setWrongShown(true);
-        return;
-      }
-      if (!n || !normalizedAccept.includes(n)) {
-        setWrongKind('badAnswer');
-        setWrongShown(true);
-        return;
-      }
-      setWrongShown(false);
-      setWrongKind(null);
-      onSuccess();
-    },
-    [hasRevealedWithPowerSave, input, normalizedAccept, onSuccess],
-  );
+  const handleConfirmRead = useCallback(() => {
+    if (!hasRevealedWithPowerSave) {
+      setWrongNoReveal(true);
+      return;
+    }
+    setWrongNoReveal(false);
+    onSuccess();
+  }, [hasRevealedWithPowerSave, onSuccess]);
 
   const decoyFeedbackText = decoyFeedbackId
     ? (() => {
@@ -138,9 +118,8 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
       )}
 
       <div className={`relative z-10 w-full max-w-sm flex flex-col gap-3 ${embedded ? 'mx-auto' : ''}`}>
-        <p className="text-center text-xs text-gray-500 tracking-wide">手機草稿（未完成同步）</p>
+        <p className="text-center text-xs text-gray-500 tracking-wide">{deviceScreenTitle}</p>
 
-        {/* 外框深色；內螢幕：一般＝白底黑字，低耗＝黑底白字（顯影層浮出） */}
         <div className="rounded-[2rem] border border-zinc-600/80 bg-zinc-300/90 p-1.5 shadow-2xl">
           <m.div
             layout
@@ -153,9 +132,23 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
             aria-label={powerSaveOn ? '手機備忘，低耗顯示開啟' : '手機備忘'}
             data-power-save={powerSaveOn ? 'on' : 'off'}
           >
+            {/* 瀏海／動態島 */}
+            <div
+              className={`flex justify-center pt-2.5 pb-1 transition-colors duration-500 ${
+                powerSaveOn ? 'bg-black' : 'bg-white'
+              }`}
+            >
+              <div
+                className={`h-6 w-[5.5rem] rounded-full ${
+                  powerSaveOn ? 'bg-zinc-900 ring-1 ring-zinc-700' : 'bg-zinc-900/90'
+                }`}
+                aria-hidden
+              />
+            </div>
+
             {/* 狀態列 */}
             <div
-              className={`flex items-center justify-between px-3 pt-2.5 pb-2 text-[11px] border-b transition-colors duration-500 ${
+              className={`flex items-center justify-between px-3 pt-1 pb-2 text-[11px] border-b transition-colors duration-500 ${
                 powerSaveOn
                   ? 'text-zinc-200 border-zinc-800 bg-black'
                   : 'text-zinc-800 border-zinc-200 bg-white'
@@ -187,52 +180,71 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
               </div>
             </div>
 
-            {/* 假目標列 */}
+            {/* 控制中心：2×2 */}
             <div
-              className={`flex flex-wrap gap-2 px-3 py-2 border-b transition-colors duration-500 ${
-                powerSaveOn ? 'border-zinc-800 bg-black' : 'border-zinc-200 bg-white'
+              className={`px-3 pt-2 pb-2 border-b transition-colors duration-500 ${
+                powerSaveOn ? 'border-zinc-800 bg-zinc-950/50' : 'border-zinc-200 bg-zinc-50/80'
               }`}
             >
-              {decoys.map((d) => (
-                <button
-                  key={d.id}
-                  type="button"
-                  aria-label={d.ariaLabel}
-                  aria-pressed={!!decoyOn[d.id]}
-                  onClick={() => toggleDecoy(d.id)}
-                  className={`text-[11px] px-2 py-1 rounded-full border transition-colors ${
-                    powerSaveOn
-                      ? decoyOn[d.id]
-                        ? 'border-zinc-500 bg-zinc-800 text-zinc-100'
-                        : 'border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600'
-                      : decoyOn[d.id]
-                        ? 'border-zinc-500 bg-zinc-200 text-zinc-900'
-                        : 'border-zinc-300 bg-zinc-50 text-zinc-700 hover:border-zinc-400'
-                  }`}
-                >
-                  {d.label}
-                </button>
-              ))}
+              <p
+                className={`text-[9px] uppercase tracking-wider mb-2 ${
+                  powerSaveOn ? 'text-zinc-500' : 'text-zinc-500'
+                }`}
+              >
+                控制中心
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {decoys.map((d) => {
+                  const Icon = DECOY_ICONS[d.id] ?? Wifi;
+                  const on = !!decoyOn[d.id];
+                  return (
+                    <button
+                      key={d.id}
+                      type="button"
+                      aria-label={d.ariaLabel}
+                      aria-pressed={on}
+                      onClick={() => toggleDecoy(d.id)}
+                      className={`flex flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2.5 text-center transition-colors min-h-[4.25rem] ${
+                        powerSaveOn
+                          ? on
+                            ? 'border-zinc-500 bg-zinc-800/90 text-zinc-100 shadow-inner'
+                            : 'border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600'
+                          : on
+                            ? 'border-zinc-400 bg-white text-zinc-900 shadow-sm'
+                            : 'border-zinc-200 bg-white/90 text-zinc-600 hover:border-zinc-300'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5 shrink-0 opacity-90" strokeWidth={1.75} aria-hidden />
+                      <span className="text-[10px] leading-tight font-medium">{d.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {decoyFeedbackText && (
               <p
-                className={`px-3 py-1 text-[10px] border-b line-clamp-2 transition-colors duration-500 ${
+                className={`px-3 py-1.5 text-[10px] border-b line-clamp-2 transition-colors duration-500 ${
                   powerSaveOn
                     ? 'text-zinc-500 border-zinc-800 bg-zinc-950/80'
-                    : 'text-zinc-600 border-zinc-200 bg-zinc-50'
+                    : 'text-zinc-600 border-zinc-200 bg-white'
                 }`}
               >
                 {decoyFeedbackText}
               </p>
             )}
 
-            {/* 草稿本體：低耗時表層像雜訊沉底，顯影為高對比白字 */}
+            {/* 備忘 App 內容 */}
             <div
-              className={`relative min-h-[200px] px-4 py-3 space-y-2 transition-colors duration-500 ${
+              className={`relative min-h-[180px] px-4 py-3 space-y-2 transition-colors duration-500 ${
                 powerSaveOn ? 'bg-black' : 'bg-white'
               }`}
             >
+              <div
+                className={`text-[10px] tracking-wide mb-1 ${powerSaveOn ? 'text-zinc-500' : 'text-zinc-500'}`}
+              >
+                備忘
+              </div>
               <div
                 className={`text-[12px] leading-relaxed space-y-1.5 transition-all duration-500 ${
                   powerSaveOn
@@ -279,69 +291,49 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
               </m.div>
             </div>
 
-            {/* 輸入 */}
-            <form
-              onSubmit={handleSubmit}
-              className={`px-4 pb-4 pt-2 space-y-2 border-t transition-colors duration-500 ${
+            {/* 已讀確認 + Home 指示條 */}
+            <div
+              className={`px-4 pb-3 pt-2 space-y-2 border-t transition-colors duration-500 ${
                 powerSaveOn ? 'border-zinc-800 bg-black' : 'border-zinc-200 bg-white'
               }`}
             >
-              <label
-                className={`block text-[11px] ${powerSaveOn ? 'text-zinc-500' : 'text-zinc-600'}`}
-              >
-                {inputLabel}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => {
-                    setInput(e.target.value);
-                    setWrongShown(false);
-                    setWrongKind(null);
-                  }}
-                  placeholder={inputPlaceholder}
-                  autoComplete="off"
-                  className={`flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-colors duration-500 ${
-                    powerSaveOn
-                      ? 'border-zinc-700 bg-zinc-950 text-zinc-100 placeholder:text-zinc-600 focus:ring-white/20'
-                      : 'border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 focus:ring-zinc-400/50'
-                  }`}
-                />
-                <button
-                  type="submit"
-                  className={`shrink-0 px-4 py-2 rounded-lg border text-sm transition-colors ${
-                    powerSaveOn
-                      ? 'border-zinc-500 bg-zinc-100 text-zinc-900 hover:bg-white'
-                      : 'border-zinc-800 bg-zinc-900 text-white hover:bg-zinc-800'
-                  }`}
+              {confirmReadHint && (
+                <p
+                  className={`text-[10px] leading-relaxed text-center ${powerSaveOn ? 'text-zinc-500' : 'text-zinc-500'}`}
                 >
-                  送出
-                </button>
+                  {confirmReadHint}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleConfirmRead}
+                className={`w-full py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+                  powerSaveOn
+                    ? 'border-zinc-500 bg-zinc-100 text-zinc-900 hover:bg-white'
+                    : 'border-zinc-800 bg-zinc-900 text-white hover:bg-zinc-800'
+                }`}
+              >
+                {confirmReadLabel}
+              </button>
+              <div className="flex justify-center pt-1 pb-0.5">
+                <div
+                  className={`h-1 w-28 rounded-full ${powerSaveOn ? 'bg-zinc-700' : 'bg-zinc-300'}`}
+                  aria-hidden
+                />
               </div>
-            </form>
+            </div>
           </m.div>
         </div>
 
         <AnimatePresence>
-          {wrongShown && (
+          {wrongNoReveal && (
             <m.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="rounded-xl border border-orange-500/25 bg-dark-surface/85 px-4 py-3 text-sm space-y-1"
+              className="rounded-xl border border-orange-500/25 bg-dark-surface/85 px-4 py-3 text-sm"
             >
-              {wrongKind === 'noReveal' ? (
-                <p className="text-gray-300/95 text-[13px] leading-relaxed">
-                  {wrongFeedback.hintWhenNoReveal ??
-                    '草稿裡好像還有一層沒對上；對照備忘再看一次。'}
-                </p>
-              ) : (
-                <>
-                  <p className="text-orange-200/85 italic">KK：「{wrongFeedback.kk}」</p>
-                  <p className="text-gray-400/90">劉隊：「{wrongFeedback.liu}」</p>
-                </>
-              )}
+              <p className="text-gray-300/95 text-[13px] leading-relaxed">{wrongFeedback.hintWhenNoReveal}</p>
             </m.div>
           )}
         </AnimatePresence>

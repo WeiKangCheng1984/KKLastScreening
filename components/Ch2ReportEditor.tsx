@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import ReportFillBlank from '@/components/ReportFillBlank';
-import { ch2ReportConfig } from '@/data/ch2ReportConfig';
+import { ch2ReportConfig, normalizeCh2KeywordAnswer } from '@/data/ch2ReportConfig';
 import type { Effect, GameState, DialogChoice } from '@/types/game';
 
 export interface Ch2ReportEditorProps {
@@ -18,21 +18,68 @@ export interface Ch2ReportEditorProps {
   onRound1Dismiss: () => void;
 }
 
-function Ch2ReportRound2Panel({ onConfirm }: { onConfirm: () => void }) {
+function Ch2ReportRound2Panel({
+  keywordLabel,
+  keywordPlaceholder,
+  wrongHint,
+  acceptableAnswersNormalized,
+  liuClosing,
+  supplement,
+  finalizeButtonLabel,
+  onConfirm,
+}: {
+  keywordLabel: string;
+  keywordPlaceholder: string;
+  wrongHint: string;
+  acceptableAnswersNormalized: string[];
+  liuClosing: string;
+  supplement: string;
+  finalizeButtonLabel: string;
+  onConfirm: () => void;
+}) {
+  const [keyword, setKeyword] = useState('');
+  const [showWrong, setShowWrong] = useState(false);
+
+  const tryConfirm = useCallback(() => {
+    const n = normalizeCh2KeywordAnswer(keyword);
+    if (!n || !acceptableAnswersNormalized.includes(n)) {
+      setShowWrong(true);
+      return;
+    }
+    setShowWrong(false);
+    onConfirm();
+  }, [acceptableAnswersNormalized, keyword, onConfirm]);
+
   return (
-    <div className="w-full max-w-md mx-auto px-4 py-6 space-y-6 text-center">
-      <p className="text-sm text-gray-300/95 leading-relaxed whitespace-pre-line">
-        {`劉隊把筆記本闔上。\n\n「這版能往上遞。剩下的交給鑑定與內勤。」`}
-      </p>
-      <p className="text-xs text-gray-500 leading-relaxed">
-        你把手機草稿裡對上的關鍵詞，收進能交差的句子裡。
-      </p>
+    <div className="w-full max-w-md mx-auto px-4 py-6 space-y-5 text-center">
+      <p className="text-sm text-gray-300/95 leading-relaxed whitespace-pre-line">{liuClosing}</p>
+      <p className="text-xs text-gray-500 leading-relaxed">{supplement}</p>
+      <div className="text-left space-y-2">
+        <label htmlFor="ch2-round2-keyword" className="block text-xs text-gray-400">
+          {keywordLabel}
+        </label>
+        <input
+          id="ch2-round2-keyword"
+          type="text"
+          value={keyword}
+          onChange={(e) => {
+            setKeyword(e.target.value);
+            setShowWrong(false);
+          }}
+          placeholder={keywordPlaceholder}
+          autoComplete="off"
+          className="w-full rounded-xl border border-zinc-600 bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+        />
+      </div>
+      {showWrong && (
+        <p className="text-xs text-amber-200/90 text-left leading-relaxed">{wrongHint}</p>
+      )}
       <button
         type="button"
-        onClick={onConfirm}
+        onClick={tryConfirm}
         className="w-full py-3 rounded-xl border border-orange-500/40 bg-orange-950/40 text-orange-100 text-sm font-medium hover:bg-orange-900/50 transition-colors"
       >
-        結案，前往下一章
+        {finalizeButtonLabel}
       </button>
     </div>
   );
@@ -42,6 +89,14 @@ export default function Ch2ReportEditor({ engine, onComplete, onRound1Dismiss }:
   const [index, setIndex] = useState(0);
   const configs = useMemo(() => ch2ReportConfig.ch2ReportFillBlanks, []);
   const current = configs[index];
+  const phoneCfg = ch2ReportConfig.ch2PhoneRiddle;
+  const round2Panel = ch2ReportConfig.ch2ReportRound2Panel;
+  const interstitial = ch2ReportConfig.ch2ReportInterstitial;
+
+  const acceptableRound2 = useMemo(
+    () => phoneCfg.acceptableAnswers.map((a) => normalizeCh2KeywordAnswer(a)),
+    [phoneCfg.acceptableAnswers],
+  );
 
   const flags = engine.getState().flags || {};
 
@@ -68,12 +123,21 @@ export default function Ch2ReportEditor({ engine, onComplete, onRound1Dismiss }:
     return null;
   }
 
-  // 第二輪：手機謎完成後，僅結案 UI → reward
   if (flags.ch2_phone_riddle_done) {
-    return <Ch2ReportRound2Panel onConfirm={handleRound2Confirm} />;
+    return (
+      <Ch2ReportRound2Panel
+        keywordLabel={phoneCfg.round2KeywordLabel}
+        keywordPlaceholder={phoneCfg.round2KeywordPlaceholder}
+        wrongHint={phoneCfg.round2KeywordWrongHint}
+        acceptableAnswersNormalized={acceptableRound2}
+        liuClosing={round2Panel.liuClosing}
+        supplement={round2Panel.supplement}
+        finalizeButtonLabel={round2Panel.finalizeButtonLabel}
+        onConfirm={handleRound2Confirm}
+      />
+    );
   }
 
-  // 第一輪：僅雙格填空（未完成 ch2_report_fill_done 前）
   if (!flags.ch2_report_fill_done) {
     if (!current) return null;
     return (
@@ -85,12 +149,9 @@ export default function Ch2ReportEditor({ engine, onComplete, onRound1Dismiss }:
     );
   }
 
-  // 已寫入第一輪但尚未完成手機謎：不應由劉隊開啟章尾；開發者／異常狀態提示
   return (
     <div className="w-full max-w-md mx-auto px-4 py-8 space-y-4 text-center">
-      <p className="text-sm text-gray-300 leading-relaxed">
-        請先到阿蘇終端取得技術組備忘，在背包內完成手機草稿解碼後，再向劉隊申請結案。
-      </p>
+      <p className="text-sm text-gray-300 leading-relaxed">{interstitial.afterRound1NeedPhone}</p>
       <button
         type="button"
         onClick={onRound1Dismiss}

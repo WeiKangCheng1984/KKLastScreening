@@ -11,7 +11,7 @@
 | 章節 | 主要資料檔 | 形式 |
 |------|------------|------|
 | 第一章 | `data/ch1ReportConfig.ts`（`ch1ReportFillBlanks`） | 五題雙格填空；章尾另依玩家「流程／證據／人心」傾向給**維度結語** |
-| 第二章 | `data/ch2ReportConfig.ts`（`ch2ReportFillBlanks`＋`ch2PhoneRiddle`） | **兩段**：第一輪章尾僅兩題雙格填空（`ReportFillBlank`），關閉 overlay 後至阿蘇終端領取道具 `item_ch2_phone_decoder`；**背包內**開啟手機省電謎（`Ch2CrowPhoneRiddle`）；第二輪章尾結案與獎勵 |
+| 第二章 | `data/ch2ReportConfig.ts`（`ch2ReportFillBlanks`＋`ch2PhoneRiddle`） | **兩段**：第一輪章尾僅兩題雙格填空（`ReportFillBlank`），關閉 overlay 後至阿蘇終端領取道具 `item_ch2_phone_decoder`；**背包內**手機省電顯影讀畢（`Ch2CrowPhoneRiddle`，不於手機上輸入關鍵詞）；第二輪章尾輸入關鍵詞後結案與獎勵 |
 | 第三章～第六章 | `data/ch3ReportConfig.ts` … `data/ch6ReportConfig.ts` | 各五題雙格填空（`ReportFillBlank`） |
 
 **判定規則（共通）**：每一題須**兩格皆選中**任一組 `correctIds` 內的選項，該題才算通過；同格常有多個「語意等價」正解。錯選可能觸發專屬吐槽（KUSO 誤導），否則走該題的 `wrongFallback`。
@@ -103,7 +103,7 @@
 
 ## 三、第二章：死者是誰——手機裡的版本
 
-**流程順序（程式）**：劉隊「第一輪報告」→ 章尾 overlay 僅兩題填空 → 關閉後設 `ch2_report_fill_done` → 回阿蘇電腦解鎖道具 → 背包內完成手機謎設 `ch2_phone_riddle_done` → 劉隊「結案」開第二輪章尾 → `ch2_qa_reviewed_with_liu`／`ch2_reasoning_done` 與獎勵。
+**流程順序（程式）**：劉隊「第一輪報告」→ 章尾 overlay 僅兩題填空 → 關閉後設 `ch2_report_fill_done` → 回阿蘇電腦解鎖道具 → 背包內手機開低耗讀畢顯影後確認，設 `ch2_phone_riddle_done` → 劉隊「結案」開第二輪章尾 → 於 overlay 輸入關鍵詞（`acceptableAnswers`）→ `ch2_qa_reviewed_with_liu`／`ch2_reasoning_done` 與獎勵。
 
 ### 3.1 雙格填空（共 2 題）
 
@@ -111,15 +111,16 @@
 
 | 題 | 句式摘要 | 格一正解（語意組） | 格二正解（語意組） |
 |----|----------|-------------------|-------------------|
-| 1 | 卷宗認戶籍；城市用抬頭／署名／口頭稱呼。圈內有人喊他烏鴉——報告「對外名字」與「職能」 | 烏鴉、專欄抬頭那個名字、調查欄固定署名、讀者／圈內先認得的那個稱呼 | 寫公共流程／外包驗證敘事的人、把事故寫成議題的人、調查型專欄書寫者、監督欄位與對外敘事的人 |
+| 1 | 卷宗認戶籍；公開稿與署名欄 vs 口頭稱呼；報告要對的是「能對卷的那一格」與職能 | **黑羽**、專欄抬頭那個名字、調查欄固定署名、讀者／圈內先認得的那個稱呼 | 寫公共流程／外包驗證敘事的人、把事故寫成議題的人、調查型專欄書寫者、監督欄位與對外敘事的人 |
 | 2 | 私訊太「順」通常是什麼；與冷座標疊在一起的是 | 像被先剪過情緒、表層故事被排好順序、讀起來像劇本而非生活殘渣、最好吞的解釋被放最前面 | 幾個館的代號／縮寫、跨館節點與轉折點、兩年前樓梯間那套說法的殘影、舊傷在流程圖上的接點 |
 
 ### 3.2 手機省電謎（`ch2PhoneRiddle`）
 
 - **觸發位置**：背包內開啟道具 `item_ch2_phone_decoder`（`components/Ch2PhoneDecoderItemView.tsx`／`Ch2CrowPhoneRiddle` `embedded`），**不再**於章尾 overlay 內連續播放。
-- **流程**：狀態列**低電量電池**可開啟「低耗顯示」確認 → 草稿區顯影（`draftRevealLines`，文案含蓄、不直寫答案詞）→ 可再點電池關閉低耗；**曾至少開啟過一次低耗**後，即使關閉仍可憑記憶輸入。Wi‑Fi／藍牙／勿擾／還原等為假目標。
-- **可接受答案**（正規化後比對）：**烏鴉**（簡體「乌鸦」可同義）；與顯影文案需玩家自行對齊前兩題填空語境。
+- **流程**：狀態列**低電量電池**可開啟「低耗顯示」確認 → 控制中心捷徑（Wi‑Fi／藍牙／勿擾／還原）為假目標 → 草稿區顯影（`draftRevealLines`，含蓄、**不直寫**關鍵詞字面）→ 按「封存此頁」確認後設 `ch2_phone_riddle_done`（語意：備忘已讀、可回報劉隊）。手機上**不**輸入關鍵詞。
+- **第二輪章尾**：`Ch2ReportEditor` 內輸入關鍵詞；**可接受答案**（`normalizeCh2KeywordAnswer` 後比對）：**黑羽**（專欄對外署名；口頭綽號「烏鴉」僅劇情稱呼，非輸入欄）。
 - **旗標**：`ch2_phone_riddle_done`（與 `ch2_q1_done`、`ch2_q2_done` 一併納入里程碑；舊存檔曾完成五題填空者仍相容，見 `lib/flowController.ts`）。劉隊選項：`ch2_liu_open_qa_conclusion`（第一輪章尾）、`ch2_liu_report_finalize`（第二輪章尾）。
+- **相容**：改版後題面與關鍵詞為「黑羽」；若舊存檔卡在中途，建議新周目或以 `?dev=1` 調整旗標。
 
 ---
 

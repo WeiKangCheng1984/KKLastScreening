@@ -265,7 +265,7 @@ export const liuReportFlowByChapter: Record<string, LiuReportFlowConfig> = {
         text: '「好，來說一次你現在看到的版本。」\n\n「我們把那幾句話排在一起，看它們指向哪裡。」',
         choices: [
           { id: 'ch2_liu_keep_exploring', text: '我再多看一下現場。' },
-          { id: 'ch2_liu_open_qa_conclusion', text: '好，現在就試著說一次。' },
+          { id: 'ch2_liu_open_qa_conclusion', text: '我唸你手上的版本。' },
         ],
       },
     ],
