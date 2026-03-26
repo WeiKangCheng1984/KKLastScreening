@@ -4,6 +4,7 @@
  * 另附 reportFills：向劉隊回報的雙空格浮動填空（各章兩道）
  */
 import { TwoBlankFillConfig } from '@/components/FloatingFillBlankCore';
+import { ch3ReportFillBlanks } from '@/data/ch3ReportConfig';
 
 export interface ReasoningQ1 {
   question: string;
@@ -206,79 +207,6 @@ const reportFillsCh2: [TwoBlankFillConfig, TwoBlankFillConfig] = [
       liu: '值得我們怕的，正是這個。他已經知道，而且快說出來了。',
     },
     wrongFallback: '阿蘇說：這份錄音不是技術問題造成的模糊。它是被刻意做成這樣的。',
-  },
-];
-
-const reportFillsCh3: [TwoBlankFillConfig, TwoBlankFillConfig] = [
-  {
-    id: 'ch3_fill1',
-    sentenceParts: ['「整理版存在的目的，\n不是讓資料更', '，\n而是讓某些欄位', '地消失。」'],
-    blank1: {
-      hintLabel: '整理版讓資料看起來更⋯⋯',
-      options: [
-        { id: 'ch3_f1_A', label: '好讀',  fullText: '好讀',  x: 0.20, y: 0.18, rotation: -8  },
-        { id: 'ch3_f1_B', label: '完整',  fullText: '完整',  x: 0.46, y: 0.13, rotation:  7  },
-        { id: 'ch3_f1_C', label: '真實',  fullText: '真實',  x: 0.70, y: 0.19, rotation: -5  },
-        { id: 'ch3_f1_D', label: '精準',  fullText: '精準',  x: 0.30, y: 0.35, rotation: 10  },
-        { id: 'ch3_f1_E', label: '安全',  fullText: '安全',  x: 0.58, y: 0.31, rotation: -9  },
-        { id: 'ch3_f1_F', label: '正確',  fullText: '正確',  x: 0.84, y: 0.36, rotation:  5  },
-      ],
-      correctIds: ['ch3_f1_A'],
-      replyOnCorrect: '「好讀」是對的。但好讀的代價，是你不會去問那些不見的欄位在哪裡。',
-    },
-    blank2: {
-      hintLabel: '那些欄位，是⋯⋯地消失的',
-      options: [
-        { id: 'ch3_f2_A', label: '自然',  fullText: '自然',  x: 0.22, y: 0.17, rotation: -7  },
-        { id: 'ch3_f2_B', label: '徹底',  fullText: '徹底',  x: 0.48, y: 0.12, rotation:  8  },
-        { id: 'ch3_f2_C', label: '安靜',  fullText: '安靜',  x: 0.74, y: 0.19, rotation: -5  },
-        { id: 'ch3_f2_D', label: '合理',  fullText: '合理',  x: 0.28, y: 0.36, rotation: 11  },
-        { id: 'ch3_f2_E', label: '乾淨',  fullText: '乾淨',  x: 0.60, y: 0.31, rotation: -8  },
-        { id: 'ch3_f2_F', label: '精準',  fullText: '精準',  x: 0.84, y: 0.37, rotation:  5  },
-      ],
-      correctIds: ['ch3_f2_A'],
-      replyOnCorrect: '顧乃謙說：它讓刪除看起來像選擇，讓隱藏看起來像分類。',
-    },
-    bothCorrectDialogue: {
-      kk: '整理版最高明的地方——你很難追問一個感覺已經很整齊的東西。',
-      liu: '所以那幾個欄位，是選擇性遺漏，不是格式問題。我會在報告裡這樣寫。',
-    },
-    wrongFallback: '顧乃謙說：你要整理版，今天就能結案；你要原始檔，今晚很多人睡不好。你選哪個，它就變成哪個樣子。',
-  },
-  {
-    id: 'ch3_fill2',
-    sentenceParts: ['「城市 W 和光芒 R 在同一個', '序列，\n代表有人知道哪裡按下去，\n兩個地方會', '響。」'],
-    blank1: {
-      hintLabel: '兩館共用的⋯⋯序列',
-      options: [
-        { id: 'ch3_g1_A', label: '插件版本', fullText: '插件版本', x: 0.18, y: 0.18, rotation: -8  },
-        { id: 'ch3_g1_B', label: '設備型號', fullText: '設備型號', x: 0.46, y: 0.13, rotation:  7  },
-        { id: 'ch3_g1_C', label: '網路節點', fullText: '網路節點', x: 0.72, y: 0.19, rotation: -5  },
-        { id: 'ch3_g1_D', label: '操作介面', fullText: '操作介面', x: 0.28, y: 0.35, rotation: 10  },
-        { id: 'ch3_g1_E', label: '維護記錄', fullText: '維護記錄', x: 0.58, y: 0.31, rotation: -9  },
-        { id: 'ch3_g1_F', label: '系統版本', fullText: '系統版本', x: 0.84, y: 0.36, rotation:  5  },
-      ],
-      correctIds: ['ch3_g1_A'],
-      replyOnCorrect: '同一個插件版本，代表同樣的入口，同樣的漏洞，同樣的操作方式。',
-    },
-    blank2: {
-      hintLabel: '兩個地方會⋯⋯響',
-      options: [
-        { id: 'ch3_g2_A', label: '一起',  fullText: '一起',  x: 0.22, y: 0.17, rotation: -7  },
-        { id: 'ch3_g2_B', label: '同時',  fullText: '同時',  x: 0.48, y: 0.12, rotation:  8  },
-        { id: 'ch3_g2_C', label: '輪流',  fullText: '輪流',  x: 0.74, y: 0.19, rotation: -5  },
-        { id: 'ch3_g2_D', label: '連鎖',  fullText: '連鎖',  x: 0.28, y: 0.36, rotation: 11  },
-        { id: 'ch3_g2_E', label: '延遲',  fullText: '延遲',  x: 0.60, y: 0.31, rotation: -8  },
-        { id: 'ch3_g2_F', label: '分別',  fullText: '分別',  x: 0.84, y: 0.37, rotation:  5  },
-      ],
-      correctIds: ['ch3_g2_A'],
-      replyOnCorrect: '不是單點故障，是有人理解這個網路的拓樸。',
-    },
-    bothCorrectDialogue: {
-      kk: '跨館同步不是偶發故障。是有人知道哪裡按下去，哪裡會一起響。',
-      liu: '顧乃謙的說法能支持這個嗎？',
-    },
-    wrongFallback: '顧乃謙說：跨館同步不是故障，那比較像⋯⋯有人知道哪裡會一起響。',
   },
 ];
 
@@ -667,7 +595,7 @@ export const reasoningByChapter: Record<string, ChapterReasoning> = {
         },
       ],
     },
-    reportFills: reportFillsCh3,
+    reportFills: ch3ReportFillBlanks as [TwoBlankFillConfig, TwoBlankFillConfig],
   },
   ch4: {
     q1: {

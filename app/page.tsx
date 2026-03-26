@@ -91,10 +91,10 @@ export default function Home() {
       <div className={`text-center max-w-2xl px-4 transition-all duration-800 ${
         isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
       }`}>
-        <h1 className="text-[2.7rem] md:text-[3.375rem] font-bold mb-6 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent animate-fade-float text-center" style={{ animationDelay: '0.1s' }}>
+        <h1 className="text-[2.7rem] md:text-[3.375rem] font-bold mb-6 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent animate-home-hero-in text-center" style={{ animationDelay: '0.08s' }}>
           KK流程偵探<br />最後一場放映
         </h1>
-        <p className="text-lg text-orange-300/80 mb-8 animate-fade-float" style={{ animationDelay: '0.2s' }}>
+        <p className="text-lg text-orange-300/80 mb-8 animate-home-hero-in" style={{ animationDelay: '0.18s' }}>
           凌晨 00:39，一通沒有顯示來電的電話。城市影城，散場後約五分鐘左右，有人死在 H 排 12 號。散場的燈，延後三分鐘亮起，你不是警察，你只是 KK。
         </p>
         <button
@@ -119,12 +119,12 @@ export default function Home() {
           onClose={() => setShowPasswordModal(false)}
           onSuccess={handlePasswordSuccess}
         />
-        <div className="mt-10 text-sm text-orange-200/60 animate-fade-float" style={{ animationDelay: '0.4s' }}>
+        <div className="mt-10 text-sm text-orange-200/60 animate-home-hero-in" style={{ animationDelay: '0.38s' }}>
           <p>使用滑鼠點擊場景中的物件進行互動</p>
         </div>
 
         {/* 開發測試入口 */}
-        <div className="mt-6 animate-fade-float" style={{ animationDelay: '0.45s' }}>
+        <div className="mt-6 animate-home-hero-in" style={{ animationDelay: '0.44s' }}>
           <Link
             href="/dev/simulate"
             className="inline-flex items-center gap-2 px-5 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/70 text-xs font-medium transition-all duration-200"

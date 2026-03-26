@@ -8,12 +8,10 @@ import {
   resolveChapterClosingReward,
   type ChapterClosingCh6EndingId,
 } from '@/data/chapterClosingRewards';
-import type { GameEngine } from '@/lib/gameEngine';
 import OverlayCard from '@/components/OverlayCard';
 
 export interface ChapterClosingRewardStepProps {
   chapterId: ReportChapterId;
-  getEngine: () => GameEngine;
   onContinue: () => void;
   ch6EndingId?: ChapterClosingCh6EndingId;
 }
@@ -22,24 +20,17 @@ const DIALOG_TITLE_ID = 'chapter-closing-reward-title';
 
 export default function ChapterClosingRewardStep({
   chapterId,
-  getEngine,
   onContinue,
   ch6EndingId,
 }: ChapterClosingRewardStepProps) {
   const continueRef = useRef<HTMLButtonElement>(null);
   const reduceMotion = useReducedMotion();
 
-  const { src, alt } = resolveChapterClosingReward(
-    chapterId,
-    getEngine().getState(),
-    ch6EndingId
-  );
+  const { src, alt } = resolveChapterClosingReward(chapterId, ch6EndingId);
 
   useEffect(() => {
     continueRef.current?.focus();
   }, []);
-
-  const isSvg = src.endsWith('.svg');
 
   return (
     <m.div
@@ -63,7 +54,7 @@ export default function ChapterClosingRewardStep({
           本章印記
         </h2>
 
-        <div className="relative w-full max-w-[min(100%,540px)] aspect-square rounded-xl overflow-hidden border border-amber-600/30 bg-slate-900/80 shadow-lg">
+        <div className="relative w-full max-w-[min(100%,540px)] aspect-[3/4] rounded-xl overflow-hidden border border-amber-600/30 bg-slate-900/80 shadow-lg">
           <Image
             src={src}
             alt={alt}
@@ -71,7 +62,6 @@ export default function ChapterClosingRewardStep({
             className="object-contain"
             sizes="(max-width: 768px) 90vw, 540px"
             priority
-            unoptimized={isSvg}
           />
         </div>
 

@@ -41,7 +41,7 @@ export interface Requirement {
 }
 
 export interface Effect {
-  type: 'addItem' | 'removeItem' | 'setFlag' | 'showDialog' | 'playAudio' | 'triggerEvent' | 'changeScene' | 'startNpcDialog' | 'addInsight' | 'markScenesVisited';
+  type: 'addItem' | 'removeItem' | 'setFlag' | 'showDialog' | 'playAudio' | 'triggerEvent' | 'changeScene' | 'startNpcDialog' | 'markScenesVisited';
   itemId?: string;
   flag?: string;
   value?: any;
@@ -53,8 +53,6 @@ export interface Effect {
   sceneId?: string;
   chapterId?: string;
   dialogId?: string; // 用於 startNpcDialog
-  insightTarget?: keyof InsightsState; // 用於 addInsight
-  insightDelta?: number; // 用於 addInsight
   sceneIds?: string[]; // 用於 markScenesVisited：標記多個場景已拜訪（不切換當前場景）
 }
 
@@ -73,7 +71,6 @@ export interface DialogChoice {
   weight?: number; // 選擇權重（用於分數計算）
   nextDialog?: Dialog; // 後續對話
   effects?: Effect[]; // 選擇效果
-  insightEffects?: InsightEffect[]; // 對 KK 洞察三維度的影響
 }
 
 export interface Dialog {
@@ -95,21 +92,6 @@ export interface Dialog {
   characterExpression?: 1 | 2 | 3; // 頭像表情編號，對應 /images/characters/{characterId}_1|2|3.webp
   /** 場景／Dock 立繪錨點；未指定時 UI 預設為右側（對話框靠左、文字區較寬） */
   characterPosition?: 'left' | 'right';
-}
-
-// === KK 洞察系統（三維度） ===
-
-// 玩家思考分數：PROCEDURE 流程洞察、HUMAN 人心洞察、EVIDENCE 物證洞察
-export interface InsightsState {
-  procedure_insight: number;
-  human_insight: number;
-  evidence_insight: number;
-}
-
-// 選項對洞察維度的影響
-export interface InsightEffect {
-  target: keyof InsightsState;
-  delta: number;
 }
 
 // === NPC 對話系統（A + C 模式） ===
@@ -141,8 +123,6 @@ export interface NpcDialogChoice {
   effects?: Effect[];
   // 對偏好變量的影響（0–3，需在引擎端 clamp）
   preferenceEffects?: PreferenceEffect[];
-  // 對 KK 洞察三維度的影響（流程／人心／物證）
-  insightEffects?: InsightEffect[];
 }
 
 // 單一 NPC 對話節點
@@ -309,8 +289,6 @@ export interface GameState {
   choices?: PlayerChoice[]; // 記錄所有選擇
   // 新增：玩家推理偏好變量（0–3）
   preferences?: PreferencesState;
-  // 新增：KK 洞察三維度（流程洞察、人心洞察、物證洞察）
-  insights?: InsightsState;
   // 新增：NPC 對話模式狀態
   activeNpcDialogId?: string;
   activeNpcDialogNodeId?: string;

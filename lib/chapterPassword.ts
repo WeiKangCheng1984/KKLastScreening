@@ -109,11 +109,6 @@ export function getCanonicalStateForChapter(chapter: ChapterDigit): GameState {
       question_system: 0,
       avoid_early_conviction: 0,
     },
-    insights: {
-      procedure_insight: 0,
-      human_insight: 0,
-      evidence_insight: 0,
-    },
     reasoningAnswers: {},
     npcCasualTalkCount: {},
   };
@@ -128,12 +123,6 @@ const DEFAULT_PREFERENCES = {
   weight_escape_route: 0,
   question_system: 0,
   avoid_early_conviction: 0,
-} as const;
-
-const DEFAULT_INSIGHTS = {
-  procedure_insight: 0,
-  human_insight: 0,
-  evidence_insight: 0,
 } as const;
 
 /**
@@ -159,7 +148,6 @@ export function getCh1StateForPassword(password: string): GameState | null {
     weights: {},
     choices: [],
     preferences: { ...DEFAULT_PREFERENCES },
-    insights: { ...DEFAULT_INSIGHTS },
     reasoningAnswers: {},
     npcCasualTalkCount: {},
   };

@@ -62,15 +62,17 @@ export function resolveLiuNpcClick(params: {
     }
     if (!flags.ch2_report_fill_done) {
       const reportStep = cfg.steps.find((s) => !s.blockIfMissing?.length);
+      const choices =
+        reportStep?.choices?.map((c) => ({ id: c.id, text: c.text })) ?? [
+          { id: 'ch2_liu_keep_exploring', text: '我再多看一下現場。' },
+          { id: 'ch2_liu_open_qa_conclusion', text: '我試著把版本說清楚。' },
+        ];
       return {
         kind: 'dialog',
         dialog: {
           ...LIU_BASE_DIALOG,
           text: reportStep?.text ?? cfg.steps[cfg.steps.length - 1]?.text ?? '',
-          choices: [
-            { id: 'ch2_liu_keep_exploring', text: '我再多看一下現場。' },
-            { id: 'ch2_liu_open_qa_conclusion', text: '好，現在就試著說一次。' },
-          ],
+          choices,
         },
       };
     }
@@ -80,8 +82,9 @@ export function resolveLiuNpcClick(params: {
         dialog: {
           ...LIU_BASE_DIALOG,
           text:
-            '劉隊：「你剛那版先放在這。」\n\n' +
-            '「阿蘇那邊還有東西沒給齊。等她肯給了，你再回來跟我收尾。」',
+            '劉隊：「你剛那版先擱著。」\n\n' +
+            '「阿蘇手邊還扣著一支機子——她點頭前，我不會催她交。」\n' +
+            '「你去把該讀的讀完，再回來跟我把話收乾淨。」',
         },
       };
     }
@@ -90,11 +93,11 @@ export function resolveLiuNpcClick(params: {
       dialog: {
         ...LIU_BASE_DIALOG,
         text:
-          '劉隊：「備忘那邊，你看完了？」\n\n' +
-          '「行。抬頭別空著。對上了，我們就收。」',
+          '劉隊：「手機裡壓著的那層，你看見了？」\n\n' +
+          '「行。抬頭別空著；對得上，我就敢往上遞。」',
         choices: [
-          { id: 'ch2_liu_keep_exploring', text: '我再多確認一下。' },
-          { id: 'ch2_liu_report_finalize', text: '我想申請結案。' },
+          { id: 'ch2_liu_keep_exploring', text: '我再對一次。' },
+          { id: 'ch2_liu_report_finalize', text: '就這版，往上送。' },
         ],
       },
     };

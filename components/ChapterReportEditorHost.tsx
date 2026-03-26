@@ -81,7 +81,6 @@ export default function ChapterReportEditorHost({
       {phase === 'reward' ? (
         <ChapterClosingRewardStep
           chapterId={chapterId}
-          getEngine={getEngine}
           ch6EndingId={pendingCh6Ending ?? undefined}
           onContinue={handleRewardContinue}
         />

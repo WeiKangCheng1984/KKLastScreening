@@ -37,6 +37,9 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
     statusBarPowerSaveHint,
     decoys,
     wrongFeedback,
+    successTitle,
+    successMessage,
+    successContinueLabel,
   } = config;
 
   const [batteryDialog, setBatteryDialog] = useState<null | 'enable' | 'disable'>(null);
@@ -47,6 +50,7 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
   );
   const [decoyFeedbackId, setDecoyFeedbackId] = useState<string | null>(null);
   const [wrongNoReveal, setWrongNoReveal] = useState(false);
+  const [readSuccess, setReadSuccess] = useState(false);
 
   const toggleDecoy = useCallback((id: string) => {
     setDecoyOn((prev) => {
@@ -80,8 +84,12 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
       return;
     }
     setWrongNoReveal(false);
+    setReadSuccess(true);
+  }, [hasRevealedWithPowerSave]);
+
+  const handleSuccessContinue = useCallback(() => {
     onSuccess();
-  }, [hasRevealedWithPowerSave, onSuccess]);
+  }, [onSuccess]);
 
   const decoyFeedbackText = decoyFeedbackId
     ? (() => {
@@ -117,7 +125,10 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
         />
       )}
 
-      <div className={`relative z-10 w-full max-w-sm flex flex-col gap-3 ${embedded ? 'mx-auto' : ''}`}>
+      <div
+        className={`relative z-10 w-full max-w-sm flex flex-col gap-3 ${embedded ? 'mx-auto' : ''} ${readSuccess ? 'pointer-events-none opacity-40' : ''}`}
+        aria-hidden={readSuccess}
+      >
         <p className="text-center text-xs text-gray-500 tracking-wide">{deviceScreenTitle}</p>
 
         <div className="rounded-[2rem] border border-zinc-600/80 bg-zinc-300/90 p-1.5 shadow-2xl">
@@ -129,7 +140,7 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
                 : 'bg-white text-zinc-900 ring-1 ring-zinc-200'
             }`}
             role="region"
-            aria-label={powerSaveOn ? '手機備忘，低耗顯示開啟' : '手機備忘'}
+            aria-label={powerSaveOn ? '備忘草稿，螢幕已壓暗' : '備忘草稿'}
             data-power-save={powerSaveOn ? 'on' : 'off'}
           >
             {/* 瀏海／動態島 */}
@@ -161,7 +172,7 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
                 )}
                 <button
                   type="button"
-                  aria-label="低電量，點擊省電選項"
+                  aria-label="電量見底，點擊壓暗螢幕"
                   onClick={handleBatteryClick}
                   className={`flex items-center rounded px-0.5 py-0.5 transition-colors ${
                     powerSaveOn ? 'hover:bg-white/10 active:bg-white/15' : 'hover:bg-zinc-100 active:bg-zinc-200'
@@ -191,7 +202,7 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
                   powerSaveOn ? 'text-zinc-500' : 'text-zinc-500'
                 }`}
               >
-                控制中心
+                快速開關
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {decoys.map((d) => {
@@ -243,7 +254,7 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
               <div
                 className={`text-[10px] tracking-wide mb-1 ${powerSaveOn ? 'text-zinc-500' : 'text-zinc-500'}`}
               >
-                備忘
+                備忘草稿
               </div>
               <div
                 className={`text-[12px] leading-relaxed space-y-1.5 transition-all duration-500 ${
@@ -376,6 +387,39 @@ export default function Ch2CrowPhoneRiddle({ config, onSuccess, embedded }: Ch2C
                   {dialogConfirm}
                 </button>
               </div>
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {readSuccess && (
+          <m.div
+            className={`fixed inset-0 flex items-center justify-center px-6 bg-black/70 ${embedded ? 'z-[100]' : 'z-[95]'}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ch2-phone-success-title"
+          >
+            <m.div
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.96, opacity: 0 }}
+              className="w-full max-w-sm rounded-2xl border border-zinc-500/40 bg-zinc-900/95 p-5 shadow-xl text-zinc-100 pointer-events-auto"
+            >
+              <h2 id="ch2-phone-success-title" className="text-lg font-medium mb-2">
+                {successTitle}
+              </h2>
+              <p className="text-sm text-zinc-300 leading-relaxed mb-5">{successMessage}</p>
+              <button
+                type="button"
+                onClick={handleSuccessContinue}
+                className="w-full py-2.5 rounded-xl border border-industrial-orange/80 bg-industrial-orange/90 text-dark-surface font-medium text-sm hover:bg-industrial-orange"
+              >
+                {successContinueLabel}
+              </button>
             </m.div>
           </m.div>
         )}

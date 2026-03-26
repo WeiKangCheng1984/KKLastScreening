@@ -12,7 +12,7 @@ const items: Record<string, Item> = {
       '樓梯間燈控的操作記錄，時間欄位顯示一個異常：散場前 3 分鐘，燈光切換到節能模式。\n\n正常流程是散場後才切換，這次比散場時間早了整整 3 分鐘。\n\n梁以安說得沒錯：「黑得太早。」\n\n3 分鐘。樓梯間從亮到暗。這是窗口，不是疏失。',
     svgImage: '/svg/items/lighting_time_diff.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_stairwell_wear_trace: {
     id: 'item_stairwell_wear_trace',
@@ -21,7 +21,7 @@ const items: Record<string, Item> = {
       '樓梯中段的踏面有一道不規則磨損，像是有人腳滑後緊急踩穩。扶手鍍層在同一位置有指甲抓痕，深度不像日常使用。\n\n地面還有一個零碎物件：一顆鈕扣，材質偏工作服用料。\n\n有人差點摔落，或者有人讓別人差點摔落。',
     svgImage: '/svg/items/stairwell_wear_trace.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_monitor_blind_stair: {
     id: 'item_monitor_blind_stair',
@@ -30,7 +30,7 @@ const items: Record<string, Item> = {
       '保全提供的監視器覆蓋範圍圖顯示：樓梯間入口和出口都有拍到，但中段轉角沒有任何鏡頭。\n\n有人能站在那個位置，觀察到上下兩端的混亂，卻完全不入鏡。\n\n這個死角不是偶然形成的，監視器的安裝位置是被設計過的。',
     svgImage: '/svg/items/monitor_blind_stair.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 
   // 場景二：放映控制區 / 副面板區
@@ -41,13 +41,13 @@ const items: Record<string, Item> = {
       '陳佑誠翻出一張截圖，副面板的操作介面版本號：v2.3.1-patch07。\n\n這個版本號和城市影城的版本完全一致——不只是同一套軟體，是同一個 patch 版本。\n\n「同一套插件跑三館，你還要我相信這些都是巧合？」',
     svgImage: '/svg/items/plugin_same_version.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_plugin_sync_record: {
     id: 'item_plugin_sync_record',
     name: '插件版本號與同步紀錄',
     description:
-      '維護記錄顯示：光芒 R 與城市 W 的插件在同一週內完成了版本更新，時間差在一天以內。\n\n更新的觸發來源：遠端推送。推送帳號：系統維護帳號。\n\n技術上，系統維護帳號可以由多人共用。它不能告訴你誰在裡面，只能告訴你有人進來過。',
+      '維護記錄顯示：光芒 R 與城市 W 的插件在同一週內完成了版本更新，時間差在一天以內。\n\n更新的觸發來源：遠端推送。推送帳號：系統維護帳號。\n\n技術上，系統維護帳號可以由多人共用。它不能告訴你誰在裡面，只能告訴你有人進來過。\n\n【同版截圖】副面板介面版本 v2.3.1-patch07，與城市影城同一 patch——同一套漏洞與觸發方式。\n\n【面板／逃脫】大廳面板「手動切換」區有指紋，側門方向有新鮮鞋印——混亂中完成操作後離開無鏡頭側門，需熟現場動線。',
     svgImage: '/svg/items/plugin_sync_record.svg',
     svgSize: 'medium',
     collectible: true,
@@ -56,7 +56,7 @@ const items: Record<string, Item> = {
     id: 'item_risk_report_buried',
     name: '被擱置的風險回報單',
     description:
-      '陳佑誠從抽屜最底層找出三份回報單，每一份都有格式、有日期、有優先標記。\n\n第一份：四個月前。第二份：兩個月前。第三份：六週前。\n\n三份都標了「優先 B」——緊急但不是最高優先。三份都消失在審核流程裡，沒有任何批示。\n\n「回報過。不是一次。格式都對，優先級也對，消失得更對。」',
+      '陳佑誠從抽屜最底層找出三份回報單，每一份都有格式、有日期、有優先標記。\n\n第一份：四個月前。第二份：兩個月前。第三份：六週前。\n\n三份都標了「優先 B」——緊急但不是最高優先。三份都消失在審核流程裡，沒有任何批示。\n\n「回報過。不是一次。格式都對，優先級也對，消失得更對。」\n\n【樓梯／燈控】散場前 3 分鐘燈控已切節能，與「散場後才切」的流程敘事牴觸；踏面磨損與扶手抓痕像急停施力，地面有工作服鈕扣。\n\n【動線／死角】入口與出口有鏡頭，中段轉角無鏡頭——可觀察兩端混亂卻不入鏡。\n\n【大廳序列】廣播比散場信號延遲 8 秒，燈在廣播前已切——燈先滅、廣播後響，像執行順序被改過，不像單一設備偶然失序。',
     svgImage: '/svg/items/risk_report_buried.svg',
     svgSize: 'medium',
     collectible: true,
@@ -70,7 +70,7 @@ const items: Record<string, Item> = {
       '事故當下的現場記錄：廣播比散場信號延遲 8 秒，燈光在廣播前已切換，觀眾尚未收到疏散提示時大廳已陷入半暗。\n\n梁以安說他聽到有人跌倒。保全記錄說有三個人被推擠。\n\n這個順序——燈先滅、廣播後響——不是設備故障，是序列被改過。',
     svgImage: '/svg/items/crowd_timing_log.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_panel_operator_trace: {
     id: 'item_panel_operator_trace',
@@ -79,7 +79,7 @@ const items: Record<string, Item> = {
       '面板旁邊的地面上有一道新鮮的橡膠鞋底印，角度朝向側門出口。\n\n面板螢幕有殘留指紋，位置在「手動切換」區域，不是正常操作的位置。\n\n有人在混亂發生的瞬間快速操作了面板，然後從側門離開——這不是維修動作，這是逃脫路線。',
     svgImage: '/svg/items/panel_operator_trace.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 };
 
@@ -256,7 +256,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細看燈控箱上的操作記錄。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_lighting_time_diff' },
           {
             type: 'showDialog',
             dialog: {
@@ -274,7 +273,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細看樓梯中段的磨損與殘留物。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_stairwell_wear_trace' },
           {
             type: 'showDialog',
             dialog: {
@@ -292,7 +290,6 @@ const scenes: Record<string, Scene> = {
         description: '看牆上貼的監視器覆蓋圖。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_monitor_blind_stair' },
           {
             type: 'showDialog',
             dialog: {
@@ -442,7 +439,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細看副面板螢幕角落的版本資訊。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_plugin_same_version' },
           {
             type: 'showDialog',
             dialog: {
@@ -618,7 +614,6 @@ const scenes: Record<string, Scene> = {
         description: '閱讀事故當下的時序記錄。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_crowd_timing_log' },
           {
             type: 'showDialog',
             dialog: {
@@ -636,7 +631,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細看面板旁的殘留痕跡。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_panel_operator_trace' },
           {
             type: 'showDialog',
             dialog: {
@@ -677,13 +671,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'chen_s1_q1',
           label: '你知道那個承辦人是誰嗎？',
           effects: [{ type: 'setFlag', flag: 'ch4_chen_s1_q1', value: true }],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
         {
           id: 'chen_s1_q2',
           label: '這個漏洞——如果被利用，能做到什麼？',
           effects: [{ type: 'setFlag', flag: 'ch4_chen_s1_q2', value: true }],
-          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
         },
       ],
       next: (state: GameState): string | null => {
@@ -733,13 +725,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'chen_s2_q1',
           label: '高文傑符合這個清單嗎？',
           effects: [{ type: 'setFlag', flag: 'ch4_chen_s2_q1', value: true }],
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
         },
         {
           id: 'chen_s2_q2',
           label: '你符合這個清單嗎？',
           effects: [{ type: 'setFlag', flag: 'ch4_chen_s2_q2', value: true }],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
       ],
       next: (state: GameState): string | null => {

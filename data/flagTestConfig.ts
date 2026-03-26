@@ -74,6 +74,7 @@ export const flagTestGroups: FlagGroup[] = [
       { id: 'ch3_milestone_whiteboard', label: '里程碑：白板重寫兩次' },
       { id: 'ch3_milestone_brand_script', label: '里程碑：話術草稿（禁用語）' },
       { id: 'ch3_milestone_cross_venue', label: '里程碑：跨館同步/版本序列' },
+      { id: 'ch3_log_compare_done', label: 'log 對照（整理版 vs 機房殘留）已完成' },
       { id: 'ch3_liu_report_ready', label: '可向劉隊報告（入口解鎖）' },
       { id: 'ch3_liu_report_done', label: '向劉隊報告完成（章尾）' },
       { id: 'ch3_reasoning_done', label: 'ch3 推理完成' },

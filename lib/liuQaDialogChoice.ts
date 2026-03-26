@@ -65,7 +65,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch3_q2_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch3_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'procedure_insight', delta: 1 }],
           },
           {
             id: 'ch3_q2_B',
@@ -75,7 +74,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch3_q2_main_correct', value: true },
               { type: 'setFlag', flag: 'ch3_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'evidence_insight', delta: 1 }],
           },
           {
             id: 'ch3_q2_C',
@@ -101,7 +99,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch3_q2_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch3_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'evidence_insight', delta: 1 }],
           },
         ],
       });
@@ -148,7 +145,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch3_q3_main_correct', value: true },
               { type: 'setFlag', flag: 'ch3_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'procedure_insight', delta: 2 }],
           },
           {
             id: 'ch3_q3_B',
@@ -158,7 +154,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch3_q3_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch3_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'human_insight', delta: 1 }],
           },
           {
             id: 'ch3_q3_C',
@@ -176,7 +171,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch3_q3_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch3_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'evidence_insight', delta: 1 }],
           },
           {
             id: 'ch3_q3_G',
@@ -185,7 +179,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch3_q3_answer', value: 'G' },
               { type: 'setFlag', flag: 'ch3_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'human_insight', delta: 1 }],
           },
         ],
       });
@@ -228,13 +221,11 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
             id: 'ch3_outro_write_in',
             text: '寫進去——「log 被整理過，原始欄位遺失，跨館操作痕跡無法重建。」',
             effects: [{ type: 'setFlag', flag: 'ch3_outro_write_raw', value: true }],
-            insightEffects: [{ target: 'evidence_insight', delta: 2 }],
           },
           {
             id: 'ch3_outro_use_filtered',
             text: '先用整理版——「現有資料指向個別操作，尚無跨館系統性問題之直接證據。」',
             effects: [{ type: 'setFlag', flag: 'ch3_outro_use_filtered', value: true }],
-            insightEffects: [{ target: 'procedure_insight', delta: 1 }],
           },
         ],
       });
@@ -324,7 +315,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch6_q2_main_correct', value: true },
               { type: 'setFlag', flag: 'ch6_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'human_insight', delta: 2 }],
           },
           {
             id: 'ch6_q2_B',
@@ -334,7 +324,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch6_q2_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch6_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'procedure_insight', delta: 1 }],
           },
           {
             id: 'ch6_q2_C',
@@ -386,7 +375,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch6_q3_answer', value: 'A' },
               { type: 'setFlag', flag: 'ch6_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'evidence_insight', delta: 2 }],
           },
           {
             id: 'ch6_q3_B',
@@ -395,7 +383,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch6_q3_answer', value: 'B' },
               { type: 'setFlag', flag: 'ch6_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'procedure_insight', delta: 2 }],
           },
           {
             id: 'ch6_q3_C',
@@ -404,7 +391,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch6_q3_answer', value: 'C' },
               { type: 'setFlag', flag: 'ch6_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'human_insight', delta: 2 }],
           },
         ],
       });
@@ -554,7 +540,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch5_q2_main_correct', value: true },
               { type: 'setFlag', flag: 'ch5_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'evidence_insight', delta: 2 }],
           },
           {
             id: 'ch5_q2_B',
@@ -580,7 +565,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch5_q2_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch5_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'procedure_insight', delta: 1 }],
           },
         ],
       });
@@ -627,7 +611,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch5_q3_main_correct', value: true },
               { type: 'setFlag', flag: 'ch5_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'procedure_insight', delta: 2 }],
           },
           {
             id: 'ch5_q3_B',
@@ -645,7 +628,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch5_q3_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch5_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'human_insight', delta: 1 }],
           },
           {
             id: 'ch5_q3_D',
@@ -695,13 +677,11 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
             id: 'ch5_outro_gao',
             text: '先押高文傑——登入紀錄在，程序可以走，之後再繼續追林子睿。',
             effects: [{ type: 'setFlag', flag: 'ch5_d6_gao', value: true }],
-            insightEffects: [{ target: 'procedure_insight', delta: 1 }],
           },
           {
             id: 'ch5_outro_lin',
             text: '盯林子睿——插件頂層授權在他那裡，先押高文傑會讓真正的人跑掉。',
             effects: [{ type: 'setFlag', flag: 'ch5_d6_lin', value: true }],
-            insightEffects: [{ target: 'evidence_insight', delta: 2 }],
           },
         ],
       });
@@ -791,7 +771,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch4_q2_main_correct', value: true },
               { type: 'setFlag', flag: 'ch4_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'human_insight', delta: 2 }],
           },
           {
             id: 'ch4_q2_B',
@@ -809,7 +788,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch4_q2_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch4_q2_done', value: true },
             ],
-            insightEffects: [{ target: 'procedure_insight', delta: 1 }],
           },
           {
             id: 'ch4_q2_D',
@@ -864,7 +842,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch4_q3_main_correct', value: true },
               { type: 'setFlag', flag: 'ch4_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'procedure_insight', delta: 2 }],
           },
           {
             id: 'ch4_q3_B',
@@ -874,7 +851,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch4_q3_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch4_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'evidence_insight', delta: 1 }],
           },
           {
             id: 'ch4_q3_C',
@@ -884,7 +860,6 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
               { type: 'setFlag', flag: 'ch4_q3_partial_correct', value: true },
               { type: 'setFlag', flag: 'ch4_q3_done', value: true },
             ],
-            insightEffects: [{ target: 'human_insight', delta: 1 }],
           },
           {
             id: 'ch4_q3_D',
@@ -934,13 +909,11 @@ export function tryHandleLiuQaDialogChoice(choice: DialogChoice, ctx: LiuQaDialo
             id: 'ch4_outro_direct',
             text: '直接寫：「第二起事故具備人為操作條件，建議重新調查，不維持偶發認定。」',
             effects: [{ type: 'setFlag', flag: 'ch4_outro_direct_flag', value: true }],
-            insightEffects: [{ target: 'evidence_insight', delta: 2 }],
           },
           {
             id: 'ch4_outro_cautious',
             text: '謹慎寫：「現有物證顯示燈控異常具備人為可能，建議待更多技術比對後再行定性。」',
             effects: [{ type: 'setFlag', flag: 'ch4_outro_cautious_flag', value: true }],
-            insightEffects: [{ target: 'procedure_insight', delta: 1 }],
           },
         ],
       });

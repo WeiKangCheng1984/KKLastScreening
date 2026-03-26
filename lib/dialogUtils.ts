@@ -2,7 +2,7 @@ import { splitTextByParagraphGaps } from '@/lib/dialogSegmentUtils';
 
 export interface NpcDialogNodeInput {
   text: string;
-  choices: Array<{ id: string; label: string; effects?: any[]; insightEffects?: any[] }>;
+  choices: Array<{ id: string; label: string; effects?: any[] }>;
 }
 
 export interface NpcInfoInput {
@@ -28,7 +28,6 @@ export function buildDialogFromNpcNode(node: NpcDialogNodeInput, npc: NpcInfoInp
       id: c.id,
       text: c.label,
       effects: c.effects,
-      insightEffects: c.insightEffects,
     })),
   };
 }

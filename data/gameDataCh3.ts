@@ -12,7 +12,7 @@ const items: Record<string, Item> = {
       '交接白板上有一處被重寫的筆劃——字體比周圍的字更新，墨水比較深。\n\n與第一章紅筆塗改做比對：同樣的書寫習慣，先劃掉再補字，下筆的角度幾乎一致。\n\n周姊說，白板擦過兩次。第一次是為了改，第二次是為了讓它看起來像沒改過。',
     svgImage: '/svg/items/whiteboard_rewrite.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_promo_wall_text: {
     id: 'item_promo_wall_text',
@@ -21,7 +21,7 @@ const items: Record<string, Item> = {
       '宣傳牆上的文案寫著：「城市影城全系列場館支援分區控制與自動排程，打造最佳觀影體驗。」\n\n但現場口徑是「只開了節能模式，沒有做任何自動控制。」\n\n「可分區」和「可自動」——這兩個功能如果都有，那第一章的「延後亮燈」就不只是疏失，而是有人知道怎麼用這個系統。',
     svgImage: '/svg/items/promo_wall_text.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_scene_control_sheet: {
     id: 'item_scene_control_sheet',
@@ -30,7 +30,7 @@ const items: Record<string, Item> = {
       '前台抽屜裡有一份過期的場控手冊，附著一張臨時簡表。\n\n簡表的第三頁有一個被手寫補注的功能頁：「C4：散場延後照明申請——適用條件：觀眾投訴、特殊活動、VIP場次。」\n\n這一頁原本不在正式版本裡。是誰加進來的？加的時間，比第一章的案發時間還早了三個月。',
     svgImage: '/svg/items/scene_control_sheet.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 
   // 場景二：臨時會議室 / 品牌應對室
@@ -50,7 +50,7 @@ const items: Record<string, Item> = {
       '一張 A4 草稿，字跡工整，像是背稿用的：\n\n「—— 如媒體詢問：請一律使用『個別失誤』，不使用『系統問題』。\n—— 如追問三館：回答『尚在釐清關聯性』，不主動提及聯繫。\n—— 禁用語：三起事故、跨館、系統性風險。」\n\n最下方有一行潦草的補注：「告訴記者，這是局部異常，無系統性風險。」\n\n這不是防禦媒體，這是在防止真相被串起來。',
     svgImage: '/svg/items/press_draft.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_brand_monitor_report: {
     id: 'item_brand_monitor_report',
@@ -59,7 +59,7 @@ const items: Record<string, Item> = {
       '品牌監測報表的標題是「輿情分析—城市影城 W-R 事件關聯度」。\n\n報表裡有一欄被手工圈起來，旁邊寫著：「三館同日出現在搜尋趨勢，需降低關聯性。」\n\n宋雅甄在意的不是死者是誰，是「三館」這個詞能不能同時出現在新聞裡。\n\n她的邏輯是：一間影城出事是事故，三間一起被聯想，就是品牌問題。',
     svgImage: '/svg/items/brand_monitor_report.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 
   // 場景三：機房外走道 / 系統接點區
@@ -70,7 +70,7 @@ const items: Record<string, Item> = {
       '顧乃謙列印出一段系統記錄，在上面用紅筆圈了三個時間點。\n\n「城市 W」和「光芒 R」在三個不同日期，各自出現了同樣的插件版本更新記錄——時間差在 15 分鐘以內。\n\n「跨館同步不是故障，那比較像……有人知道哪裡會一起響。」\n\n這不是系統自動同步。同版本、不同館、幾乎同時更新——背後要嘛是同一個操作入口，要嘛是同一個人。',
     svgImage: '/svg/items/cross_venue_sync.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_network_device_label: {
     id: 'item_network_device_label',
@@ -79,7 +79,7 @@ const items: Record<string, Item> = {
       '機房走道的設備架上貼著標籤，旁邊有一份手寫的館別代號對照表：\n\n「W-01：城市影城（本館）\nR-02：光芒影城（遠端）\nM-03：明星影城（遠端）」\n\nW 和 R 的設備在同一個子網段。這不是預設的標準配置——有人在設定網路時，特意讓兩館可以直接溝通。',
     svgImage: '/svg/items/network_device_label.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_remote_login_sheet: {
     id: 'item_remote_login_sheet',
@@ -88,7 +88,7 @@ const items: Record<string, Item> = {
       '一份維護單，記錄了遠端登入的申請與審核流程。\n\n最後一筆記錄日期：三週前。操作人：顧乃謙。說明：「插件版本序列比對——W、R 同步確認。」\n\n這筆記錄是顧乃謙親自做的。他知道這兩館的版本是同步的，早在案發之前就知道。\n\n他在等什麼？還是他一直在看著什麼？',
     svgImage: '/svg/items/remote_login_sheet.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 };
 
@@ -247,7 +247,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '劉隊壓著嗓門：「品牌的人到了，話都先講漂亮。顧乃謙也在，那人嘴臭，但講的是真的。」\n\n「我要的不是誰動手，是誰動紀錄、動幾次、動完怎麼裝沒事。」\n\n「順序：大廳先摸——白板、牆上字、抽屜。再進去聽他們對外怎麼講。最後找顧乃謙，機房有東西給你對。」',
+              text: '劉隊壓著嗓門：「品牌的人到了，話都先講漂亮。顧乃謙也在，那人嘴臭，但講的是真的。」\n\n「我要的不是誰動手，是誰動紀錄、動幾次、動完怎麼裝沒事。」\n\n「順序：大廳先把白板、牆上字、抽屜摸清楚，再進應對室聽對外話術、跟張景衡對照整理版與原始痕跡；最後才去機房找顧乃謙對跨館。」',
               type: 'character',
               characterId: 'npc_liu',
               characterName: '劉隊（偵查隊）',
@@ -265,7 +265,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細觀察白板上的筆跡。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_whiteboard_rewrite' },
           {
             type: 'showDialog',
             dialog: {
@@ -285,7 +284,6 @@ const scenes: Record<string, Scene> = {
         description: '閱讀牆上的宣傳文案。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_promo_wall_text' },
           {
             type: 'showDialog',
             dialog: {
@@ -303,7 +301,6 @@ const scenes: Record<string, Scene> = {
         description: '翻看前台抽屜裡的文件。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_scene_control_sheet' },
           {
             type: 'showDialog',
             dialog: {
@@ -466,6 +463,7 @@ const scenes: Record<string, Scene> = {
           { type: 'hasFlag', flag: 'ch3_milestone_whiteboard', value: true },
           { type: 'hasFlag', flag: 'ch3_milestone_brand_script', value: true },
           { type: 'hasFlag', flag: 'ch3_milestone_cross_venue', value: true },
+          { type: 'hasFlag', flag: 'ch3_log_compare_done', value: true },
         ],
         effects: [{ type: 'setFlag', flag: 'ch3_liu_report_ready', value: true }],
         oneTime: true,
@@ -641,6 +639,10 @@ const scenes: Record<string, Scene> = {
               characterName: '張景衡（品牌特助）',
               characterExpression: 1,
               characterPosition: 'right',
+              choices: [
+                { id: 'ch3_open_compare_ui', text: '對照整理版與機房讀到的原始殘留' },
+                { id: 'close_only', text: '稍後再說' },
+              ],
             },
           },
           { type: 'setFlag', flag: 'ch3_zhang_talked', value: true },
@@ -692,7 +694,6 @@ const scenes: Record<string, Scene> = {
         description: '閱讀宋雅甄的媒體應對草稿。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_press_draft' },
           {
             type: 'showDialog',
             dialog: {
@@ -712,7 +713,6 @@ const scenes: Record<string, Scene> = {
         description: '閱讀宋雅甄的輿情分析報告。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_brand_monitor_report' },
           {
             type: 'showDialog',
             dialog: {
@@ -812,6 +812,7 @@ const scenes: Record<string, Scene> = {
           { type: 'hasFlag', flag: 'ch3_milestone_whiteboard', value: true },
           { type: 'hasFlag', flag: 'ch3_milestone_brand_script', value: true },
           { type: 'hasFlag', flag: 'ch3_milestone_cross_venue', value: true },
+          { type: 'hasFlag', flag: 'ch3_log_compare_done', value: true },
         ],
         effects: [{ type: 'setFlag', flag: 'ch3_liu_report_ready', value: true }],
         oneTime: true,
@@ -978,7 +979,6 @@ const scenes: Record<string, Scene> = {
         description: '檢視顧乃謙圈出來的系統記錄。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_cross_venue_sync' },
           {
             type: 'showDialog',
             dialog: {
@@ -998,7 +998,6 @@ const scenes: Record<string, Scene> = {
         description: '檢視設備架上的館別代號對照。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_network_device_label' },
           {
             type: 'showDialog',
             dialog: {
@@ -1016,7 +1015,6 @@ const scenes: Record<string, Scene> = {
         description: '檢視夾在設備架旁的維護單。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_remote_login_sheet' },
           {
             type: 'showDialog',
             dialog: {
@@ -1036,6 +1034,7 @@ const scenes: Record<string, Scene> = {
           { type: 'hasFlag', flag: 'ch3_milestone_whiteboard', value: true },
           { type: 'hasFlag', flag: 'ch3_milestone_brand_script', value: true },
           { type: 'hasFlag', flag: 'ch3_milestone_cross_venue', value: true },
+          { type: 'hasFlag', flag: 'ch3_log_compare_done', value: true },
         ],
         effects: [{ type: 'setFlag', flag: 'ch3_liu_report_ready', value: true }],
         oneTime: true,
@@ -1191,13 +1190,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'gu_s1_q1',
           label: '遠端操作——意思是不用親自在場？',
           effects: [{ type: 'setFlag', flag: 'ch3_gu_s1_q1', value: true }],
-          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
         },
         {
           id: 'gu_s1_q2',
           label: '張景衡知道那兩個欄位的事嗎？',
           effects: [{ type: 'setFlag', flag: 'ch3_gu_s1_q2', value: true }],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
       ],
       next: (state: GameState): string | null => {
@@ -1247,13 +1244,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'gu_s2_q1',
           label: '能查出那個人是誰嗎？',
           effects: [{ type: 'setFlag', flag: 'ch3_gu_s2_q1', value: true }],
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
         },
         {
           id: 'gu_s2_q2',
           label: '你為什麼在案發前就知道這件事？',
           effects: [{ type: 'setFlag', flag: 'ch3_gu_s2_q2', value: true }],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
       ],
       next: (state: GameState): string | null => {
@@ -1313,7 +1308,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q1_main_correct', value: true },
             { type: 'setFlag', flag: 'ch3_q1_done', value: true },
           ],
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
         },
         {
           id: 'ch3_q1_B',
@@ -1355,7 +1349,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q1_partial_correct', value: true },
             { type: 'setFlag', flag: 'ch3_q1_done', value: true },
           ],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
         {
           id: 'ch3_q1_G',
@@ -1401,7 +1394,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q2_partial_correct', value: true },
             { type: 'setFlag', flag: 'ch3_q2_done', value: true },
           ],
-          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
         },
         {
           id: 'ch3_q2_B',
@@ -1411,7 +1403,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q2_main_correct', value: true },
             { type: 'setFlag', flag: 'ch3_q2_done', value: true },
           ],
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
         },
         {
           id: 'ch3_q2_C',
@@ -1453,7 +1444,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q2_partial_correct', value: true },
             { type: 'setFlag', flag: 'ch3_q2_done', value: true },
           ],
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
         },
       ],
     },
@@ -1491,7 +1481,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q3_main_correct', value: true },
             { type: 'setFlag', flag: 'ch3_q3_done', value: true },
           ],
-          insightEffects: [{ target: 'procedure_insight', delta: 2 }],
         },
         {
           id: 'ch3_q3_B',
@@ -1501,7 +1490,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q3_partial_correct', value: true },
             { type: 'setFlag', flag: 'ch3_q3_done', value: true },
           ],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
         {
           id: 'ch3_q3_C',
@@ -1527,7 +1515,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q3_partial_correct', value: true },
             { type: 'setFlag', flag: 'ch3_q3_done', value: true },
           ],
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
         },
         {
           id: 'ch3_q3_F',
@@ -1544,7 +1531,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_q3_answer', value: 'G' },
             { type: 'setFlag', flag: 'ch3_q3_done', value: true },
           ],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
       ],
     },
@@ -1581,7 +1567,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_outro_write_raw', value: true },
             { type: 'setFlag', flag: 'ch3_reasoning_done', value: true },
           ],
-          insightEffects: [{ target: 'evidence_insight', delta: 2 }],
         },
         {
           id: 'ch3_outro_use_filtered',
@@ -1590,7 +1575,6 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
             { type: 'setFlag', flag: 'ch3_outro_use_filtered', value: true },
             { type: 'setFlag', flag: 'ch3_reasoning_done', value: true },
           ],
-          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
         },
       ],
     },

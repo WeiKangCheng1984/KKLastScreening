@@ -25,6 +25,7 @@ import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import { chapters } from '@/data/chapters';
 import { getChapterData } from '@/data/getChapterData';
 import DeveloperPanel from '@/components/DeveloperPanel';
+import Ch3LogComparePanel from '@/components/Ch3LogComparePanel';
 import AudioControl from '@/components/AudioControl';
 import MuteAllButton from '@/components/MuteAllButton';
 import { preloadSVGBatch } from '@/lib/svgLoader';
@@ -42,6 +43,8 @@ import { useChapterData } from '@/hooks/useChapterData';
 import { useDialogQueue } from '@/hooks/useDialogQueue';
 import { useInventoryDetail } from '@/hooks/useInventoryDetail';
 import { getChapterConfig, CHOICE_ID_TO_REPORT_CHAPTER, type ReportChapterId } from '@/data/getChapterConfig';
+import { DEV_TEST_LIU_SCENE, DEV_TEST_CH1_REPORT_RESET_FLAGS } from '@/lib/devTestConstants';
+import { ch1ReportConfig } from '@/data/ch1ReportConfig';
 import { tryHandleLiuQaDialogChoice } from '@/lib/liuQaDialogChoice';
 import { resolveLiuNpcClick } from '@/lib/liuReportFlow';
 import { getCh3PortraitIntroEventId } from '@/lib/ch3PortraitIntroEvents';
@@ -75,6 +78,20 @@ function getHotspotCenter(hotspot: Hotspot): { x: number; y: number } {
   }
   return { x: 0.5, y: 0.5 };
 }
+
+/** 張景衡 oneTime 事件已消耗、尚未完成 log 對照時的補位對話（與 talk_zhang_ch3 同選項） */
+const CH3_ZHANG_COMPARE_REMINDER_DIALOG: Dialog = {
+  text: '張景衡揚揚紙：「整理版你讀過了，機房那邊你也對過一次了吧？」\n\n「三格對齊再寫報告，才不會像幫別人收工。」',
+  type: 'character',
+  characterId: 'npc_zhang_jingheng',
+  characterName: '張景衡（品牌特助）',
+  characterExpression: 1,
+  characterPosition: 'right',
+  choices: [
+    { id: 'ch3_open_compare_ui', text: '對照整理版與機房讀到的原始殘留' },
+    { id: 'close_only', text: '稍後再說' },
+  ],
+};
 
 export default function PlayPage() {
   const params = useParams();
@@ -158,6 +175,7 @@ export default function PlayPage() {
   const [showMenu, setShowMenu] = useState(false);
   const gameEndShownRef = useRef(false);
   const [showDeveloperPanel, setShowDeveloperPanel] = useState(false);
+  const [showCh3LogCompare, setShowCh3LogCompare] = useState(false);
   /** 方案一：問敏感問題前的獨立抉擇（不共用 NPC 對話框） */
   const [sensitiveGate, setSensitiveGate] = useState<{
     step: 'ask_or_skip' | 'pick_one';
@@ -318,7 +336,8 @@ export default function PlayPage() {
       activeItemDetail ||
       activeReportChapterId ||
       sensitiveGate ||
-      ch6EndingId
+      ch6EndingId ||
+      showCh3LogCompare
     );
   });
 
@@ -620,6 +639,12 @@ export default function PlayPage() {
       return;
     }
 
+    if (choice.id === 'ch3_open_compare_ui') {
+      setCurrentDialog(null);
+      setShowCh3LogCompare(true);
+      return;
+    }
+
     const LIU_KEEP_EXPLORING_IDS = new Set([
       'ch1_liu_keep_exploring',
       'ch1_liu_try_reasoning',
@@ -685,20 +710,11 @@ export default function PlayPage() {
     // 一般對話選擇
     engine.handleDialogChoice(choice);
 
-    // 第一章態度宣言四選一選完後：顯示推理句與進入第二章（handleDialogChoice 已於上方套用洞察與 ch1_attitude_declared）
+    // 第一章態度宣言四選一選完後：顯示推理句與進入第二章（handleDialogChoice 已設 ch1_attitude_declared）
     if (choice.id === 'ch1_attitude_procedure' || choice.id === 'ch1_attitude_evidence' || choice.id === 'ch1_attitude_human' || choice.id === 'ch1_attitude_both') {
-      const st = engine.getState();
-      const insights = st.insights || { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
-      const p = insights.procedure_insight ?? 0;
-      const h = insights.human_insight ?? 0;
-      const e = insights.evidence_insight ?? 0;
-      const maxVal = Math.max(p, h, e);
+      const followMap = ch1ReportConfig.attitude.attitudeFollowUpByChoiceId;
       const inferenceText =
-        maxVal === p
-          ? '兇手不是在黑暗裡殺人，他是在規定的黑暗裡殺人。'
-          : maxVal === e
-            ? '官腔很滑，但官腔擋不住痕跡。找一個他沒想到的小東西，他就會破。'
-            : '他怕的不是兇手，是上面那張看不見的臉。恐懼會替兇手擦地板。';
+        followMap[choice.id as keyof typeof followMap] ?? ch1ReportConfig.attitude.closingInference;
       setCurrentDialog({
         text: inferenceText,
         type: 'narrator',
@@ -1726,33 +1742,64 @@ export default function PlayPage() {
       const state = engine.getState();
       const flags = state.flags || {};
 
-      // 1) 想前往品牌應對室：需要先接到劉隊任務
-      if (targetSceneId === 'scene_ch3_brand_room' && !flags.ch3_task_from_liu) {
-        setCurrentDialog({
-          text:
-            '劉隊站在大廳角落看著你。\n\n「先過來，我跟你說一下你要查什麼。」',
-          type: 'character',
-          characterId: 'npc_liu',
-          characterName: '劉隊（偵查隊）',
-          characterExpression: 1,
-          characterPosition: 'right',
-        });
-        return;
-      }
-
-      // 2) 想前往機房外走道：需要先接任務，且在品牌應對室互動過兩個以上核心物件
-      if (targetSceneId === 'scene_ch3_server_corridor') {
-        const coreBrandHotspots = [
-          'hotspot_brand_filtered_log',
-          'hotspot_brand_press_draft',
-          'hotspot_brand_monitor_report',
-        ];
-        const interactedCount = coreBrandHotspots.filter((id) => engine.hasInteracted(id)).length;
-
-        if (!flags.ch3_task_from_liu || interactedCount < 2) {
+      // 1) 想前往品牌應對室：需劉隊任務，且已看過交接白板里程碑
+      if (targetSceneId === 'scene_ch3_brand_room') {
+        if (!flags.ch3_task_from_liu) {
           setCurrentDialog({
             text:
-              '顧乃謙說：「先把那邊的東西看完。」\n\n「帶著問題來，不要帶著空白的筆記本過來。」',
+              '劉隊站在大廳角落看著你。\n\n「先過來，我跟你說一下你要查什麼。」',
+            type: 'character',
+            characterId: 'npc_liu',
+            characterName: '劉隊（偵查隊）',
+            characterExpression: 1,
+            characterPosition: 'right',
+          });
+          return;
+        }
+        if (!flags.ch3_milestone_whiteboard) {
+          setCurrentDialog({
+            text:
+              '先在大廳把交接白板看完，再進應對室聽品牌方怎麼說、對照張景衡那份整理版。\n\n順序對了，進去才不會被話術牽著走。',
+            type: 'narrator',
+          });
+          return;
+        }
+      }
+
+      // 2) 想前往機房外走道：任務＋白板＋話術里程碑＋ log 對照完成（與章節敘事順序一致）
+      if (targetSceneId === 'scene_ch3_server_corridor') {
+        if (!flags.ch3_task_from_liu) {
+          setCurrentDialog({
+            text:
+              '劉隊站在大廳角落看著你。\n\n「先過來，我跟你說一下你要查什麼。」',
+            type: 'character',
+            characterId: 'npc_liu',
+            characterName: '劉隊（偵查隊）',
+            characterExpression: 1,
+            characterPosition: 'right',
+          });
+          return;
+        }
+        if (!flags.ch3_milestone_whiteboard) {
+          setCurrentDialog({
+            text:
+              '機房的原始痕跡要對著看——你大廳白板還沒摸完，別急著往機房走。',
+            type: 'narrator',
+          });
+          return;
+        }
+        if (!flags.ch3_milestone_brand_script) {
+          setCurrentDialog({
+            text:
+              '應對室裡那份記者話術草稿還沒讀過。\n\n先搞清楚對外口徑禁講什麼，再進機房對原始 log，才不會被現場牽著鼻子走。',
+            type: 'narrator',
+          });
+          return;
+        }
+        if (!flags.ch3_log_compare_done) {
+          setCurrentDialog({
+            text:
+              '顧乃謙說：「整理版跟原始檔，你對照過了嗎？」\n\n「對完再來機房。帶著問題來，不要帶著空白的筆記本過來。」',
             type: 'character',
             characterId: 'npc_gu_naiqian',
             characterName: '顧乃謙（系統工程）',
@@ -1886,7 +1933,8 @@ export default function PlayPage() {
                 currentPuzzle ||
                 activeItemDetail ||
                 activeReportChapterId ||
-                sensitiveGate
+                sensitiveGate ||
+                showCh3LogCompare
               )}
               onNpcClick={(npcId) => {
                 if (!engineRef.current) return;
@@ -1899,6 +1947,14 @@ export default function PlayPage() {
                     const introResult = engine.triggerEvent(introEventId);
                     if (introResult?.dialog) {
                       setCurrentDialog(introResult.dialog);
+                      return;
+                    }
+                    if (
+                      introEventId === 'talk_zhang_ch3' &&
+                      npcId === 'npc_zhang_jingheng' &&
+                      !st.flags.ch3_log_compare_done
+                    ) {
+                      setCurrentDialog(CH3_ZHANG_COMPARE_REMINDER_DIALOG);
                       return;
                     }
                   }
@@ -2053,6 +2109,19 @@ export default function PlayPage() {
             />
           )}
         </AnimatePresence>
+
+        {showCh3LogCompare && (
+          <Ch3LogComparePanel
+            onClose={() => setShowCh3LogCompare(false)}
+            onSolved={() => {
+              if (!engineRef.current) return;
+              const engine = engineRef.current;
+              engine.applyEffect({ type: 'setFlag', flag: 'ch3_log_compare_done', value: true });
+              engine.triggerEvent('ch3_check_report_ready');
+              setShowCh3LogCompare(false);
+            }}
+          />
+        )}
 
         {ch6EndingId && (
           <EndingOverlay
@@ -2780,7 +2849,39 @@ export default function PlayPage() {
             setDevModeAndPersist(false);
             setShowDeveloperPanel(false);
           }}
-          onTestCh2Report={() => {
+          onTestCh1LiuReport={() => {
+            const engine = engineRef.current;
+            if (!engine) return;
+            engine.applyEffect({ type: 'setFlag', flag: 'dev_unlock_liu_report', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch1_reasoning_done', value: false });
+            try {
+              localStorage.setItem('gameState', JSON.stringify(engine.getState()));
+            } catch (e) {
+              console.warn('無法保存遊戲狀態:', e);
+            }
+            router.push(`/play/${DEV_TEST_LIU_SCENE.ch1.chapterId}/${DEV_TEST_LIU_SCENE.ch1.sceneId}`);
+          }}
+          onTestCh1Breakthrough={() => {
+            const engine = engineRef.current;
+            if (!engine) return;
+            DEV_TEST_CH1_REPORT_RESET_FLAGS.forEach((flag) =>
+              engine.applyEffect({ type: 'setFlag', flag, value: false }),
+            );
+            setActiveReportChapterId('ch1');
+          }}
+          onTestCh2LiuReport={() => {
+            const engine = engineRef.current;
+            if (!engine) return;
+            engine.applyEffect({ type: 'setFlag', flag: 'dev_unlock_liu_report', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch2_reasoning_done', value: false });
+            try {
+              localStorage.setItem('gameState', JSON.stringify(engine.getState()));
+            } catch (e) {
+              console.warn('無法保存遊戲狀態:', e);
+            }
+            router.push(`/play/${DEV_TEST_LIU_SCENE.ch2.chapterId}/${DEV_TEST_LIU_SCENE.ch2.sceneId}`);
+          }}
+          onTestCh2Breakthrough={() => {
             const engine = engineRef.current;
             if (!engine) return;
             const ch2ReportResetFlags = [
@@ -2801,6 +2902,53 @@ export default function PlayPage() {
               engine.applyEffect({ type: 'setFlag', flag, value: false }),
             );
             setActiveReportChapterId('ch2');
+          }}
+          onTestCh3LiuReport={() => {
+            const engine = engineRef.current;
+            if (!engine) return;
+            engine.applyEffect({ type: 'setFlag', flag: 'dev_unlock_liu_report', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_reasoning_done', value: false });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_liu_report_done', value: false });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_task_from_liu', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_log_compare_done', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_milestone_whiteboard', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_milestone_brand_script', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_milestone_cross_venue', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_liu_report_ready', value: true });
+            try {
+              localStorage.setItem('gameState', JSON.stringify(engine.getState()));
+            } catch (e) {
+              console.warn('無法保存遊戲狀態:', e);
+            }
+            router.push(`/play/${DEV_TEST_LIU_SCENE.ch3.chapterId}/${DEV_TEST_LIU_SCENE.ch3.sceneId}`);
+          }}
+          onTestCh3Breakthrough={() => {
+            const engine = engineRef.current;
+            if (!engine) return;
+            const ch3ReportResetFlags = [
+              'ch3_liu_report_done',
+              'ch3_reasoning_done',
+              'navigate_to_ch4_intro',
+            ] as const;
+            ch3ReportResetFlags.forEach((flag) =>
+              engine.applyEffect({ type: 'setFlag', flag, value: false }),
+            );
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_task_from_liu', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_log_compare_done', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_milestone_whiteboard', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_milestone_brand_script', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_milestone_cross_venue', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_liu_report_ready', value: true });
+            setActiveReportChapterId('ch3');
+          }}
+          onTestCh3Compare={() => {
+            const engine = engineRef.current;
+            if (!engine) return;
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_task_from_liu', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_milestone_whiteboard', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_milestone_brand_script', value: true });
+            engine.applyEffect({ type: 'setFlag', flag: 'ch3_log_compare_done', value: false });
+            setShowCh3LogCompare(true);
           }}
           currentChapterId={chapterId}
           currentSceneId={sceneId}

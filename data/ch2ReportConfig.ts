@@ -72,6 +72,11 @@ export interface Ch2PhoneRiddleConfig {
   statusBarPowerSaveHint: string;
   decoys: Ch2PhoneDecoy[];
   wrongFeedback: Ch2PhoneWrongFeedback;
+  /** 封存已讀後、關閉道具前顯示的成功回饋 */
+  successTitle: string;
+  successMessage: string;
+  /** 成功態主按鈕（再呼叫 onSuccess） */
+  successContinueLabel: string;
 }
 
 /** 第二輪章尾 overlay 文案（與驗證字無關） */
@@ -252,37 +257,38 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
 const ch2TriWheelAlphabet = ['W', 'R', 'C', 'A', 'B', 'D', 'M', 'K'];
 
 export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
-  deviceScreenTitle: '草稿同步岔路 · 內測',
+  deviceScreenTitle: '未同步備忘 · 吳亞',
   draftSurfaceLines: [
-    '◇※＃ 同步岔路 0x7F2A · 佇列在風裡發抖（邊角閃過單字 W）',
-    '節能，他們要的是「改善」：R 與 C 兩格口徑要先對齊再說',
-    '我是不是偏執，像羽毛散落：▓→▒→（此列不負責）',
-    '提示僅一行：不能寄。寄了就是幫他們把故事收乾淨。',
+    '【導言｜刪】節能那套上線後，散場像被遙控——（此段語氣太硬，暫不寄）',
+    '私訊殘句：壓節能稿；「她也在」；三起不是數字，是欄位名。',
+    'W／R／C 在腦中亂跳，像在試哪一段路最常寫進新聞。',
+    '不能寄。寄了就是幫他們把喪事收成喜訊。',
   ],
   draftRevealLines: [
-    '筆名在鍵盤上，地圖在指尖上——警方只會猜密碼，不會猜「誰的憤怒被存成檔」。',
-    '備忘裡有一則隱藏片斷，標題寫著：梁以安導演的憤怒。要開它，先對外叫對名字，再把三館轉到對的位置。',
-    '劉隊要的能對卷：筆名＋三格代號，少一格都打不開。',
+    '螢幕暗下來，才聽見自己怕什麼：不是死，是名字被別人先填進欄位。',
+    '鎖著一則標題刺眼的備忘片斷——跟梁以安導演、跟現場壓不下的情緒有關；要開它，對外得先叫對筆名，三館代號也要轉到那晚他心裡對的位置。',
+    '這支機子不認勇氣，只認你願不願意把「烏鴉」兩個字與 W、R、C 對齊——對齊了，藏著的那行字才肯浮上來。',
   ],
-  confirmReadLabel: '已讀',
-  confirmReadHint: '備忘讀畢。回桌邊：先打字，再轉齊 W、R、C。',
-  round2PenNameLabel: '署名／筆名（鍵盤輸入）',
+  confirmReadLabel: '讀完了',
+  confirmReadHint: '心裡先對齊筆名與三館，再回劉隊那邊開口。',
+  round2PenNameLabel: '對外筆名',
   round2PenNamePlaceholder: '兩個字',
-  round2PenNameWrongHint: '劉隊：「卷宗抬頭對不上他對外用的那兩個字。」',
+  round2PenNameWrongHint: '劉隊眉頭一皺：「抬頭那兩個字，跟他對外用的不一致。」',
   acceptablePenNameAnswers: ['烏鴉'],
-  round2TriWheelWrongHint: '劉隊：「三館代號對不齊——你在終端地圖上不是看過？」',
-  triWheelColumns: ['第一格（左）', '第二格（中）', '第三格（右）'] as [string, string, string],
+  round2TriWheelWrongHint: '劉隊：「三館那三格——你在地圖上不是繞過？」',
+  triWheelColumns: ['左格', '中格', '右格'] as [string, string, string],
   triWheelAlphabet: ch2TriWheelAlphabet,
   triWheelCorrect: ch2TriWheelCorrect,
-  powerSaveDialogTitle: '低耗顯示',
-  powerSaveDialogMessage: '電量臨界。是否切換低耗？對比將重排，耗電較低。',
-  powerSaveConfirmLabel: '確定',
-  powerSaveCancelLabel: '取消',
-  powerOffDialogTitle: '關閉低耗顯示',
-  powerOffDialogMessage: '恢復一般顯示。備忘的另一層會先隱藏。',
-  powerOffConfirmLabel: '關閉',
-  powerOffCancelLabel: '保留',
-  statusBarPowerSaveHint: '低耗',
+  powerSaveDialogTitle: '螢幕太亮',
+  powerSaveDialogMessage:
+    '電量見底了。要不要把螢幕壓暗？暗下來，有些字才肯從雜訊裡浮上來——也省一點電。',
+  powerSaveConfirmLabel: '壓暗',
+  powerSaveCancelLabel: '先不要',
+  powerOffDialogTitle: '拉回亮度',
+  powerOffDialogMessage: '亮度一回來，剛剛浮出來那層字會先沉回去。',
+  powerOffConfirmLabel: '拉回',
+  powerOffCancelLabel: '維持暗的',
+  statusBarPowerSaveHint: '暗屏',
   decoys: [
     {
       id: 'wifi',
@@ -314,21 +320,25 @@ export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
     },
   ],
   wrongFeedback: {
-    hintWhenNoReveal: '對比不足，備忘拒絕封存。',
+    hintWhenNoReveal: '亮度還太誠實，字不會跟你講真話。先把螢幕壓暗。',
   },
+  successTitle: '備忘已封存',
+  successMessage:
+    '暗屏下讀到的線索已記下。回劉隊那邊開口前，筆名與三館代號先在心裡對齊。',
+  successContinueLabel: '繼續',
 };
 
 export const ch2ReportRound2Panel: Ch2ReportRound2PanelCopy = {
   liuClosing:
-    '劉隊把筆記本闔上。\n\n「備忘裡多了一則打不開的片斷，標題很刺——跟現場情緒有關。你先把筆名和三館轉對，我們才知道下一張傳票該問誰。」',
+    '劉隊把筆記本闔上。\n\n「手機裡還壓著一則跟梁以安導演有關的東西——情緒很尖。名字與三館對不對，決定我們進大廳要叫住誰。」',
   supplement:
-    '「鍵盤：對外筆名。轉盤：W、R、C。兩個都對，那條『梁以安導演的憤怒』才讀得到——進大廳你才有名有姓去問。」',
-  finalizeButtonLabel: '筆名與三館都對了，往上送',
+    '「筆名對了，轉盤對了，那條才讀得到。別讓我拿猜的去問人。」',
+  finalizeButtonLabel: '就這版，往上遞',
 };
 
 export const ch2ReportInterstitial: Ch2ReportInterstitialCopy = {
   afterRound1NeedPhone:
-    '阿蘇終端邊還有東西沒到你手上。備忘裡還藏一則要筆名與三館代號才開的片斷——等那支備忘機可開了，再來跟劉隊收尾。',
+    '阿蘇那邊還扣著一支機子：劉隊點頭前她不願意讓螢幕上的東西被多看一眼。等你能從終端旁領走它、把暗下來才讀得到的讀完，再回劉隊把話收乾淨。',
 };
 
 export const ch2ReportConfig: Ch2ReportConfig = {

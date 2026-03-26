@@ -1,7 +1,7 @@
 import type { TwoBlankFillConfig } from '@/components/FloatingFillBlankCore';
 
 /**
- * 第三章章尾：向劉隊報告（5 題雙格填空）
+ * 第三章章尾：向劉隊報告（2 題雙格填空）
  * - 玩法：兩格一次填完 → 一次送出判定（由 ReportFillBlank 實作）
  * - 判定：每格 correctIds 可多組（同精神即可）
  * - 特定 KUSO 錯誤：用 wrongRepliesByChoiceId 給專屬回饋；其餘錯誤走 wrongFallback
@@ -63,201 +63,54 @@ export const ch3ReportFillBlanks: TwoBlankFillConfig[] = [
   {
     id: 'ch3_report_q2',
     sentenceParts: [
-      '整理版 log 的問題，不在它說了什麼，而在它',
-      '了哪些欄位，讓你沒辦法問清楚操作從',
-      '發出。',
+      '三館線索對卷後，光芒影城的技術窗口先找',
+      '；下一步要往維運責任鏈追',
+      '，才能把跨館操作寫進報告。',
     ],
     blank1: {
-      hintLabel: '第一格：整理版 log 做了什麼？',
+      hintLabel: '第一格：光芒影城技術窗口（現場／設備）',
       options: [
-        { id: 'ch3q2_1a', label: '選擇性遺漏', fullText: '選擇性遺漏', x: 0.22, y: 0.18, rotation: -8 },
-        { id: 'ch3q2_1b', label: '刪掉', fullText: '刪掉', x: 0.5, y: 0.14, rotation: 7 },
-        { id: 'ch3q2_1c', label: '剪裁', fullText: '剪裁', x: 0.76, y: 0.2, rotation: -6 },
-        { id: 'ch3q2_1d', label: '漏記', fullText: '漏記', x: 0.3, y: 0.36, rotation: 10 },
-        // KUSO
-        { id: 'ch3q2_1k1', label: '美編排版', fullText: '美編排版', x: 0.2, y: 0.62, rotation: -12 },
-        { id: 'ch3q2_1k2', label: '貼金箔', fullText: '貼金箔', x: 0.52, y: 0.66, rotation: 9 },
-        { id: 'ch3q2_1k3', label: '幫它加濾鏡', fullText: '幫它加濾鏡', x: 0.82, y: 0.6, rotation: -9 },
+        { id: 'ch3q2n_1a', label: '梁以安', fullText: '梁以安', x: 0.24, y: 0.18, rotation: -8 },
+        { id: 'ch3q2n_1b', label: '陳佑誠', fullText: '陳佑誠', x: 0.52, y: 0.14, rotation: 7 },
+        { id: 'ch3q2n_1c', label: '顧乃謙', fullText: '顧乃謙', x: 0.78, y: 0.2, rotation: -6 },
+        { id: 'ch3q2n_1d', label: '林瑞堂', fullText: '林瑞堂', x: 0.3, y: 0.36, rotation: 10 },
+        { id: 'ch3q2n_1e', label: '林子睿', fullText: '林子睿', x: 0.58, y: 0.34, rotation: -9 },
+        { id: 'ch3q2n_1k1', label: '小張', fullText: '小張', x: 0.22, y: 0.6, rotation: -11 },
+        { id: 'ch3q2n_1k2', label: '宋雅甄', fullText: '宋雅甄', x: 0.52, y: 0.64, rotation: 9 },
+        { id: 'ch3q2n_1k3', label: '張景衡', fullText: '張景衡', x: 0.82, y: 0.58, rotation: -8 },
       ],
-      correctIds: ['ch3q2_1a', 'ch3q2_1b', 'ch3q2_1c'],
-      replyOnCorrect: '不是錯誤，是決定：哪些欄位重要、哪些不重要。',
+      correctIds: ['ch3q2n_1a'],
+      replyOnCorrect: '光芒那邊先對現場與設備敘述——把「誰在場」說清楚，才能接維運鏈。',
       wrongRepliesByChoiceId: {
-        ch3q2_1k1: '排版再漂亮也不會讓欄位消失。這不是設計，是挑選。',
-        ch3q2_1k2: '金箔只能讓人相信你很貴，不能讓人相信你很真。',
-        ch3q2_1k3: '濾鏡會改色，這份是改責任。你別把它當修圖。',
+        ch3q2n_1k1: '放映端只照表。你現在要的是能對到系統與責任鏈的人。',
+        ch3q2n_1k2: '品牌在管口徑。報告要寫的是誰能對到技術事實。',
+        ch3q2n_1k3: '他整理的是給外人看的版本；下一步要追的是能簽維運的人。',
       },
     },
     blank2: {
-      hintLabel: '第二格：缺了什麼，才會不知道操作從哪來？',
+      hintLabel: '第二格：維運／跨館鏈上應追的對象',
       options: [
-        { id: 'ch3q2_2a', label: '遠端', fullText: '遠端', x: 0.22, y: 0.2, rotation: -7 },
-        { id: 'ch3q2_2b', label: '本機', fullText: '本機', x: 0.5, y: 0.14, rotation: 8 },
-        { id: 'ch3q2_2c', label: 'IP', fullText: 'IP', x: 0.76, y: 0.22, rotation: -6 },
-        { id: 'ch3q2_2d', label: '來源', fullText: '來源', x: 0.3, y: 0.36, rotation: 11 },
-        // KUSO
-        { id: 'ch3q2_2k1', label: '宇宙訊號', fullText: '宇宙訊號', x: 0.2, y: 0.63, rotation: -12 },
-        { id: 'ch3q2_2k2', label: '風向', fullText: '風向', x: 0.52, y: 0.67, rotation: 10 },
-        { id: 'ch3q2_2k3', label: '靈魂', fullText: '靈魂', x: 0.82, y: 0.62, rotation: -8 },
+        { id: 'ch3q2n_2a', label: '陳佑誠', fullText: '陳佑誠', x: 0.24, y: 0.18, rotation: -7 },
+        { id: 'ch3q2n_2b', label: '梁以安', fullText: '梁以安', x: 0.52, y: 0.14, rotation: 8 },
+        { id: 'ch3q2n_2c', label: '高文傑', fullText: '高文傑', x: 0.78, y: 0.2, rotation: -6 },
+        { id: 'ch3q2n_2d', label: '周姊', fullText: '周姊', x: 0.3, y: 0.36, rotation: 11 },
+        { id: 'ch3q2n_2e', label: '阿順', fullText: '阿順', x: 0.58, y: 0.32, rotation: -8 },
+        { id: 'ch3q2n_2k1', label: '劉隊', fullText: '劉隊', x: 0.2, y: 0.62, rotation: -12 },
+        { id: 'ch3q2n_2k2', label: '記者', fullText: '記者', x: 0.52, y: 0.66, rotation: 10 },
+        { id: 'ch3q2n_2k3', label: '股東', fullText: '股東', x: 0.82, y: 0.6, rotation: -9 },
       ],
-      correctIds: ['ch3q2_2a', 'ch3q2_2b', 'ch3q2_2c', 'ch3q2_2d'],
-      replyOnCorrect: '缺的不是「幾欄」，是剛好能讓你問清楚來源的那一欄。',
+      correctIds: ['ch3q2n_2a'],
+      replyOnCorrect: '維運鏈上把回報與漏洞接起來的人——才是能把「跨館」寫成可追責句子的人。',
       wrongRepliesByChoiceId: {
-        ch3q2_2k1: '宇宙訊號不會被刪欄位。被刪的是能追到人的證據。',
-        ch3q2_2k3: '帳號在場不代表人也在場。靈魂更不是欄位。',
+        ch3q2n_2k1: '劉隊在等你把名字填對。你先把鏈上的人對齊。',
+        ch3q2n_2k2: '媒體不是責任鏈的一環。你追的是能簽字、能停損的人。',
       },
     },
     bothCorrectDialogue: {
-      kk: 'log 不是沒寫，是寫到你問不了「從哪裡」。這種缺口，是設計。',
-      liu: '目前能寫的是「紀錄不完整」。你把缺的欄位講清楚，我們才有下一步。',
+      kk: '一個對現場，一個對鏈。三館這條線，要這樣寫才能往下鑽。',
+      liu: '行。下一步我會把光芒與維運兩邊的名字對進流程表。',
     },
-    wrongFallback: '整理版最可怕的不是它錯，是它剛好讓你追不到來源。想想：哪一欄能回答「從哪裡操作」。',
-  },
-  {
-    id: 'ch3_report_q3',
-    sentenceParts: [
-      '城市 W 與光芒 R 在同一插件版本序列，這不是',
-      '，而是有人在兩館之間具備',
-      '。',
-    ],
-    blank1: {
-      hintLabel: '第一格：這不是什麼？',
-      options: [
-        { id: 'ch3q3_1a', label: '單點故障', fullText: '單點故障', x: 0.22, y: 0.18, rotation: -8 },
-        { id: 'ch3q3_1b', label: '偶發', fullText: '偶發', x: 0.5, y: 0.14, rotation: 7 },
-        { id: 'ch3q3_1c', label: '巧合', fullText: '巧合', x: 0.76, y: 0.2, rotation: -6 },
-        // KUSO
-        { id: 'ch3q3_1k1', label: '命運安排', fullText: '命運安排', x: 0.2, y: 0.62, rotation: -12 },
-        { id: 'ch3q3_1k2', label: '水逆', fullText: '水逆', x: 0.52, y: 0.66, rotation: 9 },
-        { id: 'ch3q3_1k3', label: '玄學', fullText: '玄學', x: 0.82, y: 0.6, rotation: -9 },
-      ],
-      correctIds: ['ch3q3_1a', 'ch3q3_1b', 'ch3q3_1c'],
-      replyOnCorrect: '版本序列不是自己長出來的。這不是偶然。',
-      wrongRepliesByChoiceId: {
-        ch3q3_1k1: '命運不會把兩館的版本更新排到 15 分鐘內。那是人手。',
-        ch3q3_1k2: '水逆最多讓人心情差，這種同步讓人睡不好。',
-      },
-    },
-    blank2: {
-      hintLabel: '第二格：這代表對兩館都有什麼？',
-      options: [
-        { id: 'ch3q3_2a', label: '存取權', fullText: '存取權', x: 0.24, y: 0.16, rotation: -7 },
-        { id: 'ch3q3_2b', label: '權限', fullText: '權限', x: 0.52, y: 0.12, rotation: 9 },
-        { id: 'ch3q3_2c', label: '操作入口', fullText: '操作入口', x: 0.78, y: 0.18, rotation: -6 },
-        { id: 'ch3q3_2d', label: '通道', fullText: '通道', x: 0.28, y: 0.34, rotation: 10 },
-        // KUSO
-        { id: 'ch3q3_2k1', label: 'VIP 通行證', fullText: 'VIP 通行證', x: 0.2, y: 0.63, rotation: -11 },
-        { id: 'ch3q3_2k2', label: '人脈', fullText: '人脈', x: 0.52, y: 0.67, rotation: 10 },
-        { id: 'ch3q3_2k3', label: '氣場', fullText: '氣場', x: 0.82, y: 0.62, rotation: -8 },
-      ],
-      correctIds: ['ch3q3_2a', 'ch3q3_2b', 'ch3q3_2c', 'ch3q3_2d'],
-      replyOnCorrect: '能跨館動的不是「熟悉」，是權限與入口。',
-      wrongRepliesByChoiceId: {
-        ch3q3_2k3: '氣場再強也開不了面板。能開面板的叫權限。',
-      },
-    },
-    bothCorrectDialogue: {
-      kk: '跨館同步不是故障，是有人知道兩邊會一起響，然後讓它一起響。',
-      liu: '這條可以寫成「疑似跨館權限或通道存在」。再往下，就要追到誰握著那把鑰匙。',
-    },
-    wrongFallback: '版本序列的同步不是巧合。想想：誰能同時在兩館動手？那代表什麼權限或通道存在？',
-  },
-  {
-    id: 'ch3_report_q4',
-    sentenceParts: [
-      '品牌話術把災難說成瑕疵：一間出事是',
-      '，三間被聯想就變成',
-      '。',
-    ],
-    blank1: {
-      hintLabel: '第一格：一間出事被說成什麼？',
-      options: [
-        { id: 'ch3q4_1a', label: '事故', fullText: '事故', x: 0.22, y: 0.18, rotation: -8 },
-        { id: 'ch3q4_1b', label: '個案', fullText: '個案', x: 0.5, y: 0.14, rotation: 7 },
-        { id: 'ch3q4_1c', label: '瑕疵', fullText: '瑕疵', x: 0.76, y: 0.2, rotation: -6 },
-        // KUSO
-        { id: 'ch3q4_1k1', label: '小插曲', fullText: '小插曲', x: 0.2, y: 0.62, rotation: -12 },
-        { id: 'ch3q4_1k2', label: '彩蛋', fullText: '彩蛋', x: 0.52, y: 0.66, rotation: 9 },
-        { id: 'ch3q4_1k3', label: '驚喜活動', fullText: '驚喜活動', x: 0.82, y: 0.6, rotation: -9 },
-      ],
-      correctIds: ['ch3q4_1a', 'ch3q4_1b', 'ch3q4_1c'],
-      replyOnCorrect: '語言會把事情變小。品牌最擅長的就是這件事。',
-      wrongRepliesByChoiceId: {
-        ch3q4_1k2: '彩蛋通常讓人開心。這個彩蛋讓人去醫院。',
-        ch3q4_1k3: '驚喜活動不會附帶封鎖線。',
-      },
-    },
-    blank2: {
-      hintLabel: '第二格：三間一起被聯想，會變成什麼？',
-      options: [
-        { id: 'ch3q4_2a', label: '品牌問題', fullText: '品牌問題', x: 0.22, y: 0.2, rotation: -7 },
-        { id: 'ch3q4_2b', label: '系統性風險', fullText: '系統性風險', x: 0.52, y: 0.14, rotation: 8 },
-        { id: 'ch3q4_2c', label: '結構問題', fullText: '結構問題', x: 0.78, y: 0.22, rotation: -6 },
-        // KUSO
-        { id: 'ch3q4_2k1', label: '熱搜', fullText: '熱搜', x: 0.2, y: 0.63, rotation: -11 },
-        { id: 'ch3q4_2k2', label: '社群梗圖', fullText: '社群梗圖', x: 0.52, y: 0.67, rotation: 10 },
-        { id: 'ch3q4_2k3', label: '年度迷因', fullText: '年度迷因', x: 0.82, y: 0.62, rotation: -8 },
-      ],
-      correctIds: ['ch3q4_2a', 'ch3q4_2b', 'ch3q4_2c'],
-      replyOnCorrect: '品牌怕的不是單點，怕的是它看起來像結構。',
-      wrongRepliesByChoiceId: {
-        ch3q4_2k1: '熱搜只是結果。品牌怕的是原因被串起來。',
-        ch3q4_2k2: '梗圖傷形象，但系統性風險會傷整個結算。',
-      },
-    },
-    bothCorrectDialogue: {
-      kk: '他們不是在否認事實，是在管理語氣。讓你說不出口「系統」。',
-      liu: '這段我會寫成「對外口徑傾向單點化」。但你要我寫進去的，是那個口徑在保什麼。',
-    },
-    wrongFallback: '品牌話術的核心不是內容，是把「結構」拆成「個案」。想想他們最怕哪個詞被放大。',
-  },
-  {
-    id: 'ch3_report_q5',
-    sentenceParts: [
-      '顧乃謙說：要整理版，今天就能',
-      '；要原始檔，今晚很多人睡不',
-      '。',
-    ],
-    blank1: {
-      hintLabel: '第一格：整理版帶來什麼？',
-      options: [
-        { id: 'ch3q5_1a', label: '結案', fullText: '結案', x: 0.22, y: 0.18, rotation: -8 },
-        { id: 'ch3q5_1b', label: '收束', fullText: '收束', x: 0.5, y: 0.14, rotation: 7 },
-        { id: 'ch3q5_1c', label: '交代', fullText: '交代', x: 0.76, y: 0.2, rotation: -6 },
-        // KUSO
-        { id: 'ch3q5_1k1', label: '圓滿大結局', fullText: '圓滿大結局', x: 0.2, y: 0.62, rotation: -12 },
-        { id: 'ch3q5_1k2', label: '感動收尾', fullText: '感動收尾', x: 0.52, y: 0.66, rotation: 9 },
-        { id: 'ch3q5_1k3', label: '最佳剪輯獎', fullText: '最佳剪輯獎', x: 0.82, y: 0.6, rotation: -9 },
-      ],
-      correctIds: ['ch3q5_1a', 'ch3q5_1b', 'ch3q5_1c'],
-      replyOnCorrect: '整理版的功能不是找真相，是讓事情可以被交代。',
-      wrongRepliesByChoiceId: {
-        ch3q5_1k1: '圓滿只存在於稿子裡。案件要的是能追的欄位。',
-        ch3q5_1k3: '剪輯獎是電影的，欄位被剪是案件的。',
-      },
-    },
-    blank2: {
-      hintLabel: '第二格：原始檔會讓很多人睡不什麼？',
-      options: [
-        { id: 'ch3q5_2a', label: '好', fullText: '好', x: 0.22, y: 0.2, rotation: -7 },
-        { id: 'ch3q5_2b', label: '著', fullText: '著', x: 0.52, y: 0.14, rotation: 8 },
-        { id: 'ch3q5_2c', label: '安穩', fullText: '安穩', x: 0.78, y: 0.22, rotation: -6 },
-        // KUSO
-        { id: 'ch3q5_2k1', label: '到天亮', fullText: '到天亮', x: 0.2, y: 0.63, rotation: -11 },
-        { id: 'ch3q5_2k2', label: '像嬰兒', fullText: '像嬰兒', x: 0.52, y: 0.67, rotation: 10 },
-        { id: 'ch3q5_2k3', label: '得體', fullText: '得體', x: 0.82, y: 0.62, rotation: -8 },
-      ],
-      correctIds: ['ch3q5_2a', 'ch3q5_2b', 'ch3q5_2c'],
-      replyOnCorrect: '原始檔會讓人睡不好，是因為它會把人從流程裡叫出來。',
-      wrongRepliesByChoiceId: {
-        ch3q5_2k2: '像嬰兒睡覺的前提是你沒做過需要被追的事。',
-        ch3q5_2k3: '得體是公關的字。原始檔追的是不體面。',
-      },
-    },
-    bothCorrectDialogue: {
-      kk: '整理版能讓今天結束；原始檔會讓明天開始追。差別不在檔案，在人。',
-      liu: '好。你把「整理版」跟「原始檔」的差別說出來了。我們接下來就要找誰有能力把差別藏起來。',
-    },
-    wrongFallback: '顧乃謙那句話的核心是選擇：要快、要能交代；或要原始、要能追責。',
+    wrongFallback: '對卷不是背人名，是對責任鏈。想想：誰能對到光芒現場、誰能對到跨館維運。',
   },
 ];
 

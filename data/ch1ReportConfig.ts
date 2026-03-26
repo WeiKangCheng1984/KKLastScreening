@@ -12,11 +12,13 @@ export interface Ch1ReportTimelineConfig {
 
 export interface Ch1ReportAttitudeConfig {
   attitudeFillBlanks: TwoBlankFillConfig[];
-  closingInferenceByDimension: {
-    procedure_insight: string;
-    human_insight: string;
-    evidence_insight: string;
-  };
+  /** 章尾 overlay 結語（單一版本，不依洞察加權） */
+  closingInference: string;
+  /** 第一章態度四選一（對話選項 id）→ 選後接續台詞 */
+  attitudeFollowUpByChoiceId: Record<
+    'ch1_attitude_procedure' | 'ch1_attitude_evidence' | 'ch1_attitude_human' | 'ch1_attitude_both',
+    string
+  >;
 }
 
 export interface Ch1ReportConfig {
@@ -370,13 +372,17 @@ export const ch1ReportConfig: Ch1ReportConfig = {
   },
   attitude: {
     attitudeFillBlanks: ch1ReportFillBlanks,
-    closingInferenceByDimension: {
-      procedure_insight:
+    closingInference:
+      '兇手不是在黑暗裡殺人，他是在規定的黑暗裡殺人。',
+    attitudeFollowUpByChoiceId: {
+      ch1_attitude_procedure:
         '兇手不是在黑暗裡殺人，他是在規定的黑暗裡殺人。',
-      human_insight:
-        '他怕的不是兇手，是上面那張看不見的臉。恐懼會替兇手擦地板。',
-      evidence_insight:
+      ch1_attitude_evidence:
         '官腔很滑，但官腔擋不住痕跡。找一個他沒想到的小東西，他就會破。',
+      ch1_attitude_human:
+        '他怕的不是兇手，是上面那張看不見的臉。恐懼會替兇手擦地板。',
+      ch1_attitude_both:
+        '規定、痕跡、恐懼——三條線都收在同一個缺口；你選哪條當主線，劉隊都會讓你把報告寫完。',
     },
   },
 };

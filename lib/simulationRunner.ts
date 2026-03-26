@@ -54,7 +54,6 @@ export interface SimResult {
   steps: SimStep[];
   finalFlags: Record<string, any>;
   finalInventory: string[];
-  finalInsights: { procedure_insight: number; human_insight: number; evidence_insight: number };
   ending: string;
   endingLabel: string;
   errors: string[];
@@ -632,11 +631,6 @@ export class SimulationRunner {
       steps,
       finalFlags: { ...finalState.flags },
       finalInventory: [...finalState.inventory],
-      finalInsights: {
-        procedure_insight: finalState.insights?.procedure_insight ?? 0,
-        human_insight: finalState.insights?.human_insight ?? 0,
-        evidence_insight: finalState.insights?.evidence_insight ?? 0,
-      },
       ending,
       endingLabel,
       errors,
@@ -800,7 +794,7 @@ export class SimulationRunner {
     // 設定任務旗標
     engine.applyEffect({ type: 'setFlag', flag: `${chId}_task_from_liu`, value: true });
 
-    // 補足互動紀錄（ch2）
+    // 補足互動紀錄（ch2）與車內敏感門檻旗標（與 chapterBehaviourConfigs 一致）
     if (sceneId === 'scene_ch2_asu_desktop') {
       const hotspots = [
         'hotspot_car_unknown_chat',
@@ -816,6 +810,14 @@ export class SimulationRunner {
           engine.getState().interactions.push(h);
         }
       });
+      (
+        [
+          'ch2_car_unknown_viewed',
+          'ch2_car_notepad_viewed',
+          'ch2_car_recording_viewed',
+          'ch2_car_location_viewed',
+        ] as const
+      ).forEach((f) => engine.applyEffect({ type: 'setFlag', flag: f, value: true }));
     }
 
     // 補足 D7 選擇（ch6 press_corridor）

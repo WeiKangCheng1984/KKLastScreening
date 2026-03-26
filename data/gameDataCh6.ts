@@ -13,7 +13,7 @@ const items: Record<string, Item> = {
       '放映廳的燈光、廣播、逃生動線在本次事故中的時序記錄：\n\n廣播晚於燈光 11 秒；逃生指示燈在燈光切換後 4 秒才亮起；面板記錄了一次「手動覆蓋自動序列」的操作指令。\n\n這個序列，和第二起事故完全相同。\n不只是相同的版本，是相同的操作邏輯。',
     svgImage: '/svg/items/blackout_sequence.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_screening_panel_trace: {
     id: 'item_screening_panel_trace',
@@ -22,7 +22,7 @@ const items: Record<string, Item> = {
       '面板內部的操作 log（非整理版）：\n\n操作時間：正式放映開始後 47 分鐘\n操作指令：手動覆蓋燈控序列\n觸發來源：遠端連線（節點識別碼存在但無法解析）\n\n顧乃謙說：「遠端連線有節點識別碼，代表原始 log 應該有——如果中控室那份還在的話。」',
     svgImage: '/svg/items/screening_panel_trace.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 
   // 場景二：中控室
@@ -30,7 +30,7 @@ const items: Record<string, Item> = {
     id: 'item_raw_log_archive',
     name: '中控室原始 log 存檔',
     description:
-      '中控室伺服器裡還沒有被覆蓋的原始 log。\n\n欄位完整：操作來源 IP、失敗登入嘗試、遠端節點完整識別碼、操作前原始值——全在。\n\n顧乃謙說：「拿到這份，整理版被剪裁的部分就能完整比對。」\n阿蘇說：「現在不存，等下就只剩版本。」\n\n這份檔案，是真相結局與其他結局的分水嶺。',
+      '中控室伺服器裡還沒有被覆蓋的原始 log。\n\n欄位完整：操作來源 IP、失敗登入嘗試、遠端節點完整識別碼、操作前原始值——全在。\n\n顧乃謙說：「拿到這份，整理版被剪裁的部分就能完整比對。」\n阿蘇說：「現在不存，等下就只剩版本。」\n\n這份檔案，是真相結局與其他結局的分水嶺。\n\n【事故時序】廣播晚燈 11 秒、逃生燈延遲 4 秒、「手動覆蓋自動序列」——與第二起事故同邏輯再執行一次。\n\n【面板遠端】放映後 47 分鐘手動覆蓋燈控，節點識別碼存在；完整欄位只會留在 raw。\n\n【門禁】事故前 6 分鐘斷線、事故後 2 分鐘重連——有人進出卻無身分紀錄，需熟門禁死角與時機。',
     svgImage: '/svg/items/raw_log_archive.svg',
     svgSize: 'medium',
     collectible: true,
@@ -42,7 +42,7 @@ const items: Record<string, Item> = {
       '中控室附近的門禁記錄在事故發生時出現一次斷線後重連。\n\n斷線時間：事故前 6 分鐘\n重連時間：事故後 2 分鐘\n這段時間，有人進出過這個區域，但門禁沒有記錄到身分。\n\n阿蘇說：「6 分鐘是準備，2 分鐘是離場。這個操作需要對現場很熟。」',
     svgImage: '/svg/items/door_access_anomaly.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 
   // 場景三：記者會前廊
@@ -53,13 +53,13 @@ const items: Record<string, Item> = {
       '宋雅甄準備給記者會的發言稿初稿：\n\n第一段：「本公司對此次意外深感遺憾，已啟動全面系統檢查……」\n第二段：「相關責任人員目前配合警方調查……」\n第三段：「公司將確保此類事件不再發生……」\n\n「相關責任人員」這個詞被用了三次，但沒有一次接著名字。',
     svgImage: '/svg/items/press_speech_draft.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_zhang_edited_brief: {
     id: 'item_zhang_edited_brief',
     name: '張景衡修過的說帖',
     description:
-      '張景衡把宋雅甄的初稿修過一遍，對比版本：\n\n改動 1：「系統故障」取代「操作異常」\n改動 2：刪除了「遠端操作存在可能性」這整句話\n改動 3：「高文傑配合調查中」→「技術維護人員配合調查中」\n\n張景衡說：「先發出去的那份，就會比較像真的。」\n\n他改掉的那些字，就是你花了五章找到的那些字。',
+      '張景衡把宋雅甄的初稿修過一遍，對比版本：\n\n改動 1：「系統故障」取代「操作異常」\n改動 2：刪除了「遠端操作存在可能性」這整句話\n改動 3：「高文傑配合調查中」→「技術維護人員配合調查中」\n\n張景衡說：「先發出去的那份，就會比較像真的。」\n\n他改掉的那些字，就是你花了五章找到的那些字。\n\n【發言稿底色】官方稿三段皆被動語氣、「深感遺憾／啟動調查／確保不再」；「相關責任人員」出現三次卻從不跟名字——主語先被抽空，才好接公關修字。',
     svgImage: '/svg/items/zhang_edited_brief.svg',
     svgSize: 'medium',
     collectible: true,
@@ -230,7 +230,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細看這次事故的時序記錄。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_blackout_sequence' },
           {
             type: 'showDialog',
             dialog: {
@@ -248,7 +247,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細看面板裡的操作記錄。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_screening_panel_trace' },
           {
             type: 'showDialog',
             dialog: {
@@ -407,7 +405,6 @@ const scenes: Record<string, Scene> = {
                     { type: 'setFlag', flag: 'ch6_d7_done', value: true },
                     { type: 'setFlag', flag: 'ch6_raw_log_secured', value: true },
                   ],
-                  insightEffects: [{ target: 'evidence_insight', delta: 2 }],
                 },
                 {
                   id: 'ch6_d7_rescue',
@@ -416,7 +413,6 @@ const scenes: Record<string, Scene> = {
                     { type: 'setFlag', flag: 'ch6_d7_rescue', value: true },
                     { type: 'setFlag', flag: 'ch6_d7_done', value: true },
                   ],
-                  insightEffects: [{ target: 'human_insight', delta: 2 }],
                 },
                 {
                   id: 'ch6_d7_chase',
@@ -425,7 +421,6 @@ const scenes: Record<string, Scene> = {
                     { type: 'setFlag', flag: 'ch6_d7_chase', value: true },
                     { type: 'setFlag', flag: 'ch6_d7_done', value: true },
                   ],
-                  insightEffects: [{ target: 'procedure_insight', delta: 2 }],
                 },
               ],
             },
@@ -440,7 +435,6 @@ const scenes: Record<string, Scene> = {
         description: '閱讀門禁的斷線重連記錄。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_door_access_anomaly' },
           {
             type: 'showDialog',
             dialog: {
@@ -621,7 +615,6 @@ const scenes: Record<string, Scene> = {
         description: '閱讀官方版本的發言稿。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_press_speech_draft' },
           {
             type: 'showDialog',
             dialog: {
@@ -696,13 +689,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'lin_f1_q1',
           label: '三個人的代價——他們算不算那個「理由」？',
           effects: [{ type: 'setFlag', flag: 'ch6_lin_f1_q1', value: true }],
-          insightEffects: [{ target: 'human_insight', delta: 2 }],
         },
         {
           id: 'lin_f1_q2',
           label: '那份風險回報——你決定不批，就是在等這個理由成熟？',
           effects: [{ type: 'setFlag', flag: 'ch6_lin_f1_q2', value: true }],
-          insightEffects: [{ target: 'evidence_insight', delta: 2 }],
         },
       ],
       next: (state: GameState): string | null => {
@@ -752,13 +743,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'lin_f2_q1',
           label: '「你不知道是誰利用的」——這句話你相信自己嗎？',
           effects: [{ type: 'setFlag', flag: 'ch6_lin_f2_q1', value: true }],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
         {
           id: 'lin_f2_q2',
           label: '插件頂層授權在你那裡——要利用那個洞，需要你點頭或你的沉默。',
           effects: [{ type: 'setFlag', flag: 'ch6_lin_f2_q2', value: true }],
-          insightEffects: [{ target: 'procedure_insight', delta: 2 }],
         },
       ],
       next: (state: GameState): string | null => {

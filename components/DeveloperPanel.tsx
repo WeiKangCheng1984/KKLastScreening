@@ -7,8 +7,20 @@ import { X, Code, MapPin, FileText } from 'lucide-react';
 interface DeveloperPanelProps {
   onClose: () => void;
   onDisableDevMode?: () => void;
-  /** 直接開啟第二章章尾（雙格填空＋手機謎），供本機測試 */
-  onTestCh2Report?: () => void;
+  /** 第一章：設旗標並跳轉至有劉隊頭像場景，測劉隊對話 */
+  onTestCh1LiuReport?: () => void;
+  /** 第一章：重置章尾旗標並開啟章尾 overlay（時間線＋態度填空＋本章印記） */
+  onTestCh1Breakthrough?: () => void;
+  /** 第二章：同上，測劉隊對話 */
+  onTestCh2LiuReport?: () => void;
+  /** 第二章：重置並開啟章尾（填空＋手機謎＋本章印記） */
+  onTestCh2Breakthrough?: () => void;
+  /** 第三章：同上，測劉隊對話 */
+  onTestCh3LiuReport?: () => void;
+  /** 第三章：重置並開啟章尾（兩題填空＋本章印記） */
+  onTestCh3Breakthrough?: () => void;
+  /** 第三章：開啟 log 對照面板 */
+  onTestCh3Compare?: () => void;
   currentChapterId: string;
   currentSceneId: string;
   scenes: Record<string, Scene>;
@@ -18,7 +30,13 @@ interface DeveloperPanelProps {
 export default function DeveloperPanel({
   onClose,
   onDisableDevMode,
-  onTestCh2Report,
+  onTestCh1LiuReport,
+  onTestCh1Breakthrough,
+  onTestCh2LiuReport,
+  onTestCh2Breakthrough,
+  onTestCh3LiuReport,
+  onTestCh3Breakthrough,
+  onTestCh3Compare,
   currentChapterId,
   currentSceneId,
   scenes,
@@ -31,6 +49,15 @@ export default function DeveloperPanel({
     router.push(`/play/${chapterId}/${sceneId}`);
     onClose();
   };
+
+  const hasChapterTests =
+    onTestCh1LiuReport ||
+    onTestCh1Breakthrough ||
+    onTestCh2LiuReport ||
+    onTestCh2Breakthrough ||
+    onTestCh3LiuReport ||
+    onTestCh3Breakthrough ||
+    onTestCh3Compare;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -65,7 +92,7 @@ export default function DeveloperPanel({
 
         <div className="space-y-4">
           {Object.values(chapters).map((chapter) => {
-            const chapterScenes = allScenes.filter(s => s.chapterId === chapter.id);
+            const chapterScenes = allScenes.filter((s) => s.chapterId === chapter.id);
 
             return (
               <div key={chapter.id} className="border border-dark-border rounded-lg p-4">
@@ -107,25 +134,123 @@ export default function DeveloperPanel({
           })}
         </div>
 
-        {onTestCh2Report && (
+        {hasChapterTests && (
           <div className="mt-6 border border-cyan-800/40 rounded-lg p-4 bg-cyan-950/15">
             <div className="text-sm font-semibold text-cyan-200/90 mb-2 flex items-center gap-2">
               <FileText size={16} />
               章節環節測試
             </div>
             <p className="text-xs text-gray-500 mb-3">
-              會重置第二章報告相關旗標並開啟章尾 overlay（兩題填空 → 手機省電謎）。需已載入遊戲引擎（任意 play 場景）。
+              需已載入遊戲引擎（任意 play 場景）。「與劉隊報告」會設旗標、存檔並跳場景；「破關章尾」會重置旗標並開啟章尾 overlay。
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                onTestCh2Report();
-                onClose();
-              }}
-              className="w-full px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors"
-            >
-              第二章：向劉隊報告（填空＋手機）
-            </button>
+
+            {(onTestCh1LiuReport || onTestCh1Breakthrough) && (
+              <div className="mb-4 space-y-2">
+                <div className="text-xs font-semibold text-cyan-300/80">第一章</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {onTestCh1LiuReport && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTestCh1LiuReport();
+                        onClose();
+                      }}
+                      className="px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors"
+                    >
+                      與劉隊報告（跳場景）
+                    </button>
+                  )}
+                  {onTestCh1Breakthrough && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTestCh1Breakthrough();
+                        onClose();
+                      }}
+                      className="px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors"
+                    >
+                      破關報告（章尾）
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {(onTestCh2LiuReport || onTestCh2Breakthrough) && (
+              <div className="mb-4 space-y-2">
+                <div className="text-xs font-semibold text-cyan-300/80">第二章</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {onTestCh2LiuReport && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTestCh2LiuReport();
+                        onClose();
+                      }}
+                      className="px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors"
+                    >
+                      與劉隊報告（跳場景）
+                    </button>
+                  )}
+                  {onTestCh2Breakthrough && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTestCh2Breakthrough();
+                        onClose();
+                      }}
+                      className="px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors"
+                    >
+                      破關報告（章尾）
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {(onTestCh3LiuReport || onTestCh3Breakthrough || onTestCh3Compare) && (
+              <div className="space-y-2">
+                <div className="text-xs font-semibold text-cyan-300/80">第三章</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {onTestCh3LiuReport && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTestCh3LiuReport();
+                        onClose();
+                      }}
+                      className="px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors"
+                    >
+                      與劉隊報告（跳場景）
+                    </button>
+                  )}
+                  {onTestCh3Breakthrough && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTestCh3Breakthrough();
+                        onClose();
+                      }}
+                      className="px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors"
+                    >
+                      破關報告（章尾）
+                    </button>
+                  )}
+                  {onTestCh3Compare && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTestCh3Compare();
+                        onClose();
+                      }}
+                      className="px-4 py-3 rounded-lg text-left bg-cyan-900/30 hover:bg-cyan-800/40 border border-cyan-600/40 text-cyan-100 text-sm font-medium transition-colors sm:col-span-2"
+                    >
+                      log 對照（三下拉）
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -1,4 +1,4 @@
-import { GameState, Scene, Event, Requirement, Effect, Puzzle, Item, DialogChoice, PlayerChoice, NpcDialogNode, PreferenceEffect, RandomDialog, Npc, Dialog, InsightsState, InsightEffect } from '@/types/game';
+import { GameState, Scene, Event, Requirement, Effect, Puzzle, Item, DialogChoice, PlayerChoice, NpcDialogNode, PreferenceEffect, RandomDialog, Npc, Dialog } from '@/types/game';
 import { chapters } from '@/data/chapters';
 
 export class GameEngine {
@@ -31,11 +31,6 @@ export class GameEngine {
         question_system: 0,
         avoid_early_conviction: 0,
       },
-      insights: {
-        procedure_insight: 0,
-        human_insight: 0,
-        evidence_insight: 0,
-      },
     };
     
     // 確保新字段存在（向後兼容）
@@ -55,13 +50,6 @@ export class GameEngine {
         weight_escape_route: 0,
         question_system: 0,
         avoid_early_conviction: 0,
-      };
-    }
-    if (!this.state.insights) {
-      this.state.insights = {
-        procedure_insight: 0,
-        human_insight: 0,
-        evidence_insight: 0,
       };
     }
     if (!this.state.reasoningAnswers) {
@@ -89,6 +77,39 @@ export class GameEngine {
       ch2Flags.ch2_reveal_liang_director_memo !== true
     ) {
       ch2Flags.ch2_reveal_liang_director_memo = true;
+    }
+
+    // ch3～ch6：舊存檔曾將多個敘事線索 addItem 進背包；精簡後每章僅保留少數 collectible
+    const LEGACY_INVENTORY_IDS_TO_STRIP = new Set([
+      // ch3
+      'item_whiteboard_rewrite',
+      'item_promo_wall_text',
+      'item_scene_control_sheet',
+      'item_press_draft',
+      'item_brand_monitor_report',
+      'item_cross_venue_sync',
+      'item_network_device_label',
+      'item_remote_login_sheet',
+      // ch4
+      'item_lighting_time_diff',
+      'item_stairwell_wear_trace',
+      'item_monitor_blind_stair',
+      'item_plugin_same_version',
+      'item_crowd_timing_log',
+      'item_panel_operator_trace',
+      // ch5
+      'item_gao_login_gap',
+      'item_log_raw_diff',
+      'item_lin_call_transcript',
+      'item_unknown_msg_style',
+      // ch6
+      'item_blackout_sequence',
+      'item_screening_panel_trace',
+      'item_door_access_anomaly',
+      'item_press_speech_draft',
+    ]);
+    if (this.state.inventory?.length) {
+      this.state.inventory = this.state.inventory.filter((id) => !LEGACY_INVENTORY_IDS_TO_STRIP.has(id));
     }
   }
 
@@ -205,16 +226,6 @@ export class GameEngine {
       case 'startNpcDialog':
         if (effect.dialogId) {
           this.startNpcDialog(effect.dialogId);
-        }
-        break;
-      case 'addInsight':
-        if (effect.insightTarget != null && effect.insightDelta !== undefined) {
-          if (!this.state.insights) {
-            this.state.insights = { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
-          }
-          const insights = this.state.insights;
-          const current = insights[effect.insightTarget] ?? 0;
-          insights[effect.insightTarget] = Math.max(0, current + effect.insightDelta);
         }
         break;
     }
@@ -557,18 +568,6 @@ export class GameEngine {
       choice.effects.forEach(effect => this.applyEffect(effect));
     }
 
-    if (choice.insightEffects?.length) {
-      if (!this.state.insights) {
-        this.state.insights = { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
-      }
-      const insights = this.state.insights;
-      choice.insightEffects.forEach(insightEffect => {
-        if (insightEffect.target in insights) {
-          const current = insights[insightEffect.target] ?? 0;
-          insights[insightEffect.target] = Math.max(0, current + insightEffect.delta);
-        }
-      });
-    }
     this.notify();
   }
 
@@ -676,20 +675,6 @@ export class GameEngine {
         if (prefEffect.target in prefs) {
           const currentValue = prefs[prefEffect.target];
           prefs[prefEffect.target] = Math.max(0, Math.min(3, currentValue + prefEffect.delta));
-        }
-      });
-    }
-
-    // 應用 KK 洞察三維度影響
-    if (choice.insightEffects?.length) {
-      if (!this.state.insights) {
-        this.state.insights = { procedure_insight: 0, human_insight: 0, evidence_insight: 0 };
-      }
-      const insights = this.state.insights;
-      choice.insightEffects.forEach(insightEffect => {
-        if (insightEffect.target in insights) {
-          const current = insights[insightEffect.target] ?? 0;
-          insights[insightEffect.target] = Math.max(0, current + insightEffect.delta);
         }
       });
     }

@@ -134,20 +134,8 @@ export default function Ch1ReportEditor({
 
   const closingText = useMemo(() => {
     if (!showClosingView) return '';
-    const st = engine.getState();
-    const insights = st.insights ?? {
-      procedure_insight: 0,
-      human_insight: 0,
-      evidence_insight: 0,
-    };
-    const p = insights.procedure_insight ?? 0;
-    const h = insights.human_insight ?? 0;
-    const e = insights.evidence_insight ?? 0;
-    const maxVal = Math.max(p, h, e);
-    const key =
-      maxVal === p ? 'procedure_insight' : maxVal === e ? 'evidence_insight' : 'human_insight';
-    return config.attitude.closingInferenceByDimension[key];
-  }, [showClosingView, engine, config.attitude.closingInferenceByDimension]);
+    return config.attitude.closingInference;
+  }, [showClosingView, config.attitude.closingInference]);
 
   return (
     <>

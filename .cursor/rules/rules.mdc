@@ -54,7 +54,7 @@ alwaysApply: true
 
 - **檔案**：`lib/gameEngine.ts`
 - **資料注入**：Engine 不直接 import 章節資料，透過 `loadChapterData()` 合併注入。
-- **狀態**：`GameState` 含 `flags / inventory / interactions / score / weights / insights / preferences / reasoningAnswers / npcCasualTalkCount …`
+- **狀態**：`GameState` 含 `flags / inventory / interactions / score / weights / preferences / reasoningAnswers / npcCasualTalkCount …`
 - **強約束**：所有章節劇情/互動新增，優先寫進 `data/gameDataChX.ts`（scene.hotspotEventMap + events/effects 或 npcDialogs），不要把章節硬規則塞進 page.tsx。
 
 ---
@@ -102,7 +102,7 @@ alwaysApply: true
 
 ### 第一章：向劉隊報告（時間線翻牌 + 5 題雙格填空）
 - **入口**：`components/Ch1ReportEditor.tsx`
-- **配置**：`data/ch1ReportConfig.ts`（`timeline`：`crimeTimeRange` + `errorMessages`；`attitude.attitudeFillBlanks` → `ch1ReportFillBlanks`；`closingInferenceByDimension`；`CH1_REPORT_DEFAULT_EVIDENCE_IDS` 僅供開 overlay 時寫入 `ch1_report_evidence` 旗標，無證據桌 UI）
+- **配置**：`data/ch1ReportConfig.ts`（`timeline`：`crimeTimeRange` + `errorMessages`；`attitude.attitudeFillBlanks` → `ch1ReportFillBlanks`；`closingInference`；`attitudeFollowUpByChoiceId`；`CH1_REPORT_DEFAULT_EVIDENCE_IDS` 僅供開 overlay 時寫入 `ch1_report_evidence` 旗標，無證據桌 UI）
 - **題型元件**：`components/ReportFillBlank.tsx`
 - **重要規則**：
   - 一次必須完成 **5 題**（index 0~4）
@@ -129,8 +129,7 @@ alwaysApply: true
 - **回饋原則（寫法一致）**：
   - 不用紅字說「錯」，而是「劉隊一句冷的」+「KK 旁白一句硬的」，提示玩家**缺了哪種支點**
   - 容許玩家反覆嘗試，但每次錯誤回饋要「有資訊」：缺時間？缺權限？缺現場痕跡？缺動機？
-- **洞察/偏好加權（選配）**：
-  - 完成時依玩家偏向（流程/證據/人心）給 `insights` 小幅加成，並用 closing text 收尾（類似 ch1 的三維度結語）
+- **章尾圖**：第 1～5 章各一張（`data/chapterClosingRewards.ts`）；第六章依 `Ch6EndingId` 四結局各一張，無結局 id 時後備 `reward_ch6_default`／`reward_placeholder`。圖檔為 **直式 4:3**（寬:高 = 3:4，建議 **540×720** WebP，`public/images/closing/`）。
 
 ---
 
@@ -233,6 +232,8 @@ alwaysApply: true
   - 少量進背包（例如票根、黑色碎片）
   - 其餘採「檢視即發現」：事件只設 flag，不一定 addItem
   - 第一章章尾**無**證據桌互動；現場線索仍以場景事件旗標／背包為準（見 `gameDataCh1.ts`）
+- **第三章**：僅 `item_filtered_log` 進背包，其餘線索為檢視即敘事（見 `gameDataCh3.ts`）。
+- **第四～六章**：各章僅 **2** 個 `collectible`（誤導錨點＋權限錨點），其餘線索為檢視即敘事（見 `gameDataCh4.ts`～`gameDataCh6.ts`）。
 
 ---
 
@@ -272,6 +273,10 @@ alwaysApply: true
 ### 場景背景
 - 540×540、WebP、≤250KB
 - `bg_ch{章}_sc{場}_v{版}.webp`
+
+### 章尾結算圖（本章印記）
+- 直式 4:3（寬:高 = 3:4）、WebP、建議 **540×720**、≤250KB
+- 路徑 `public/images/closing/`；檔名表見 `data/chapterClosingRewards.ts`（`reward_ch1`～`ch5`、`reward_ch6_*` 結局四張、`reward_ch6_default`、`reward_placeholder`）
 
 ### 道具圖
 - 長邊 384（必要才 512）、WebP/PNG、≤80KB（特寫可到 120KB）

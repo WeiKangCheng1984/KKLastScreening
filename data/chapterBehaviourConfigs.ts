@@ -51,7 +51,8 @@ export const sensitiveBranchesByChapter: Record<string, SensitiveBranchConfig[]>
   ch2: [
     {
       npcId: 'npc_asu',
-      pickOneText: '阿蘇看你一眼，像在量你今晚要付多少代價。你只能選一條路把話說穿——另一條就爛在肚子裡。',
+      pickOneText:
+        '阿蘇沒抬頭，只把滑鼠停在螢幕邊緣。你知道她今晚沒打算當好人——你只能選一條路把話捅到底，另一條就永遠別再提。',
       branches: [
         { choiceId: 'asu_branch_1', choiceText: '敘舊：兩年前那件事之後，妳跟我之間那個還沒講完的疙瘩——今晚把它說清楚。', nodeId: 'node_asu_sensitive1_1' },
         { choiceId: 'asu_branch_2', choiceText: '問案：我不要故事，我要技術。這些資料在鑑定上能站到哪裡、哪裡會被人動手腳？', nodeId: 'node_asu_sensitive2_1' },
@@ -154,11 +155,18 @@ export const sensitiveGatesByChapter: Record<string, NpcSensitiveGateConfig[]> =
     {
       npcId: 'npc_asu',
       doneFlag: 'npc_asu_sensitive_done',
-      allowedScenes: ['scene_ch2_asu_desktop'],
-      observedFlags: ['ch2_pc_unknown_viewed', 'ch2_pc_column_viewed', 'ch2_pc_recording_viewed', 'ch2_pc_location_viewed'],
+      /** 敏感線僅在「阿蘇的車裡」開；進度以車內四條主線索檢視計（與終端完整版對應） */
+      allowedScenes: ['scene_ch2_asu_car'],
+      observedFlags: [
+        'ch2_car_unknown_viewed',
+        'ch2_car_notepad_viewed',
+        'ch2_car_recording_viewed',
+        'ch2_car_location_viewed',
+      ],
       minObservedCount: 3,
       casualTalkThreshold: 1,
-      gateText: '阿蘇敲了一下機殼，像在問你：今晚要當記者，還是當共犯。你可以把話往深裡捅一次。',
+      gateText:
+        '阿蘇終於轉過來看你一眼，眼底是熬夜的紅。她像在問：你要不要趁今晚，把那句一直沒說出口的話砸出來。',
       choices: {
         ask: { id: 'asu_sensitive_ask', text: '我想把話問深一點。' },
         skip: { id: 'asu_sensitive_skip', text: '先消化資料，暫時不碰。' },
@@ -259,13 +267,17 @@ export const liuReportFlowByChapter: Record<string, LiuReportFlowConfig> = {
     steps: [
       {
         blockIfMissing: ['npc_asu_sensitive_done'],
-        text: '「先去跟阿蘇把那些話講完。」\n\n「等她把那些東西講清楚，你再回來跟我說一次。」',
+        text:
+          '劉隊：「先去跟阿蘇把話說開。」\n\n' +
+          '「她若還梗著兩年前那件事，你今晚寫什麼都會歪。聽她把技術邊界講清楚，再回來找我。」',
       },
       {
-        text: '「好，來說一次你現在看到的版本。」\n\n「我們把那幾句話排在一起，看它們指向哪裡。」',
+        text:
+          '劉隊：「好，你現在看到的版本——說一次。」\n\n' +
+          '「別急著漂亮，我要聽它們指向同一個人、同一條線。」',
         choices: [
           { id: 'ch2_liu_keep_exploring', text: '我再多看一下現場。' },
-          { id: 'ch2_liu_open_qa_conclusion', text: '我唸你手上的版本。' },
+          { id: 'ch2_liu_open_qa_conclusion', text: '我試著把版本說清楚。' },
         ],
       },
     ],

@@ -10,7 +10,7 @@ const items: Record<string, Item> = {
     id: 'item_suspect_matrix',
     name: '嫌疑矩陣交叉表',
     description:
-      '五人名單的交叉欄位：權限等級、動機方向、關鍵時間點、通聯記錄、在場性。\n\n有意思的地方不在哪一格特別醒目，而在整個矩陣看起來太整齊——像有人在最後統一校過。\n\n高文傑的欄位填得最滿，林子睿的欄位填得最少。',
+      '五人名單的交叉欄位：權限等級、動機方向、關鍵時間點、通聯記錄、在場性。\n\n有意思的地方不在哪一格特別醒目，而在整個矩陣看起來太整齊——像有人在最後統一校過。\n\n高文傑的欄位填得最滿，林子睿的欄位填得最少。\n\n【登入時間差】14 次登入中 3 次「接近」命案時間卻未完全重疊——「接近≠在場」「登入≠操作」；帳號在場不保證操作者本人。\n\n【通話語氣】林子睿慣用「可管理／個案／影響多大」框架；「系統複雜…管理落後」在三起事故後各出現一次。\n\n【Unknown 語感】與公關文件同構：主語消失、「個案」代換結構問題——像有人先把結論寫成可對外說的版本。',
     svgImage: '/svg/items/suspect_matrix.svg',
     svgSize: 'medium',
     collectible: true,
@@ -22,7 +22,7 @@ const items: Record<string, Item> = {
       '高文傑的系統登入紀錄，與第一起命案時間的重疊分析：\n\n共有 14 次登入，其中 3 次的時間點「接近」案發時間，但沒有完全重疊。\n\n「接近」不等於「在場」。「登入」不等於「操作」。\n\n阿蘇說：「登入紀錄只證明帳號在場，不保證靈魂也在場。」',
     svgImage: '/svg/items/gao_login_gap.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 
   // 場景二：技術比對室
@@ -33,13 +33,13 @@ const items: Record<string, Item> = {
       '顧乃謙做出的比對清單，原始 log 有，整理版沒有的欄位：\n\n① 操作來源 IP（無法確認遠端或本地）\n② 失敗登入嘗試（3 次失敗後第 4 次成功）\n③ 遠端節點識別碼（共用帳號的連線來源）\n④ 覆寫前原始值（操作前的初始狀態）\n\n「選擇性遺漏，不是格式問題。」\n\n這四個欄位，剛好能讓案件說清楚誰在哪裡操作。',
     svgImage: '/svg/items/log_raw_diff.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_plugin_permission_tree: {
     id: 'item_plugin_permission_tree',
     name: '插件權限樹',
     description:
-      '顧乃謙拉出的插件授權結構圖。\n\n高文傑的帳號有「執行」權限，沒有「修改插件邏輯」的層級。\n\n能修改插件邏輯、能決定插件怎麼被部署到多館的——那個層級靠近技術長職位。\n\n顧乃謙說：「真正能改插件的人，不需要每次自己登入。」',
+      '顧乃謙拉出的插件授權結構圖。\n\n高文傑的帳號有「執行」權限，沒有「修改插件邏輯」的層級。\n\n能修改插件邏輯、能決定插件怎麼被部署到多館的——那個層級靠近技術長職位。\n\n顧乃謙說：「真正能改插件的人，不需要每次自己登入。」\n\n【整理版缺口】整理版刪去：操作來源 IP、失敗登入、遠端節點識別碼、覆寫前原始值——少這四欄就難以指認「誰在何處操作」；誰能定義哪些欄位不必出現在報告裡，本身就是權限問題。',
     svgImage: '/svg/items/plugin_permission_tree.svg',
     svgSize: 'medium',
     collectible: true,
@@ -53,7 +53,7 @@ const items: Record<string, Item> = {
       '技術部門的通話記錄，林子睿在三起事故前後的幾通電話節錄。\n\n語氣特點：用詞精準，風險被描述得「可管理」，事故被歸類為「個案」。每次都在問「影響多大」，很少問「怎麼避免」。\n\n「系統複雜，不代表陰謀存在。多半只是管理落後。」\n\n這句話說過三次，在三起事故之後各說過一次。',
     svgImage: '/svg/items/lin_call_transcript.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
   item_unknown_msg_style: {
     id: 'item_unknown_msg_style',
@@ -62,7 +62,7 @@ const items: Record<string, Item> = {
       '死者手機裡 Unknown 的訊息措辭，與張景衡公關文件的語感比對：\n\n共同特徵：主動句被動化、責任主語消失、「個案」取代「結構問題」、動詞選用「處理中」而非「未解決」。\n\n更往上追：這種說話框架的來源，可能是一個習慣「定義風險怎麼被說」的人。\n\n林子睿不一定寫了 Unknown 的訊息，但有人替林子睿把話翻成了那種格式。',
     svgImage: '/svg/items/unknown_msg_style.svg',
     svgSize: 'medium',
-    collectible: true,
+    collectible: false,
   },
 };
 
@@ -249,7 +249,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細看高文傑的登入記錄與命案時間差分析。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_gao_login_gap' },
           {
             type: 'showDialog',
             dialog: {
@@ -390,7 +389,6 @@ const scenes: Record<string, Scene> = {
         description: '仔細看整理版與原始版的差異欄位。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_log_raw_diff' },
           {
             type: 'showDialog',
             dialog: {
@@ -550,7 +548,6 @@ const scenes: Record<string, Scene> = {
         description: '閱讀林子睿在三起事故前後的通話記錄節錄。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_lin_call_transcript' },
           {
             type: 'showDialog',
             dialog: {
@@ -568,7 +565,6 @@ const scenes: Record<string, Scene> = {
         description: '閱讀阿蘇整理的語感比對表。',
         requirements: [],
         effects: [
-          { type: 'addItem', itemId: 'item_unknown_msg_style' },
           {
             type: 'showDialog',
             dialog: {
@@ -609,13 +605,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'gao_s1_q1',
           label: '誰用你的帳號登入、你知道嗎？',
           effects: [{ type: 'setFlag', flag: 'ch5_gao_s1_q1', value: true }],
-          insightEffects: [{ target: 'human_insight', delta: 1 }],
         },
         {
           id: 'gao_s1_q2',
           label: '你說你被通知去確認——你確認到什麼？',
           effects: [{ type: 'setFlag', flag: 'ch5_gao_s1_q2', value: true }],
-          insightEffects: [{ target: 'evidence_insight', delta: 1 }],
         },
       ],
       next: (state: GameState): string | null => {
@@ -665,13 +659,11 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           id: 'gao_s2_q1',
           label: '他知道漏洞的存在嗎？',
           effects: [{ type: 'setFlag', flag: 'ch5_gao_s2_q1', value: true }],
-          insightEffects: [{ target: 'procedure_insight', delta: 1 }],
         },
         {
           id: 'gao_s2_q2',
           label: '誰最希望你看起來像答案？',
           effects: [{ type: 'setFlag', flag: 'ch5_gao_s2_q2', value: true }],
-          insightEffects: [{ target: 'human_insight', delta: 2 }],
         },
       ],
       next: (state: GameState): string | null => {

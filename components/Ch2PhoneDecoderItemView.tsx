@@ -12,13 +12,13 @@ export default function Ch2PhoneDecoderItemView({ onSuccess, onClose }: Ch2Phone
   return (
     <div className="rounded-2xl border border-zinc-600/80 bg-zinc-950/90 p-4 shadow-xl">
       <div className="flex items-center justify-between gap-2 mb-3">
-        <p className="text-xs text-zinc-400 tracking-wide">草稿手機（解碼）</p>
+        <p className="text-xs text-zinc-400 tracking-wide">技術組暫扣機 · 螢幕還亮著</p>
         <button
           type="button"
           onClick={onClose}
           className="text-xs text-zinc-500 hover:text-zinc-300 px-2 py-1 rounded border border-zinc-700/80 hover:border-zinc-500"
         >
-          關閉
+          收起
         </button>
       </div>
       <Ch2CrowPhoneRiddle config={ch2ReportConfig.ch2PhoneRiddle} onSuccess={onSuccess} embedded />
