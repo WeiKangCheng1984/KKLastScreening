@@ -3,18 +3,20 @@ import type { TwoBlankFillConfig } from '@/components/FloatingFillBlankCore';
 /**
  * 第二章章尾：向劉隊報告
  * - 雙格填空：`ReportFillBlank`（僅 2 題）
- * - 手機省電謎：`Ch2CrowPhoneRiddle`（電池→省電→顯影→「已讀」確認；關鍵詞於第二輪章尾輸入）
- *
- * 謎底「黑羽」＝專欄／對外稿署名欄慣用筆名；口頭綽號「烏鴉」僅劇情稱呼，非第二輪輸入答案。
+ * - 手機省電謎：`Ch2CrowPhoneRiddle`（電池→省電→顯影→「已讀」確認）
+ * - 第二輪章尾：**烏鴉**（鍵盤）＋ **WRC 三格轉盤**；顯影帶出梁以安導演隱藏訊息線
  */
 
-/** 與 `acceptableAnswers` 比對前使用（trim、全形半形、去空白） */
+/** 與 `acceptablePenNameAnswers` 比對前使用（trim、全形半形、去空白） */
 export function normalizeCh2KeywordAnswer(raw: string): string {
   return raw
     .trim()
     .replace(/[\uFF01-\uFF5E]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
     .replace(/\s+/g, '');
 }
+
+/** 三館代號正解（左→右），與轉盤選取比對 */
+export const ch2TriWheelCorrect = ['W', 'R', 'C'] as const;
 
 /** 假目標：僅本地切換，不觸發過關 */
 export interface Ch2PhoneDecoy {
@@ -35,19 +37,27 @@ export interface Ch2PhoneRiddleConfig {
   deviceScreenTitle: string;
   /** 草稿區：表層（亂碼／混淆字） */
   draftSurfaceLines: string[];
-  /** 草稿區：省電顯影後可讀線索（宜含蓄；不直寫關鍵詞答案） */
+  /** 草稿區：省電顯影後可讀線索（宜含蓄；不直寫謎底字串） */
   draftRevealLines: string[];
   /** 顯影後主按鈕（確認已讀備忘） */
   confirmReadLabel: string;
   /** 按鈕上方一句補充（可選） */
   confirmReadHint?: string;
-  /** 第二輪章尾：關鍵詞輸入標籤 */
-  round2KeywordLabel: string;
-  round2KeywordPlaceholder: string;
-  /** 第二輪關鍵詞與 `acceptableAnswers` 不符時 */
-  round2KeywordWrongHint: string;
-  /** 可接受字詞（第二輪輸入；比對用 `normalizeCh2KeywordAnswer`） */
-  acceptableAnswers: string[];
+  /** 第二輪章尾：筆名輸入 */
+  round2PenNameLabel: string;
+  round2PenNamePlaceholder: string;
+  /** 筆名與 `acceptablePenNameAnswers` 不符時 */
+  round2PenNameWrongHint: string;
+  /** 可接受筆名（比對用 `normalizeCh2KeywordAnswer`） */
+  acceptablePenNameAnswers: string[];
+  /** 筆名對但三館轉盤未對齊時 */
+  round2TriWheelWrongHint: string;
+  /** 左→右三格標籤（教學／無障礙） */
+  triWheelColumns: [string, string, string];
+  /** 每格可選字母（含 W、R、C 與干擾字元） */
+  triWheelAlphabet: string[];
+  /** 正解三元組（通常為 `ch2TriWheelCorrect`） */
+  triWheelCorrect: readonly [string, string, string];
   /** 狀態列電池：開啟省電確認 */
   powerSaveDialogTitle: string;
   powerSaveDialogMessage: string;
@@ -239,25 +249,31 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
   },
 ];
 
+const ch2TriWheelAlphabet = ['W', 'R', 'C', 'A', 'B', 'D', 'M', 'K'];
+
 export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
   deviceScreenTitle: '草稿同步岔路 · 內測',
   draftSurfaceLines: [
-    '◇※＃ 同步岔路 0x7F2A · 佇列在風裡發抖',
-    '節能，他們要的是『改善』，不是『承認』',
+    '◇※＃ 同步岔路 0x7F2A · 佇列在風裡發抖（邊角閃過單字 W）',
+    '節能，他們要的是「改善」：R 與 C 兩格口徑要先對齊再說',
     '我是不是偏執，像羽毛散落：▓→▒→（此列不負責）',
     '提示僅一行：不能寄。寄了就是幫他們把故事收乾淨。',
   ],
   draftRevealLines: [
-    '集團為了節能，為了得獎，罔顧民眾安全。',
-    '我想告訴大家，不要被包裝過後的仁義道德騙了。',
-    '我得和他攤牌，不能再像兩年前一樣妥協。',
+    '筆名在鍵盤上，地圖在指尖上——警方只會猜密碼，不會猜「誰的憤怒被存成檔」。',
+    '備忘裡有一則隱藏片斷，標題寫著：梁以安導演的憤怒。要開它，先對外叫對名字，再把三館轉到對的位置。',
+    '劉隊要的能對卷：筆名＋三格代號，少一格都打不開。',
   ],
   confirmReadLabel: '已讀',
-  confirmReadHint: '備忘只到這裡；紙上怎麼落款，回桌邊再說。',
-  round2KeywordLabel: '署名欄（對外稿）',
-  round2KeywordPlaceholder: '筆名',
-  round2KeywordWrongHint: '這一格對不上劉隊手邊那份抬頭。',
-  acceptableAnswers: ['黑羽'],
+  confirmReadHint: '備忘讀畢。回桌邊：先打字，再轉齊 W、R、C。',
+  round2PenNameLabel: '署名／筆名（鍵盤輸入）',
+  round2PenNamePlaceholder: '兩個字',
+  round2PenNameWrongHint: '劉隊：「卷宗抬頭對不上他對外用的那兩個字。」',
+  acceptablePenNameAnswers: ['烏鴉'],
+  round2TriWheelWrongHint: '劉隊：「三館代號對不齊——你在終端地圖上不是看過？」',
+  triWheelColumns: ['第一格（左）', '第二格（中）', '第三格（右）'] as [string, string, string],
+  triWheelAlphabet: ch2TriWheelAlphabet,
+  triWheelCorrect: ch2TriWheelCorrect,
   powerSaveDialogTitle: '低耗顯示',
   powerSaveDialogMessage: '電量臨界。是否切換低耗？對比將重排，耗電較低。',
   powerSaveConfirmLabel: '確定',
@@ -303,14 +319,16 @@ export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
 };
 
 export const ch2ReportRound2Panel: Ch2ReportRound2PanelCopy = {
-  liuClosing: '劉隊把筆記本闔上。\n\n「這些資訊很夠了。」',
-  supplement: '劉隊指尖在空白欄敲了一下：「抬頭對不對，你自己填。」',
-  finalizeButtonLabel: '就這版，往上送',
+  liuClosing:
+    '劉隊把筆記本闔上。\n\n「備忘裡多了一則打不開的片斷，標題很刺——跟現場情緒有關。你先把筆名和三館轉對，我們才知道下一張傳票該問誰。」',
+  supplement:
+    '「鍵盤：對外筆名。轉盤：W、R、C。兩個都對，那條『梁以安導演的憤怒』才讀得到——進大廳你才有名有姓去問。」',
+  finalizeButtonLabel: '筆名與三館都對了，往上送',
 };
 
 export const ch2ReportInterstitial: Ch2ReportInterstitialCopy = {
   afterRound1NeedPhone:
-    '阿蘇終端邊還有東西沒到你手上。等那支備忘機可開了，再來跟劉隊收尾。',
+    '阿蘇終端邊還有東西沒到你手上。備忘裡還藏一則要筆名與三館代號才開的片斷——等那支備忘機可開了，再來跟劉隊收尾。',
 };
 
 export const ch2ReportConfig: Ch2ReportConfig = {

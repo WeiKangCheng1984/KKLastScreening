@@ -74,7 +74,7 @@
 
 ### 章尾：向劉隊報告（第二章）
 
-章尾為 **兩題雙格填空**（`ch2ReportFillBlanks`：對外署名 **黑羽** vs 職能、「太順」與跨館座標）＋ **手機省電顯影** 讀畢後 **第二輪輸入關鍵詞**（`ch2PhoneRiddle.acceptableAnswers`）。  
+章尾為 **兩題雙格填空**（`ch2ReportFillBlanks`：能對卷的抬頭 vs 職能、「太順」與跨館座標）＋ **手機省電顯影** 讀畢後 **第二輪**：鍵盤筆名（`acceptablePenNameAnswers`：**烏鴉**）＋ **WRC 三格轉盤**（`ch2PhoneRiddle.triWheelCorrect`）。  
 **推論上**：KK 把死者從「無名屍」定為 **調查型專欄書寫者**，並區分 **紙上署名與口頭綽號**；延續 **通訊與敘事可被「整理」** 的模型。
 
 ---

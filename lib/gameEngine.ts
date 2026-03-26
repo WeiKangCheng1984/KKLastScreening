@@ -82,6 +82,14 @@ export class GameEngine {
       ch2Flags.ch2_q1_done = true;
       ch2Flags.ch2_q2_done = true;
     }
+    // 顯影備忘已讀旗標：舊存檔僅有 ch2_phone_riddle_done 時補齊（供第三章條件）
+    if (
+      ch2Flags &&
+      ch2Flags.ch2_phone_riddle_done &&
+      ch2Flags.ch2_reveal_liang_director_memo !== true
+    ) {
+      ch2Flags.ch2_reveal_liang_director_memo = true;
+    }
   }
 
   getState(): GameState {

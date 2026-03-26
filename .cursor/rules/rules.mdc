@@ -46,7 +46,7 @@ alwaysApply: true
 - **流程**：
   1. `getChapterData(chapterId)` → `engine.loadChapterData(data)`
   2. `engine.applyEffect({ type: 'changeScene', chapterId, sceneId })`
-  3. `ch2` 與其他章相同，僅注入 `scenes/items/npcDialogs`；章尾與背包手機／第二輪關鍵詞讀 `data/ch2ReportConfig.ts`
+  3. `ch2` 與其他章相同，僅注入 `scenes/items/npcDialogs`；章尾與背包手機／第二輪筆名＋轉盤讀 `data/ch2ReportConfig.ts`
 
 ---
 
@@ -108,9 +108,9 @@ alwaysApply: true
   - 一次必須完成 **5 題**（index 0~4）
   - `ReportFillBlank` 必須帶 `key`（依題號），避免 React 沿用上一題內部 state 造成「只做一題就全過」。
 
-### 第二章：向劉隊報告（兩段：第一輪 2 題雙格填空 → 背包手機顯影讀畢 → 第二輪章尾輸入關鍵詞結案）
-- **元件**：`components/Ch2ReportEditor.tsx`（`ReportFillBlank`＋第二輪關鍵詞欄）
-- **配置**：`data/ch2ReportConfig.ts` → `ch2ReportFillBlanks`（2 題）＋ `ch2PhoneRiddle`（背包道具 `item_ch2_phone_decoder`：低耗顯影與「封存此頁」確認，**不**於手機輸入謎底；第二輪關鍵詞 `acceptableAnswers` 現為 **黑羽**；`ch2ReportRound2Panel`／`ch2ReportInterstitial` 為章尾文案）；旗標含 `ch2_report_fill_done`（第一輪結束）、`ch2_phone_riddle_done`（備忘已讀）、兩輪劉隊選項 `ch2_liu_open_qa_conclusion`／`ch2_liu_report_finalize`
+### 第二章：向劉隊報告（兩段：第一輪 2 題雙格填空 → 背包手機顯影讀畢 → 第二輪筆名＋WRC 轉盤結案）
+- **元件**：`components/Ch2ReportEditor.tsx`（`ReportFillBlank`＋第二輪筆名欄＋`Ch2TriWheel`）
+- **配置**：`data/ch2ReportConfig.ts` → `ch2ReportFillBlanks`（2 題）＋ `ch2PhoneRiddle`（背包道具 `item_ch2_phone_decoder`：低耗顯影與「封存此頁」確認，**不**於手機輸入謎底；第二輪筆名 `acceptablePenNameAnswers`（**烏鴉**）與三格轉盤 `triWheelCorrect` **WRC**；`ch2ReportRound2Panel`／`ch2ReportInterstitial` 為章尾文案）；旗標含 `ch2_report_fill_done`（第一輪結束）、`ch2_phone_riddle_done`（備忘已讀）、`ch2_reveal_liang_director_memo`（顯影隱藏標題線已讀）、兩輪劉隊選項 `ch2_liu_open_qa_conclusion`／`ch2_liu_report_finalize`
 
 ---
 
@@ -171,10 +171,10 @@ alwaysApply: true
 
 > 不先綁死劇情細節，先定「報告的破關邏輯」：玩家到底要向劉隊交出哪一種結論。
 
-### 第二章（ch2）：兩段章尾＋背包內手機顯影＋章尾關鍵詞（現況）
-- **實作**：`Ch2ReportEditor`（第一輪 `ReportFillBlank` 2 題；第二輪輸入關鍵詞後結案）+ `data/ch2ReportConfig.ts`；背包內 `Ch2CrowPhoneRiddle`（低耗顯影、已讀確認，不輸入謎底）於 `item_ch2_phone_decoder`（`Ch2PhoneDecoderItemView`），阿蘇電腦 `pc_grant_phone_decoder`（需 `ch2_report_fill_done`）
-- **主題手感**：先補兩句能對卷的報告句；回終端領備忘後在背包內讀顯影；再向劉隊開第二輪，於報告欄寫出對外署名（**黑羽**）後結案；口頭綽號「烏鴉」僅劇情稱呼
-- **旗標**：`ch2_q1_done`、`ch2_q2_done`、`ch2_report_fill_done`、`ch2_phone_riddle_done`、`ch2_qa_reviewed_with_liu`、`ch2_reasoning_done`（舊存檔五題填空全滿仍視為 QA 完成，見 `flowController`）
+### 第二章（ch2）：兩段章尾＋背包內手機顯影＋第二輪筆名與 WRC 轉盤（現況）
+- **實作**：`Ch2ReportEditor`（第一輪 `ReportFillBlank` 2 題；第二輪 **烏鴉**＋**WRC** 三格轉盤後結案）+ `data/ch2ReportConfig.ts`；背包內 `Ch2CrowPhoneRiddle`（低耗顯影、已讀確認，不輸入謎底）於 `item_ch2_phone_decoder`（`Ch2PhoneDecoderItemView`），阿蘇電腦 `pc_grant_phone_decoder`（需 `ch2_report_fill_done`）
+- **主題手感**：先補兩句能對卷的報告句；回終端領備忘後在背包內讀顯影；再向劉隊開第二輪，鍵盤對筆名、轉盤對齊三館代號後結案（世界觀上對外欄位另有慣用署名如黑羽者，見劇情／表格，不與第二輪輸入欄綁死）
+- **旗標**：`ch2_q1_done`、`ch2_q2_done`、`ch2_report_fill_done`、`ch2_phone_riddle_done`、`ch2_reveal_liang_director_memo`、`ch2_qa_reviewed_with_liu`、`ch2_reasoning_done`（舊存檔五題填空全滿仍視為 QA 完成，見 `flowController`；舊存檔僅有 `ch2_phone_riddle_done` 時會補 `ch2_reveal_liang_director_memo`，見 `gameEngine`）
 
 ### 第三章（ch3）：三題「反證」報告（把錯的說法排掉）
 - **建議模組**：A（雙格填空）但縮成 3 題

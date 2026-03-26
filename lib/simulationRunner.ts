@@ -660,6 +660,7 @@ export class SimulationRunner {
     scene: string,
     pushStep: (s: Omit<SimStep, 'seq'>) => void
   ) {
+    // 章尾「向劉隊報告」（例如 ch2 筆名＋WRC 轉盤）由實際遊玩流程寫入旗標；此處不模擬該段輸入。
     // Q1 選擇題
     const q1Choices = this.getChapterQ1Choices(chId);
     if (q1Choices.length > 0) {

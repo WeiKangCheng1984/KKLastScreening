@@ -2387,6 +2387,11 @@ export default function PlayPage() {
                         flag: 'ch2_phone_riddle_done',
                         value: true,
                       });
+                      engineRef.current.applyEffect({
+                        type: 'setFlag',
+                        flag: 'ch2_reveal_liang_director_memo',
+                        value: true,
+                      });
                       setActiveItemDetail(null);
                     }}
                   />
@@ -2786,6 +2791,7 @@ export default function PlayPage() {
               'ch2_q5_done',
               'ch2_report_fill_done',
               'ch2_phone_riddle_done',
+              'ch2_reveal_liang_director_memo',
               'ch2_pc_phone_decoder_taken',
               'ch2_qa_reviewed_with_liu',
               'ch2_reasoning_done',
