@@ -38,7 +38,7 @@ const items: Record<string, Item> = {
     id: 'item_filtered_log',
     name: '張景衡整理版 log',
     description:
-      '張景衡提供的 log 報告，版面乾淨，每一欄都有清楚說明。\n\n「操作員：高文傑。時間：22:57。操作類型：手動覆寫。結果：照明模式切換。」\n\n這份報告讀起來非常清楚——清楚到顧乃謙看了一眼就說：「原始檔不長這樣。」\n\n問題不在這份 log 寫了什麼，而在它少說了什麼。',
+      '張景衡提供的對外摘要（Summary View），欄位齊全、註解完整，格式符合內部「可轉交通報／可對媒體口徑」範本。\n\n「操作員：高文傑。時間：22:57。操作類型：手動覆寫。結果：照明模式切換。」\n\n顧乃謙只瞥一眼：「這是給人讀的版本。母帶上的欄位不是長這樣。」\n\n差別不在多寫了哪一句，而在哪些欄位在摘要裡**預設就不會出現**。',
     svgImage: '/svg/items/filtered_log.svg',
     svgSize: 'medium',
     collectible: true,
@@ -47,7 +47,7 @@ const items: Record<string, Item> = {
     id: 'item_press_draft',
     name: '記者應對話術草稿',
     description:
-      '一張 A4 草稿，字跡工整，像是背稿用的：\n\n「—— 如媒體詢問：請一律使用『個別失誤』，不使用『系統問題』。\n—— 如追問三館：回答『尚在釐清關聯性』，不主動提及聯繫。\n—— 禁用語：三起事故、跨館、系統性風險。」\n\n最下方有一行潦草的補注：「告訴記者，這是局部異常，無系統性風險。」\n\n這不是防禦媒體，這是在防止真相被串起來。',
+      '一張 A4 草稿，字跡工整，邊角註記「對外溝通—核准用詞 v3」：\n\n「—— 媒體詢問：優先使用『個案處置中』，避免『系統性』等未定義詞彙。\n—— 追問多館關聯：回覆『尚待交叉比對』，不主動延伸敘事。\n—— 建議避免並列：事故件數、館別、時序（以降低不當聯想）。」\n\n最下方補一行：「口徑以法遵與公關雙簽為準。」\n\n你讀得出：這是一份**風險控管的說話地圖**，未必寫「假」，但寫「先別往哪裡講」。',
     svgImage: '/svg/items/press_draft.svg',
     svgSize: 'medium',
     collectible: false,
@@ -56,7 +56,7 @@ const items: Record<string, Item> = {
     id: 'item_brand_monitor_report',
     name: '宋雅甄品牌監測報表',
     description:
-      '品牌監測報表的標題是「輿情分析—城市影城 W-R 事件關聯度」。\n\n報表裡有一欄被手工圈起來，旁邊寫著：「三館同日出現在搜尋趨勢，需降低關聯性。」\n\n宋雅甄在意的不是死者是誰，是「三館」這個詞能不能同時出現在新聞裡。\n\n她的邏輯是：一間影城出事是事故，三間一起被聯想，就是品牌問題。',
+      '品牌監測報表標題：「輿情熱區—W／R 關鍵字共現分析」。\n\n一欄被手工圈註：「多館關鍵字同日熱度上升—建議**敘事去關聯化**（internal memo）」。\n\n從公關 KPI 來看，這叫**降低不當串聯風險**；從調查看，它至少說明：有人在盯「三館會不會被寫進同一段」。',
     svgImage: '/svg/items/brand_monitor_report.svg',
     svgSize: 'medium',
     collectible: false,
@@ -67,7 +67,7 @@ const items: Record<string, Item> = {
     id: 'item_cross_venue_sync',
     name: '跨館同步異常片段',
     description:
-      '顧乃謙列印出一段系統記錄，在上面用紅筆圈了三個時間點。\n\n「城市 W」和「光芒 R」在三個不同日期，各自出現了同樣的插件版本更新記錄——時間差在 15 分鐘以內。\n\n「跨館同步不是故障，那比較像……有人知道哪裡會一起響。」\n\n這不是系統自動同步。同版本、不同館、幾乎同時更新——背後要嘛是同一個操作入口，要嘛是同一個人。',
+      '顧乃謙列印的系統記錄，紅筆圈了三個時間點。\n\n「城市 W」與「光芒 R」在不同日期出現相同插件版本更新紀錄，時間差在 15 分鐘內。\n\n備註欄他寫：「非內建跨館自動升級路徑；需人工觸發或同一發布管線。」\n\n要證明「同一隻手」還差母帶與操作來源欄位——但時間軸上，兩邊確實**一起動過**。',
     svgImage: '/svg/items/cross_venue_sync.svg',
     svgSize: 'medium',
     collectible: false,
@@ -85,7 +85,7 @@ const items: Record<string, Item> = {
     id: 'item_remote_login_sheet',
     name: '遠端登入維護單',
     description:
-      '一份維護單，記錄了遠端登入的申請與審核流程。\n\n最後一筆記錄日期：三週前。操作人：顧乃謙。說明：「插件版本序列比對——W、R 同步確認。」\n\n這筆記錄是顧乃謙親自做的。他知道這兩館的版本是同步的，早在案發之前就知道。\n\n他在等什麼？還是他一直在看著什麼？',
+      '遠端登入申請與審核流程表（影印本）。\n\n最後一筆：三週前，操作人顧乃謙，說明欄「插件版本序列比對—W／R 同步確認」。\n\n屬例行維護紀錄；能確定的是：技術端**早就在追**兩館版本是否同一步。\n\n至於當時是否已察覺異常，單子上不會寫。',
     svgImage: '/svg/items/remote_login_sheet.svg',
     svgSize: 'medium',
     collectible: false,
@@ -247,7 +247,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '劉隊壓著嗓門：「品牌的人到了，話都先講漂亮。顧乃謙也在，那人嘴臭，但講的是真的。」\n\n「我要的不是誰動手，是誰動紀錄、動幾次、動完怎麼裝沒事。」\n\n「順序：大廳先把白板、牆上字、抽屜摸清楚，再進應對室聽對外話術、跟張景衡對照整理版與原始痕跡；最後才去機房找顧乃謙對跨館。」',
+              text: '劉隊壓著嗓門：「品牌端在，對外話術先到位。顧乃謙在機房那邊等你——技術欄位找他。」\n\n「我要的是：紀錄被動過幾次、動在什麼欄位、對外那份**缺了什麼**。」\n\n「順序：大廳白板、牆上字、抽屜；再進應對室對張景衡的摘要；最後機房對母帶與跨館。」',
               type: 'character',
               characterId: 'npc_liu',
               characterName: '劉隊（偵查隊）',
@@ -549,12 +549,12 @@ const scenes: Record<string, Scene> = {
         name: '宋雅甄（品牌長）',
         portraitExpression: 1,
         randomDialogs: [
-          { id: 'ch3_song_idle_1', text: '宋雅甄笑笑的：「我沒擋你啦，只是你先想清楚怎麼講，大家才好做事。」', type: 'hint', weight: 1 },
-          { id: 'ch3_song_idle_2', text: '「現在要穩啦，穩下來再談真相，比較不會炸。」', type: 'hint', weight: 1 },
-          { id: 'ch3_song_casual_1', text: '她理一下袖口：「我講話慢，是因為快的人容易講錯。」', type: 'casual', weight: 2 },
-          { id: 'ch3_song_casual_2', text: '「你當我在擋你，其實我在擋明天。」', type: 'casual', weight: 2 },
-          { id: 'ch3_song_casual_3', text: '宋雅甄眨眼：「咖啡要嗎？不加糖，今晚夠甜了。」', type: 'casual', weight: 1 },
-          { id: 'ch3_song_casual_4', text: '「關鍵字我們都懂，只是不能同時出現。」', type: 'hint', weight: 2 },
+          { id: 'ch3_song_idle_1', text: '宋雅甄語氣很平：「今晚對外只能有一個核准敘事。你先想清楚用詞，大家才好接。」', type: 'hint', weight: 1 },
+          { id: 'ch3_song_idle_2', text: '「媒體問到跨館，我們回『交叉比對中』。別幫他們把句子串成標題。」', type: 'hint', weight: 1 },
+          { id: 'ch3_song_casual_1', text: '她理一下袖口：「我講慢一點，是怕有人脫口未定案的話。」', type: 'casual', weight: 2 },
+          { id: 'ch3_song_casual_2', text: '「現場員工也要下班。你一句話，明天他們會被記者堵在門口。」', type: 'casual', weight: 2 },
+          { id: 'ch3_song_casual_3', text: '宋雅甄眨眼：「咖啡要嗎？不加糖。」', type: 'casual', weight: 1 },
+          { id: 'ch3_song_casual_4', text: '「有些字不能同時出現——不是秘密，是**風險控管**。」', type: 'hint', weight: 2 },
         ],
         available: true,
       },
@@ -563,12 +563,12 @@ const scenes: Record<string, Scene> = {
         name: '張景衡（品牌特助）',
         portraitExpression: 1,
         randomDialogs: [
-          { id: 'ch3_zhang_idle_1', text: '張景衡揚揚紙：「這份你讀得懂，原始那包……你確定今晚要開？」', type: 'hint', weight: 1 },
-          { id: 'ch3_zhang_idle_2', text: '「長官要的是講得出口的版本，不是讓全局睡不著的版本。」', type: 'hint', weight: 1 },
-          { id: 'ch3_zhang_casual_1', text: '他把夾子敲敲桌角：「整齊是美德，過齊是警訊。」', type: 'casual', weight: 2 },
-          { id: 'ch3_zhang_casual_2', text: '「我這行靠排版吃飯，不是靠自己相信。」', type: 'casual', weight: 2 },
-          { id: 'ch3_zhang_casual_3', text: '張景衡苦笑：「你愈聰明，我愈怕你把大家都拖下水。」', type: 'hint', weight: 2 },
-          { id: 'ch3_zhang_casual_4', text: '「你要母帶？可以啊，先問誰敢簽收。」', type: 'casual', weight: 1 },
+          { id: 'ch3_zhang_idle_1', text: '張景衡揚揚紙：「這份是對外可引用摘要。原始 bundle 要機房權限。」', type: 'hint', weight: 1 },
+          { id: 'ch3_zhang_idle_2', text: '「警方要的是**可簽核**的說法。不是比較嚇人，是比較好結案。」', type: 'hint', weight: 1 },
+          { id: 'ch3_zhang_casual_1', text: '他把夾子敲敲桌角：「我負責把雜訊壓到讀者看得懂。」', type: 'casual', weight: 2 },
+          { id: 'ch3_zhang_casual_2', text: '「原始資料不是不能看，是看了要有人扛。**簽收**在誰那邊，問那邊。」', type: 'casual', weight: 2 },
+          { id: 'ch3_zhang_casual_3', text: '張景衡看螢幕：「你問愈細，我愈要先確認**法遵**。」', type: 'hint', weight: 2 },
+          { id: 'ch3_zhang_casual_4', text: '「母帶？走申請。我這邊只有**已篩過**的欄位。」', type: 'casual', weight: 1 },
         ],
         available: true,
       },
@@ -577,12 +577,12 @@ const scenes: Record<string, Scene> = {
         name: '顧乃謙（系統工程）',
         portraitExpression: 1,
         randomDialogs: [
-          { id: 'ch3_gu_brand_idle_1', text: '顧乃謙盯著筆電：「要看真的，機房。這裡只有給外人看的。」', type: 'hint', weight: 1 },
-          { id: 'ch3_gu_brand_idle_2', text: '「整理版能讀，就這樣。全不全，你自己想。」', type: 'hint', weight: 1 },
-          { id: 'ch3_gu_brand_casual_1', text: '「這房間味道很好聞，聞久了會以為問題也被聞掉了。」', type: 'casual', weight: 2 },
-          { id: 'ch3_gu_brand_casual_2', text: '他敲鍵盤兩下：「我沒情緒，我只有 log。」', type: 'casual', weight: 2 },
-          { id: 'ch3_gu_brand_casual_3', text: '「你問我信不信他們？我信機櫃比較老實。」', type: 'casual', weight: 1 },
-          { id: 'ch3_gu_brand_casual_4', text: '顧乃謙淡淡：「少兩欄，故事就會剛好。」', type: 'hint', weight: 2 },
+          { id: 'ch3_gu_brand_idle_1', text: '顧乃謙盯著筆電：「摘要欄位是模板長的。你要 lineage，去 raw retention。」', type: 'hint', weight: 1 },
+          { id: 'ch3_gu_brand_idle_2', text: '「這裡是會議室，不是機房。別在這裡跟我談母帶。」', type: 'hint', weight: 1 },
+          { id: 'ch3_gu_brand_casual_1', text: '「香氛開很強。有些人會把『好聞』當成『沒事』。」', type: 'casual', weight: 2 },
+          { id: 'ch3_gu_brand_casual_2', text: '他敲鍵盤兩下：「我只對欄位負責。」', type: 'casual', weight: 2 },
+          { id: 'ch3_gu_brand_casual_3', text: '「你拿整理版來問我，我回答你的就是整理版。」', type: 'casual', weight: 1 },
+          { id: 'ch3_gu_brand_casual_4', text: '顧乃謙淡淡：「少欄位不是 bug，是 view 定義。」', type: 'hint', weight: 2 },
         ],
         available: true,
       },
@@ -612,7 +612,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '宋雅甄語氣軟軟的：「現在要先穩住啦，真相端太快，全桌翻掉。」\n\n「一間出事叫事故，三間名字排一起，股東就會問你是不是整組壞掉。」\n\n「我沒不給你查，你查得像大人一點——別一句話害明天全館沒班。」\n\n「你要你的真，我要門還開得下去。」',
+              text: '宋雅甄語氣很穩：「今晚對外只有一個核准口徑。未定案前，我不會讓現場同事被一句話拖去當頭條。」\n\n「多館關鍵字一旦同屏，股東會問的是**治理**，不是案情。」\n\n「你查你的，我守的是**可發表**與**可收束**——兩邊別互相踩線。」\n\n她停一下：「我們都想收場，只是**收場的定義**不一樣。」',
               type: 'character',
               characterId: 'npc_song_yazhen',
               characterName: '宋雅甄（品牌長）',
@@ -633,7 +633,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '張景衡把紙推過來：「我幫你排好了，你省時間。」\n\n「原始不是不能看，看了……也不一定比較有用，還比較吵。」\n\n「警方要的是講得清楚，不是講得嚇人。」\n\n他聳肩：「先出去那版，通常就變成『大家以為的事實』啦。」',
+              text: '張景衡把紙推過來：「這是對外摘要，欄位已對齊範本。」\n\n「原始 bundle 在機房，調閱要走流程。不是不能，是**要簽**。」\n\n「警方要的是可結案敘事；我們給的是**可引用**版本。」\n\n他抬眼：「你先決定要哪一種『清楚』。」',
               type: 'character',
               characterId: 'npc_zhang_jingheng',
               characterName: '張景衡（品牌特助）',
@@ -658,7 +658,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '顧乃謙沒抬頭：「我只看到機器寫了啥，看不到誰嘴硬。」\n\n「要整理版，今天就能簽一簽結掉。要原始檔，今晚手機會響一整夜。」\n\n「機房有東西。這邊看完再來。」\n\n「別一來就問我是誰。先問缺哪一欄。」',
+              text: '顧乃謙沒抬頭：「我這邊回的是欄位定義，不是動機。」\n\n「摘要今天能簽；母帶要 raw 權限與稽核窗口。」\n\n「機房見。別在這裡問我是誰——先問**缺哪一欄**。」',
               type: 'character',
               characterId: 'npc_gu_naiqian',
               characterName: '顧乃謙（系統工程）',
@@ -680,7 +680,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '紙上寫：高文傑、22:57、手動覆寫——一排排好漂亮。\n\n顧乃謙只扔一句：真的不是長這樣。\n\n可怕的不是寫了啥，是沒寫啥。',
+              text: '紙上：高文傑、22:57、手動覆寫——欄位對齊得像簡報。\n\n顧乃謙只一句：「母帶欄位不是這樣。」\n\n差異在**沒有出現在摘要裡**的幾格。',
               type: 'narrator',
             },
           },
@@ -697,7 +697,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '草稿列禁用語：三起、跨館、系統性風險。\n\n記者追三館？回「還在釐清」，不要自己串。\n\n這不是防記者，是防三案被講成同一句。',
+              text: '草稿用詞表：避免「系統性」「多館」並列；建議用「個案處置」「交叉比對中」。\n\n追問三館？回「尚待釐清」，不主動提供敘事串聯。\n\n你讀的是**對外溝通邊界**，不是劇情大綱。',
               type: 'narrator',
             },
           },
@@ -716,7 +716,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '報表紅字寫：三館同一天上熱搜，要壓關聯。\n\n她在乎的不是誰死了，是三個名字會不會排同一行。\n\n一間叫意外，三間排一起，老闆就會打來。',
+              text: '報表紅字：多館關鍵字同日熱度上升—「建議敘事去關聯化」。\n\nKPI 寫的是**聲量結構**，不是誰該負責。\n\n但你看懂了：有人在盯「三館會不會被寫進同一段」。',
               type: 'narrator',
             },
           },
@@ -820,7 +820,7 @@ const scenes: Record<string, Scene> = {
     ],
     puzzles: [],
     initialDialog: {
-      text: '一進門就聞到飯店那種香，香到忘記這間沒窗。\n\n宋雅甄坐中間像拍封面，張景衡旁邊排文件，像在等你問他早就準備好的那句。',
+      text: '一進門就聞到會議室香氛，濃得讓人想起「對外口徑」四個字。\n\n宋雅甄坐中間，張景衡旁邊文件排得整齊，顧乃謙在角落敲鍵盤——像在等流程，不像在等你佩服。',
       type: 'narrator',
     },
   },
@@ -898,12 +898,12 @@ const scenes: Record<string, Scene> = {
         name: '顧乃謙（系統工程）',
         portraitExpression: 1,
         randomDialogs: [
-          { id: 'ch3_gu_server_idle_1', text: '顧乃謙敲敲紙：「三個時間點，看了沒。」', type: 'hint', weight: 1 },
-          { id: 'ch3_gu_server_idle_2', text: '「機器不會騙人，會騙人的是給你看哪一段。」', type: 'hint', weight: 1 },
-          { id: 'ch3_gu_server_idle_3', text: '「你問是不是人為？我只知道有人曉得哪兩邊會一起跳。」', type: 'hint', weight: 1 },
-          { id: 'ch3_gu_server_casual_1', text: '「這條走廊冷氣像不要錢，頭腦會比較清醒。」', type: 'casual', weight: 2 },
-          { id: 'ch3_gu_server_casual_2', text: '他把紅筆蓋起來：「圈起來的不是重點，是缺口。」', type: 'casual', weight: 2 },
-          { id: 'ch3_gu_server_casual_3', text: '「你要睡覺可以，別指望母帶也睡。」', type: 'casual', weight: 1 },
+          { id: 'ch3_gu_server_idle_1', text: '顧乃謙敲敲紙：「三個時間點，對過沒。」', type: 'hint', weight: 1 },
+          { id: 'ch3_gu_server_idle_2', text: '「機器只記錄。顯示給誰看，是另一層。」', type: 'hint', weight: 1 },
+          { id: 'ch3_gu_server_idle_3', text: '「兩邊一起跳，路由表上早寫了。」', type: 'hint', weight: 1 },
+          { id: 'ch3_gu_server_casual_1', text: '「這條走廊冷氣很強。」', type: 'casual', weight: 2 },
+          { id: 'ch3_gu_server_casual_2', text: '他把紅筆蓋起來：「圈的是**缺口**，不是結論。」', type: 'casual', weight: 2 },
+          { id: 'ch3_gu_server_casual_3', text: '「母帶不會等你睡覺。」', type: 'casual', weight: 1 },
         ],
         available: true,
       },
@@ -1184,7 +1184,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_gu_sensitive1_1',
       npcId: 'npc_gu_naiqian',
       text:
-        '顧乃謙停幾秒，冷冷的：「真的 log 有兩欄，整理版沒有。」\n\n「操作來源 IP，跟覆寫前原值。」\n\n「你問怎麼剛好指到高文傑？缺這兩欄，你就分不清是本機按的還是遠端按的。」',
+        '顧乃謙停幾秒：「母帶上固定有兩欄，你那份摘要裡沒有。」\n\n「操作來源 IP、覆寫前原值——對外模板不顯示，不代表系統沒記。」\n\n「高文傑會被指到，是因為摘要只留得住『誰的帳號』這種乾淨答案。」',
       choices: [
         {
           id: 'gu_s1_q1',
@@ -1206,7 +1206,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_gu_s1_reply_q1',
       npcId: 'npc_gu_naiqian',
       text:
-        '「對。遠端就是人不用在現場也能戳。」\n\n「權限夠、版本對、指令會，連上去就動了。」\n\n他瞥走廊：「W 跟 R 設備同一網段——這事沒幾個人知道。」',
+        '「遠端的意思是：人不必在機房，也能下得到指令。」\n\n「權限、版本、指令鏈對了，連線成立。」\n\n他目光掠過設備標籤：「W 跟 R 同子網——**路由表上寫得出來**，只是很少人去看。」',
       choices: [
         {
           id: 'gu_s1_end',
@@ -1221,7 +1221,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_gu_s1_reply_q2',
       npcId: 'npc_gu_naiqian',
       text:
-        '「他拿的是我給的那份，不是母帶。」\n\n「懂不懂差在哪，我不曉得。反正沒來問我。」\n\n「看不到跟裝沒看到，兩回事。」',
+        '「他手上那份，是轉出用的摘要。」\n\n「母帶在我這邊的定義裡。他若沒來對欄位，我當然不會替他補。」\n\n「**沒看到**可以有很多原因；別混成一種。」',
       choices: [
         {
           id: 'gu_s1_end',
@@ -1238,7 +1238,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_gu_sensitive2_1',
       npcId: 'npc_gu_naiqian',
       text:
-        '顧乃謙把紙拍桌上：「三個時間點，兩個館，更新差不到十五分鐘。」\n\n「不是巧合，那版插件也沒內建跨館自己升。」\n\n「人手推的。推的人，兩邊都能進。」',
+        '顧乃謙把紙拍桌上：「三個時間點，兩個館，更新落在十五分鐘內。」\n\n「內建路徑沒寫自動跨館升級——那就是**發布管線**或**人工觸發**。」\n\n「兩邊都能進同一套版本，代表入口早就共用。」',
       choices: [
         {
           id: 'gu_s2_q1',
@@ -1260,7 +1260,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_gu_s2_reply_q1',
       npcId: 'npc_gu_naiqian',
       text:
-        '「可以查，前提拿得到母帶。整理版沒那些。」\n\n「要 IP、要動之前的版本紀錄、要兩邊維護帳號。」\n\n他盯著你：「你要我調真的出來，今晚就別想睡。」',
+        '「查得到，前提母帶齊。」\n\n「IP、版本紀錄、兩邊維護帳號——摘要不會替你長出來。」\n\n他看你一眼：「要我開稽核鏈，**今晚時程**你自己估。」',
       choices: [
         {
           id: 'gu_s2_end',
@@ -1275,7 +1275,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_gu_s2_reply_q2',
       npcId: 'npc_gu_naiqian',
       text:
-        '他沉默一下。\n\n「跨館維護我負責，版本是我記的。早覺得怪，那時還沒死人。」\n\n「現在死人了，我才給你看。」',
+        '他沉默一下。\n\n「跨館維護我負責，版本紀錄在我這邊。案發前就做過比對——**例行**。」\n\n「你要我把話說滿？等你拿得到母帶再談。」',
       choices: [
         {
           id: 'gu_s2_end',

@@ -147,11 +147,21 @@
 
 ## 八、實作對齊檢查清單（之後改版用）
 
-- [ ] `Dialog.type === 'narrator'` 時，抬頭是否一律可讀（「旁白」或明確 `title`）？  
-- [ ] 熱點純 hint：Zoom 是否一律帶**互動名稱**作副標，避免空白抬頭？  
-- [ ] `RandomDialog.type`（casual／hint）是否在 UI 或權重上**有可觀察的差異**（或明定「僅資料註記」）？  
-- [ ] `incrementNpcCasualTalk` 是否在**所有「算閒聊」的路徑**一致（含無 sensitive 條目的 NPC、劉隊 random 是否排除）？  
-- [ ] 新章節複製 Ch1／Ch2 時：**先**填 `sensitiveGatesByChapter` / `liuReportFlowByChapter`，**再**寫 `randomDialogs`，避免流程死鎖。
+- [x] `Dialog.type === 'narrator'` 時，抬頭是否一律可讀（「旁白」或明確 `title`）？— **已對齊**：`DialogBox` 主列對 `!type` 或 `type === 'narrator'` 顯示「旁白」；熱點 hint 另設 `title` 後備。  
+- [x] 熱點純 hint：Zoom 是否一律帶**互動名稱**作副標，避免空白抬頭？— **已對齊**：`interactionName` 與 Dock 用 `title` 皆為 `hotspot.description ?? hotspot.id`；有 `showDialog` 的 Zoom 路徑同後備。  
+- [ ] `RandomDialog.type`（casual／hint）是否在 UI 或權重上**有可觀察的差異**（或明定「僅資料註記」）？— **現況**：仍為僅資料註記；未強制 UI 區隔。  
+- [x] `incrementNpcCasualTalk` 是否在**所有「算閒聊」的路徑**一致（含無 sensitive 條目的 NPC、劉隊 random 是否排除）？— **已對齊**：成功回傳的 `triggerRandomNpcDialog` 於引擎內 +1；敏感略過與一般 random 不再於 `page` 重複加計。  
+- [x] 新章節複製 Ch1／Ch2 時：**先**填 `sensitiveGatesByChapter` / `liuReportFlowByChapter`，**再**寫 `randomDialogs`，避免流程死鎖。— **已對齊行為**：劉隊點擊在 `getNpcClickBehaviour` **之前**走 `resolveLiuNpcClick`；`getNpcClickBehaviour` 已無 `none`，無敏感表或無條目時為 `random_dialog`。
+
+### 現況對齊（實作後摘要）
+
+| 項目 | 程式位置／行為 |
+|------|----------------|
+| 旁白抬頭 | `components/DialogBox.tsx`：`narrator` 與無 `type` 皆顯示「旁白」 |
+| 熱點 hint（Dock／Zoom） | `page.tsx`：`hintDialog` 的 `title`、Zoom `interactionName`、`showDialog` 之 Zoom 互動名皆 `description ?? id` |
+| 閒聊計數 | `lib/gameEngine.ts`：`triggerRandomNpcDialog` 成功建立 `Dialog` 前呼叫 `incrementNpcCasualTalk` |
+| 劉隊順序 | `page.tsx`：`npc_liu` 先 `resolveLiuNpcClick`，再進 `getNpcClickBehaviour` |
+| `none` 行為 | `lib/chapterBehaviours.ts`：改為一律回傳 `random_dialog`（已移除 `NpcBehaviourType` 的 `none`）；`page` 已刪除原 `none` 之 fallback |
 
 ---
 

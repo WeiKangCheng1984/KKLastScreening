@@ -9,7 +9,7 @@ const items: Record<string, Item> = {
     id: 'item_lighting_time_diff',
     name: '節能燈提前切換記錄',
     description:
-      '樓梯間燈控的操作記錄，時間欄位顯示一個異常：散場前 3 分鐘，燈光切換到節能模式。\n\n正常流程是散場後才切換，這次比散場時間早了整整 3 分鐘。\n\n梁以安說得沒錯：「黑得太早。」\n\n3 分鐘。樓梯間從亮到暗。這是窗口，不是疏失。',
+      '樓梯間燈控的操作記錄，時間欄位顯示一個異常：散場前 3 分鐘，燈光切換到節能模式。\n\n正常流程是散場後才切換，這次比散場時間早了整整 3 分鐘。\n\n梁以安說得沒錯：「黑得太早。」\n\n3 分鐘。樓梯間從亮到暗。讀起來像**實地彩排**留下的時間窗——不是單純疏失。',
     svgImage: '/svg/items/lighting_time_diff.svg',
     svgSize: 'medium',
     collectible: false,
@@ -56,7 +56,7 @@ const items: Record<string, Item> = {
     id: 'item_risk_report_buried',
     name: '被擱置的風險回報單',
     description:
-      '陳佑誠從抽屜最底層找出三份回報單，每一份都有格式、有日期、有優先標記。\n\n第一份：四個月前。第二份：兩個月前。第三份：六週前。\n\n三份都標了「優先 B」——緊急但不是最高優先。三份都消失在審核流程裡，沒有任何批示。\n\n「回報過。不是一次。格式都對，優先級也對，消失得更對。」\n\n【樓梯／燈控】散場前 3 分鐘燈控已切節能，與「散場後才切」的流程敘事牴觸；踏面磨損與扶手抓痕像急停施力，地面有工作服鈕扣。\n\n【動線／死角】入口與出口有鏡頭，中段轉角無鏡頭——可觀察兩端混亂卻不入鏡。\n\n【大廳序列】廣播比散場信號延遲 8 秒，燈在廣播前已切——燈先滅、廣播後響，像執行順序被改過，不像單一設備偶然失序。',
+      '陳佑誠從抽屜最底層找出三份回報單，每一份都有格式、有日期、有優先標記。\n\n第一份：四個月前。第二份：兩個月前。第三份：六週前。\n\n三份都標了「優先 B」——緊急但不是最高優先。三份都消失在審核流程裡，沒有任何批示；但每一份**都有承辦簽收、都進了系統**——能走完整條流程的人，很難假裝「沒人看見」。\n\n「回報過。不是一次。格式都對，優先級也對，消失得更對。」\n\n【樓梯／燈控】散場前 3 分鐘燈控已切節能，與「散場後才切」的流程敘事牴觸；踏面磨損與扶手抓痕像急停施力，地面有工作服鈕扣。\n\n【動線／死角】入口與出口有鏡頭，中段轉角無鏡頭——可觀察兩端混亂卻不入鏡。\n\n【大廳序列】廣播比散場信號延遲 8 秒，燈在廣播前已切——燈先滅、廣播後響，像執行順序被改過，不像單一設備偶然失序。',
     svgImage: '/svg/items/risk_report_buried.svg',
     svgSize: 'medium',
     collectible: true,
@@ -67,7 +67,7 @@ const items: Record<string, Item> = {
     id: 'item_crowd_timing_log',
     name: '廣播延遲與燈光錯拍記錄',
     description:
-      '事故當下的現場記錄：廣播比散場信號延遲 8 秒，燈光在廣播前已切換，觀眾尚未收到疏散提示時大廳已陷入半暗。\n\n梁以安說他聽到有人跌倒。保全記錄說有三個人被推擠。\n\n這個順序——燈先滅、廣播後響——不是設備故障，是序列被改過。',
+      '事故當下的現場記錄：廣播比散場信號延遲 8 秒，燈光在廣播前已切換，觀眾尚未收到疏散提示時大廳已陷入半暗。\n\n梁以安說他聽到有人跌倒。保全記錄說有三個人被推擠。\n\n這個順序——燈先滅、廣播後響——**廣播與燈光刻意脫節**，不是設備故障；讀起來像在**實地彩排**：測黑暗中的恐慌會怎麼蔓延，而非單次失誤。',
     svgImage: '/svg/items/crowd_timing_log.svg',
     svgSize: 'medium',
     collectible: false,
@@ -149,6 +149,10 @@ const scenes: Record<string, Scene> = {
         randomDialogs: [
           { id: 'ch4_liu_idle_1', text: '劉隊說：「先看樓梯間，再去找陳佑誠，那邊有東西要讓你看。」', type: 'hint', weight: 1 },
           { id: 'ch4_liu_idle_2', text: '「未遂事故不是沒有痕跡，是痕跡不夠整齊。你去找那個不夠整齊的地方。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liu_casual_1', text: '劉隊壓低聲：「壓回報、挑人道歉、同一套說帖——光芒這邊一向漂亮。漂亮到不像調查，像公關。」', type: 'casual', weight: 2 },
+          { id: 'ch4_liu_casual_2', text: '「三分鐘聽起來短，夠讓一群人踩錯腳。」', type: 'casual', weight: 2 },
+          { id: 'ch4_liu_casual_3', text: '他把筆尖在紙上敲兩下：「我要的是能對上時間軸的東西，不是感覺。」', type: 'hint', weight: 2 },
+          { id: 'ch4_liu_casual_4', text: '「陳佑誠那邊若肯開抽屜，你就會知道——有人早把答案寫過了。」', type: 'hint', weight: 1 },
         ],
         available: true,
       },
@@ -158,7 +162,11 @@ const scenes: Record<string, Scene> = {
         portraitExpression: 1,
         randomDialogs: [
           { id: 'ch4_liang_idle_1', text: '梁以安說：「我不是難搞。我只是記得那次黑得太早。」', type: 'hint', weight: 1 },
-          { id: 'ch4_liang_idle_2', text: '「有人老說是節能。我聽起來比較像偷懶，或測試。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liang_idle_2', text: '「有人老說是節能。我聽起來比較像在試——遠端黑暗、人群慌起來會怎樣。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liang_stair_casual_1', text: '他盯著轉角：「我愛電影，也尊重把放映做完的人——但那次節奏像被人剪接過。」', type: 'casual', weight: 2 },
+          { id: 'ch4_liang_stair_casual_2', text: '「記者會那天，我想對觀眾說的是——別怕黑，怕的是黑得剛剛好。結果鏡頭只拍得到穿制服的。」', type: 'casual', weight: 2 },
+          { id: 'ch4_liang_stair_hint_1', text: '「片尾還在跑，燈先沒了。你說這像不像有人剪接過現實？」', type: 'hint', weight: 2 },
+          { id: 'ch4_liang_stair_hint_2', text: '梁以安苦笑：「他們要一個人鞠躬——挑了維護。導演跟觀眾一起罵。」', type: 'hint', weight: 1 },
         ],
         available: true,
       },
@@ -169,6 +177,10 @@ const scenes: Record<string, Scene> = {
         randomDialogs: [
           { id: 'ch4_chen_stair_idle_1', text: '陳佑誠說：「系統不怕壞，怕的是壞得剛剛好，像正常老化。」', type: 'hint', weight: 1 },
           { id: 'ch4_chen_stair_idle_2', text: '「控制區那邊有更多東西，你先把樓梯這邊看完。」', type: 'hint', weight: 1 },
+          { id: 'ch4_chen_stair_casual_1', text: '「回報單寫得越完整，越像寫給自己看的。」', type: 'casual', weight: 2 },
+          { id: 'ch4_chen_stair_casual_2', text: '他指燈控箱：「時間不會說謊，會說謊的是解釋時間的人。」', type: 'casual', weight: 2 },
+          { id: 'ch4_chen_stair_hint_1', text: '「你等等看到版本號，就會懂我為什麼急。」', type: 'hint', weight: 2 },
+          { id: 'ch4_chen_stair_hint_2', text: '「三館同一套插件——洞留在授權樹頂層能看見的地方，就不是單一館倒楣。」', type: 'hint', weight: 1 },
         ],
         available: true,
       },
@@ -196,7 +208,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '劉隊說：「光芒影城，第二起事故——那次沒有人死，所以沒有人認真記錄。」\n\n「但樓梯間的燈比該亮的時間早了 3 分鐘，有人差點在黑暗裡摔下去。」\n\n他把時間點寫在本子上，筆尖停在「-3:00」那格。\n\n「三分鐘不是感覺，是數字。數字一準，就不是自然。」\n\n「你去看陳佑誠。他說他早就回報過這個漏洞。我想知道那份回報最後停在誰手上。」',
+              text: '劉隊說：「光芒影城，第二起事故——那次沒有人死，所以沒有人認真記錄。」\n\n「但樓梯間的燈比該亮的時間早了 3 分鐘，有人差點在黑暗裡摔下去。」\n\n他把時間點寫在本子上，筆尖停在「-3:00」那格。\n\n「三分鐘不是感覺，是數字。數字一準，就不是自然。」\n\n「你去看陳佑誠。他說他早就回報過這個漏洞。回報被吃掉、記者會挑人道歉——常常是同一套說帖在管。我想知道那份回報最後停在誰手上。」\n\n「梁以安怎麼說、log 怎麼寫，對不起來就對了——那才是你要查的。」',
               type: 'character',
               characterId: 'npc_liu',
               characterName: '劉隊（偵查隊）',
@@ -217,7 +229,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '梁以安說：「我不是難搞。我只是記得那次黑得太早。」\n\n「片尾字幕還在跑，燈就先滅了。不是慢慢暗，是一下子——像有人把整個樓梯間的呼吸抽走。」\n\n「然後有人在樓梯間推擠，有人跌倒，有人在叫。」\n\n他咬著字：「我記得時間。因為我看了手錶。我還想著『怎麼可能比散場早』。」\n\n「觀眾罵我，我還得跟他們道歉。像是我親手把電影掐死一樣。」\n\n他停了一下：「那不是節能，那是有人在測試——不管是測系統，還是測觀眾。」',
+              text: '梁以安說：「我不是難搞。我只是記得那次黑得太早。」\n\n「片尾字幕還在跑，燈就先滅了。不是慢慢暗，是一下子——像有人把整個樓梯間的呼吸抽走。」\n\n「然後有人在樓梯間推擠，有人跌倒，有人在叫。」\n\n「我熱愛那部片，也尊重現場每一個把工作做完的人——我不是來拆自己片子的。但那種節奏不該由觀眾或第一線來扛。」\n\n他咬著字：「我記得時間。因為我看了手錶。我還想著『怎麼可能比散場早』。」\n\n「觀眾在罵影城、罵節能藉口——我跟他們一起火大，火氣被帶去對準**集團**那套說法。他們卻把陳佑誠推到鏡頭前道歉，好像燈是我們按錯的。」\n\n他停了一下：「那不是節能，那是有人在測試——遠端黑暗、人群恐慌——像在試一場實地彩排。」',
               type: 'character',
               characterId: 'npc_liang_yian',
               characterName: '梁以安',
@@ -238,7 +250,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '陳佑誠說：「回報過。不是一次。格式都對，優先級也對，消失得更對。」\n\n「回報單是三份。時間我記得很清楚——因為我每次都想：『這次總該有人回我吧。』」\n\n他指向燈控箱：「這種提前切換不是壞掉，是被允許。被允許，就一定有人知道。」\n\n「控制區那邊有我的回報單副本，還有那個插件的版本記錄。你去看，然後再告訴我你有什麼問題。」',
+              text: '陳佑誠說：「回報過。不是一次。格式都對，優先級也對，消失得更對。」\n\n「回報單是三份。時間我記得很清楚——因為我每次都想：『這次總該有人回我吧。』」\n\n「上新聞那晚，影城要我穿制服站到鏡頭前道歉——制服最好找。導演沒道歉；他跟觀眾一樣罵**集團**。」\n\n他指向燈控箱：「這種提前切換不是壞掉，是**被允許留在系統裡**。簽收過、進過系統的人——有那個權限的，很難說集體不知情。」\n\n「控制區那邊有我的回報單副本，還有那個插件的版本記錄。你去看，然後再告訴我你有什麼問題。」',
               type: 'character',
               characterId: 'npc_chen_youcheng',
               characterName: '陳佑誠（技術維護）',
@@ -259,7 +271,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '記錄顯示燈光比散場時間早了 3 分鐘切換。\n\n這是第二起事故的起點：不是設備故障，是操作指令在錯誤的時間點執行。\n\n那 3 分鐘——樓梯間從亮到暗，人群還在移動，沒有預警，沒有廣播。',
+              text: '記錄顯示燈光比散場時間早了 3 分鐘切換。\n\n這是第二起事故的起點：不是設備故障，是操作指令在錯誤的時間點執行。\n\n那 3 分鐘——樓梯間從亮到暗，人群還在移動，沒有預警，沒有廣播。像把「恐慌」當變因，在現場試一次。',
               type: 'narrator',
             },
           },
@@ -304,7 +316,7 @@ const scenes: Record<string, Scene> = {
     ],
     puzzles: [],
     initialDialog: {
-      text: '光芒影城的樓梯間比城市影城的老一些，照明偏冷，扶手有磨損。\n\n第二起事故沒有人死，所以很快被歸類為「偶發事件」。但梁以安說，那次黑得太早。',
+      text: '光芒影城的樓梯間比城市影城的老一些，照明偏冷，扶手有磨損。\n\n第二起事故沒有人死，曾上新聞；對外鞠躬道歉的是被推出來的維護，怒氣卻被話術導去對準**集團口徑**，很快整件事就被壓成「偶發」。但梁以安說，那次黑得太早。',
       type: 'narrator',
     },
   },
@@ -363,7 +375,10 @@ const scenes: Record<string, Scene> = {
         randomDialogs: [
           { id: 'ch4_chen_control_idle_1', text: '陳佑誠說：「同一套插件跑三館，你還要我相信這些都是巧合？」', type: 'hint', weight: 1 },
           { id: 'ch4_chen_control_idle_2', text: '「這個版本的插件有一個很方便的特性：可以遠端觸發燈控，不需要本地授權。」', type: 'hint', weight: 1 },
-          { id: 'ch4_chen_control_idle_3', text: '「三份回報單。四個月、兩個月、六週。每次都消失在審核流程裡。」', type: 'hint', weight: 1 },
+          { id: 'ch4_chen_control_idle_3', text: '「三份回報單。四個月、兩個月、六週。簽收過、進過系統——然後沒批示。你說那是忘記？」', type: 'hint', weight: 1 },
+          { id: 'ch4_chen_control_casual_1', text: '「我寧願它壞得大聲，也不要壞得像『正常』。」', type: 'casual', weight: 2 },
+          { id: 'ch4_chen_control_casual_2', text: '陳佑誠敲敲抽屜：「有些東西放最底層，不是忘了，是等一個肯開的人。」', type: 'casual', weight: 2 },
+          { id: 'ch4_chen_control_hint_1', text: '「遠端不代表神祕，只代表人不必站在這間房。」', type: 'hint', weight: 2 },
         ],
         available: true,
       },
@@ -374,6 +389,10 @@ const scenes: Record<string, Scene> = {
         randomDialogs: [
           { id: 'ch4_liang_control_idle_1', text: '梁以安說：「我以為那次只是我倒霉。陳先生說，這個漏洞三館都有。」', type: 'hint', weight: 1 },
           { id: 'ch4_liang_control_idle_2', text: '「如果這不是偶發，那第一次——那個死掉的人——也不是偶發。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liang_control_casual_1', text: '「我以前只在乎片尾字幕的美感——那是對作品與現場的尊重。現在我只在乎它亮不亮。」', type: 'casual', weight: 2 },
+          { id: 'ch4_liang_control_casual_2', text: '梁以安低聲：「你知道最侮辱的是什麼嗎？他們用『節能』兩個字安慰觀眾。」', type: 'casual', weight: 2 },
+          { id: 'ch4_liang_control_hint_1', text: '「同一套版本……代表同一套可被利用的空隙。」', type: 'hint', weight: 2 },
+          { id: 'ch4_liang_control_hint_2', text: '「我不管誰的 KPI——品牌話術與機房母帶，遲早會在**集團**裡互相咬。」', type: 'hint', weight: 1 },
         ],
         available: true,
       },
@@ -400,7 +419,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '陳佑誠說：「你看到版本號了嗎？城市 W 跟光芒 R，完全一樣。不只是同一套，是同一個 patch。」\n\n「這個版本有一個問題：燈控可以被遠端觸發，不需要人在本地操作。我六週前就回報了，格式對、優先級對，就是沒有人回應。」\n\n他頓了頓：「回報過，不代表有人想解。」',
+              text: '陳佑誠說：「你看到版本號了嗎？城市 W 跟光芒 R，完全一樣。不只是同一套，是同一個 patch。」\n\n「這個版本有一個問題：燈控可以被遠端觸發，不需要人在本地操作——等於把『黑暗＋人群反應』變成可排程的東西。我六週前就回報了，格式對、優先級對，就是沒有人回應。」\n\n他頓了頓：「回報過，不代表有人想解。**洞留在場上**，才能一再拿來用。」',
               type: 'character',
               characterId: 'npc_chen_youcheng',
               characterName: '陳佑誠（技術維護）',
@@ -421,7 +440,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '梁以安說：「陳先生說這個 patch 版本三個館都有，我聽完就有點不舒服。」\n\n「因為這代表那次事故不是光芒影城自己的問題——是個更大的問題的其中一次。」\n\n「我開始討厭『差一點』這三個字。它們通常只是下次的預告。」',
+              text: '梁以安說：「陳先生說這個 patch 版本三個館都有，我聽完就有點不舒服。」\n\n「因為這代表那次事故不是光芒影城自己的問題——是**集團系統**裡同一個洞的一次顯影。」\n\n「我在乎片尾字幕亮完、在乎放映被尊重——結果他們用『節能』兩個字，把整件事說得像現場活該。」\n\n「我開始討厭『差一點』這三個字。它們通常只是下次的預告。」',
               type: 'character',
               characterId: 'npc_liang_yian',
               characterName: '梁以安',
@@ -489,7 +508,7 @@ const scenes: Record<string, Scene> = {
     ],
     puzzles: [],
     initialDialog: {
-      text: '副面板區的介面比外面乾淨，但陳佑誠說，乾淨的地方有時候只是因為沒有人真的進來看過。',
+      text: '副面板區的介面比外面乾淨，但陳佑誠說，乾淨的地方有時候只是因為沒有人真的進來看過。\n\n抽屜裡那三份回報——簽收過、進過系統——擱置本身就像決策。',
       type: 'narrator',
     },
   },
@@ -541,6 +560,10 @@ const scenes: Record<string, Scene> = {
         randomDialogs: [
           { id: 'ch4_liang_hall_idle_1', text: '梁以安說：「那個人不是從主出口走的。他從側門出去，那邊沒有監視器。」', type: 'hint', weight: 1 },
           { id: 'ch4_liang_hall_idle_2', text: '「我想衝過去，但我不確定要救人還是跟著那個人。結果兩個都來不及。」', type: 'hint', weight: 1 },
+          { id: 'ch4_liang_hall_casual_1', text: '「廣播響的時候，燈早就把人心弄慌了。」', type: 'casual', weight: 2 },
+          { id: 'ch4_liang_hall_casual_2', text: '梁以安盯著側門：「有些人離場的方式，像彩排過。」', type: 'casual', weight: 2 },
+          { id: 'ch4_liang_hall_hint_1', text: '「我記得鞋底摩擦的聲音。很快，像在躲什麼。」', type: 'hint', weight: 2 },
+          { id: 'ch4_liang_hall_hint_2', text: '「你如果要我相信這是意外，先解釋順序為什麼會錯。」', type: 'hint', weight: 1 },
         ],
         available: true,
       },
@@ -551,6 +574,10 @@ const scenes: Record<string, Scene> = {
         randomDialogs: [
           { id: 'ch4_chen_hall_idle_1', text: '陳佑誠說：「他知道哪個面板、哪個操作、哪個時機。不是隨機的，這是準備過的。」', type: 'hint', weight: 1 },
           { id: 'ch4_chen_hall_idle_2', text: '「如果你問我誰有能力做到這件事，我只能給你一個技術清單，而不是一個名字。」', type: 'hint', weight: 1 },
+          { id: 'ch4_chen_hall_casual_1', text: '「手動切換那個位置……平常訓練不會教你按那裡。」', type: 'casual', weight: 2 },
+          { id: 'ch4_chen_hall_casual_2', text: '陳佑誠看向鞋印：「逃得快，不代表心虛；但心虛的人通常都很快。」', type: 'casual', weight: 2 },
+          { id: 'ch4_chen_hall_hint_1', text: '「共用帳號這件事，你們晚點會在別的館再碰到一次。」', type: 'hint', weight: 2 },
+          { id: 'ch4_chen_hall_hint_2', text: '「序列能被改，代表有人當時就在流程上游。」', type: 'hint', weight: 1 },
         ],
         available: true,
       },
@@ -617,7 +644,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '廣播比散場信號延遲 8 秒；燈光在廣播前已切換。\n\n觀眾在沒有任何廣播提示的情況下，面對驟然變暗的大廳開始移動。\n\n這個序列——燈先滅、廣播後響——不是設備偶然失序，這是執行順序被刻意改過。',
+              text: '廣播比散場信號延遲 8 秒；燈光在廣播前已切換。\n\n觀眾在沒有任何廣播提示的情況下，面對驟然變暗的大廳開始移動。\n\n這個序列——燈先滅、廣播後響——**廣播與燈光刻意脫節**，不是設備偶然失序；像在**放大恐慌**，測人群在錯拍裡會怎麼擠、怎麼慌。',
               type: 'narrator',
             },
           },
@@ -645,7 +672,7 @@ const scenes: Record<string, Scene> = {
     ],
     puzzles: [],
     initialDialog: {
-      text: '大廳的燈又亮起來了，但梁以安說，他永遠記得它滅下去的順序。\n\n「人群能被當測試。」這句話在這裡有了重量。',
+      text: '大廳的燈又亮起來了，但梁以安說，他永遠記得它滅下去的順序。\n\n遠端黑暗、人群恐慌——像一場被排過的實地彩排。「人群能被當測試。」這句話在這裡有了重量。',
       type: 'narrator',
     },
   },
@@ -665,7 +692,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_chen_sensitive1_1',
       npcId: 'npc_chen_youcheng',
       text:
-        '陳佑誠說：「我把三份回報單都按標準流程送出去了。第一份四個月前，第二份兩個月前，最後一份六週前。」\n\n「每次都有承辦人簽收，每次都進了系統，每次都沒有下文。」\n\n「你問我是誰擋住的——我不知道。但我知道，不是所有擱置都是遺忘，有些擱置是決策。」',
+        '陳佑誠說：「我把三份回報單都按標準流程送出去了。第一份四個月前，第二份兩個月前，最後一份六週前。」\n\n「每次都有承辦人簽收，每次都進了系統，每次都沒有下文。」\n\n「你問我是誰擋住的——我不知道。但簽收過的人，權限都在那條鏈上——**很難假裝全系統沒人看見。**」\n\n「不是所有擱置都是遺忘，有些擱置是決策。」',
       choices: [
         {
           id: 'chen_s1_q1',
@@ -687,7 +714,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_chen_s1_reply_q1',
       npcId: 'npc_chen_youcheng',
       text:
-        '「技術回報的審核鏈最後會到部門主管那邊。光芒影城的技術這端，線最後接到哪裡，我沒辦法直接告訴你，但你可以從維護帳號的授權樹往上追。」\n\n「我只能說：不是每個人都想讓這個漏洞被修掉。」',
+        '「技術回報的審核鏈最後會到部門主管那邊。光芒影城的技術這端，線最後接到哪裡，我沒辦法直接告訴你，但你可以從維護帳號的授權樹往上追。」\n\n「我只能說：不是每個人都想讓這個漏洞被修掉。**留著它**，才有人在多館、多時間窗能用同一套手法。」',
       choices: [
         {
           id: 'chen_s1_end',
@@ -764,6 +791,109 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
           effects: [
             { type: 'setFlag', flag: 'npc_chen_sensitive_done', value: true },
           ],
+        },
+      ],
+    },
+  },
+
+  // ──────────────────────────────────────────────
+  // 梁以安 敏感對話（ch4：主觀證詞／目擊）
+  // ──────────────────────────────────────────────
+  npc_liang_yian: {
+    node_liang_sensitive1_1: {
+      id: 'node_liang_sensitive1_1',
+      npcId: 'npc_liang_yian',
+      text:
+        '梁以安吸一口氣，像在把舊聞的標題從嘴邊推開：「他們把陳佑誠推到鏡頭前道歉。我站在旁邊聽——那不像認錯，像替整個體制扛。」\n\n「我沒有對觀眾說對不起。我跟著一起罵——罵的是**集團**那套話；片尾還在跑，大廳就先暗了；那次不是創作失誤，是**廣播與燈光刻意脫節**。」\n\n「你問我信不信『節能』？我只信我手錶上的時間。」',
+      choices: [
+        {
+          id: 'liang_s1_q1',
+          label: '你覺得「推維護員出去道歉」是為了轉移焦點嗎？',
+          effects: [{ type: 'setFlag', flag: 'ch4_liang_s1_q1', value: true }],
+        },
+        {
+          id: 'liang_s1_q2',
+          label: '你確定是燈先走、廣播後到——不是你自己慌？',
+          effects: [{ type: 'setFlag', flag: 'ch4_liang_s1_q2', value: true }],
+        },
+      ],
+      next: (state: GameState): string | null => {
+        if (state.flags.ch4_liang_s1_q1) return 'node_liang_s1_reply_q1';
+        return 'node_liang_s1_reply_q2';
+      },
+    },
+    node_liang_s1_reply_q1: {
+      id: 'node_liang_s1_reply_q1',
+      npcId: 'npc_liang_yian',
+      text:
+        '「對外要一句對不起，最簡單——他們挑了穿制服的。」\n\n「我沒有站在道歉那邊。我站在觀眾這邊——黑得太早，不是觀眾的錯。」\n\n「把火氣帶去罵**集團口徑**，大家就比較不想問：誰把洞留在系統裡。」\n\n「他們要的是場面先穩住，不是先把真相排好。」',
+      choices: [
+        {
+          id: 'liang_s1_end',
+          label: '（結束對話）',
+          effects: [{ type: 'setFlag', flag: 'npc_liang_yian_sensitive_done', value: true }],
+        },
+      ],
+    },
+    node_liang_s1_reply_q2: {
+      id: 'node_liang_s1_reply_q2',
+      npcId: 'npc_liang_yian',
+      text:
+        '梁以安抬眼，語氣很硬：「我慌過，但我沒有幻覺。」\n\n「我看了兩次錶，怕是自己嚇自己——結果時間只更確定。」\n\n「燈下去那一刻，字幕還在跑。那不是節能，是順序被換過。」',
+      choices: [
+        {
+          id: 'liang_s1_end',
+          label: '（結束對話）',
+          effects: [{ type: 'setFlag', flag: 'npc_liang_yian_sensitive_done', value: true }],
+        },
+      ],
+    },
+
+    node_liang_sensitive2_1: {
+      id: 'node_liang_sensitive2_1',
+      npcId: 'npc_liang_yian',
+      text:
+        '梁以安視線掃向面板，又掃向側門：「大廳那次，我看到有人在邊上操作——不是巡邏那種從容，是很快、很準。」\n\n「然後他往側門走。那邊沒鏡頭，我事後才想通。」\n\n「我想追，但人潮在推。我也不知道該先救人還是先追人。」',
+      choices: [
+        {
+          id: 'liang_s2_q1',
+          label: '如果你再見到那個人，你認得出來嗎？',
+          effects: [{ type: 'setFlag', flag: 'ch4_liang_s2_q1', value: true }],
+        },
+        {
+          id: 'liang_s2_q2',
+          label: '你覺得維護員該為那次事故負責嗎？',
+          effects: [{ type: 'setFlag', flag: 'ch4_liang_s2_q2', value: true }],
+        },
+      ],
+      next: (state: GameState): string | null => {
+        if (state.flags.ch4_liang_s2_q1) return 'node_liang_s2_reply_q1';
+        return 'node_liang_s2_reply_q2';
+      },
+    },
+    node_liang_s2_reply_q1: {
+      id: 'node_liang_s2_reply_q1',
+      npcId: 'npc_liang_yian',
+      text:
+        '「鞋、背影、走路的方式——我記得，但我不是警方素描師。」\n\n「我能確定的是：他知道往哪逃，也知道哪裡拍不到。」\n\n「那種離場不像觀眾，像收工。」',
+      choices: [
+        {
+          id: 'liang_s2_end',
+          label: '（結束對話）',
+          effects: [{ type: 'setFlag', flag: 'npc_liang_yian_sensitive_done', value: true }],
+        },
+      ],
+    },
+    node_liang_s2_reply_q2: {
+      id: 'node_liang_s2_reply_q2',
+      npcId: 'npc_liang_yian',
+      text:
+        '梁以安停了一秒，語氣軟下來：「不該。」\n\n「第一線的人跟我一樣，都是被推出去頂的。真正該回答問題的，不在面板旁邊。」\n\n「你們若只抓得到道歉的人，永遠只會拿到最便宜的結局。」',
+      choices: [
+        {
+          id: 'liang_s2_end',
+          label: '（結束對話）',
+          effects: [{ type: 'setFlag', flag: 'npc_liang_yian_sensitive_done', value: true }],
         },
       ],
     },

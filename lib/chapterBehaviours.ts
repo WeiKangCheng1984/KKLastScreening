@@ -1,10 +1,7 @@
 import type { GameState } from '@/types/game';
 import { sensitiveGatesByChapter } from '@/data/chapterBehaviourConfigs';
 
-export type NpcBehaviourType =
-  | 'random_dialog'
-  | 'sensitive_gate'
-  | 'none';
+export type NpcBehaviourType = 'random_dialog' | 'sensitive_gate';
 
 export interface NpcBehaviourResult {
   type: NpcBehaviourType;
@@ -22,10 +19,10 @@ export function getNpcClickBehaviour(chapterId: string, ctx: NpcContext): NpcBeh
   const { npcId, state, sceneId, casualTalkCount } = ctx;
   const flags = state.flags || {};
   const configs = sensitiveGatesByChapter[chapterId];
-  if (!configs) return { type: 'none' };
+  if (!configs) return { type: 'random_dialog' };
 
   const cfg = configs.find((c) => c.npcId === npcId);
-  if (!cfg) return { type: 'none' };
+  if (!cfg) return { type: 'random_dialog' };
 
   if (flags[cfg.doneFlag]) {
     return { type: 'random_dialog' };

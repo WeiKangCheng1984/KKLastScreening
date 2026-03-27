@@ -117,6 +117,7 @@ export const flagTestGroups: FlagGroup[] = [
     flags: [
       { id: 'ch4_task_from_liu', label: '劉隊任務已接' },
       { id: 'npc_chen_sensitive_done', label: '陳佑誠敏感對話完成（解鎖報告入口）' },
+      { id: 'npc_liang_yian_sensitive_done', label: '梁以安敏感對話完成（解鎖報告入口）' },
       { id: 'ch4_liu_report_done', label: '向劉隊報告完成' },
       { id: 'ch4_reasoning_done', label: '推理完成' },
       { id: 'ch4_liang_stair_talked', label: '梁以安（樓梯間）已談' },

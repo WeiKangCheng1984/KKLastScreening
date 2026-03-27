@@ -384,7 +384,7 @@ export default function DialogBox({
                 {formatNpcDisplayName(dialog.characterName || '角色')}
               </span>
             )}
-            {mode !== 'npc' && !dialog.type && '旁白'}
+            {mode !== 'npc' && (!dialog.type || dialog.type === 'narrator') && '旁白'}
           </div>
           <div className="flex items-center gap-2">
             {/* 快速跳過按鈕 */}

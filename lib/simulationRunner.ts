@@ -588,6 +588,7 @@ export class SimulationRunner {
                 npc_zhou_jie: 'npc_zhou_jie_sensitive_done',
                 npc_gu_naiqian: 'npc_gu_naiqian_sensitive_done',
                 npc_chen_youcheng: 'npc_chen_sensitive_done',
+                npc_liang_yian: 'npc_liang_yian_sensitive_done',
                 npc_gao_wenjie: 'npc_gao_sensitive_done',
                 npc_lin_zirui: 'npc_lin_ch6_confrontation_done',
               };

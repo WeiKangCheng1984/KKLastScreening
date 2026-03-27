@@ -772,6 +772,8 @@ export class GameEngine {
       dialog.effects.forEach(effect => this.applyEffect(effect));
     }
 
+    this.incrementNpcCasualTalk(npcId);
+
     // 返回 Dialog 對象，用於顯示對話框（頭像優先使用 WEBP：characterId + characterExpression）
     return {
       text: dialog.text,

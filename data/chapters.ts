@@ -65,7 +65,7 @@ export const chapters: Record<string, Chapter> = {
     intro: {
       title: '第四章：光芒影城',
       subtitle: '未遂的事故',
-      description: '第二起事故沒有人死，所以沒有人認真記錄。\n\n但樓梯間的燈比應該亮的時間早了 3 分鐘，有人差點在黑暗裡摔下去。\n\n陳佑誠說他早就回報過漏洞。你要找到那份回報去了哪裡。',
+      description: '第二起事故沒有人死——上過小媒體、影城推維護員出來對鏡頭道歉，導演反而和觀眾站在同一邊罵體制，最後仍被說成偶發。\n\n但樓梯間的燈比應該亮的時間早了 3 分鐘，有人差點在黑暗裡摔下去。\n\n陳佑誠說他早就回報過漏洞。你要找到那份回報去了哪裡。',
       moodText: '我開始討厭「差一點」這三個字。\n\n它們通常只是下次的預告。',
       ambientAudio: '/audio/bgm/kk_bgm_title_ch4.mp3',
     },

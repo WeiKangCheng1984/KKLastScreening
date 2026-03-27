@@ -103,7 +103,7 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
     id: 'ch2_report_q1',
     sentenceParts: [
       '卷宗很乖，只認戶籍那兩個字；城市不乖，抬頭、署名、口徑可以多線並存。（口頭流傳的那套先不進卷。）你要寫進報告、能對上對外稿與署名欄的「那一格」是「',
-      '」；把它折成職能，他是拿筆去撞流程的人——也就是「',
+      '」；把它折成職能，他是拿筆去撞流程的人，也就是「',
       '」。',
     ],
     blank1: {
@@ -211,7 +211,7 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
       correctIds: ['ch2r2_1a', 'ch2r2_1b', 'ch2r2_1c', 'ch2r2_1d'],
       replyOnCorrect: '對。完整常常是陷阱；缺口才是座標。',
       wrongRepliesByChoiceId: {
-        ch2r2_1k1: '貼圖戰很精彩，但精彩很少能當呈堂證供——除非你想呈的是青少年。',
+        ch2r2_1k1: '貼圖戰很精彩，但精彩很少能當呈堂證供，除非你想呈的是青少年。',
       },
     },
     blank2: {
@@ -246,7 +246,7 @@ export const ch2ReportFillBlanks: TwoBlankFillConfig[] = [
       },
     },
     bothCorrectDialogue: {
-      kk: '你越讀越像愛情片，地圖卻越讀越像內部文件——這種落差，才叫線索。',
+      kk: '你越讀越像愛情片，地圖卻越讀越像內部文件，這種落差，才叫線索。',
       liu: '動機欄留空。先把代號與舊案寫成能對的。',
     },
     wrongFallback:
@@ -259,15 +259,15 @@ const ch2TriWheelAlphabet = ['W', 'R', 'C', 'A', 'B', 'D', 'M', 'K'];
 export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
   deviceScreenTitle: '未同步備忘 · 吳亞',
   draftSurfaceLines: [
-    '【導言｜刪】節能那套上線後，散場像被遙控——（此段語氣太硬，暫不寄）',
+    '【導言｜刪】節能那套上線後，散場像被遙控，（此段語氣太硬，暫不寄）',
     '私訊殘句：壓節能稿；「她也在」；三起不是數字，是欄位名。',
     'W／R／C 在腦中亂跳，像在試哪一段路最常寫進新聞。',
     '不能寄。寄了就是幫他們把喪事收成喜訊。',
   ],
   draftRevealLines: [
     '螢幕暗下來，才聽見自己怕什麼：不是死，是名字被別人先填進欄位。',
-    '鎖著一則標題刺眼的備忘片斷——跟梁以安導演、跟現場壓不下的情緒有關；要開它，對外得先叫對筆名，三館代號也要轉到那晚他心裡對的位置。',
-    '這支機子不認勇氣，只認你願不願意把「烏鴉」兩個字與 W、R、C 對齊——對齊了，藏著的那行字才肯浮上來。',
+    '鎖著一則標題刺眼的備忘片斷，跟梁以安導演、跟現場壓不下的情緒有關；要開它，對外得先叫對筆名，三館代號也要轉到那晚他心裡對的位置。',
+    '這支機子不認勇氣，只認你願不願意把「烏鴉」兩個字與 W、R、C 對齊，對齊了，藏著的那行字才肯浮上來。',
   ],
   confirmReadLabel: '讀完了',
   confirmReadHint: '心裡先對齊筆名與三館，再回劉隊那邊開口。',
@@ -275,13 +275,13 @@ export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
   round2PenNamePlaceholder: '兩個字',
   round2PenNameWrongHint: '劉隊眉頭一皺：「抬頭那兩個字，跟他對外用的不一致。」',
   acceptablePenNameAnswers: ['烏鴉'],
-  round2TriWheelWrongHint: '劉隊：「三館那三格——你在地圖上不是繞過？」',
+  round2TriWheelWrongHint: '劉隊：「三館那三格，你在地圖上不是繞過？」',
   triWheelColumns: ['左格', '中格', '右格'] as [string, string, string],
   triWheelAlphabet: ch2TriWheelAlphabet,
   triWheelCorrect: ch2TriWheelCorrect,
   powerSaveDialogTitle: '螢幕太亮',
   powerSaveDialogMessage:
-    '電量見底了。要不要把螢幕壓暗？暗下來，有些字才肯從雜訊裡浮上來——也省一點電。',
+    '電量見底了。要不要把螢幕壓暗？暗下來，有些字才肯從雜訊裡浮上來，也省一點電。',
   powerSaveConfirmLabel: '壓暗',
   powerSaveCancelLabel: '先不要',
   powerOffDialogTitle: '拉回亮度',
@@ -330,7 +330,7 @@ export const ch2PhoneRiddle: Ch2PhoneRiddleConfig = {
 
 export const ch2ReportRound2Panel: Ch2ReportRound2PanelCopy = {
   liuClosing:
-    '劉隊把筆記本闔上。\n\n「手機裡還壓著一則跟梁以安導演有關的東西——情緒很尖。名字與三館對不對，決定我們進大廳要叫住誰。」',
+    '劉隊把筆記本闔上。\n\n「手機裡還壓著一則跟梁以安導演有關的東西，情緒很尖。名字與三館對不對，決定我們進大廳要叫住誰。」',
   supplement:
     '「筆名對了，轉盤對了，那條才讀得到。別讓我拿猜的去問人。」',
   finalizeButtonLabel: '就這版，往上遞',

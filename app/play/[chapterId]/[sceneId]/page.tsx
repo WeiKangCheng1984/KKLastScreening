@@ -517,9 +517,11 @@ export default function PlayPage() {
     // 事件觸發失敗，顯示 hotspot 提示
     const hotspot = scene.hotspots.find(h => h.id === hotspotId);
     if (hotspot?.hint) {
+      const hintTitle = hotspot.description ?? hotspot.id;
       setCurrentDialog({
         text: hotspot.hint,
         type: 'narrator',
+        title: hintTitle,
       });
     }
     return true; // 已處理，不需要繼續
@@ -558,7 +560,7 @@ export default function PlayPage() {
       queueMicrotask(() => {
         if (!engineRef.current) return;
         const d = engineRef.current.triggerRandomNpcDialog(skipCfg.npcId);
-        if (d) { engineRef.current.incrementNpcCasualTalk(skipCfg.npcId); setCurrentDialog(d); }
+        if (d) setCurrentDialog(d);
       });
       return;
     }
@@ -1283,7 +1285,7 @@ export default function PlayPage() {
                     background: scene.background,
                     zoomCenter: hotspot ? getHotspotCenter(hotspot) : { x: 0.5, y: 0.5 },
                     dialogs,
-                    interactionName: hotspot?.description,
+                    interactionName: hotspot ? hotspot.description ?? hotspot.id : undefined,
                   });
                 }
               }
@@ -1301,9 +1303,11 @@ export default function PlayPage() {
     // 如果沒有特殊處理，顯示 hotspot 提示
     const hotspot = scene.hotspots.find(h => h.id === hotspotId);
     if (hotspot?.hint) {
+      const hintTitle = hotspot.description ?? hotspot.id;
       const hintDialog: Dialog = {
         text: hotspot.hint || hotspot.description || '',
         type: 'narrator',
+        title: hintTitle,
       };
       const hintPresentation =
         hotspot.hintPresentation ?? scene.defaultDialogPresentation ?? 'zoom';
@@ -1315,7 +1319,7 @@ export default function PlayPage() {
           background: scene.background,
           zoomCenter: getHotspotCenter(hotspot),
           dialogs: [hintDialog],
-          interactionName: hotspot.description,
+          interactionName: hintTitle,
         });
       }
     }
@@ -1960,6 +1964,18 @@ export default function PlayPage() {
                   }
                 }
 
+                if (npcId === 'npc_liu') {
+                  const liu = resolveLiuNpcClick({ chapterId, sceneId, engine });
+                  if (liu.kind === 'noop') return;
+                  if (liu.kind === 'random_liu') {
+                    const rand = engine.triggerRandomNpcDialog('npc_liu');
+                    if (rand) setCurrentDialog(rand);
+                    return;
+                  }
+                  setCurrentDialog(liu.dialog);
+                  return;
+                }
+
                 const behaviour = getNpcClickBehaviour(chapterId, {
                   state: st,
                   npcId,
@@ -1979,30 +1995,7 @@ export default function PlayPage() {
 
                 if (behaviour.type === 'random_dialog') {
                   const dialog = engine.triggerRandomNpcDialog(npcId);
-                  if (dialog) {
-                    engine.incrementNpcCasualTalk(npcId);
-                    setCurrentDialog(dialog);
-                    if (npcId === 'npc_xiaozhang') {
-                    }
-                  }
-                  return;
-                }
-
-                if (npcId === 'npc_liu') {
-                  const liu = resolveLiuNpcClick({ chapterId, sceneId, engine });
-                  if (liu.kind === 'noop') return;
-                  if (liu.kind === 'random_liu') {
-                    const rand = engine.triggerRandomNpcDialog('npc_liu');
-                    if (rand) setCurrentDialog(rand);
-                    return;
-                  }
-                  setCurrentDialog(liu.dialog);
-                  return;
-                }
-
-                const dialog = engine.triggerRandomNpcDialog(npcId);
-                if (dialog) {
-                  setCurrentDialog(dialog);
+                  if (dialog) setCurrentDialog(dialog);
                 }
               }}
               checkAvailability={(npc) => {

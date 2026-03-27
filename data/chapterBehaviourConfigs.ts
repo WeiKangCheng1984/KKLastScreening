@@ -78,6 +78,14 @@ export const sensitiveBranchesByChapter: Record<string, SensitiveBranchConfig[]>
         { choiceId: 'chen_branch_2', choiceText: '我想問：你說符合技術清單的人不多——你心裡有幾個名字？', nodeId: 'node_chen_sensitive2_1' },
       ],
     },
+    {
+      npcId: 'npc_liang_yian',
+      pickOneText: '梁以安看你一眼，像在確認你是不是只想聽「官方說法」。你只能選一條路把話問透，另一條今晚就別再掀。',
+      branches: [
+        { choiceId: 'liang_branch_1', choiceText: '我想問：那次影城推陳佑誠公開道歉——你覺得是在保護誰、又在掩蓋什麼？', nodeId: 'node_liang_sensitive1_1' },
+        { choiceId: 'liang_branch_2', choiceText: '我想問：大廳混亂那幾秒——你眼睛裡看到的那個人，你還能描述多少？', nodeId: 'node_liang_sensitive2_1' },
+      ],
+    },
   ],
   ch5: [
     {
@@ -204,6 +212,20 @@ export const sensitiveGatesByChapter: Record<string, NpcSensitiveGateConfig[]> =
         skip: { id: 'chen_sensitive_skip', text: '先看資料就好，暫時不問。' },
       },
     },
+    {
+      npcId: 'npc_liang_yian',
+      doneFlag: 'npc_liang_yian_sensitive_done',
+      allowedScenes: ['scene_ch4_main_hall'],
+      observedFlags: ['ch4_hall_crowd_viewed', 'ch4_hall_trace_viewed'],
+      minObservedCount: 2,
+      casualTalkThreshold: 1,
+      gateText:
+        '梁以安站在當時他站過的位置，視線掠過面板與側門。你覺得現在可以問他：那次記者會／公關場面背後，他到底看見了什麼、又沒看見什麼。',
+      choices: {
+        ask: { id: 'liang_sensitive_ask', text: '我想把當時的情節問清楚。' },
+        skip: { id: 'liang_sensitive_skip', text: '先讓他靜一靜。' },
+      },
+    },
   ],
 
   ch5: [
@@ -308,6 +330,12 @@ export const liuReportFlowByChapter: Record<string, LiuReportFlowConfig> = {
       {
         blockIfMissing: ['npc_chen_sensitive_done'],
         text: '「先去跟陳佑誠把控制區的東西確認完。」\n\n「等你問完那個問題，再回來跟我說你怎麼看。」',
+      },
+      {
+        blockIfMissing: ['npc_liang_yian_sensitive_done'],
+        text:
+          '「大廳那邊，梁以安還梗著。」\n\n' +
+          '「導演看見的不是 log，是觀眾的臉——你去把他的話問深一點，再回來跟我說。」',
       },
       {
         text: '劉隊合上記錄本，說：「好。你現在可以講一次完整的版本。」\n\n「你要向我報告，還是再多走一圈？」',
