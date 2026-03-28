@@ -19,8 +19,8 @@ export interface Ch1ReportEditorProps {
 }
 
 const VISIBLE_STEPS = [
-  { id: 1, label: '時間線', icon: Clock },
-  { id: 3, label: '態度宣言', icon: MessageSquare },
+  { id: 1, label: '時間推測', icon: Clock },
+  { id: 3, label: '初步判斷', icon: MessageSquare },
 ];
 
 /** 單一數字翻牌（0–9） */
@@ -97,14 +97,16 @@ export default function Ch1ReportEditor({
   }, []);
 
   const attitudeFillBlanks = config.attitude.attitudeFillBlanks;
-  const useAttitudeFillBlanks = Boolean(attitudeFillBlanks && attitudeFillBlanks.length >= 5);
-  const showClosingView = showClosing || (useAttitudeFillBlanks && attitudeFillBlankIndex >= 5);
+  const attitudeBlankCount = attitudeFillBlanks?.length ?? 0;
+  const useAttitudeFillBlanks = attitudeBlankCount > 0;
+  const showClosingView =
+    showClosing || (useAttitudeFillBlanks && attitudeFillBlankIndex >= attitudeBlankCount);
 
   useEffect(() => {
-    if (!useAttitudeFillBlanks || attitudeFillBlankIndex < 5) return;
+    if (!useAttitudeFillBlanks || attitudeFillBlankIndex < attitudeBlankCount) return;
     engine.applyEffect({ type: 'setFlag', flag: 'ch1_attitude_declared', value: true });
     setShowClosing(true);
-  }, [useAttitudeFillBlanks, attitudeFillBlankIndex, engine]);
+  }, [useAttitudeFillBlanks, attitudeFillBlankIndex, attitudeBlankCount, engine]);
 
   const handleTimelineNext = () => {
     const range = config.timeline.crimeTimeRange;
@@ -139,7 +141,7 @@ export default function Ch1ReportEditor({
 
   return (
     <>
-      {step === 3 && useAttitudeFillBlanks && attitudeFillBlankIndex < 5 && attitudeFillBlanks && (
+      {step === 3 && useAttitudeFillBlanks && attitudeFillBlankIndex < attitudeBlankCount && attitudeFillBlanks && (
         <ReportFillBlank
           key={`att-q-${attitudeFillBlankIndex}`}
           config={attitudeFillBlanks[attitudeFillBlankIndex]}

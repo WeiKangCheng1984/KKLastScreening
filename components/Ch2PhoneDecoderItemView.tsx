@@ -12,7 +12,7 @@ export default function Ch2PhoneDecoderItemView({ onSuccess, onClose }: Ch2Phone
   return (
     <div className="rounded-2xl border border-zinc-600/80 bg-zinc-950/90 p-4 shadow-xl">
       <div className="flex items-center justify-between gap-2 mb-3">
-        <p className="text-xs text-zinc-400 tracking-wide">技術組暫扣機 · 螢幕還亮著</p>
+        <p className="text-xs text-zinc-400 tracking-wide">技術組暫扣機 · 螢幕還能亮著</p>
         <button
           type="button"
           onClick={onClose}
