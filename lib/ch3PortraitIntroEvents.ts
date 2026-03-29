@@ -6,19 +6,15 @@
 const CH3_PORTRAIT_INTRO_BY_SCENE: Record<string, Record<string, string>> = {
   scene_ch3_lobby_front: {
     npc_liu: 'talk_liu_ch3_task',
-    npc_lin_ruitang: 'talk_lin_ch3',
-    npc_ashun: 'talk_ashun_ch3_lobby',
-    npc_zhou_jie: 'talk_zhou_jie_ch3',
   },
   scene_ch3_brand_room: {
     npc_song_yazhen: 'talk_song_ch3',
     npc_zhang_jingheng: 'talk_zhang_ch3',
     npc_gu_naiqian: 'talk_gu_brand_ch3',
-  },
-  scene_ch3_server_corridor: {
-    npc_gu_naiqian: 'talk_gu_naiqian_ch3',
-    npc_xiaozhang: 'talk_xiazhang_ch3',
+    npc_lin_ruitang: 'talk_lin_ch3',
+    npc_zhou_jie: 'talk_zhou_jie_ch3',
     npc_ashun: 'talk_ashun_ch3_server',
+    npc_xiaozhang: 'talk_xiazhang_ch3',
   },
 };
 

@@ -188,10 +188,10 @@ export default function Ch3LogComparePanel({ onSolved, onClose }: Ch3LogCompareP
             </div>
           </div>
 
-          {/* 機房七條：高文傑＋雙館＋跳號／批次 */}
+          {/* 母帶殘留七條：高文傑＋雙館＋跳號／批次 */}
           <div className="rounded-xl border border-cyan-800/35 bg-cyan-950/20 overflow-hidden">
             <div className="px-3 py-2 text-[11px] font-medium text-cyan-200/90 border-b border-cyan-800/30 bg-cyan-950/30">
-              機房殘留（七條操作痕；序號與批次不連續）
+              母帶殘留（七條操作痕；序號與批次不連續）
             </div>
             <div className="overflow-x-auto max-h-[min(42vh,320px)] overflow-y-auto">
               <table className="w-full text-left text-[10px] sm:text-[11px] min-w-[560px]">

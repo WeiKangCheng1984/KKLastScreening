@@ -186,7 +186,7 @@ export const sensitiveGatesByChapter: Record<string, NpcSensitiveGateConfig[]> =
     {
       npcId: 'npc_gu_naiqian',
       doneFlag: 'npc_gu_naiqian_sensitive_done',
-      allowedScenes: ['scene_ch3_server_corridor'],
+      allowedScenes: ['scene_ch3_brand_room'],
       observedFlags: ['ch3_cross_venue_viewed', 'ch3_network_label_viewed', 'ch3_remote_login_viewed'],
       minObservedCount: 2,
       casualTalkThreshold: 1,
@@ -311,7 +311,7 @@ export const liuReportFlowByChapter: Record<string, LiuReportFlowConfig> = {
     steps: [
       {
         blockIfMissing: ['ch3_liu_report_ready'],
-        text: '「先把大廳、應對室、機房都走一遍。」\n\n「我要你帶回來的不是情緒，是一份能交出去的缺口清單。」',
+        text: '「先把大廳、應對室走一遍——技術角跟列印區在同一間，別漏。」\n\n「我要你帶回來的不是情緒，是一份能交出去的缺口清單。」',
       },
       {
         text: '「好。」\n\n「你現在說一次：白板、log、跨館、口徑——你看到的是哪一種版本？」',

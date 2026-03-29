@@ -1,5 +1,5 @@
 /**
- * 第三章：整理版 log vs 機房殘留 — 方案 B＋C
+ * 第三章：整理版 log vs 母帶／技術角殘留 — 方案 B＋C
  * B：同一操作帳號（高文傑）在城市影城／光芒影城短時間內成對出現，整理版卻無法追「從哪進來」。
  * C：事件序號不連續、插件批次／Session 編號跳躍，暗示中間紀錄或進入路徑被裁掉。
  * 通關：仍為還原被刪欄位標題（操作／來源／IP 三格字塊）。
@@ -25,7 +25,7 @@ export const ch3LogCompareTokens: LogCompareToken[] = [
   { id: 'lc_frag_prev', text: '前值' },
 ];
 
-/** 整理版：只保留「好看懂」的三欄，列印時整欄裁掉；列數也比機房少 */
+/** 整理版：只保留「好看懂」的三欄，列印時整欄裁掉；列數也比母帶殘留少 */
 export const ch3LogCompareOrganizedTable = {
   title: '張景衡整理版（對外節錄）',
   headers: ['時間', '操作員', '結果'] as const,
@@ -39,7 +39,7 @@ export const ch3LogCompareOrganizedTable = {
 } as const;
 
 /**
- * 機房殘留：七條操作痕（高文傑為主體），雙館交錯；序號與批次刻意不連續。
+ * 母帶殘留（技術角撈出）：七條操作痕（高文傑為主體），雙館交錯；序號與批次刻意不連續。
  * eventSeq：事件流水號（跳號）；batchSession：插件批次／session（C）
  */
 export interface Ch3RawLogRow {
@@ -145,7 +145,7 @@ export const ch3LogCompareWrongMessage =
   '不對。沒有「操作／來源／IP」這條欄名，你就無法把高文傑在 W 與 R 的成對紀錄，接回同一條進線證據。';
 
 export const ch3LogComparePanelIntro =
-  '下方是機房撈出的七條痕跡：高文傑帳號、雙館交錯、序號與批次都不連續——這正是「缺欄」會害你問錯人的原因。對照張景衡的節錄後，把被裁掉的欄位標題用三格字塊還原。';
+  '下方是母帶撈出的七條痕跡（技術角讀到的原始殘留）：高文傑帳號、雙館交錯、序號與批次都不連續——這正是「缺欄」會害你問錯人的原因。對照張景衡的節錄後，把被裁掉的欄位標題用三格字塊還原。';
 
 /** 三格還原正確後、關閉面板前顯示 */
 export const ch3LogCompareSuccessTitle = '欄位還原完成';
@@ -156,7 +156,7 @@ export const ch3LogCompareSuccessMessage =
 /** 成功態主按鈕（再呼叫 onSolved） */
 export const ch3LogCompareSuccessContinueLabel = '繼續';
 
-/** 機房表表頭（欄位盡量精簡以利手機橫向捲動） */
+/** 母帶殘留表表頭（欄位盡量精簡以利手機橫向捲動） */
 export const ch3LogCompareRawTableHeaders = [
   '事件序號',
   '批次／Session',

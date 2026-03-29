@@ -81,14 +81,14 @@ function getHotspotCenter(hotspot: Hotspot): { x: number; y: number } {
 
 /** 張景衡 oneTime 事件已消耗、尚未完成 log 對照時的補位對話（與 talk_zhang_ch3 同選項） */
 const CH3_ZHANG_COMPARE_REMINDER_DIALOG: Dialog = {
-  text: '張景衡揚揚紙：「整理版你讀過了，機房那邊你也對過一次了吧？」\n\n「三格對齊再寫報告，才不會像幫別人收工。」',
+  text: '張景衡揚揚紙：「整理版你讀過了，技術角母帶欄位你也對過一次了吧？」\n\n「三格對齊再寫報告，才不會像幫別人收工。」',
   type: 'character',
   characterId: 'npc_zhang_jingheng',
   characterName: '張景衡（品牌特助）',
   characterExpression: 1,
   characterPosition: 'right',
   choices: [
-    { id: 'ch3_open_compare_ui', text: '對照整理版與機房讀到的原始殘留' },
+    { id: 'ch3_open_compare_ui', text: '對照整理版與技術角讀到的原始殘留' },
     { id: 'close_only', text: '稍後再說' },
   ],
 };
@@ -1765,50 +1765,6 @@ export default function PlayPage() {
             text:
               '先在大廳把交接白板看完，再進應對室聽品牌方怎麼說、對照張景衡那份整理版。\n\n順序對了，進去才不會被話術牽著走。',
             type: 'narrator',
-          });
-          return;
-        }
-      }
-
-      // 2) 想前往機房外走道：任務＋白板＋話術里程碑＋ log 對照完成（與章節敘事順序一致）
-      if (targetSceneId === 'scene_ch3_server_corridor') {
-        if (!flags.ch3_task_from_liu) {
-          setCurrentDialog({
-            text:
-              '劉隊站在大廳角落看著你。\n\n「先過來，我跟你說一下你要查什麼。」',
-            type: 'character',
-            characterId: 'npc_liu',
-            characterName: '劉隊（偵查隊）',
-            characterExpression: 1,
-            characterPosition: 'right',
-          });
-          return;
-        }
-        if (!flags.ch3_milestone_whiteboard) {
-          setCurrentDialog({
-            text:
-              '機房的原始痕跡要對著看——你大廳白板還沒摸完，別急著往機房走。',
-            type: 'narrator',
-          });
-          return;
-        }
-        if (!flags.ch3_milestone_brand_script) {
-          setCurrentDialog({
-            text:
-              '應對室裡那份記者話術草稿還沒讀過。\n\n先搞清楚對外口徑禁講什麼，再進機房對原始 log，才不會被現場牽著鼻子走。',
-            type: 'narrator',
-          });
-          return;
-        }
-        if (!flags.ch3_log_compare_done) {
-          setCurrentDialog({
-            text:
-              '顧乃謙說：「整理版跟原始檔，你對照過了嗎？」\n\n「對完再來機房。帶著問題來，不要帶著空白的筆記本過來。」',
-            type: 'character',
-            characterId: 'npc_gu_naiqian',
-            characterName: '顧乃謙（系統工程）',
-            characterExpression: 1,
-            characterPosition: 'right',
           });
           return;
         }

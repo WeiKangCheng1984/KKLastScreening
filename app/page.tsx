@@ -3,15 +3,38 @@
 import { useRouter } from 'next/navigation';
 import { Play, BookOpen, FlaskConical } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { audioManager, GAME_BGM } from '@/lib/audioManager';
 import MuteAllButton from '@/components/MuteAllButton';
 import PasswordLoadModal from '@/components/PasswordLoadModal';
+
+/** 過場後若仍留在首頁（導航失敗等），逾時解除遮罩（毫秒） */
+const TRANSITION_SAFETY_MS = 6000;
 
 export default function Home() {
   const router = useRouter();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navLockRef = useRef(false);
+
+  const clearNavTimers = useCallback(() => {
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = null;
+    }
+    if (safetyTimerRef.current) {
+      clearTimeout(safetyTimerRef.current);
+      safetyTimerRef.current = null;
+    }
+  }, []);
+
+  const resetTransitionUi = useCallback(() => {
+    clearNavTimers();
+    navLockRef.current = false;
+    setIsTransitioning(false);
+  }, [clearNavTimers]);
 
   // 方案一：全遊戲一首 BGM，開頭頁若尚未播放則播放，離開時不中斷
   useEffect(() => {
@@ -21,35 +44,58 @@ export default function Home() {
     return () => {};
   }, []);
 
+  useEffect(() => {
+    return () => clearNavTimers();
+  }, [clearNavTimers]);
+
+  // 從 bfcache 還原（上一頁回來）時，過場遮罩可能仍為 true，需重置否則無法點擊
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        navLockRef.current = false;
+        setShowPasswordModal(false);
+        resetTransitionUi();
+      }
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, [resetTransitionUi]);
+
+  const scheduleNavigate = useCallback(
+    (path: string, delayMs: number) => {
+      if (navLockRef.current) return;
+      navLockRef.current = true;
+      setIsTransitioning(true);
+      clearNavTimers();
+      transitionTimerRef.current = setTimeout(() => {
+        transitionTimerRef.current = null;
+        router.push(path);
+        safetyTimerRef.current = setTimeout(() => {
+          safetyTimerRef.current = null;
+          resetTransitionUi();
+        }, TRANSITION_SAFETY_MS);
+      }, delayMs);
+    },
+    [router, clearNavTimers, resetTransitionUi]
+  );
+
   const handleStartGame = () => {
-    setIsTransitioning(true);
+    if (navLockRef.current) return;
     // 不停止 BGM，讓音樂一路播到結局
-    // 清除所有遊戲記憶
     if (typeof window !== 'undefined') {
       try {
         localStorage.removeItem('gameState');
-        console.log('遊戲記憶已清除');
       } catch (e) {
         console.warn('無法清除遊戲記憶:', e);
       }
     }
-
-    // 等待過場動畫完成後導航到序章，再進入第一章導讀
-    setTimeout(() => {
-      router.push('/play/prologue');
-    }, 800);
+    scheduleNavigate('/play/prologue', 800);
   };
 
   const handlePasswordSuccess = (chapterId: string, sceneId?: string) => {
     setShowPasswordModal(false);
-    setIsTransitioning(true);
-    setTimeout(() => {
-      if (sceneId) {
-        router.push(`/play/${chapterId}/${sceneId}`);
-      } else {
-        router.push(`/play/${chapterId}/intro`);
-      }
-    }, 500);
+    const path = sceneId ? `/play/${chapterId}/${sceneId}` : `/play/${chapterId}/intro`;
+    scheduleNavigate(path, 500);
   };
 
   return (
@@ -59,8 +105,9 @@ export default function Home() {
         <MuteAllButton />
         {/* 主選單底圖 WEBP：以手機直式滿版為主。建議 1080×1920（9:16），≤250KB，置於 /images/main_bg_placeholder.webp */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 pointer-events-none select-none"
           style={{ backgroundImage: 'url(/images/main_bg_placeholder.webp)' }}
+          aria-hidden
         />
         {/* 背景粒子效果：用 index 產生固定數值，避免 SSR 與 client 的 Math.random() 不一致造成 hydration 錯誤 */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -80,7 +127,7 @@ export default function Home() {
 
       {/* 過場遮罩 */}
       {isTransitioning && (
-        <div className="fixed inset-0 z-50 bg-black transition-opacity duration-800 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black transition-opacity duration-700 flex items-center justify-center pointer-events-auto">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
             <p className="text-orange-300 text-lg">載入中...</p>
@@ -88,9 +135,11 @@ export default function Home() {
         </div>
       )}
 
-      <div className={`text-center max-w-2xl px-4 transition-all duration-800 ${
-        isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-      }`}>
+      <div
+        className={`relative z-10 text-center max-w-2xl px-4 transition-all duration-700 ${
+          isTransitioning ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+        }`}
+      >
         <h1 className="text-[2.7rem] md:text-[3.375rem] font-bold mb-6 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent animate-home-hero-in text-center" style={{ animationDelay: '0.08s' }}>
           KK流程偵探<br />最後一場放映
         </h1>
@@ -98,6 +147,7 @@ export default function Home() {
           凌晨 00:39，一通沒有顯示來電的電話。城市影城，散場後約五分鐘左右，有人死在 H 排 12 號。散場的燈，延後三分鐘亮起，你不是警察，你只是 KK。
         </p>
         <button
+          type="button"
           onClick={handleStartGame}
           className="inline-flex items-center gap-2 px-10 py-5 bg-gradient-to-r from-industrial-orange to-industrial-red hover:from-industrial-orange-dark hover:to-industrial-red-dark text-white rounded-xl transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 animate-pulse-slow"
           style={{ animationDelay: '0.3s' }}

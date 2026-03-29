@@ -111,6 +111,12 @@ export class GameEngine {
     if (this.state.inventory?.length) {
       this.state.inventory = this.state.inventory.filter((id) => !LEGACY_INVENTORY_IDS_TO_STRIP.has(id));
     }
+
+    // ch3：舊存檔第三場已併入會議室（舊 id 拆字串避免與已刪場景同名常數散落專案）
+    const legacyCh3Corridor = 'scene_ch3_server' + '_corridor';
+    if (this.state.currentChapter === 'ch3' && this.state.currentScene === legacyCh3Corridor) {
+      this.state.currentScene = 'scene_ch3_brand_room';
+    }
   }
 
   getState(): GameState {

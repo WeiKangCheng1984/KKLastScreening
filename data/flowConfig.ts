@@ -52,7 +52,7 @@ export const flowConfig: FlowConfig = {
       type: 'scene_explore',
       next: 'ch4_intro',
       chapterId: 'ch3',
-      sceneIds: ['scene_ch3_lobby_front', 'scene_ch3_brand_room', 'scene_ch3_server_corridor'],
+      sceneIds: ['scene_ch3_lobby_front', 'scene_ch3_brand_room'],
     },
     ch4_intro: {
       id: 'ch4_intro',

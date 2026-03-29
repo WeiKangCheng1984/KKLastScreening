@@ -98,16 +98,6 @@ function checkSceneGate(
     if (targetSceneId === 'scene_ch3_brand_room' && !flags.ch3_task_from_liu) {
       return { blocked: true, reason: '需先接劉隊任務 (ch3_task_from_liu)' };
     }
-    if (targetSceneId === 'scene_ch3_server_corridor') {
-      const brandHotspots = [
-        'hotspot_ch3_brand_contract', 'hotspot_ch3_venue_map',
-        'hotspot_ch3_meeting_notes', 'hotspot_ch3_system_spec',
-      ];
-      const interacted = brandHotspots.filter((id) => engine.hasInteracted(id)).length;
-      if (!flags.ch3_task_from_liu || interacted < 2) {
-        return { blocked: true, reason: `需接任務且品牌室≥2互動 (目前${interacted})` };
-      }
-    }
   }
 
   if (chapterId === 'ch4') {
