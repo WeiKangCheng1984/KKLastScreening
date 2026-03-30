@@ -712,11 +712,6 @@ export class GameEngine {
     if (this.state.activeNpcDialogId) {
       // 設置對話完成 flag
       this.state.flags[`npc_${this.state.activeNpcDialogId}_interviewed`] = true;
-      
-      // 特殊處理：周雅雯對話結束時設置 clue_light_delay_confirmed
-      if (this.state.activeNpcDialogId === 'npc_zhou_jie') {
-        this.state.flags['clue_light_delay_confirmed'] = true;
-      }
     }
     
     this.state.activeNpcDialogId = undefined;

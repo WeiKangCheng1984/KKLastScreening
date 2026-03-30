@@ -9,7 +9,6 @@ export interface SensitiveBranchConfig {
     choiceId: string;
     choiceText: string;
     nodeId: string;
-    special?: 'zhou_fragment';
   }>;
 }
 
@@ -17,34 +16,26 @@ export const sensitiveBranchesByChapter: Record<string, SensitiveBranchConfig[]>
   ch1: [
     {
       npcId: 'npc_lin_ruitang',
-      pickOneText: '你只能問一個方向。問了，另一個就不能再提。',
+      pickOneText: '你只能問一個方向。',
       branches: [
-        { choiceId: 'lin_branch_light', choiceText: '我想問：散場的燈為什麼晚亮？誰能改這個表、誰在流程上游？', nodeId: 'node_lin_light_1' },
-        { choiceId: 'lin_branch_fear', choiceText: '我想問：你是不是害怕兇手，還是害怕你上面的長官？', nodeId: 'node_lin_fear_1' },
+        { choiceId: 'lin_branch_light', choiceText: '散場的燈為什麼晚亮？誰能改這個表、誰在流程上游？', nodeId: 'node_lin_light_1' },
+        { choiceId: 'lin_branch_fear', choiceText: '你是不是害怕兇手，還是害怕你上面的長官？', nodeId: 'node_lin_fear_1' },
       ],
     },
     {
       npcId: 'npc_ashun',
-      pickOneText: '你只能問一個方向。問了，另一個就不能再提。',
+      pickOneText: '你只能問一個方向。',
       branches: [
-        { choiceId: 'ashun_branch_window', choiceText: '我想問：散場後那一兩分鐘，誰在看？空窗有多大？', nodeId: 'node_ashun_window_1' },
-        { choiceId: 'ashun_branch_deadzone', choiceText: '我想問：監視器死角在哪？你真的確定嗎？', nodeId: 'node_ashun_deadzone_1' },
+        { choiceId: 'ashun_branch_window', choiceText: '散場後那一兩分鐘，誰在看？空窗有多大？', nodeId: 'node_ashun_window_1' },
+        { choiceId: 'ashun_branch_deadzone', choiceText: '監視器死角在哪？你真的確定嗎？', nodeId: 'node_ashun_deadzone_1' },
       ],
     },
     {
       npcId: 'npc_xiaozhang',
-      pickOneText: '你只能問一個方向。問了，另一個就不能再提。',
+      pickOneText: '你只能問一個方向。',
       branches: [
-        { choiceId: 'xiaozhang_branch_table', choiceText: '我想問：燈延後三分鐘是誰改的？表格誰能改、誰在流程上游？', nodeId: 'node_xiaozhang_table_1' },
-        { choiceId: 'xiaozhang_branch_oral', choiceText: '我想問：有人跟你說過什麼嗎？口頭指示、像背 SOP 的那個人。', nodeId: 'node_xiaozhang_oral_1' },
-      ],
-    },
-    {
-      npcId: 'npc_zhou_jie',
-      pickOneText: '你只能問一個方向。問了，另一個就不能再提。',
-      branches: [
-        { choiceId: 'zhou_branch_clean', choiceText: '我想問：你說「太乾淨」，哪裡太乾淨？誰在急著擦？', nodeId: 'node_zhou_clean_1' },
-        { choiceId: 'zhou_branch_fragment', choiceText: '我想問：你找到什麼？燈晚亮你怎麼確定？', nodeId: 'node_zhou_fragment_1', special: 'zhou_fragment' },
+        { choiceId: 'xiaozhang_branch_table', choiceText: '燈延後三分鐘是誰改的？表格誰能改、誰在流程上游？', nodeId: 'node_xiaozhang_table_1' },
+        { choiceId: 'xiaozhang_branch_oral', choiceText: '有人跟你說過什麼嗎？口頭指示、像背 SOP 的那個人。', nodeId: 'node_xiaozhang_oral_1' },
       ],
     },
   ],
@@ -52,10 +43,10 @@ export const sensitiveBranchesByChapter: Record<string, SensitiveBranchConfig[]>
     {
       npcId: 'npc_asu',
       pickOneText:
-        '阿蘇沒抬頭，只把滑鼠停在螢幕邊緣。你知道她今晚沒打算當好人——你只能選一條路把話捅到底，另一條就永遠別再提。',
+        '阿蘇沒抬頭，只把滑鼠停在螢幕邊緣。你知道她今晚沒打算當好人，你只能選一條路把話捅到底，另一條就永遠別再提。',
       branches: [
-        { choiceId: 'asu_branch_1', choiceText: '敘舊：兩年前那件事之後，妳跟我之間那個還沒講完的疙瘩——今晚把它說清楚。', nodeId: 'node_asu_sensitive1_1' },
-        { choiceId: 'asu_branch_2', choiceText: '問案：我不要故事，我要技術。這些資料在鑑定上能站到哪裡、哪裡會被人動手腳？', nodeId: 'node_asu_sensitive2_1' },
+        { choiceId: 'asu_branch_1', choiceText: '敘舊：兩年前那件事之後...', nodeId: 'node_asu_sensitive1_1' },
+        { choiceId: 'asu_branch_2', choiceText: '問案：這些資料在鑑定上能站到哪裡、哪裡會被人動手腳？', nodeId: 'node_asu_sensitive2_1' },
       ],
     },
   ],
@@ -144,17 +135,6 @@ export const sensitiveGatesByChapter: Record<string, NpcSensitiveGateConfig[]> =
       choices: {
         ask: { id: 'xiaozhang_sensitive_ask', text: '我想問一些比較敏感的問題。' },
         skip: { id: 'xiaozhang_sensitive_skip', text: '先不用，再聊聊就好。' },
-      },
-    },
-    {
-      npcId: 'npc_zhou_jie',
-      doneFlag: 'npc_zhou_jie_sensitive_done',
-      observedFlags: ['observed_restroom_ch1'],
-      casualTalkThreshold: 3,
-      gateText: '你覺得時機差不多了，可以試著往深一點問。',
-      choices: {
-        ask: { id: 'zhou_sensitive_ask', text: '我想問一些比較敏感的問題。' },
-        skip: { id: 'zhou_sensitive_skip', text: '先不用，再聊聊就好。' },
       },
     },
   ],

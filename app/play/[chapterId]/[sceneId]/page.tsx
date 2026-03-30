@@ -538,7 +538,7 @@ export default function PlayPage() {
       const st = engine.getState();
       const flags = st.flags || {};
       if (st.currentChapter !== 'ch1' || flags.ch1_liu_mid_shown) return;
-      const completedCount = ['npc_lin_sensitive_done', 'npc_ashun_sensitive_done', 'npc_xiaozhang_sensitive_done', 'npc_zhou_jie_sensitive_done']
+      const completedCount = ['npc_lin_sensitive_done', 'npc_ashun_sensitive_done', 'npc_xiaozhang_sensitive_done']
         .filter((key) => flags[key]).length;
       if (completedCount >= 3 && !flags.ch1_liu_mid_ready) {
         engine.applyEffect({ type: 'setFlag', flag: 'ch1_liu_mid_ready', value: true });
@@ -584,23 +584,6 @@ export default function PlayPage() {
       const branch = branchCfg.branches.find((b) => b.choiceId === choice.id);
       if (!branch) continue;
       const npcId = branchCfg.npcId;
-
-      // zhou_fragment 特殊分支：依是否已有碎片決定起始節點
-      if (branch.special === 'zhou_fragment') {
-        setSensitiveGate(null);
-        const npc = scene?.npcs?.find((n: { id: string }) => n.id === npcId);
-        if (!npc) return;
-        const gateCfg = allGateConfigs.find((c) => c.npcId === npcId);
-        if (gateCfg) engine.applyEffect({ type: 'setFlag', flag: gateCfg.doneFlag, value: true });
-        checkAndTriggerLiuMid();
-        const alreadyHave = !!engine.getState()?.flags?.black_fragment_found;
-        engine.startNpcDialog(npcId, alreadyHave ? 'node_zhou_fragment_1_already_have' : branch.nodeId);
-        const node = engine.getCurrentNpcDialogNode();
-        if (node) {
-          queueMicrotask(() => { setCurrentDialog(buildDialogFromNpcNode(node, npc)); });
-        }
-        return;
-      }
 
       // 一般分支
       setSensitiveGate(null);

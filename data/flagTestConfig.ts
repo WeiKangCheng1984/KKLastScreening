@@ -50,7 +50,6 @@ export const flagTestGroups: FlagGroup[] = [
       { id: 'npc_lin_sensitive_done', label: '林瑞堂敏感對話' },
       { id: 'npc_ashun_sensitive_done', label: '阿順敏感對話' },
       { id: 'npc_xiaozhang_sensitive_done', label: '小張敏感對話' },
-      { id: 'npc_zhou_jie_sensitive_done', label: '周姊敏感對話' },
       { id: 'ch1_puzzle_done', label: 'ch1 解謎完成' },
       { id: 'ch1_reasoning_done', label: 'ch1 推理完成' },
       { id: 'ch1_police_intro_shown', label: '劉隊開場已播' },
@@ -275,14 +274,6 @@ export const sensitiveChoiceGroups: SensitiveChoiceGroup[] = [
     npcLabel: '小張',
     entries: [
       { flagId: 'npc_xiaozhang_sensitive_done', label: '已問敏感' },
-    ],
-  },
-  {
-    chapterId: 'ch1',
-    npcId: 'npc_zhou_jie',
-    npcLabel: '周姊',
-    entries: [
-      { flagId: 'npc_zhou_jie_sensitive_done', label: '已問敏感' },
     ],
   },
   {

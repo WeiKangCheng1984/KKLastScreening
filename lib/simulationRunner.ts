@@ -573,9 +573,8 @@ export class SimulationRunner {
             if (picked.id.endsWith('_ask') || picked.id.endsWith('_confront_ask')) {
               const sensitiveFlagMap: Record<string, string> = {
                 npc_lin_ruitang: 'npc_lin_sensitive_done',
-                npc_ashun: 'npc_asu_sensitive_done',
+                npc_ashun: 'npc_ashun_sensitive_done',
                 npc_xiaozhang: 'npc_xiaozhang_sensitive_done',
-                npc_zhou_jie: 'npc_zhou_jie_sensitive_done',
                 npc_gu_naiqian: 'npc_gu_naiqian_sensitive_done',
                 npc_chen_youcheng: 'npc_chen_sensitive_done',
                 npc_liang_yian: 'npc_liang_yian_sensitive_done',

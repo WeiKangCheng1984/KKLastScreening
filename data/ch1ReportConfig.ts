@@ -1,13 +1,60 @@
 import type { TwoBlankFillConfig } from '@/components/FloatingFillBlankCore';
 
 /**
- * 第一章章尾：向劉隊報告（現況僅使用「時間線時刻」＋「四題雙格態度填空」＋結語）
+ * 第一章章尾：向劉隊報告（「三時鐘時間線」一次填寫＋雙格態度填空＋結語）
  * - 雙格填空與 ch2～ch6 對齊命名：ch1ReportFillBlanks
  */
 
+/** 單一時鐘的正解：精確時分，或同日某小時內的分鐘區間（含端點） */
+export type Ch1TimelineClockAnswer =
+  | { mode: 'exact'; hour: number; minute: number }
+  | { mode: 'minuteRange'; hour: number; minuteMin: number; minuteMax: number };
+
+export interface Ch1TimelineClockDef {
+  id: string;
+  label: string;
+  /** 顯示在標題下的提示 */
+  sublabel?: string;
+  answer: Ch1TimelineClockAnswer;
+}
+
+export function isCh1TimelineClockCorrect(
+  def: Ch1TimelineClockDef,
+  hour: number,
+  minute: number,
+): boolean {
+  const a = def.answer;
+  if (a.mode === 'exact') {
+    return hour === a.hour && minute === a.minute;
+  }
+  return hour === a.hour && minute >= a.minuteMin && minute <= a.minuteMax;
+}
+
+/** 三時鐘順序與題幹（向劉隊報告第一步） */
+export const ch1TimelineClocks: Ch1TimelineClockDef[] = [
+  {
+    id: 'movie_start',
+    label: '電影開場時間',
+    sublabel: '命運的轉輪是何時開始的呢?',
+    answer: { mode: 'exact', hour: 22, minute: 30 },
+  },
+  {
+    id: 'crime_window',
+    label: '可能的行兇時間',
+    sublabel: '那個黑暗區間是什麼?',
+    answer: { mode: 'minuteRange', hour: 0, minuteMin: 14, minuteMax: 17 },
+  },
+  {
+    id: 'kk_notify',
+    label: 'KK 收到通知的時間',
+    sublabel: '深夜的那通電話',
+    answer: { mode: 'exact', hour: 0, minute: 39 },
+  },
+];
+
 export interface Ch1ReportTimelineConfig {
   errorMessages: string[];
-  crimeTimeRange: { startMinutes: number; endMinutes: number };
+  clocks: Ch1TimelineClockDef[];
 }
 
 export interface Ch1ReportAttitudeConfig {
@@ -299,11 +346,12 @@ export const ch1ReportFillBlanks: TwoBlankFillConfig[] = [
 export const ch1ReportConfig: Ch1ReportConfig = {
   timeline: {
     errorMessages: [
-      '時間線對不上，再排一次。',
-      '順序錯了，先想誰能控制燈、誰在黑暗裡。',
-      '首尾可以固定：開演、報案。中間三張再想想。',
+      '三個時間要一起對齊；錯一個就整段重對。',
+      '開場是排程寫死的；行兇落在散場後那幾分鐘暗檔；通知是你接到案子的那一下。',
+      '劉隊不看單點，他看整條線：開演、暗檔、你進場——三個都對再往下。',
+      '票根上的開演、監視器暗下來的窗口、你手機亮起的時間，別混成一顆鐘。',
     ],
-    crimeTimeRange: { startMinutes: 14, endMinutes: 17 },
+    clocks: ch1TimelineClocks,
   },
   attitude: {
     attitudeFillBlanks: ch1ReportFillBlanks,

@@ -100,13 +100,13 @@ alwaysApply: true
 
 ## 章尾結算／報告系統（現況重點）
 
-### 第一章：向劉隊報告（時間線翻牌 + 5 題雙格填空）
+### 第一章：向劉隊報告（三時鐘翻牌時間線一次過關 + 雙格填空）
 - **入口**：`components/Ch1ReportEditor.tsx`
-- **配置**：`data/ch1ReportConfig.ts`（`timeline`：`crimeTimeRange` + `errorMessages`；`attitude.attitudeFillBlanks` → `ch1ReportFillBlanks`；`closingInference`；`attitudeFollowUpByChoiceId`；`CH1_REPORT_DEFAULT_EVIDENCE_IDS` 僅供開 overlay 時寫入 `ch1_report_evidence` 旗標，無證據桌 UI）
+- **配置**：`data/ch1ReportConfig.ts`（`timeline.clocks`：開場 22:30、行兇 00:14～00:17、通知 00:39 + `errorMessages`；`attitude.attitudeFillBlanks` → `ch1ReportFillBlanks`；`closingInference`；`attitudeFollowUpByChoiceId`；`CH1_REPORT_DEFAULT_EVIDENCE_IDS` 僅供開 overlay 時寫入 `ch1_report_evidence` 旗標，無證據桌 UI）
 - **題型元件**：`components/ReportFillBlank.tsx`
 - **重要規則**：
-  - 一次必須完成 **5 題**（index 0~4）
-  - `ReportFillBlank` 必須帶 `key`（依題號），避免 React 沿用上一題內部 state 造成「只做一題就全過」。
+  - 時間線：**三個時鐘須同時調對**後才能進填空；`ch1_report_timeline` 寫入 `type: 'ch1_triple_timeline'` 與三筆時分。
+  - 填空須依 `ch1ReportFillBlanks` 題數逐題完成；`ReportFillBlank` 必須帶 `key`（依題號），避免 React 沿用上一題內部 state。
 
 ### 第二章：向劉隊報告（兩段：第一輪 2 題雙格填空 → 背包手機顯影讀畢 → 第二輪筆名＋WRC 轉盤結案）
 - **元件**：`components/Ch2ReportEditor.tsx`（`ReportFillBlank`＋第二輪筆名欄＋`Ch2TriWheel`）

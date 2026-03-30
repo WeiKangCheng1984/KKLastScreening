@@ -345,7 +345,7 @@ const scenes: Record<string, Scene> = {
           {
             type: 'showDialog',
             dialog: {
-              text: '播映時間表（塗改）\n\n一張播映時間表，上面有塗改的痕跡。\n\n原本某一欄被劃掉，旁邊用紅筆寫了新的時間。\n\n這個改動很細微，如果不是仔細看，根本不會注意到。',
+              text: '播映時間表（塗改）\n\n一張播映時間表，上面有塗改的痕跡。\n\n原本某一欄被劃掉，旁邊用紅筆寫了新的時間，字很醜。\n\n',
               type: 'narrator',
             },
           },
@@ -633,7 +633,7 @@ const scenes: Record<string, Scene> = {
           },
           {
             id: 'casual_3',
-            text: '「白板有一筆喔，寫了兩次？三次？反正重寫很多次啦……那種不會幫人說謊，我看得出。」',
+            text: '「白板有很多改寫……那種不會幫人說謊，我看得出。」',
             type: 'casual',
             weight: 2,
           },
@@ -697,21 +697,18 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       npcId: 'npc_lin_ruitang',
       text:
         'KK：「散場燈晚了三分鐘。誰動得到設定？」\n\n' +
-        '林瑞堂：「三分鐘……欸，三分鐘這種，本來就有彈性嘛。節能、節能你也知道的，體驗也要顧啊。」\n\n' +
-        'KK：「誰能改。」\n\n' +
+        '林瑞堂：「三分鐘……欸，三分鐘這種，本來就有彈性嘛。節能你也知道的，體驗也要顧啊。」\n\n' +
+        'KK：「誰能改?」\n\n' +
         '林瑞堂：「不是、不是說誰不能碰啦，是層級、層級要看，協調也要看。流程我們都有走。」\n\n' +
-        'KK：「放映員自己按的？」\n\n' +
-        '林瑞堂：「當然不是爽按啊，當然不是。我們有流程的，節能模式、節能本來就，本來就合法嘛，公司也在優化、也在優化。」\n\n' +
-        'KK：「那天誰叫改手動。」\n\n' +
-        '林瑞堂：「口頭喬一下也算協調嘛，也算。遠端現在很多也能，也沒有說一定是遠端啦！」\n\n' +
-        'KK（心想）：問名字，他餵你流程。\n\n' +
+        'KK：「所以是放映員自己按的？」\n\n' +
+        '林瑞堂：「當然不是爽按啊，當然不是。我們有流程的，節能模式、節能它本來就，本來就合法嘛，公司都在升級設備。」\n\n' +
+        'KK：「所以，那天是誰改了時間的?」\n\n' +
+        '林瑞堂：「口頭喬一下也算協調嘛，也算。遠端現在很多也能啊，也沒有說一定是遠端啦！」\n\n' +
+        'KK（心想）：問不出名字，他一直講流程。\n\n' +
         'KK：「手動要不要留紀錄。」\n\n' +
         '林瑞堂：「照規定、照規定都會留啊，都會留的。操作起來順順、順順的。」\n\n' +
         'KK：「責任切得出誰嗎。」\n\n' +
-        '林瑞堂：「……不會是基層亂弄的啦，這個我可以保證。」\n\n' +
-        'KK：「你心裡知道不是他們。」\n\n' +
-        '林瑞堂：「我知道它不會從天上、從天上掉下來嘛。」\n\n' +
-        'KK（心想）：「流程」念三次，就當答過了。',
+        '林瑞堂：「……不會是基層亂弄的啦，這個我可以保證。」\n\n' ,
       choices: [
         { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }] },
       ],
@@ -720,22 +717,17 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_lin_fear_1',
       npcId: 'npc_lin_ruitang',
       text:
-        'KK：「你一講那三分鐘，聲音就小下去。」\n\n' +
+        'KK：「你一講那三分鐘，聲音就顯得很害怕?」\n\n' +
         '林瑞堂：「現在這種事……現在這種事，誰敢大聲啦。講話本來就、本來就要小心嘛。」\n\n' +
-        'KK：「你怕講對。」\n\n' +
+        'KK：「你有隱瞞嗎?」\n\n' +
         '林瑞堂：「我怕、我怕講錯啦，講錯也很麻煩啊。」\n\n' +
-        'KK：「兇手盯你，還是上面盯你。」\n\n' +
+        'KK：「是不是兇手盯你?還是上面盯你?」\n\n' +
         '林瑞堂：「我又不知道兇手是誰……你不要把我講成、講成好像……」\n\n' +
-        'KK：「有人拍板過。」\n\n' +
-        '林瑞堂：「副理嘛，副理就是……先不要炸開，先不要炸開而已啊。」\n\n' +
-        'KK（心想）：控管、控管，念兩遍像盡責。\n\n' +
-        'KK：「死者跟招牌。」\n\n' +
-        '林瑞堂：「死者我也遺憾、也遺憾啊……可是整間一起、一起那個，誰扛啦。」\n\n' +
-        'KK：「失控比死人大聲。」\n\n' +
-        '林瑞堂：「你沒坐這位子……你沒坐這位子嘛。」\n\n' +
-        'KK：「你選先看見哪一段。」\n\n' +
-        '林瑞堂抿嘴。領帶又緊一格。\n\n' +
-        'KK（心想）：讓久了，以為本來就該讓。',
+        'KK：「這個燈光調整，是有人拍板過的嗎?」\n\n' +
+        '林瑞堂：「我們都有流程，我是副理嘛，副理就是……先不要炸開，先不要而已啊。」\n\n' +
+        'KK（心想）：林副理很怕，講話都結巴了。\n\n' +
+        'KK：「死者跟影城招牌，誰比較重要?」\n\n' +
+        '林瑞堂：「死者我也遺憾、也遺憾啊……可是整間一起、一起那個，誰扛啦。」\n\n',
       choices: [
         { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_lin_sensitive_done', value: true }] },
       ],
@@ -746,20 +738,15 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_ashun_window_1',
       npcId: 'npc_ashun',
       text:
-        'KK：「散場那幾分鐘，怎麼巡。」\n\n' +
-        '阿順：「人很多的時候，就……就先卡出口嘛，怕踩嘛，先、先讓會動的出去。」\n\n' +
-        'KK：「廳內後排。」\n\n' +
-        '阿順：「表上是要掃啦……忙起來就，就先看大局啊。後面那幾排，有、有空再看。」\n\n' +
-        'KK：「H 排會空一下。」\n\n' +
-        '阿順：「對啊……一、一分鐘上下啦。熟門路的，那一小段……很夠。」\n\n' +
-        'KK：「哪條最快。」\n\n' +
-        '阿順：「側走道啊……燈箱那邊一拐，快。人、人多你不會注意有人溜掉。」\n\n' +
-        'KK（心想）：講得像導航。走太熟了。\n\n' +
-        'KK：「那時段摸去 H 排 12 再抽身。」\n\n' +
-        '阿順：「也不是說我一定看見喔……就側走道轉角，鏡、鏡頭接不起來，回放會覺得像、像被地吃掉。」\n\n' +
-        'KK：「接縫。」\n\n' +
-        '阿順：「對……亮點再多，眨眼那下也、也拼不起來啦。」\n\n' +
-        'KK（心想）：缺的是空拍。',
+        'KK：「散場那幾分鐘，你動線是上怎麼巡。」\n\n' +
+        '阿順：「人很多的時候，就……就先卡出口嘛，怕踩嘛，先、先讓著急的出去。」\n\n' +
+        'KK：「廳內後排呢?」\n\n' +
+        '阿順：「表上是要走動啦……忙起來就，就先看出口啊。後面那幾排，有、有空再看。」\n\n' +
+        'KK：「H排是優先巡視的嗎?」\n\n' +
+        '阿順：「沒有……但是差不到幾分鐘啦。那一小段……很夠。」\n\n' +
+        'KK（心想）：H排很明顯，可能是兇手熟練的位置。\n\n' +
+        'KK：「兇手會跑去H排動手後再抽身?」\n\n' +
+        '阿順：「監控沒拍清楚，鏡頭接不起來，回放會覺得像、像被地吃掉。」\n\n',
       choices: [
         { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
       ],
@@ -768,18 +755,13 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_ashun_deadzone_1',
       npcId: 'npc_ashun',
       text:
-        'KK：「死角講得像你家。」\n\n' +
+        'KK：「你是不是知道很多死角?」\n\n' +
         '阿順：「做、做久了嘛……哪裡常客訴，自己會記。」\n\n' +
-        'KK：「拿來防？還是事後講難免。」\n\n' +
+        'KK：「會回報上級嗎?」\n\n' +
         '阿順：「……哇靠，你、你這樣問很刺欸。」\n\n' +
-        'KK：「一分鐘夠用，背太順。」\n\n' +
-        '阿順：「因、因為洞多大，我……我知道啊！不先往壞的想，誰扛？」\n\n' +
-        'KK（心想）：無辜也像演練過。\n\n' +
-        'KK：「出事那天第一個畫面。」\n\n' +
-        '阿順：「就……完了啊。搞大了。」\n\n' +
-        'KK：「死人先，還是帶子要被翻。」\n\n' +
-        '阿順：「兩個都會冒……可、可是先聽到腦裡在播監視器啦。」\n\n' +
-        'KK（心想）：職業本能外包一層。',
+        'KK：「你們高壓嗎?我看你很緊張。」\n\n' +
+        '阿順：「因、因為洞多大，我……我知道啊！不先往壞的想，我也不想扛？」\n\n' +
+        'KK（心想）：很無辜，讓我懷疑他是不是演練過。',
       choices: [
         { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_ashun_sensitive_done', value: true }] },
       ],
@@ -790,98 +772,46 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_xiaozhang_table_1',
       npcId: 'npc_xiaozhang',
       text:
-        'KK：「表先，還是話先。」\n\n' +
-        '小張：「表先……然後有人探頭，說燈不用急著開。」\n\n' +
-        'KK：「對得上。」\n\n' +
+        'KK：「你照表操作，還是聽誰的命令操作。」\n\n' +
+        '小張：「照表……」\n\n' +
+        'KK：「今天的開燈時間，對得上?」\n\n' +
         '小張：「我這邊就……表寫啥我打啥。改表的……不在我這層。」\n\n' +
         'KK：「紅筆那筆。」\n\n' +
-        '小張：「有、有啊……亮燈往後撥三分鐘，硬改的。片在跑，沒空問。」\n\n' +
-        'KK（心想）：手比腦快。\n\n' +
-        'KK：「手動你切的。」\n\n' +
-        '小張：「表說手動就……」\n\n' +
-        'KK：「不是自動跑完。」\n\n' +
-        '小張：「你硬要講……也、也可以。但我沒得選啦。」\n\n' +
-        'KK（心想）：手最乾淨也最髒。',
+        '小張：「有、有啊…… 有個鬼畫符，亮燈往後撥三分鐘之類的。電影還在播，我也沒空問。」\n\n' +
+        'KK（心想）：所以你也照習慣操作?\n\n' +
+        '小張：「我看是手動就…… 我也有動」\n\n' +
+        'KK：「所以燈光不是照電腦流程自動跑完的?」\n\n' +
+        '小張：「你硬要講……也、也算是吧，但我沒多做什麼，沒得選啦。」\n\n' +
+        'KK（心想）：小張的手，沒多做什麼，但也不是完全沒做。',
       choices: [
-        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
+        {
+          id: 'choice_done',
+          label: '結束',
+          effects: [
+            { type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true },
+            { type: 'setFlag', flag: 'clue_light_delay_confirmed', value: true },
+          ],
+        },
       ],
     },
     'node_xiaozhang_oral_1': {
       id: 'node_xiaozhang_oral_1',
       npcId: 'npc_xiaozhang',
       text:
-        'KK：「你心裡覺得怪。」\n\n' +
-        '小張：「怪的事天天有……放映室被改來改去，我早麻痺了。死人……死人是第一次。」\n\n' +
-        'KK：「感覺關掉，因為沒人會回。」\n\n' +
-        '小張：「問了變我麻煩……不問，片、片至少能放完。」\n\n' +
-        'KK（心想）：閉嘴叫專業。\n\n' +
-        'KK：「『燈不用急著開』，太順。」\n\n' +
-        '小張：「那句很刺……可當下，我眼裡就是注意表上寫的。」\n\n' +
-        'KK：「你選片順。」\n\n' +
+        'KK：「你覺得流程怪嗎?」\n\n' +
+        '小張：「怪的事天天有……放映室被改來改去，我早麻痺了。可是，死…死人是第一次。」\n\n' +
+        'KK：「今天的操作有比較複雜嗎?」\n\n' +
+        '小張：「差不多吧，我也沒問，問了變我的麻煩……不問，片、片至少能放完。」\n\n' +
+        'KK（心想）：沉默服從，也是專業。\n\n' +
         '小張：「不、不然呢。」\n\n' +
-        'KK（心想）：服從久以為負責。',
-      choices: [
-        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true }] },
-      ],
-    },
-  },
-  npc_zhou_jie: {
-    'node_zhou_clean_1': {
-      id: 'node_zhou_clean_1',
-      npcId: 'npc_zhou_jie',
-      text:
-        'KK：「這區怎麼收。」\n\n' +
-        '周姊：「外圈先……啊不對，廁所、廁所要中間？欸我是說先外圍啦，然後廁所，最後才下面。」\n\n' +
-        'KK：「洗手台底下。」\n\n' +
-        '周姊：「那種不會第一個弄啦……留到後面。留到……」\n\n' +
-        'KK：「那天太乾淨。」\n\n' +
-        '周姊：「像被撈過，抹過啦，急的那種。灰是舊的，東西是新……新灰？啊是新的渣渣卡在舊灰邊，我講不好啦，地板不騙人啦。」\n\n' +
-        'KK（心想）：她看地比看臉準。\n\n' +
-        'KK：「燈也拖很久。」\n\n' +
-        '周姊：「對啊燈……燈不亮我不好進去拖嘛。那天等超久，我看錶看到……看到火大，罵說拖什麼拖。」\n\n' +
-        'KK（心想）：到底在講什麼? 聽得好痛苦。',
-      choices: [
-        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
-      ],
-    },
-    'node_zhou_fragment_1_already_have': {
-      id: 'node_zhou_fragment_1_already_have',
-      npcId: 'npc_zhou_jie',
-      text:
-        '周姊：「喔你撿到了齁……那、那好，我不重複。」\n\n' +
-        '「灰舊、新渣渣，啊我剛是不是講過……你記著就好啦。」\n\n' +
-        'KK：「燈不亮你在想啥。」\n\n' +
-        '周姊：「毛。不是慢機器那種毛，是……有人、有人要它慢？不對，是有人不要它那麼快亮？」\n\n' +
-        'KK：「裝沒看見很難。」\n\n' +
-        '周姊：「會黏啦……黏腦子，洗、洗手還會想起來。」\n\n' +
-        'KK（心想）：到底在說什麼? 聽得好痛苦。',
-      choices: [
-        { id: 'choice_done', label: '結束', effects: [{ type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true }] },
-      ],
-    },
-    'node_zhou_fragment_1': {
-      id: 'node_zhou_fragment_1',
-      npcId: 'npc_zhou_jie',
-      text:
-        '周姊：「洗手台下面……黑黑的，一小片，像樹，像塑膠啦，橡膠？我、我不敢撿。」\n\n' +
-        'KK：「怎麼不報。」\n\n' +
-        '周姊：「亂啊那時候，你一喊有、有時候東西先不見……清掉就沒了啦，我看、看很多次了。」\n\n' +
-        'KK：「你先幫它留一口氣。」\n\n' +
-        '周姊：「不要跟垃圾袋……一起當沒發生嘛。」\n\n' +
-        'KK（心想）：有的流程專門消音。\n\n' +
-        'KK：「燈很久？」\n\n' +
-        '周姊：「久啊……毛。慢跟拖不一樣啦，我講不攏，講不清楚，就是有人在拖。」\n\n' +
-        'KK：「燈拖，碎片更刺。」\n\n' +
-        '周姊：「黏眼睛……黏住。」\n\n' +
-        'KK（心想）：要人彎腰才撿得起。',
+        'KK（心想）：服從久以為，就是一種負責。',
       choices: [
         {
           id: 'choice_done',
           label: '結束',
           effects: [
-            { type: 'addItem', itemId: 'item_black_plastic_fragment' },
-            { type: 'setFlag', flag: 'black_fragment_found', value: true },
-            { type: 'setFlag', flag: 'npc_zhou_jie_sensitive_done', value: true },
+            { type: 'setFlag', flag: 'npc_xiaozhang_sensitive_done', value: true },
+            { type: 'setFlag', flag: 'clue_light_delay_confirmed', value: true },
           ],
         },
       ],

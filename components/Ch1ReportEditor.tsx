@@ -1,12 +1,17 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, Clock, MessageSquare } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Clock, MessageSquare } from 'lucide-react';
 import OverlayCard from '@/components/OverlayCard';
 import ReportFillBlank from '@/components/ReportFillBlank';
 import type { GameState, Effect } from '@/types/game';
-import { ch1ReportConfig, CH1_REPORT_DEFAULT_EVIDENCE_IDS } from '@/data/ch1ReportConfig';
+import {
+  ch1ReportConfig,
+  CH1_REPORT_DEFAULT_EVIDENCE_IDS,
+  isCh1TimelineClockCorrect,
+  type Ch1TimelineClockDef,
+} from '@/data/ch1ReportConfig';
 
 export interface Ch1ReportEditorProps {
   engine: {
@@ -23,63 +28,172 @@ const VISIBLE_STEPS = [
   { id: 3, label: '初步判斷', icon: MessageSquare },
 ];
 
-/** 單一數字翻牌（0–9） */
-function FlipDigit({ digit }: { digit: number }) {
-  const [displayed, setDisplayed] = useState(digit);
-  const [flip, setFlip] = useState(false);
-  useEffect(() => {
-    if (digit !== displayed && !flip) setFlip(true);
-  }, [digit, displayed, flip]);
+type Hm = { hour: number; minute: number };
 
+function initialClockMap(clocks: Ch1TimelineClockDef[]): Record<string, Hm> {
+  return Object.fromEntries(clocks.map((c) => [c.id, { hour: 0, minute: 0 }]));
+}
+
+/* ── Inline digit display with subtle pulse on change ───────────── */
+
+function PulseDigits({ value, pad }: { value: number; pad?: number }) {
+  const display = String(value).padStart(pad ?? 2, '0');
   return (
-    <div
-      className="relative h-14 w-11 overflow-hidden rounded-lg bg-gradient-to-b from-gray-800/90 to-gray-900/95 shadow-inner"
-      style={{
-        perspective: '140px',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.25)',
-        border: '1px solid rgba(251,146,60,0.25)',
-      }}
+    <m.span
+      key={value}
+      initial={{ opacity: 0.5, scale: 0.88 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className="inline-block w-[2ch] text-center font-mono text-[1.5rem] font-semibold tabular-nums leading-none text-amber-50 sm:text-[1.75rem]"
     >
-      <m.div
-        className="absolute inset-0 flex origin-bottom items-center justify-center rounded-lg font-mono text-3xl font-semibold tabular-nums tracking-tight text-orange-100"
-        style={{ backfaceVisibility: 'hidden', textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}
-        animate={{ rotateX: flip ? -90 : 0 }}
-        transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
-      >
-        {displayed}
-      </m.div>
-      <m.div
-        className="absolute inset-0 flex origin-top items-center justify-center rounded-lg font-mono text-3xl font-semibold tabular-nums tracking-tight text-orange-100"
-        style={{ backfaceVisibility: 'hidden', rotateX: 90, textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}
-        animate={{ rotateX: flip ? 0 : 90 }}
-        transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
-        onAnimationComplete={() => {
-          if (flip) {
-            setDisplayed(digit);
-            setFlip(false);
-          }
-        }}
-      >
-        {digit}
-      </m.div>
+      {display}
+    </m.span>
+  );
+}
+
+/* ── Compact arrow button ───────────────────────────────────────── */
+
+function ArrowBtn({
+  direction,
+  onClick,
+  label,
+}: {
+  direction: 'up' | 'down' | 'left' | 'right';
+  onClick: () => void;
+  label: string;
+}) {
+  const Icon =
+    direction === 'up' ? ChevronUp : direction === 'down' ? ChevronDown : direction === 'left' ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className="flex h-8 w-8 items-center justify-center rounded-md text-amber-300/70 transition hover:bg-white/[0.07] hover:text-amber-200 active:scale-90"
+    >
+      <Icon size={18} strokeWidth={2.2} />
+    </button>
+  );
+}
+
+/* ── Single time stepper: ◂ HH ▸ : ◂ MM ▸ ──────────────────────── */
+
+function TimeStepper({
+  hour,
+  minute,
+  onHourDelta,
+  onMinuteDelta,
+}: {
+  hour: number;
+  minute: number;
+  onHourDelta: (d: number) => void;
+  onMinuteDelta: (d: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {/* Hour */}
+      <div className="flex items-center">
+        <ArrowBtn direction="left" onClick={() => onHourDelta(-1)} label="減少一小時" />
+        <AnimatePresence mode="wait">
+          <PulseDigits key={`h-${hour}`} value={hour} />
+        </AnimatePresence>
+        <ArrowBtn direction="right" onClick={() => onHourDelta(1)} label="增加一小時" />
+      </div>
+
+      <span className="mx-0.5 select-none font-mono text-lg font-light text-amber-500/50">:</span>
+
+      {/* Minute */}
+      <div className="flex items-center">
+        <ArrowBtn direction="left" onClick={() => onMinuteDelta(-1)} label="減少一分鐘" />
+        <AnimatePresence mode="wait">
+          <PulseDigits key={`m-${minute}`} value={minute} />
+        </AnimatePresence>
+        <ArrowBtn direction="right" onClick={() => onMinuteDelta(1)} label="增加一分鐘" />
+      </div>
     </div>
   );
 }
+
+/* ── Timeline row: [●  label]  ─────  [stepper] ────────────────── */
+
+function TimelineRow({
+  index,
+  def,
+  hour,
+  minute,
+  onHourDelta,
+  onMinuteDelta,
+  isLast,
+}: {
+  index: number;
+  def: Ch1TimelineClockDef;
+  hour: number;
+  minute: number;
+  onHourDelta: (d: number) => void;
+  onMinuteDelta: (d: number) => void;
+  isLast: boolean;
+}) {
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.22 }}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        {/* Left: timeline dot + label */}
+        <div className="flex items-center gap-3">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-amber-500/15 text-[11px] font-bold tabular-nums text-amber-300">
+            {index + 1}
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-medium leading-snug text-amber-100/90">{def.label}</p>
+          </div>
+        </div>
+        {/* Right: compact stepper */}
+        <TimeStepper
+          hour={hour}
+          minute={minute}
+          onHourDelta={onHourDelta}
+          onMinuteDelta={onMinuteDelta}
+        />
+      </div>
+      {!isLast && <div className="ml-3 mt-3 h-px bg-white/[0.06] sm:ml-3" />}
+    </m.div>
+  );
+}
+
+/* ── Main component ─────────────────────────────────────────────── */
 
 export default function Ch1ReportEditor({
   engine,
   onComplete,
   onClose,
 }: Ch1ReportEditorProps) {
+  const config = ch1ReportConfig;
+  const timelineClocks = config.timeline.clocks;
+
   const [step, setStep] = useState(1);
-  const [timeMinutes, setTimeMinutes] = useState(0);
-  const [timeHour, setTimeHour] = useState(0);
+  const [clockHm, setClockHm] = useState<Record<string, Hm>>(() => initialClockMap(timelineClocks));
   const [attitudeFillBlankIndex, setAttitudeFillBlankIndex] = useState(0);
   const [showClosing, setShowClosing] = useState(false);
   const [timelineError, setTimelineError] = useState('');
   const [timelineErrorIndex, setTimelineErrorIndex] = useState(0);
 
-  const config = ch1ReportConfig;
+  const bumpHour = useCallback((id: string, delta: number) => {
+    setClockHm((prev) => {
+      const cur = prev[id] ?? { hour: 0, minute: 0 };
+      return { ...prev, [id]: { ...cur, hour: (cur.hour + delta + 24) % 24 } };
+    });
+    setTimelineError('');
+  }, []);
+
+  const bumpMinute = useCallback((id: string, delta: number) => {
+    setClockHm((prev) => {
+      const cur = prev[id] ?? { hour: 0, minute: 0 };
+      return { ...prev, [id]: { ...cur, minute: (cur.minute + delta + 60) % 60 } };
+    });
+    setTimelineError('');
+  }, []);
 
   useEffect(() => {
     engine.applyEffect({
@@ -92,7 +206,6 @@ export default function Ch1ReportEditor({
       flag: 'ch1_police_note',
       value: 'none',
     });
-    // 章尾開啟時寫入旗標一次即可（不依賴 engine 參考相等性）
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -109,21 +222,33 @@ export default function Ch1ReportEditor({
   }, [useAttitudeFillBlanks, attitudeFillBlankIndex, attitudeBlankCount, engine]);
 
   const handleTimelineNext = () => {
-    const range = config.timeline.crimeTimeRange;
-    const hourOk = timeHour === 0;
-    const minuteOk = timeMinutes >= range.startMinutes && timeMinutes <= range.endMinutes;
-    if (!hourOk || !minuteOk) {
+    const wrongLabels: string[] = [];
+    for (const def of timelineClocks) {
+      const hm = clockHm[def.id] ?? { hour: 0, minute: 0 };
+      if (!isCh1TimelineClockCorrect(def, hm.hour, hm.minute)) {
+        wrongLabels.push(def.label);
+      }
+    }
+    if (wrongLabels.length > 0) {
       const msg = config.timeline.errorMessages[timelineErrorIndex % config.timeline.errorMessages.length];
-      const hh = String(timeHour).padStart(2, '0');
-      const mm = String(timeMinutes).padStart(2, '0');
-      setTimelineError(`${msg} 你選的是 ${hh}:${mm}。`);
+      setTimelineError(`${msg} 尚未對齊：${wrongLabels.join('、')}。`);
       setTimelineErrorIndex((i) => i + 1);
       return;
     }
+
+    const movie = clockHm.movie_start ?? { hour: 0, minute: 0 };
+    const crime = clockHm.crime_window ?? { hour: 0, minute: 0 };
+    const kk = clockHm.kk_notify ?? { hour: 0, minute: 0 };
+
     engine.applyEffect({
       type: 'setFlag',
       flag: 'ch1_report_timeline',
-      value: { type: 'crime_time', minutes: timeMinutes },
+      value: {
+        type: 'ch1_triple_timeline',
+        movieStart: { hour: movie.hour, minute: movie.minute },
+        crimeWindow: { hour: crime.hour, minute: crime.minute },
+        kkNotified: { hour: kk.hour, minute: kk.minute },
+      },
     });
     setStep(3);
     setTimelineError('');
@@ -151,27 +276,29 @@ export default function Ch1ReportEditor({
       <OverlayCard
         tone="system"
         size="lg"
-        className="w-full max-w-4xl max-h-[90vh] min-h-[70vh] p-6 md:p-8 flex flex-col"
+        className="flex max-h-[90vh] min-h-[60vh] w-full max-w-2xl flex-col p-6 md:p-8"
       >
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-amber-600/50">
-          <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-200 via-orange-300 to-amber-400 bg-clip-text text-transparent">
+        <div className="mb-5 flex items-center justify-between border-b border-amber-600/50 pb-4">
+          <h2 className="bg-gradient-to-r from-amber-200 via-orange-300 to-amber-400 bg-clip-text text-xl font-bold text-transparent md:text-2xl">
             向劉隊報告
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded"
+            className="rounded p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
           >
             <X size={24} />
           </button>
         </div>
 
-        <div className="flex gap-2 mb-4 flex-wrap">
+        <div className="mb-4 flex flex-wrap gap-2">
           {VISIBLE_STEPS.map((s) => (
             <span
               key={s.id}
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm ${
-                step === s.id ? 'bg-amber-600/35 text-amber-50 border border-amber-500/40' : 'bg-white/5 text-gray-400'
+              className={`inline-flex items-center gap-1 rounded px-2 py-1 text-sm ${
+                step === s.id
+                  ? 'border border-amber-500/40 bg-amber-600/35 text-amber-50'
+                  : 'bg-white/5 text-gray-400'
               }`}
             >
               <s.icon size={14} />
@@ -180,7 +307,7 @@ export default function Ch1ReportEditor({
           ))}
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <m.div
@@ -190,84 +317,39 @@ export default function Ch1ReportEditor({
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.2 }}
               >
-                <p className="text-gray-200 mb-6">報告裡總得寫上一筆：事情發生在幾點。劉隊會問的。</p>
-                <div className="flex flex-col items-center gap-6">
-                  <div
-                    className="rounded-2xl border border-orange-500/20 bg-gradient-to-b from-gray-800/60 to-gray-900/80 px-8 py-6"
-                    style={{
-                      boxShadow:
-                        'inset 0 1px 0 rgba(251,146,60,0.06), 0 12px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.2)',
-                    }}
-                  >
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="flex gap-0.5">
-                        <FlipDigit digit={Math.floor(timeHour / 10)} />
-                        <FlipDigit digit={timeHour % 10} />
-                      </div>
-                      <span
-                        className="pb-2 font-mono text-2xl font-light text-orange-500/70"
-                        style={{ textShadow: '0 0 12px rgba(251,146,60,0.2)' }}
-                      >
-                        :
-                      </span>
-                      <div className="flex gap-0.5">
-                        <FlipDigit digit={Math.floor(timeMinutes / 10)} />
-                        <FlipDigit digit={timeMinutes % 10} />
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center justify-center gap-4">
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          aria-label="減少一小時"
-                          onClick={() => {
-                            setTimeHour((h) => (h - 1 + 24) % 24);
-                            setTimelineError('');
-                          }}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-orange-500/25 bg-gray-800/60 text-orange-400/80 text-sm transition hover:border-orange-400/40 hover:bg-orange-500/10 active:scale-95"
-                        >
-                          −
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="增加一小時"
-                          onClick={() => {
-                            setTimeHour((h) => (h + 1) % 24);
-                            setTimelineError('');
-                          }}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-orange-500/25 bg-gray-800/60 text-orange-400/80 text-sm transition hover:border-orange-400/40 hover:bg-orange-500/10 active:scale-95"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          aria-label="減少一分鐘"
-                          onClick={() => {
-                            setTimeMinutes((m) => (m - 1 + 60) % 60);
-                            setTimelineError('');
-                          }}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-orange-500/25 bg-gray-800/60 text-orange-400/80 text-sm transition hover:border-orange-400/40 hover:bg-orange-500/10 active:scale-95"
-                        >
-                          −
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="增加一分鐘"
-                          onClick={() => {
-                            setTimeMinutes((m) => (m + 1) % 60);
-                            setTimelineError('');
-                          }}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-orange-500/25 bg-gray-800/60 text-orange-400/80 text-sm transition hover:border-orange-400/40 hover:bg-orange-500/10 active:scale-95"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                <p className="mb-6 text-sm leading-relaxed text-gray-300">
+                  劉隊要你在報告裡把時間線對齊：<span className="text-amber-200/90">開場</span>、
+                  <span className="text-amber-200/90">行兇窗口</span>、
+                  <span className="text-amber-200/90">你接到通知</span>——三個都到位再交。
+                </p>
+                <div className="flex flex-col gap-4 rounded-xl border border-white/[0.07] bg-zinc-900/50 px-4 py-5 sm:px-5"
+                  style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.3)' }}
+                >
+                  {timelineClocks.map((def, i) => {
+                    const hm = clockHm[def.id] ?? { hour: 0, minute: 0 };
+                    return (
+                      <TimelineRow
+                        key={def.id}
+                        index={i}
+                        def={def}
+                        hour={hm.hour}
+                        minute={hm.minute}
+                        onHourDelta={(d) => bumpHour(def.id, d)}
+                        onMinuteDelta={(d) => bumpMinute(def.id, d)}
+                        isLast={i === timelineClocks.length - 1}
+                      />
+                    );
+                  })}
                 </div>
-                {timelineError && <p className="mt-4 text-red-400 text-sm">{timelineError}</p>}
+                {timelineError && (
+                  <m.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 text-sm text-red-400"
+                  >
+                    {timelineError}
+                  </m.p>
+                )}
               </m.div>
             )}
 
@@ -279,11 +361,11 @@ export default function Ch1ReportEditor({
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <p className="text-gray-200 mb-6 whitespace-pre-line">{closingText}</p>
+                <p className="mb-6 whitespace-pre-line text-gray-200">{closingText}</p>
                 <button
                   type="button"
                   onClick={handleEnterCh2}
-                  className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-medium flex items-center justify-center gap-2"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 py-3 font-medium text-white hover:bg-orange-500"
                 >
                   進入第二章
                   <ChevronRight size={20} />
@@ -297,7 +379,7 @@ export default function Ch1ReportEditor({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg"
+            className="rounded-lg border border-gray-600 px-4 py-2 text-gray-400 hover:text-white"
           >
             關閉
           </button>
@@ -305,9 +387,9 @@ export default function Ch1ReportEditor({
             <button
               type="button"
               onClick={handleTimelineNext}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg"
+              className="rounded-lg bg-orange-600 px-4 py-2 text-white hover:bg-orange-500"
             >
-              下一頁
+              確認時間線
             </button>
           )}
         </div>

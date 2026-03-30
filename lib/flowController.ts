@@ -32,7 +32,6 @@ export function getMilestones(state: GameState): ChapterMilestones {
     'npc_lin_sensitive_done',
     'npc_ashun_sensitive_done',
     'npc_xiaozhang_sensitive_done',
-    'npc_zhou_jie_sensitive_done',
   ];
   const ch1SensitiveCount = ch1SensitiveFlags.filter((key) => !!flags[key]).length;
   const ch1CoreSensitivesDone = ch1SensitiveCount >= 3;
