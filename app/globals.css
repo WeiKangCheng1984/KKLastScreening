@@ -82,15 +82,15 @@
    */
   .dialog-hotspot-title {
     @apply font-heading font-semibold uppercase tracking-widest leading-tight;
-    @apply text-[0.6rem] min-[380px]:text-[0.6rem] sm:text-[0.6875rem];
+    @apply text-[0.69rem] min-[380px]:text-[0.69rem] sm:text-[0.79rem];
   }
   .dialog-hotspot-body {
     @apply font-body leading-relaxed;
-    @apply text-[0.72rem] min-[380px]:text-[0.77rem] min-[900px]:text-[0.8125rem];
+    @apply text-[0.828rem] min-[380px]:text-[0.886rem] min-[900px]:text-[0.934rem];
   }
   .dialog-hotspot-choice {
     @apply font-body leading-relaxed;
-    @apply text-[0.72rem] min-[380px]:text-[0.77rem] min-[900px]:text-[0.8125rem];
+    @apply text-[0.828rem] min-[380px]:text-[0.886rem] min-[900px]:text-[0.934rem];
   }
 
   /* 對話框等：僅在「未要求減少動態」時保留長 transition（與 DialogBox 搭配） */

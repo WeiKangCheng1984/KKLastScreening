@@ -6,7 +6,7 @@ const items: Record<string, Item> = {
     id: 'item_encrypted_messages',
     name: '加密訊息紀錄（部分解碼）',
     description:
-      '紙感先是冷的：一串短句像命令，夾著貼圖與「已刪除」。你瞇眼讀見幾個破口——不放完整資訊、用三起事故來揭、有人在場被點名、壓節能稿別讓對方拿「改善」收工。\n' +
+      '紙感先是冷的：一串短句像命令，夾著貼圖與「已刪除」。你瞇眼讀見幾個破口，不放完整資訊、用三起事故來揭、有人在場被點名、壓節能稿別讓對方拿「改善」收工。\n' +
       '愈靠近案發愈密。你心裡一沉：這不像閒聊，像在催一個已經站在欄位裡的人。',
     svgImage: '/svg/items/projector_notes.svg',
     svgSize: 'medium',
@@ -27,7 +27,7 @@ const items: Record<string, Item> = {
     name: '專欄草稿（節能設備／未發表）',
     description:
       '全螢幕一開，刪除線與紅問號先跳進眼裡。標題像刀：「節能設備，誰省了電，誰省了責任？」\n' +
-      '字裡行間在寫燈、寫空調、寫散場時被看見的方式——寫到後來，你幾乎聽見有人在簡報室裡把「個案」兩個字磨平。\n' +
+      '字裡行間在寫燈、寫空調、寫散場時被看見的方式，寫到後來，你幾乎聽見有人在簡報室裡把「個案」兩個字磨平。\n' +
       '末段停在樓梯間，兩年前那件事只寫了半句。最後編輯時間：命案前兩天。',
     svgImage: '/svg/items/schedule_modified.svg',
     svgSize: 'medium',
@@ -45,12 +45,12 @@ const scenes: Record<string, Scene> = {
       '夜，散場後人稀。霓虹閃，地上爆米花與飲料杯。門邊警戒線框住一塊本非案場卻被改寫的區域。',
     background: '/images/bg_ch2_gate_v1.webp',
     hotspots: [
-      { id: 'hotspot_gate_liu', shape: 'circle', coords: [0.4, 0.7, 0.8], description: '劉隊', hint: '門邊，腋下夾簡報資料夾。' },
-      { id: 'hotspot_gate_popcorn', shape: 'circle', coords: [0.7, 0.85, 0.3], description: '爆米花殘骸', hint: '散場碎屑。' },
-      { id: 'hotspot_gate_poster', shape: 'circle', coords: [0.13, 0.7, 0.3], description: '電影海報牆', hint: '幾張舊海報尚未換下。' },
+      { id: 'hotspot_gate_liu', shape: 'circle', coords: [0.4, 0.7, 0.9], description: '劉隊', hint: '門邊，腋下夾簡報資料夾。' },
+      { id: 'hotspot_gate_popcorn', shape: 'circle', coords: [0.7, 0.85, 0.5], description: '爆米花殘骸', hint: '散場碎屑。' },
+      { id: 'hotspot_gate_poster', shape: 'circle', coords: [0.13, 0.7, 0.7], description: '電影海報牆', hint: '幾張舊海報尚未換下。' },
       { id: 'hotspot_gate_neon', shape: 'circle', coords: [0.55, 0.37, 0.9], description: '霓虹招牌', hint: '「CITY CINEMA」亮度不穩。' },
       { id: 'hotspot_gate_cordon', shape: 'circle', coords: [0.28, 0.62, 0.22], description: '門口警戒線', hint: '黃黑膠帶框住門口。' },
-      { id: 'hotspot_gate_ticket_machine', shape: 'circle', coords: [0.88, 0.52, 0.2], description: '自助取票機', hint: '螢幕亮著，末場已過。' },
+      { id: 'hotspot_gate_ticket_machine', shape: 'circle', coords: [0.58, 0.72, 0.5], description: '自助取票機', hint: '螢幕亮著，末場已過。' },
     ],
     items: [],
     hotspotEventMap: {
@@ -73,7 +73,7 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text:
                 '劉隊腋下夾資料夾，朝門口一點。\n\n' +
-                '「死者手機在那邊；技術組阿蘇在車上整理。」\n\n' +
+                '「死者手機在那邊；技術組阿蘇在車上整理，我看應該好了。」\n\n' +
                 '「你先去跟她看一輪。阿蘇你也熟，敘敘舊。」',
               type: 'character',
               characterId: 'npc_liu',
@@ -96,7 +96,7 @@ const scenes: Record<string, Scene> = {
             type: 'showDialog',
             dialog: {
               text:
-                '爆米花、飲料杯、票根——日常薄層，不是證物。',
+                '爆米花、飲料杯、票根，電影院的日常。',
               type: 'narrator',
             },
           },
@@ -128,7 +128,7 @@ const scenes: Record<string, Scene> = {
             type: 'showDialog',
             dialog: {
               text:
-                '霓虹忽明忽暗。兩年前那起——寫進報告會嫌戲劇化。',
+                '霓虹忽明忽暗。事件也有點戲劇化。',
               type: 'narrator',
             },
           },
@@ -160,7 +160,7 @@ const scenes: Record<string, Scene> = {
             type: 'showDialog',
             dialog: {
               text:
-                '廣告仍播「加場」，末場早過。螢幕閃「請取票」——你沒按。',
+                '廣告仍播「加場」，末場早過。螢幕閃「請取票」，你沒按。',
               type: 'narrator',
             },
           },
@@ -198,7 +198,7 @@ const scenes: Record<string, Scene> = {
       { id: 'hotspot_car_coffee', shape: 'circle', coords: [0.2, 0.94, 0.3], description: '便利商店咖啡杯', hint: '杯身油性筆「A」「S」。' },
       { id: 'hotspot_car_charm', shape: 'circle', coords: [0.95, 0.14, 0.3], description: '車上吊飾', hint: '像素風電路板，後視鏡上晃。' },
       { id: 'hotspot_car_seatbelt', shape: 'circle', coords: [0.4, 0.9, 0.26], description: '副駕安全帶', hint: '扣具在暗處，難扣。' },
-      { id: 'hotspot_car_air_freshener', shape: 'circle', coords: [0.16, 0.2, 0.2], description: '出風口香氛夾', hint: '「晨霧森林」——實際像機房濾網味。' },
+      { id: 'hotspot_car_air_freshener', shape: 'circle', coords: [0.9, 0.9, 0.2], description: '出風口香氛夾', hint: '「晨霧森林」，實際像機房濾網味。' },
     ],
     // 案件相關道具改由電腦場景取得，車內僅作為「還在破譯中」的過場
     items: [],
@@ -239,7 +239,7 @@ const scenes: Record<string, Scene> = {
               textSegments: [
                 '「讓它跑。我現在不跟你賭誰比較急。」',
                 '她點 Unknown 頭像，像在安撫一個會咬人的檔案。',
-                '「大螢幕那邊會整好——在這裡瞇眼，只會把偏見瞇進去。」',
+                '「大螢幕那邊會整好，在這裡瞇眼，只會把偏見瞇進去。」',
               ],
             },
           },
@@ -280,7 +280,7 @@ const scenes: Record<string, Scene> = {
               characterExpression: 1,
               characterPosition: 'right',
               textSegments: [
-                '「草稿跟解碼塞在同一條管子裡——在車上硬撐開，只會炸給你看。」',
+                '「草稿跟解碼塞在同一條管子裡，在車上硬撐開，只會炸給你看。」',
                 '她語氣很平，像在忍煩：「回去那邊看。我要你看的是全貌，不是爽感。」',
               ],
             },
@@ -290,7 +290,7 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text:
                 '標題閃過：「節能設備，誰省了電，誰省了責任？」\n\n' +
-                '他要把散場節奏、燈光寫進同段——不只省電故事。',
+                '他要把散場節奏、燈光寫進同個段落裡，不只省電故事。',
               type: 'narrator',
             },
           },
@@ -322,7 +322,7 @@ const scenes: Record<string, Scene> = {
               characterPosition: 'right',
               textSegments: [
                 '「聲音髒成這樣，在車裡硬聽，你只會聽見自己的心跳。」',
-                '「逐字稿我會給——但別指望我替你決定哪一句比較像人話。」',
+                '「逐字稿我會給，但別指望我替你決定哪一句比較像人話。」',
               ],
             },
           },
@@ -362,7 +362,7 @@ const scenes: Record<string, Scene> = {
               characterExpression: 1,
               characterPosition: 'right',
               textSegments: [
-                '「軌跡丟回去跑——我在這裡講再多，也只是故事。」',
+                '「軌跡丟回去跑，我在這裡講再多，也只是故事。」',
                 '她自嘲很短：「多半繞得很難看。難看才像真的。」',
               ],
             },
@@ -515,7 +515,7 @@ const scenes: Record<string, Scene> = {
             type: 'showDialog',
             dialog: {
               text:
-                '「晨霧森林」香氛膠囊，主味仍是隔夜咖啡與線材——大自然輸給加班。',
+                '「晨霧森林」香氛膠囊，主味仍是隔夜咖啡與線材，大自然輸給加班。',
               type: 'narrator',
             },
           },
@@ -543,7 +543,7 @@ const scenes: Record<string, Scene> = {
       text:
         '阿蘇翻開筆電，線在指尖繞一圈，插進解密終端。車內只剩風扇聲與她的呼吸。\n\n' +
         '「坐好。」她視線沒離螢幕，像在跟機器談判。\n\n' +
-        '「手機解完只是開始——接下來你要對付的是一個人怎麼活成這樣。」\n' +
+        '「手機解完只是開始，接下來你要對付的是一個人怎麼活成這樣。」\n' +
         '她停一下，聲音更硬：「我是技術組，我只對資料負責，不替誰的劇本背書。」\n' +
         '又補一句，像提醒自己：「資料有時也不值得信任。」',
       type: 'narrator',
@@ -559,7 +559,7 @@ const scenes: Record<string, Scene> = {
           { id: 'asu_casual_3', text: '「他把企業惡習寫進專欄，結果自己被留在影城裡，是不是有點好笑？」', type: 'casual', weight: 2 },
           {
             id: 'asu_casual_4',
-            text: '「節能簡報寫得愈漂亮，我愈想吐——我見過太多『改善』是用別人的命換的。」',
+            text: '「節能簡報寫得愈漂亮，我愈想吐，我見過太多『改善』是用別人的命換的。」',
             type: 'casual',
             weight: 2,
           },
@@ -567,7 +567,7 @@ const scenes: Record<string, Scene> = {
           { id: 'asu_casual_6', text: '「他給聯絡人取名字的方式全部用代碼。這種人死掉，調查起來很煩。」', type: 'casual', weight: 2 },
           {
             id: 'asu_casual_7',
-            text: '「『三起事故』這種詞一出現，我會先摸滑鼠——不是怕，是怕有人把欄位名當預告片剪進新聞。」',
+            text: '「『三起事故』這種詞一出現，我會先摸滑鼠，不是怕，是怕有人把欄位名當預告片剪進新聞。」',
             type: 'casual',
             weight: 2,
           },
@@ -584,7 +584,7 @@ const scenes: Record<string, Scene> = {
     chapterId: 'ch2',
     name: '阿蘇的電腦畫面',
     description:
-      '大螢幕把車裡那些殘影一次攤開：對話、草稿、備忘、地圖——像四張透明片疊成同一面桌。阿蘇的觸控筆痕還留在邊角。',
+      '大螢幕把車裡那些殘影一次攤開：對話、草稿、備忘、地圖，像四張透明片疊成同一面桌。阿蘇的觸控筆痕還留在邊角。',
     background: '/images/bg_ch2_desktop_v1.webp',
     hotspots: [
       {
@@ -667,7 +667,7 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text:
                 '車上那些「還在跑」的殘影，終於在同一塊桌面對上焦：通訊、草稿、備忘、地圖。\n\n' +
-                '阿蘇在邊緣用筆敲了四個記號——像在替一個死掉的人把呼吸接回去。',
+                '阿蘇在邊緣用筆敲了四個記號，像在替一個死掉的人把呼吸接回去。',
               type: 'narrator',
             },
           },
@@ -676,7 +676,7 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text:
                 '阿蘇：「我只能還原到這裡。再往下不是鑑定，是你在替他選故事。」\n\n' +
-                '「四個視窗其實是一條線——誰在跟他說話、他想寫什麼、他怕什麼、他的腳為什麼繞成那樣。」',
+                '「四個視窗其實是一條線，誰在跟他說話、他想寫什麼、他怕什麼、他的腳為什麼繞成那樣。」',
               type: 'character',
               characterId: 'npc_asu',
               characterName: '阿蘇（警方技術組）',
@@ -689,7 +689,7 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text:
                 '看板替你補上名字：吳亞；對外慣用的筆名「烏鴉」，口頭還有另一套叫法。\n\n' +
-                '幾個詞被螢光標起來——節能、散場、動線、log、改善——聽起來很行政，疊在一起卻像有人在替事故編目錄。',
+                '幾個詞被螢光標起來，節能、散場、動線、log、改善，聽起來很行政，疊在一起卻像有人在替事故編目錄。',
               type: 'narrator',
             },
           },
@@ -751,7 +751,7 @@ const scenes: Record<string, Scene> = {
                 '阿蘇螢光筆圈「三起事故」與「她也在場」。',
                 '「『三起』像欄位名。」',
                 '「『她』可能是人、代號，或釘子。」',
-                '「格式像他打字，節奏太乾——像另一隻手替他斷句。」',
+                '「格式像他打字，節奏太乾，像另一隻手替他斷句。」',
               ],
             },
           },
@@ -845,7 +845,7 @@ const scenes: Record<string, Scene> = {
               characterPosition: 'right',
               textSegments: [
                 '「兩個版本」是流程，不是八卦。',
-                '「講話者還在對；能確定的是他知道內部附件長怎樣——坐過簡報室的人。」',
+                '「講話者還在對；能確定的是他知道內部附件長怎樣，坐過簡報室的人。」',
               ],
             },
           },
@@ -853,7 +853,7 @@ const scenes: Record<string, Scene> = {
             type: 'showDialog',
             dialog: {
               text:
-                'Unknown 那邊像在催「三起」的敘事；錄音這邊像在警告別把內部那兩頁講出去——兩邊一拉，你後頸發冷。',
+                'Unknown 那邊像在催「三起」的敘事；錄音這邊像在警告別把內部那兩頁講出去，兩邊一拉，你後頸發冷。',
               type: 'narrator',
             },
           },
@@ -896,7 +896,7 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text:
                 '你把地圖跟另外三個視窗並在一起看：私訊在催稿、草稿在寫節能與動線、錄音在講兩份結案怎麼並存。\n\n' +
-                '軌跡像第四種聲音——不是說他做了什麼，而是他用腳在城市裡反覆試同一條線。',
+                '軌跡像第四種聲音，不是說他做了什麼，而是他用腳在城市裡反覆試同一條線。',
               type: 'narrator',
             },
           },
@@ -915,7 +915,7 @@ const scenes: Record<string, Scene> = {
             dialog: {
               text:
                 '螢光黃便利貼，邊角捲著：\n' +
-                '「① 車上那段不是給你跳過的——是給你記住你當時有多急。」\n' +
+                '「① 車上那段不是給你跳過的，是給你記住你當時有多急。」\n' +
                 '「② 劉隊若打來，先想清楚：你要口頭的，還是要能寫進紀錄的。」',
               type: 'narrator',
             },
@@ -946,7 +946,7 @@ const scenes: Record<string, Scene> = {
               characterExpression: 1,
               characterPosition: 'right',
               textSegments: [
-                '「永久刪除只是 UI 安慰。真消失要走流程留紀錄——跟結案一樣，刪桌面易，附件難。」',
+                '「永久刪除只是 UI 安慰。真消失要走流程留紀錄，跟結案一樣，刪桌面易，附件難。」',
               ],
             },
           },
@@ -1008,7 +1008,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
         'KK：「那烏鴉呢？兩年前，妳對他就比較客氣？」\n\n' +
         '阿蘇像被逗笑，又笑不出來。\n\n' +
         '阿蘇：「他寄信來的時候，每一封都像在指控我『幫兇』。我回得很爛，說：『那是你自己的價值判斷。』」\n\n' +
-        '阿蘇：「不重要了。烏鴉也死了。他後來文章放慢，我以為他怕了——現在才知道他可能不是怕。」',
+        '阿蘇：「不重要了。烏鴉也死了。他後來文章放慢，我以為他怕了，現在才知道他可能不是怕。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive1_5',
     },
@@ -1018,7 +1018,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       text:
         'KK：「所以妳今晚還坐在這，不是為了劉隊。」\n\n' +
         '阿蘇把筆電蓋上又掀開，動作粗暴得像在揍自己。\n\n' +
-        '阿蘇：「因為他死在同一種流程裡。節能、動線、紀錄、版本——換了場景，刀法沒換。」\n\n' +
+        '阿蘇：「因為他死在同一種流程裡。節能、動線、紀錄、版本，換了場景，刀法沒換。」\n\n' +
         '阿蘇：「我在盯資料。你愛怎麼寫是你的事。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive1_6',
@@ -1059,8 +1059,8 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       npcId: 'npc_asu',
       text:
         'KK：「那 Unknown 還原呢？灰塊是遺失還是被抹掉？」\n\n' +
-        '阿蘇：「兩種都可能。被抹掉的通常留下不自然的邊界——我們有看到。習慣可以被模仿，斷句也可以被學。」\n\n' +
-        '阿蘇：「格式像他，語氣不像——那是風險提示，不是結論。可能有人在餵他句子，或用他熟悉的排版逼他相信『這是自己人』。我只能把不自然處標紅。」',
+        '阿蘇：「兩種都可能。被抹掉的通常留下不自然的邊界，我們有看到。習慣可以被模仿，斷句也可以被學。」\n\n' +
+        '阿蘇：「格式像他，語氣不像，那是風險提示，不是結論。可能有人在餵他句子，或用他熟悉的排版逼他相信『這是自己人』。我只能把不自然處標紅。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive2_3',
     },
@@ -1071,7 +1071,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
         'KK：「錄音降噪，會不會把關鍵咬字抹成合理？」\n\n' +
         '阿蘇：「會。原始檔保留，另開處理鏈。母帶若出現不連續，我會寫『可能存在剪接風險』。」\n\n' +
         'KK：「『兩份結案』，妳能從技術上印證嗎？」\n\n' +
-        '阿蘇：「我只能印證『兩份文件的欄位與附件不一致』。但你可以把『兩份』當成接口——接口背後通常有人。」',
+        '阿蘇：「我只能印證『兩份文件的欄位與附件不一致』。但你可以把『兩份』當成接口，接口背後通常有人。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive2_4',
     },
@@ -1079,10 +1079,10 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
       id: 'node_asu_sensitive2_4',
       npcId: 'npc_asu',
       text:
-        'KK：「定位軌跡—— spoofing、基站漂移，妳排除到哪裡？」\n\n' +
+        'KK：「定位軌跡， spoofing、基站漂移，妳排除到哪裡？」\n\n' +
         '阿蘇：「交叉比對：帳號、裝置識別碼、移動節奏。有人用權限在伺服器端改紀錄，我會看到『漂亮得不像真的』。」\n\n' +
         'KK：「妳有看到嗎？」\n\n' +
-        '阿蘇：「他在三節點之間繞，那比單點造假麻煩——他不是被拖著走，是在測試：哪段路最容易從報告裡消失。」',
+        '阿蘇：「他在三節點之間繞，那比單點造假麻煩，他不是被拖著走，是在測試：哪段路最容易從報告裡消失。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],
       next: 'node_asu_sensitive2_5',
     },
@@ -1093,7 +1093,7 @@ const npcDialogs: Record<string, Record<string, NpcDialogNode>> = {
         'KK：「如果我要動手腳，我會從哪裡下手？」\n\n' +
         '阿蘇看了你很久，像在評估你是不是在自首。\n\n' +
         '阿蘇：「最省力的是敘事。檔案要對哈希，成本高；挑對句子，讀者會自己幫你結案。」\n\n' +
-        '阿蘇：「『三起事故』是釘子，『她也在場』也是——讓你猜人，不去查權限。」\n\n' +
+        '阿蘇：「『三起事故』是釘子，『她也在場』也是，讓你猜人，不去查權限。」\n\n' +
         'KK：「妳能給我一句底線嗎？」\n\n' +
         '阿蘇：「任何我沒寫進鑑定報告的推測，你都不准替我講成『技術已確認』。」',
       choices: [{ id: 'choice_next', label: '繼續', description: '下一段' }],

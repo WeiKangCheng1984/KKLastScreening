@@ -39,8 +39,8 @@ export const chapters: Record<string, Chapter> = {
     intro: {
       title: '第二章：死者是誰',
       subtitle: '手機裡的線索',
-      description: '警方技術組阿蘇把解完密的手機資料接上終端，要你一起看懂死者留下的訊息、草稿、錄音和行蹤。\n\n你要查的，不只是他的身分，還有他正在追的那條線。',
-      moodText: '你習慣先看現場，只是這一次，似乎有名字藏在手機裡。\n\n一則訊息、一段錄音、一份沒寫完的草稿，都像在把案件往外拉。',
+      description: '警方技術組阿蘇把解密中的手機資料接上電腦終端，要你一起看懂死者留下的訊息、草稿、錄音和行蹤。',
+      moodText: '你習慣先看現場，只是這一次，似乎有名字藏在手機裡。',
       ambientAudio: '/audio/bgm/kk_bgm_title_ch2.mp3',
     },
   },

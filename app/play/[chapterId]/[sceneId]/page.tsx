@@ -1576,8 +1576,8 @@ export default function PlayPage() {
       if (targetSceneId === 'scene_ch2_asu_car' && !flags.ch2_task_from_liu) {
         setCurrentDialog({
           text:
-            '劉隊看了你一眼：「先在這裡把話講清楚。」\n\n' +
-            '「你知道自己要去找誰、要看什麼，再去找阿蘇。」',
+            '劉隊看了你一眼：「阿蘇應該還沒好。」\n\n' +
+            '「解鎖訊息需要一段時間。」',
           type: 'character',
           characterId: 'npc_liu',
           characterName: '劉隊（偵查隊）',
@@ -1596,7 +1596,7 @@ export default function PlayPage() {
           const pct = Math.round(carProgress);
           setCurrentDialog({
             text:
-              '阿蘇把手從觸控板上收回來：「解碼還沒完成...」\n\n' +
+              '阿蘇把手從觸控板上收回來：「部分解碼還沒完成，很接近了，再等我一下...」\n\n' +
               '「夜深了，我們卻都不能休息。我得把資料整理好，給你看。」',
             type: 'character',
             characterId: 'npc_asu',

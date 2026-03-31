@@ -270,7 +270,7 @@ export const liuReportFlowByChapter: Record<string, LiuReportFlowConfig> = {
       {
         blockIfMissing: ['npc_asu_sensitive_done'],
         text:
-          '劉隊：「先去跟阿蘇把話說開。」\n\n' +
+          '劉隊：「先等阿蘇解鎖，再去去跟她把話說開。」\n\n' +
           '「她若還梗著兩年前那件事，你今晚寫什麼都會歪。聽她把技術邊界講清楚，再回來找我。」',
       },
       {

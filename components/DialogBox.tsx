@@ -533,10 +533,10 @@ export default function DialogBox({
                         : 'overflow-y-auto max-h-[min(65vh,calc(100vh-7rem-env(safe-area-inset-bottom)))] md:max-h-none'
                   }`
                 : isEmbedded
-                  ? 'min-h-0 max-h-none overflow-y-auto text-[0.63em] md:text-[0.69em]'
+                  ? 'min-h-0 max-h-none overflow-y-auto text-[0.725em] md:text-[0.794em]'
                   : isPagedParagraphs
-                    ? 'text-[0.77rem] md:text-[0.865rem] max-h-none overflow-visible md:max-h-none'
-                    : 'text-[0.77rem] md:text-[0.865rem] overflow-y-auto max-h-[min(65vh,calc(100vh-7rem-env(safe-area-inset-bottom)))] md:max-h-none'
+                    ? 'text-[0.886rem] md:text-[0.995rem] max-h-none overflow-visible md:max-h-none'
+                    : 'text-[0.886rem] md:text-[0.995rem] overflow-y-auto max-h-[min(65vh,calc(100vh-7rem-env(safe-area-inset-bottom)))] md:max-h-none'
             } ${dialog.svgImage && (dialog.svgPosition === 'top' || dialog.svgPosition === 'bottom') ? 'order-2' : ''}`}
           >
           {displayText.split('').map((char, index) => {
@@ -585,9 +585,9 @@ export default function DialogBox({
                 }}
                 className="w-full text-left p-3 bg-gradient-to-r from-blue-950/80 to-indigo-950/80 border border-blue-700/50 hover:border-blue-500 rounded-lg text-blue-100 hover:text-white transition-all duration-200 group"
               >
-                <div className="font-semibold text-[0.6875rem] text-blue-100 group-hover:text-white mb-1">{choice.label}</div>
+                <div className="font-semibold text-[0.79rem] text-blue-100 group-hover:text-white mb-1">{choice.label}</div>
                 {choice.description && (
-                  <div className="text-[0.53rem] min-[380px]:text-[0.6rem] text-blue-200/70 group-hover:text-blue-100 leading-snug">
+                  <div className="text-[0.61rem] min-[380px]:text-[0.69rem] text-blue-200/70 group-hover:text-blue-100 leading-snug">
                     {choice.description}
                   </div>
                 )}

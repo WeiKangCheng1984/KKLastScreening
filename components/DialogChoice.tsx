@@ -42,9 +42,9 @@ function ChoiceButton({
       : 'w-full text-left px-4 py-3 bg-dark-surface/80 hover:bg-dark-surface border-2 border-dark-border hover:border-orange-500/50 rounded-lg transition-all duration-200 group relative overflow-hidden';
 
   const textClass = isCompact
-    ? 'dialog-hotspot-choice text-xs md:text-sm text-gray-200 group-hover:text-white transition-colors'
+    ? 'dialog-hotspot-choice text-[0.865rem] md:text-sm text-gray-200 group-hover:text-white transition-colors'
     : isLiu
-      ? 'dialog-hotspot-choice text-[0.65rem] md:text-xs text-gray-300 group-hover:text-white transition-colors'
+      ? 'dialog-hotspot-choice text-[0.748rem] md:text-[0.865rem] text-gray-300 group-hover:text-white transition-colors'
       : 'dialog-hotspot-choice text-gray-200 group-hover:text-white transition-colors';
 
   const checkSize = isCompact ? 11 : isLiu ? 0 : 18;
